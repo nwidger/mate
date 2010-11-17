@@ -1,0 +1,22 @@
+/* Niels Widger
+ * Time-stamp: <14 Aug 2009 at 23:26:57 by nwidger on macros.local>
+ */
+BODY {background: white; color: black; font-family: Helvectica, sans-serif; font-size: 80%}
+
+H1, H2, H3, H4, H5, H6 {color: black;}
+
+EM {color: red; font-style: oblique;}
+
+P {text-indent: 0;}
+
+.indent {margin-left: 3em;}
+
+/*I {font-weight: bold;}*/
+
+I CODE {font-style: normal;}
+
+PRE {font-size: 110%}
+
+CODE {font-size: 120%}
+
+PRE CODE {font-size: 100%}

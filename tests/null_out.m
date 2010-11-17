@@ -1,0 +1,3 @@
+Integer main() {
+    out null;
+}

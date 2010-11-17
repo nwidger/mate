@@ -1,0 +1,159 @@
+<html>
+
+<head>
+<title>maTe Assembly Language Files </title>
+<link rev="made" href="mailto:hatcher@unh.edu">
+</head>
+
+<body>
+
+<basefont size=4>
+
+<h1>
+maTe Assembly Language Files
+</h1>
+<p>
+<hr>
+
+maTe assembly language files are produced by the maTe compiler
+(<a href="http://www.cs.unh.edu/~cs712/maTe/mc.pdf">mc</a>)
+and are read by the maTe assembler
+(<a href="http://www.cs.unh.edu/~cs712/maTe/mas.pdf">mas</a>).
+The maTe assembler translates maTe assembly language files into
+<a href="http://www.cs.unh.edu/~cs712/maTe/class-file-format.html">maTe
+class files</a>.
+<p>
+
+The maTe assembler encodes class file addresses (byte offsets within
+the class file), decimal integer literals,
+ASCII string literals and
+<a href="http://www.cs.unh.edu/~cs712/maTe/VM-instructions.html">maTe
+symbolic instruction opcodes</a>.
+These entities are all encoded into one or more 32-bit words stored in
+big-endian format in the class file.
+<p>
+
+The maTe assembler supports symbolic references to class file addresses.
+A symbol (label) is defined by providing the symbol name followed by
+a colon.
+The symbol is defined to be the number of bytes that will be encoded
+in the class file prior to the point where the symbol is defined.
+That is, the symbol stands for the address of the next entity in the
+class file.
+<p>
+
+References to symbols are made by preceding the symbol name by a
+dollar sign.
+For the reference the maTe assembler encodes in the class file
+the address bound to the symbol.
+The maTe assembler is implemented with two passes over the assembly
+language input in order to support references to symbols before
+they are defined.
+<p>
+
+Newlines are not treated specially and like all other whitespace are
+just used to separate tokens (symbol definitions, symbol references,
+integer literals, string literals and opcodes).
+<p>
+
+Comments can be placed in the assembly language file by starting
+them with a "#".
+The comment ends with the next newline character.
+<p>
+
+String literals are enclosed in double quotes and can include any
+character except a double quote (even a newline character).
+There is no support for backslash sequences.
+<p>
+
+Integer literals are specified in decimal and cannot include a sign.
+<p>
+
+Symbol names must begin with a letter and are made up of letters,
+digits, "+", "*", "/", "!", "$", "-", "<", ">", "[" and "]".
+<p>
+
+Instruction opcodes must be specified in lowercase.
+<p>
+
+The first token in the assembly language file must be "$mainBlock",
+a reference to the symbol "mainBlock", and this symbol must be
+defined at the beginning of the instructions for the main block,
+which must be specified prior to the method and constructor
+bodies for the classes.
+The second token in the file must an integer literal specifying
+the number of local slots used by the main block.
+<p>
+
+Next in the assembly language file is the class table,
+which starts with an integer literal defining the number of classes
+in the table.
+This is followed by a list of pairs, one for each class.
+The first member of each pair is a symbol reference,
+for the address of the descriptor of the class.
+The second member of the pair is a string, the name of the class.
+<p>
+
+The class descriptors follow in the file.
+Each class descriptor begins with a symbol definition to define
+its address and is followed by:
+<ol>
+<li> a symbol reference for the descriptor of the super class (or an integer
+literal zero if there is no super class);
+<li> an integer literal specifying the number of fields (including
+inherited fields);
+<li> and, the method table for the class.
+</ol>
+<p>
+
+A method table begins with an integer literal specifying the number of
+methods in the class.
+This is followed by a list of method descriptors, one for each method
+in the class.
+Each method descriptor is a triple: either a symbol reference for
+the beginning of the code for the method, followed
+by an integer literal for the number of local slots used by the method
+and by a string containing the name of the method;
+or an integer literal zero if the method is implemented natively,
+followed by the native method index
+and by a string containing the name of the method.
+<p>
+
+Method names produced by the maTe compiler are "munged" names, consisting
+of the following items separated by dollar signs:
+<ol>
+<li> class name
+<li> method name
+<li> the type (class name) of each parameter, given in order
+</ol>
+<p>
+
+Unmunged method names are created for instances of operator overloading
+by concatenating the string "operator" to the operator itself
+(e.g. "operator+").
+These names are then munged as described above.
+<p>
+
+After the class descriptors is the code section, which contains the
+main block followed by the method and constructor bodies.
+Each piece of code begins with a symbol definition to define its
+entry point address.
+This is followed by a list of instructions.
+<p>
+
+The maTe assembler verifies that each instruction opcode has the
+correct number and type of fields.
+Index or count fields must be integer literals.
+Address fields must be symbol references.
+The value field of the <i>newint</i> instruction must be an integer
+literal.
+The value field of the <i>newstr</i> instruction must be a string
+literal.
+<p>
+
+
+<hr size=3 noshade>
+Last modified on February 10, 2010.<p>
+Comments and questions should be directed to
+<a href="mailto:hatcher@unh.edu">hatcher@unh.edu</a>
+

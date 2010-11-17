@@ -1,0 +1,51 @@
+#    -*- mode: org -*-
+#+STARTUP: overview
+#+STARTUP: hidestars
+#
+# Niels Widger
+# Time-stamp: <02 Dec 2009 at 13:25:45 by nwidger on macros.local>
+
+* simp
+** toy compiler
+* mate
+** similarities to java
+*** classes w/ methods, constructors
+*** most syntax
+** similarities to c++
+*** operator overloading
+** VM structure
+*** global stack
+**** frames
+***** operand stack
+***** local variable array
+*** heap
+*** method area (code section)
+*** class table
+*** instruction table
+*** native method array
+** instruction set
+*** based on java
+*** operands pushed onto stack
+*** return values left on stack
+*** store objects in local variable arrays, object fields
+* scanning
+** regex
+** tokens
+** write lexer for mate
+* parsing
+** grammars
+*** context free grammars
+*** ll(1)
+*** lr(1)
+*** lalr(1)
+** productions
+*** null set
+*** first set
+*** follow set
+** syntax trees (ASTs)
+* semantic analysis
+** data structures
+*** class table
+*** local variable stack
+* code generation
+** instruction sets

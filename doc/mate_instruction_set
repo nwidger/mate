@@ -1,0 +1,217 @@
+Niels Widger
+Time-stamp: <13 Mar 2010 at 16:00:03 by nwidger on macros.local>
+
+aconst_null - push null
+aload - load reference from local variable
+areturn - return reference from method
+astore - store reference into local variable
+checkcast - check whether object is of a given type
+dup - duplicate top operand stack value
+getfield - fetch field from object
+goto - branch always
+ifeq - branch if comparison with zero succeeds
+in - read input
+invokespecial - invoke instance method; special handling for constructor and
+	superclass method invocations
+invokenative - invoke native method
+invokevirtual - invoke instance method; dispatch based on class
+new - create new object
+newint - create new Integer object
+newstr - create new String object
+out - write output
+putfield - set field in object
+refcmp - compare references
+return - return void from method
+	
+aconst_null - push null
+	format: aconst_null
+	opcode: 1 (0x01)
+	operand stack: ... => ..., null
+
+aload - load reference from local variable
+        format: aload index
+        opcode: 25 (0x19)
+	operand stack: ... => ..., objectref
+	index is an index into the local variable array.
+
+areturn - return reference from method
+	format: areturn
+	opcode: 176 (0xb0)
+	operand stack: ..., objectref => [empty]
+	objectref will be placed on top of caller's operand stack.
+
+astore - store reference into local variable
+        format: astore index
+	opcode: 58 (0x3a)
+	operand stack: ..., objectref => ...
+	index is an index into the local variable array.
+	
+checkcast - check whether object is of a given type
+	format: checkcast index
+	opcode: 192 (0xc0)
+	operand stack: ..., ref1, ref2 => ..., objectref
+	index is an index into a class declaration of the class file.
+	ref2 is an Integer instance.
+	if ref2's value is 0 then objectref will be a new Integer
+	instance whose value is 1 if ref1 is of the given type and 0
+	otherwise.
+	if ref2's value is non-zero then objectref will be ref1 if
+	ref1 is of the given type, otherwise the virtual machine will
+	halt immediately with an error.
+
+dup - duplicate top operand stack value
+        format: dup
+	opcode: 89 (0x59)
+	operand stack: ..., value => ..., value, value
+
+dup_x1 - duplicate the top operand stack value and insert two values down
+        format: dup_x1
+	opcode: 251 (0xfb)
+	operand stack: ..., value2, value1 => ..., value1, value2, value1
+	
+getfield - fetch field from object
+	format: getfield index
+	opcode: 180 (0xb4)
+	operand stack: ..., objectref => ..., value
+	index must be an integer >= 0 and < the number of fields declared in
+	objectref's class declaration in the class file.
+
+goto - branch always
+        format: goto index
+	opcode: 167 (0xa7)
+	operand stack: no change
+	index is an index into the class file.
+
+ifeq - branch if comparison with zero succeeds
+        format: ifeq index
+	opcode: 153 (0x99)
+	operand stack: ..., objectref => ...
+	index is an index into the class file.
+	index will execute if comparison succeeds.
+ 
+in - read input
+        format: in
+	opcode: 243 (0xf3)
+	operand stack: ... => ..., objectref
+	objectref will be a String instance containing the input.
+
+invokespecial - invoke instance method; special handling for constructor and
+	superclass method invocations
+	format: invokespecial index n locals
+	opcode: 183 (0xb7)
+	operand stack: ..., objectref, [arg1, [arg2, ..., argn]] => ...
+	index is an index into a method/constructor body in the class file
+	n in the number of arguments to the method/constructor to be invoked.
+	locals is the maximum locals used by the method/constructor to be invoked.
+	
+invokenative - invoke native method
+	format: invokenative index
+	opcode: 244 (0xf4)
+	operand stack: ... => ...
+	index is an index into the native method array
+
+	nativeTable[0]	= Object_constructor
+	nativeTable[1]	= Object$equals$Object
+	nativeTable[2]	= Object$hashCode
+	nativeTable[3]	= Object$toString
+
+	nativeTable[4]	= Integer_constructor
+	nativeTable[5]	= Integer_constructor$Integer
+	nativeTable[6]	= Integer$add$Integer
+	nativeTable[7]	= Integer$subtract$Integer
+	nativeTable[8] = Integer$multiply$Integer
+	nativeTable[9] = Integer$divide$Integer
+	nativeTable[10] = Integer$greaterThan$Integer
+	nativeTable[11] = Integer$lessThan$Integer
+	nativeTable[12] = Integer$not
+	nativeTable[13] = Integer$minus
+	nativeTable[14] = Integer$operator+$Integer
+	nativeTable[15] = Integer$operator-$Integer
+	nativeTable[16] = Integer$operator*$Integer
+	nativeTable[17] = Integer$operator/$Integer
+	nativeTable[18] = Integer$operator>$Integer
+	nativeTable[19] = Integer$operator<$Integer
+	nativeTable[20] = Integer$operator!
+	nativeTable[21] = Integer$operator-
+	nativeTable[22] = Integer$equals$Object
+	nativeTable[23] = Integer$hashCode
+	nativeTable[24] = Integer$toString
+
+	nativeTable[25] = String_constructor$String
+	nativeTable[26] = String$length
+	nativeTable[27] = String$substr$Integer$Integer
+	nativeTable[28] = String$toInteger
+	nativeTable[29] = String$concat$String	
+	nativeTable[30] = String$operator+$String
+	nativeTable[31] = String$operator>$String
+	nativeTable[32] = String$operator<$String
+	nativeTable[33] = String$hashCode
+	nativeTable[34] = String$equals$Object
+	nativeTable[35] = String$toString
+
+	nativeTable[36] = Table_constructor
+	nativeTable[37] = Table_constructor$Integer
+	nativeTable[38] = Table$get$Object
+	nativeTable[39] = Table$put$Object$Object
+	nativeTable[40] = Table$remove$Object
+	nativeTable[41] = Table$firstKey
+	nativeTable[42] = Table$nextKey
+	
+invokevirtual - invoke instance method; dispatch based on class
+	format: invokevirtual index n
+	opcode: 182 (0xb6)
+	operand stack: ..., objectref, [arg1, [arg2 ...]] => ..., retvalref
+	index is an index into the method table of a class declaration
+	in the class file.
+	n in the number of arguments to the method to be invoked.
+	refvalref is the return value of the invoked method.
+
+new - create new object
+        format: new index
+	opcode: 187 (0xbb)
+	operand stack: ..., [arg1, [arg2, ..., argn]]  => ..., objectref
+	index is an index into a class declaration in the class file.
+
+newint - create new Integer object
+        format: newint value
+	opcode: 247 (0xf7)
+	operand stack: ... => ..., objectref
+	value is the value of the new Integer object.
+	objectref is a new Integer instance with the given value.
+
+newstr - create new String object
+        format: newstr str
+	opcode: 248 (0xf8)
+	operand stack: ... => ..., objectref
+	str is the string value of the new String object.
+	objectref is a new String instance with the given string value.
+	
+out - write output
+        format: out
+	opcode: 245 (0xf5)
+	operand stack: ..., objectref => ...
+
+pop - pop top operand stack value
+	format: pop
+	opcode: 250 (0xfa)
+	operand stack: ..., value  => ...
+	
+putfield - set field in object
+	format: putfield index
+	opcode: 181 (0xb5)
+	operand stack: ..., objectref, value => ...
+	index must be an integer >= 0 and < the number of fields declared in
+	objectref's class declaration in the class file.
+	value will be placed in the specified field of objectref.
+
+refcmp - compare references
+        format: refcmp
+	opcode 249 (0xf9)
+	operand stack: ..., ref1, ref2 => ..., objectref
+	objectref is a new Integer instance with value 1 if ref1
+	is the same reference as ref2, and value 0 otherwise.
+
+return - return void from method
+        format: return
+	opcode: 246 (0xf6)
+	operand stack: ... => [empty]

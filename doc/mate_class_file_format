@@ -1,0 +1,52 @@
+Niels Widger
+Time-stamp: <23 Nov 2009 at 22:14:41 by nwidger on macros.local>
+
+maTe class files are simply a series of binary encoded 32-bit unsigned
+integers.  All values are encoded in big-endian byte-order.  All
+addresses in the class file are byte-offsets from the start of the
+class file, where address 0 points to the most significant bit of the
+first byte of the class file.  The maTe compiler (mc) outputs maTe
+assembler in accordance with the below format, which the maTe
+assembler (mas) will then translate into byte-code.  See the
+'mate_instruction_set' file in doc/ for a listing of instructions and
+their formats.
+
+All symbols ($symbol) are encoded as an integer whose value is the
+address of the label of the same name.  Integer literals are encoded
+as a integer of the same value.  String literals are encoded as a
+series of integers composed of the ASCII values of the characters in
+the string literal (not including the enclosing quotation marks),
+terminated by the ASCII value of the NULL character ('\0').
+Instruction names are encoded as an integer whose value is the
+instruction's opcode (see 'mate_instruction_set' file in doc/).
+
+Munged method names are string literals which have the form
+
+    ClassName$methodName$Argument1ClassName$Argument2ClassName...
+
+so for example Object's hashCode method would have a munged name of
+
+    Object$hasCode
+
+while String's substr method would have a munged name of
+
+    String$substr$Integer$Integer
+
+
+                $mainBlock [max locals]
+                [size of class table]
+                $Object "Object"
+                $Integer "Integer"
+                $String "String"
+                $Table "Table"
+                ...
+[class name]:
+                [label of super class, or 0 for Object]
+                [number of fields, incl. inherited]
+                [size of method table]
+                [label of method/0] [max locals/native index] [munged method name]
+                ...
+...
+mainBlock:
+                [mainBlock body]
+[bodies of all class methods]

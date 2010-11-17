@@ -1,0 +1,124 @@
+<html>
+
+<head>
+<title>maTe Class File Format</title>
+<link rev="made" href="mailto:hatcher@unh.edu">
+</head>
+
+<body>
+
+<basefont size=4>
+
+<h1>
+maTe Class File Format
+</h1>
+<p>
+<hr>
+
+maTe class files are simply a series of binary-encoded 32-bit integers
+referred to as words in the remainder of this document.
+All values are encoded in big-endian byte-order.
+All addresses in the class file are byte-offsets from the start of the
+class file, where address 0 points to the first byte of the class file.
+<p>
+
+The maTe compiler
+(<a href="http://www.cs.unh.edu/~cs712/maTe/mc.pdf">mc</a>)
+outputs a
+<a href="http://www.cs.unh.edu/~cs712/maTe/assembly-language-file.html">maTe
+assembly language file</a>
+which the maTe assembler
+(<a href="http://www.cs.unh.edu/~cs712/maTe/mas.pdf">mas</a>)
+will then translate into binary-encoded words in the format described
+by this document.
+<p>
+
+The maTe virtual machine instruction encoding is specified in a document
+describing the
+<a href="http://www.cs.unh.edu/~cs712/maTe/VM-instructions.html">maTe
+virtual machine instruction set</a>.
+<p>
+
+All symbols (<i>$symbol</i> in assembly language) are encoded as an
+word whose value is the address of the label of the same name.
+<p>
+
+Integer literals are encoded as a word of the same value.
+<p>
+
+String literals are encoded as a series of words containing
+the ASCII values of the characters in the string, one byte per word,
+terminated by the ASCII value of the NULL character (0).
+<p>
+
+Instruction names are encoded as a word whose value is the
+instruction's opcode.
+<p>
+
+The class file contains the following major sections
+in this order:
+<ol>
+<li> main block descriptor <p>
+<li> class table <p>
+<li> class descriptors <p>
+<li> code section <p>
+</ol>
+<p>
+
+The main block descriptor contains two words in this order:
+<ol>
+<li> address of the code for the main block <p>
+<li> number of locals used by the main block <p>
+</ol>
+<p>
+
+The class table begins with a word containing the number of classes
+described by the table.
+This is followed by a list of pairs, one for each class.
+The first item of a pair is a word containing the address of the
+descriptor for the class.
+The second item is a string containing the name of the class.
+<p>
+
+A class descriptor consists of the following components in this order:
+<ol>
+<li> super class<p>
+<li> number of fields, including inherited fields<p>
+<li> method table<p>
+</ol>
+<p>
+
+The super class is described by specifying the address of the descriptor
+for the super class.
+For Object, zero is placed in the super class component.
+<p>
+
+The method table begins with a word containing the number of methods
+described by the table.
+The method table then consists of a list of triples,
+with one triple for each method.
+The first item in each triple is the address of the code for the method.
+The second item is the number of locals the method uses or the native code
+index if it is implemented natively.
+If the method is implemented natively then its address (the first
+item in the triple) will be zero.
+The third item in the triple is a string containing the munged name
+of the method.
+(The munged name of a method consists of its class name, the method
+name, and then the types of any parameters, listed in order.)
+<p>
+
+The code section consists of the code for the main block plus the
+code for each constructor and method that is not
+implemented natively.
+User-defined classes cannot have native methods so all native
+implementations of methods will be for predefined classes (Object,
+Integer, String and Table) and will be provided directly by the
+virtual machine implementation.
+<p>
+
+<hr size=3 noshade>
+Last modified on January 15, 2010.<p>
+Comments and questions should be directed to
+<a href="mailto:hatcher@unh.edu">hatcher@unh.edu</a>
+

@@ -1,0 +1,8 @@
+start statement ;
+statement variable equal expression ;
+statement print variable ;
+variable identifier ;
+expression expression plus expression ;
+expression expression minus expression ;
+expression variable ;
+expression constant ;

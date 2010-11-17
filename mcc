@@ -1,0 +1,129 @@
+#!/bin/bash
+
+STOP_AFTER_COMPILE=0
+GENERATE_SYMBOL_TABLE=0
+INPUT=""
+OUTPUT=""
+ERR=0
+
+function usage() {
+    echo "usage: mcc [-h] [-s] [-S] [-o FILE] FILE"
+    echo "-h       Print this help message and exit"
+    echo "-s       Generate symbol table and exit"
+    echo "-S       Compile only; do not assemble"
+    echo "-o FILE  Place the output into FILE"
+}
+
+# parse arguments
+
+OPTERR=0
+OPTARGS=":sSo:h"
+
+if [[ $# -eq 0 ]];
+then
+    usage
+    exit 1
+fi
+
+while getopts $OPTARGS opt; do
+    case $opt in
+    h)
+    usage
+    exit 1
+    ;;
+    S)
+    STOP_AFTER_COMPILE=1
+    ;;
+    s)
+    GENERATE_SYMBOL_TABLE=1
+    ;;
+    o)
+    OUTPUT="$OPTARG"
+    ;;
+    \?)
+    echo "Invalid switch option '$OPTARG'" >&2
+    ERR=1
+    ;;
+    :)
+    echo "Missing parameter to switch '$OPTARG'" >&2
+    ERR=1
+    ;;
+    esac
+done
+
+if [[ $ERR -ne 0 || $OPTIND -gt $# ]];
+then
+    usage
+    exit 1
+fi
+
+# last argument is INPUT
+
+shift $((OPTIND-1))
+INPUT="$1"
+
+# ensure INPUT exists, isn't a directory and is readable
+
+if [[ ! -e $INPUT ]];
+then
+    echo "$INPUT: No such file or directory"
+    exit 1
+fi
+
+if [[ -d $INPUT ]];
+then
+    echo "$INPUT: Is a directory"
+    exit 1
+fi
+
+if [[ ! -r $INPUT ]];
+then
+    echo "$INPUT: Permission denied"
+    exit 1
+fi
+
+# generate OUTPUT by stripping .m suffix from INPUT and adding .class
+
+OUTPUT=${INPUT%%.m}.class
+
+# dump compiler output to TEMP
+
+TEMP=`tempfile`
+mc < $INPUT > $TEMP
+
+# abort if compile stage failed
+
+if [[ $? -ne 0 ]];
+then
+    rm -rf $TEMP > /dev/null 2>&1
+    exit 1
+fi
+
+# don't assemble, just copy assembler to OUTPUT file and exit success
+
+if [[ $STOP_AFTER_COMPILE -ne 0 ]];
+then
+    OUTPUT=${INPUT%%.m}.s
+    cp $TEMP $OUTPUT > /dev/null 2>&1
+    rm -rf $TEMP > /dev/null 2>&1
+    exit 0
+fi
+
+# write generate symbol table to OUTPUT and exit
+
+if [[ $GENERATE_SYMBOL_TABLE -ne 0 ]];
+then
+    OUTPUT=${INPUT%%.m}.sym
+    mas -s < $TEMP > $OUTPUT
+    rm -rf $TEMP > /dev/null > 2>&1
+    exit 0
+fi
+
+# assemble, writing class file to OUTPUT
+
+mas < $TEMP > $OUTPUT
+
+# cleanup and exit success
+
+rm -rf $TEMP > /dev/null 2>&1
+exit 0

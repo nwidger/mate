@@ -1,0 +1,17 @@
+#    -*- mode: org -*-
+#+STARTUP: overview
+#+STARTUP: hidestars
+#
+# Niels Widger
+# Time-stamp: <25 Mar 2010 at 16:27:30 by nwidger on macros.local>
+
+* mc
+** add code to check for unreachable code after a block's 'return'
+   statement.
+* mas
+* mvm
+* mdb
+** add set command to write to class file in memory
+** add x (examine) command to read from class file
+* spec
+* general

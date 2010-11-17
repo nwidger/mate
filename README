@@ -1,0 +1,61 @@
+Niels Widger
+Time-stamp: <09 Dec 2009 at 15:37:16 by nwidger on macros.local>
+
+See INSTALL for directions on installing the maTe suite.
+
+Compiling:
+
+    mc takes source code as input from standard input, and outputs
+    assembler code to standard output.  Error messages are printed to
+    standard error.  The compiler will not output assembler code if
+    errors are encountered will processing input.  You can redirect
+    standard output to a file to save the assembler code, or you can
+    pipe it into another process (such as the assembler).  To see all
+    available command line switches, run the compiler with the -h
+    switch or consult the mc man page.
+
+Assembling:
+
+    mas takes assembler code as input from standard input, and outputs
+    the resulting class file to standard out.  If the -s switch is
+    passed to the assembler, instead of outputting a class file, it
+    will output the contents of its symbol table after the first pass
+    to standard out.  To see all available command line switches, run
+    the assembler with the -h switch or consult the mas man page.
+
+Executing:
+
+    mvm reads a class file specified as a command line argument and
+    executes the program.  Error messages are printed to standard
+    error, and generally cause the virtual machine to halt
+    immediately.  A stack trace is printed by default when an error is
+    encountered, the -q switch can be passed to the virtual machine to
+    disable this feature.  To see all available command line switches,
+    run the virtual machine with no arguments, pass it the -h switch
+    or consult the mvm man page.
+
+Examples:
+
+    Compiling the source code file "test.m" and saving the assembler
+    code to "test.s":
+
+    mc < test.m > test.s
+
+    Compiling the source code file "test.m", piping it into the
+    assembler and saving the resulting class file to "test.class":
+
+    mc < test.m | mas > test.class
+
+    Compiling the source code file "test.m", piping it into the
+    assembler and saving the resulting symbol table to "test.map":
+
+    mc < test.m | mas -s > test.map
+
+    Execute the class file "test.class" with the virtual machine:
+
+    mvm test.class
+
+    Execute the class file "test.class" with the virtual machine using
+    a heap size of 1024 bytes:
+
+    mvm -m 1024 test.class

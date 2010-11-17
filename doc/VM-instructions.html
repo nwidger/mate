@@ -1,0 +1,886 @@
+<html>
+
+<head>
+<title>maTe Virtual Machine Instructions</title>
+<link rev="made" href="mailto:hatcher@unh.edu">
+</head>
+
+<body>
+
+<basefont size=4>
+
+<h1>
+maTe Virtual Machine Instructions
+</h1>
+<p>
+
+<a name="aconst_null"></a>
+<hr><h2>aconst_null</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Push null reference.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>aconst_null</i>
+<td>
+
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>aconst_null</i> = 1 (0x00000001)
+</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+... <img src="arrwdbrt.gif"> ..., <i>null</i>
+</blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+The value denoting a null reference is pushed onto the operand stack.
+</blockquote><p>
+
+<a name="aload"></a>
+<hr><h2>aload&#32;</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Load reference from local variable.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>aload</i>
+<td>
+ 
+<tr><td>
+ <i>index</i>
+<td>
+
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>aload</i> = 25 (0x00000019)</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+... <img src="arrwdbrt.gif"> ..., <i>objectref</i>
+</blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+The <i>index</i> must be an index into the local variable array of the
+current frame.
+The <i>objectref</i> in the local variable at <i>index</i> is pushed onto
+the operand stack.
+</blockquote><p>
+
+<a name="areturn"></a>
+<hr><h2>areturn</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Return reference from method.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>areturn</i>
+<td>
+
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>areturn</i> = 176 (0x000000b0)
+</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+..., <i>objectref</i> <img src="arrwdbrt.gif"> [empty]</blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+<i>objectref</i> is popped from the operand stack of the current frame and
+pushed onto the operand stack of the frame of the invoker.
+Execution is returned to the invoker of the current method,
+reinstating the frame of the invoker.
+</blockquote><p>
+
+<a name="astore"></a>
+<hr><h2>astore</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Store reference into local variable.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>astore</i>
+<td>
+
+<tr><td>
+ <i>index</i>
+<td>
+ 
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>astore</i> = 58 (0x0000003a)
+</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+..., <i>objectref</i> <img src="arrwdbrt.gif"> ... </blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+The <i>index</i> must be an index into the local variable array of the
+current frame.
+The <i>objectref</i> on the top of the operand stack is popped,
+and the value of the local variable at <i>index</i> is set to <i>objectref</i>.
+</blockquote><p>
+
+<a name="checkcast"></a>
+<hr><h2>checkcast</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Check whether object is of a given type.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>checkcast</i>
+<td>
+
+<tr><td>
+ <i>index</i>
+<td>
+
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>checkcast</i> = 192 (0x000000c0)
+</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+..., <i>ref1</i>, <i>ref2</i> <img src="arrwdbrt.gif"> ..., <i>objectref</i></blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+<i>index</i> must denote an index of a class in the class table.
+<i>ref2</i> must denote an Integer instance.
+If the value of <i>ref2</i> is 0, then <i>objectref</i> will be a new
+Integer instance whose value is 1 if <i>ref1</i> is an instance of the
+class indicated by <i>index</i>, otherwise its value is 0.
+If the value of <i>ref2</i> is not 0, then <i>objectref</i> will be
+<i>ref1</i> if <i>ref1</i> is an instance of the
+class indicated by <i>index</i>,
+otherwise the VM halts with an appropriate error message.
+</blockquote><p>
+
+<a name="dup"></a>
+<hr><h2>dup</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Duplicate the top value on the operand stack.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>dup</i>
+<td>
+
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>dup</i> = 89 (0x00000059)
+</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+..., <i>value</i> <img src="arrwdbrt.gif"> ..., <i>value</i>, <i>value</i></blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+The top value on the operand stack is replicated onto the top of the stack.
+</blockquote><p>
+
+<a name="dup_x1"></a>
+<hr><h2>dup_x1</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Duplicate the top value on the operand stack and insert it two values down.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>dup_x1</i>
+<td>
+
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>dup</i> = 251 (0x000000fb)
+</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+..., <i>value2</i>, <i>value1</i> <img src="arrwdbrt.gif"> ..., <i>value1</i>,
+<i>value2</i>, <i>value1</i>
+</blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+Duplicate the top value on the operand stack and insert it two values down.
+</blockquote><p>
+
+<a name="getfield"></a>
+<hr><h2>getfield</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Fetch a field from an object.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>getfield</i>
+<td>
+
+<tr><td>
+ <i>index</i>
+<td>
+
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>getfield</i> = 180 (0x000000b4)
+</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+..., <i>objectref</i> <img src="arrwdbrt.gif"> ..., <i>value</i></blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+The <i>objectref</i> is popped from the operand stack.
+It must not be <i>null</i> and the <i>index</i> must denote a field
+in the class of the object it references.
+The value of this field is retrieved and pushed onto the stack.
+</blockquote><p>
+
+<a name="goto"></a>
+<hr><h2>goto</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Branch always.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>goto</i>
+<td>
+
+<tr><td>
+ <i>address</i>
+<td>
+
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>goto</i> = 167 (0x000000a7)
+</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+No change.
+</blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+Execution proceeds at the given <i>address</i>.
+The target address must be that of an opcode of an instruction
+within the current method.
+</blockquote><p>
+
+<a name="ifeq"></a>
+<hr><h2>ifeq</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Branch if comparison with zero succeeds.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>ifeq</i>
+<td>
+
+<tr><td>
+ <i>address</i>
+<td>
+
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>ifeq</i> = 153 (0x00000099)
+</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+..., <i>objectref</i> <img src="arrwdbrt.gif"> ... </blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+The <i>objectref</i> is popped from the operand stack.
+It must not be <i>null</i> and it must denote an Integer object.
+If the value denoted by the Integer object is zero, then
+execution proceeds at the given <i>address</i>.
+The target address must be that of an opcode of an instruction
+within the current method.
+</blockquote><p>
+
+<a name="in"></a>
+<hr><h2>in</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Read string from input.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>in</i>
+<td>
+
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>in</i> = 243 (0x000000f3)
+</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+... <img src="arrwdbrt.gif"> ..., <i>objectref</i></blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+A string is read from stdin, a String object is created
+to contain the input value, and the object reference for that newly
+created object is pushed onto the operand stack.
+To read a string, first any whitespace characters next in the input
+are read and discarded.
+Then non-whitespace characters are read and saved into the string
+until a whitespace character is read or EOF is encountered.
+If EOF is encountered at the start of the operation, then
+<i>null</i> is pushed onto the operand stack.
+</blockquote><p>
+
+<a name="invokenative"></a>
+<hr><h2>invokenative</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Invoke native method.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>invokenative</i>
+<td>
+
+<tr><td>
+ <i>index</i>
+<td>
+
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>invokenative</i> = 244 (0x000000f4)
+</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+..., <i>objectref</i>, [<i>arg1</i> [, <i>arg2</i> ... [, <i>argn</i> ] ] ]
+<img src="arrwdbrt.gif"> ...
+</blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+<i>objectref</i> must not be <i>null</i>.
+The <i>index</i> must be an index into the native method table.
+The argument values and <i>objectref</i> are popped from the
+operand stack.
+They are passed as parameters to the code that implements the method.
+The parameters are passed and the code is invoked in an
+implementation-dependent manner.
+<p>
+The mapping of native methods to indices is given
+<a href="http://www.cs.unh.edu/~cs712/maTe/VM-native-method-indices.html">here</a>.
+</blockquote><p>
+
+<a name="invokespecial"></a>
+<hr><h2>invokespecial</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Invoke a method using special handling for constructor or
+superclass methods.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>invokespecial</i>
+<td>
+
+<tr><td>
+ <i>address</i>
+<td>
+
+<tr><td>
+ <i>n</i>
+<td>
+
+<tr><td>
+ <i>locals</i>
+<td>
+
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>invokespecial</i> = 183 (0x000000b7)
+</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+..., <i>objectref</i>, [<i>arg1</i> [, <i>arg2</i> ... [, <i>argn-1</i> ] ] ]
+<img src="arrwdbrt.gif"> ...
+</blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+<i>address</i> must denote the first instruction
+of the method body that should be invoked.
+<i>n</i> denotes the number of arguments being passed to the method, including
+the <i>objectref</i>.
+<i>locals</i> denotes the number of locals to be used by the method.
+<i>objectref</i> must not be <i>null</i>.
+The <i>n</i> argument values, including <i>objectref</i>, are popped from the
+operand stack.
+A new frame is created for the method being invoked.
+The <i>objectref</i> and the argument values are consecutively made the
+values of local variables of the new frame, with <i>objectref</i> in local
+variable 0, <i>arg1</i> in local variable 1, and so on.
+The new frame is then made current and
+execution continues with the first instruction of the method.
+</blockquote><p>
+
+<a name="invokevirtual"></a>
+<hr><h2>invokevirtual</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Invoke method with the dispatch based on class.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>invokevirtual</i>
+<td>
+
+<tr><td>
+ <i>index</i>
+<td>
+
+<tr><td>
+ <i>n</i>
+<td>
+
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>invokevirtual</i> = 182 (0x000000b6)
+</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+..., <i>objectref</i>, [<i>arg1</i> [, <i>arg2</i> ... [, <i>argn-1</i> ] ] ]
+<img src="arrwdbrt.gif"> ...
+</blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+<i>objectref</i> must not be <i>null</i>.
+<i>index</i> must be an index into the method table of the class of
+the object denoted by <i>objectref</i>.
+The <i>n</i> argument values, including the <i>objectref</i>, are
+popped from the operand stack.
+A new frame is created for the method being invoked.
+The <i>objectref</i> and the argument values are consecutively made the
+values of local variables of the new frame, with <i>objectref</i> in local
+variable 0, <i>arg1</i> in local variable 1, and so on.
+The new frame is then made current and
+execution continues with the first instruction of the method
+selected by <i>index</i>.
+However, if the address retrived from the method table is zero, then
+a native method is invoked as in <i>invokenative</i>.
+</blockquote><p>
+
+<a name="new"></a>
+<hr><h2>new</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Create new object.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>new</i>
+<td>
+
+<tr><td>
+ <i>class</i>
+<td>
+
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>new</i> = 187 (0x000000bb)
+</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+... <img src="arrwdbrt.gif"> ..., <i>objectref</i>
+</blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+<i>class</i> must denote a class described in the class table
+and indicates the class of the object to be created.
+Memory for a new instance of that class is allocated,
+instance variables (if any) of the new object are initialized to their
+default initial values, and
+the <i>objectref</i> for the new object is pushed onto the operand stack.
+</blockquote><p>
+
+<a name="newint"></a>
+<hr><h2>newint</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Create new Integer object.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>newint</i>
+<td>
+
+<tr><td>
+ <i>value</i>
+<td>
+
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>newint</i> = 247 (0x000000f7)
+</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+... <img src="arrwdbrt.gif"> ..., <i>objectref</i>
+</blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+<i>value</i> is the value of the new Integer object to be created.
+Memory for a new instance of Integer is allocated, the value is
+assigned, and
+the <i>objectref</i> for the new object is pushed onto the operand stack.
+</blockquote><p>
+
+<a name="newstr"></a>
+<hr><h2>newstr</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Create new object.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>newstr</i>
+<td>
+
+<tr><td>
+ <i>byte0</i>
+<td>
+
+<tr><td>
+ <i>...</i>
+<td>
+
+<tr><td>
+ <i>byten</i>
+<td>
+
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>newstr</i> = 248 (0x000000f8)
+</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+... <img src="arrwdbrt.gif"> ..., <i>objectref</i>
+</blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+The value of the new String object to be created is stored inline in the
+instruction.
+Each byte of the string is stored in one 32-bit word and the
+string is terminated with a zero word.
+Memory for a new instance of String is allocated, the value is
+assigned, and
+the <i>objectref</i> for the new object is pushed onto the operand stack.
+</blockquote><p>
+
+<a name="out"></a>
+<hr><h2>out</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Write a string to output.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>out</i>
+<td>
+
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>out</i> = 245 (0x000000f5)
+</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+..., <i>objectref</i> <img src="arrwdbrt.gif"> ...
+</blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+The <i>objectref</i> is popped from the stack.
+It must not be <i>null</i> and must
+denote an instance of String.
+This string is printed to stdout.
+</blockquote><p>
+
+<a name="pop"></a>
+<hr><h2>pop</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Pop top operand stack value.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>pop</i>
+<td>
+
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>pop</i> = 250 (0x000000fa)
+</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+..., <i>value</i> <img src="arrwdbrt.gif"> ... </blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+The top value on the operand stack is popped and discarded.
+</blockquote><p>
+
+<a name="putfield"></a>
+<hr><h2>putfield</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Set a field in an object.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>putfield</i>
+<td>
+
+<tr><td>
+ <i>index</i>
+<td>
+
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>putfield</i> = 181 (0x000000b5)
+</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+..., <i>objectref</i>, <i>value</i> <img src="arrwdbrt.gif"> ...</blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+The <i>value</i> and
+the <i>objectref</i> are popped from the operand stack.
+The <i>objectref</i> must not be <i>null</i> and the
+<i>index</i> must denote a field in the class of the object it references.
+The value popped from the stack is stored into this field.
+</blockquote><p>
+
+<a name="refcmp"></a>
+<hr><h2>refcmp</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Compare references.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>refcmp</i>
+<td>
+
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>refcmp</i> = 249 (0x000000f9)
+</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+..., <i>objectref1</i>, <i>objectref2</i> <img src="arrwdbrt.gif"> ...,
+<i>objectref</i></blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+Two object references are popped from the operand stack and compared.
+A reference to a new Integer object is pushed onto the operand stack.
+The new Integer object has value 1 if the two popped references denote
+the same object and value 0 otherwise.
+</blockquote><p>
+
+<a name="return"></a>
+<hr><h2>return</h2>
+<p><b>Operation</b><br>
+<blockquote>
+Return without a value from method.
+<p><Table Border="1">
+</blockquote>
+
+<p><b>Format</b><br>
+<blockquote>
+
+<tr><td>
+ <i>return</i>
+<td>
+
+</Table><br></blockquote><p>
+
+<p><b>Forms</b><br>
+<blockquote>
+<i>return</i> = 246 (0x000000f6)
+</blockquote><p>
+
+<p><b>Operand Stack</b><br>
+<blockquote>
+... <img src="arrwdbrt.gif"> [empty]</blockquote><p>
+
+<p><b>Description</b><br>
+<blockquote>
+Execution is returned to the invoker of the current method,
+reinstating the frame of the invoker.
+</blockquote><p>
+
+<hr size=3 noshade>
+Last modified on April 4, 2010.<p>
+Comments and questions should be directed to
+<a href="mailto:hatcher@unh.edu">hatcher@unh.edu</a>
+

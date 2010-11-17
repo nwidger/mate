@@ -1,0 +1,499 @@
+<html>
+
+<head>
+<title>A maTe Language Tutorial</title>
+<link rev="made" href="mailto:hatcher@unh.edu">
+</head>
+
+<body>
+
+<basefont size=4>
+
+<h1>
+A maTe Language Tutorial
+</h1>
+<p>
+<hr>
+
+This document provides an introduction to the maTe language, largely
+by example.
+However, it does contain links to the
+<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html">maTe
+language specification,</a>
+where the technical details are given.
+<p>
+
+maTe is a pure object-oriented programming language, meaning
+every data item is an object.
+There are built-in classes for integers
+(<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#2.3.3"><strong>Integer</strong></a>),
+strings
+(<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#2.3.4"><strong>String</strong></a>),
+and hashtables
+(<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#2.3.5"><strong>Table</strong></a>).
+Users can create classes using these built-in classes.
+There is also a built-in class
+<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#2.3.2"><strong>Object</strong></a>,
+which is the root of the inheritance hierarchy.
+maTe supports only single-inheritance.
+<p>
+
+<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#8">maTe syntax</a>
+is derived from Java syntax.
+However, maTe programs are single-file programs.
+The file can contain a collection of user-defined classes, but
+must always contain a main block where execution will begin.
+<p>
+
+Here is the "hello, world" program in maTe:
+<pre>
+Integer main()
+{
+   out "hello, world";
+   out newline;
+}
+</pre>
+<p>
+
+maTe has very primitive I/O capabilities:
+<ul>
+<li> The
+<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#6.10"><strong>out</strong> statement</a>,
+which prints the value of an expression to stdout.
+If the type of the expression is <strong>String</strong>,
+the contents of the String object is printed.
+Otherwise the <strong>toString</strong> method is called for
+the object denoted by the expression, and then the contents of
+the resulting <strong>String</strong> object is printed.
+<p>
+<li> The
+<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#7.15"><strong>in</strong> operator</a>,
+which takes no operands and
+reads a string of input from stdin.
+It first skips any leading whitespace characters in the input.
+Then it reads and saves a sequence of non-whitespace characters,
+stopping when it encounters a whitespace character (or EOF).
+If there are no non-whitespace characters prior to EOF, the
+<strong>in</strong> operator returns a null reference.
+Otherwise, a new <strong>String</strong> object is created,
+whose characters are those read in and saved.
+This <strong>String</strong> (or a null reference) is the value
+produced by the operator.
+</ul>
+<p>
+
+<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#1.7.3">maTe
+string literals</a>
+are delimited by double quotes, and can contain any
+printable ASCII character except newline, line feed or tab.
+Note that maTe has a keyword to represent a string literal containing
+only a newline (<strong>newline</strong>) and a keyword to represent
+a string literal containing only a tab (<strong>tab</strong>).
+<p> 
+
+Here is a maTe program to echo stdin to stdout (although a sequence
+of whitespace is compressed to a single space):
+<pre>
+Integer main()
+{
+  String s;
+  s = in;
+  while (!(s == null))
+  {
+    out s;
+    out " ";
+    s = in;
+  }
+  out newline;
+}
+</pre>
+<p>
+
+Note that maTe only has these basic control-flow structures:
+<ul>
+<li>
+<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#6.7"><strong>if-then</strong></a>
+and
+<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#6.6"><strong>if-then-else</strong></a>
+statements
+<li>
+<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#6.8"><strong>while</strong></a>
+statements
+<li>
+<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#6.11"><strong>break</strong></a>
+and
+<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#6.12"><strong>continue</strong></a>
+statements
+</ul>
+<p>
+
+The maTe built-in class
+<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#2.3.3"><strong>Integer</strong></a>
+provides basic support
+for integer operations, including addition, subtraction, multiplication,
+division, unary minus, greater than, less than, equals and logical not.
+(Note that there are no operators for greater than or equal, less than
+or equal, and not equals.)
+These operations are accessed through method calls (<strong>add</strong>,
+<strong>subtract</strong>, etc.) or via the conventional infix operators
+(<strong>+</strong>, <strong>-</strong>, etc.).
+<strong>
+One important exception is that equality of Integer values is only accessible
+via the equals method.
+</strong>
+(Applying the <strong>==</strong> operator on two Integer references will simply
+test whether both references refer to the same object.)
+These operations all produce new <strong>Integer</strong> objects to
+contain the results.
+<p>
+
+Here is a maTe program to compute <strong>i!</strong> for
+<strong>i = 0 to 12</strong>:
+<pre>
+Integer main()
+{
+  Integer i;
+  Integer value;
+
+  i = 0;
+  value = 1;
+
+  while (i < 13)
+  {
+    out i;
+    out tab;
+    out value;
+    out newline;
+
+    i = i + 1;
+    value = i * value;
+  }
+}
+</pre>
+<p>
+
+The maTe built-in class
+<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#2.3.4"><strong>String</strong></a>
+provides basic support for string operations,
+including length, concatenation, substring and comparison.
+The length operation is accessed via the <strong>length</strong> method.
+The substring operation is accessed via the <strong>substr</strong> method.
+The concatenation operation is accessed via the <strong>concat</strong>
+method or via the infix operator <strong>+</strong>.
+The comparison operations are all accessed via infix operators
+(<strong>&lt</strong>, <strong>&gt</strong> and <strong>==</strong>).
+<p>
+
+Here is a maTe program to compute factorial using string concatenation
+to format the output lines:
+<pre>
+Integer main()
+{
+  Integer i;
+  Integer value;
+
+  i = 0;
+  value = 1;
+
+  while (i < 13)
+  {
+    out i.toString() + tab + value.toString() + newline;
+
+    i = i + 1;
+    value = i * value;
+  }
+}
+</pre>
+<p>
+
+The maTe built-in class
+<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#2.3.5"><strong>Table</strong></a>
+provides basic support for hashtable operations.
+<p>
+
+Since maTe does not support arrays, hashtables can be used in their
+place.
+For instance, here is a maTe program to initialize and then sum
+an array of integers, with the array implemented as a hashtable.
+(This example also illustrates that maTe has Java-like comments.)
+<pre>
+Integer main()
+{
+  // x will implement an array
+  Table x;
+  Integer i;
+  Integer sum;
+
+  // create the table/array (1000 is the hashtable capacity)
+  x = new Table(1000);
+
+  // initialize x[i] = i
+  i = 0;
+  while (i < 10)
+  {
+    x.put(i, i);
+    i = i + 1;
+  }
+
+  // sum x[i] for i = 0 to 9
+  i = 0;
+  sum = 0;
+  while (i < 10)
+  {
+    sum = sum + ((Integer) x.get(i));
+    i = i + 1;
+  }
+
+  // output the sum
+  out sum.toString() + newline;
+}
+</pre>
+Note that one inconvenience to using hashtables for arrays is
+that the type of the value stored in the table is not known at compile time
+and therefore a cast must be performed on the value retrieved from the
+table before an integer operation can be applied to it.
+<p>
+
+The following code creates a class to represent an integer array,
+uses a hashtable to implement the array, and then re-does the
+array sum example:
+<pre>
+// provide support for an integer array
+class IntegerArray
+{
+  // array length: private
+  Integer length;
+
+  // hashtable used to implement array: private
+  Table t;
+
+  // validate an index: private
+  //   returns 1 if the index is okay and 0 otherwise
+  Integer checkIndex(Integer index)
+  {
+    if (index < 0)
+    {
+      out "index out of range: " + index.toString() + " < 0" + newline;
+      return 0;
+    }
+    if (index > (length - 1))
+    {
+      out "index out of range: " + index.toString() + " >= " +
+        length.toString() + newline;
+      return 0;
+    }
+    return 1;
+  }
+
+  // constructor: array length must be provided
+  //   array elements are initialized to zero
+  IntegerArray(Integer len)
+  {
+    Integer i;
+
+    t = new Table(len * 10);
+    length = len;
+
+    i = 0;
+    while (i < len)
+    {
+      t.put(i, 0);
+      i = i + 1;
+    }
+  }
+
+  // get a value from the array
+  //   returns null if index is not valid
+  Integer get(Integer index)
+  {
+    if (checkIndex(index))
+    {
+      return (Integer) t.get(index);
+    }
+    else
+    {
+      return null;
+    }
+  }
+
+  // put a value from the array
+  //   returns the value if index is valid
+  //   returns null if index is not valid
+  Integer put(Integer index, Integer value)
+  {
+    if (checkIndex(index))
+    {
+      t.put(index, value);
+      return value;
+    }
+    else
+    {
+      return null;
+    }
+  }
+}
+
+Integer main()
+{
+  IntegerArray x;
+  Integer i;
+  Integer sum;
+
+  x = new IntegerArray(10);
+
+  // initialize x[i] = i
+  i = 0;
+  while (i < 10)
+  {
+    x.put(i, i);
+    i = i + 1;
+  }
+
+  // sum x[i] for i = 0 to 9
+  i = 0;
+  sum = 0;
+  while (i < 10)
+  {
+    sum = sum + x.get(i);
+    i = i + 1;
+  }
+
+  // output the sum
+  out sum.toString() + newline;
+}
+</pre>
+<p>
+
+All method calls in maTe are virtual, meaning that the
+run-time type of an object is used to choose the method
+to invoke.
+Here is a maTe version of the classic "animals speaking" example:
+<pre>
+class Animal
+{
+  // all animals must speak
+  Integer speak()
+  {
+    out "abstract method: should not be called" + newline;
+    return 0;
+  }
+}
+
+class Pig extends Animal
+{
+  Integer speak()
+  {
+    out "oink" + newline;
+    return 1;
+  }
+}
+
+class Rooster extends Animal
+{
+  Integer speak()
+  {
+    out "cock-a-doodle-do" + newline;
+    return 1;
+  }
+}
+
+class Dog extends Animal
+{
+  Integer speak()
+  {
+    out "woof" + newline;
+    return 1;
+  }
+}
+
+class Cow extends Animal
+{
+  Integer speak()
+  {
+    out "moo" + newline;
+    return 1;
+  }
+}
+
+Integer main()
+{
+  Table t;
+  Animal animal;
+
+  // initialize a table and throw some animals in it, each with a count
+  t = new Table(100);
+  t.put(new Cow(), 1);
+  t.put(new Dog(), 3);
+  t.put(new Rooster(), 5);
+  t.put(new Pig(), 7);
+
+  // now iterate over the table contents and ask each animal to speak
+  t.firstKey();
+  animal = (Animal) t.nextKey();
+  while (!(animal == null))
+  {
+    Integer count;
+    Integer i;
+
+    // each animal will speak the number of times given by its count
+    count = (Integer) t.get(animal);
+    i = 0;
+    while (i < count)
+    {
+      animal.speak();
+      i = i + 1;
+    }
+
+    animal = (Animal) t.nextKey();
+  }
+}
+</pre>
+This example also illustrates the iterator mechanism (<strong>firstKey</strong>
+and <strong>nextKey</strong> methods) available in the
+<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#2.3.5"><strong>Table</strong></a>
+class.
+Note that the iterator does not return the values in the order they were
+inserted, rather the order is dependent on the hashing function and size
+of the table.
+<p>
+
+The run-time type of an object is accessible to the programmer via
+the
+<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#7.10.2"><strong>instanceof</strong></a>
+operator.
+Here is a simple example to illustrate that operator:
+<pre>
+Integer main()
+{
+   Object obj;
+
+   obj = new Integer(19);
+
+   if (obj instanceof Object)
+   {
+     out "it is an Object" + newline;
+   }
+
+   if (obj instanceof Integer)
+   {
+     out "it is an Integer" + newline;
+   }
+
+   if (obj instanceof String)
+   {
+     out "it is a String" + newline;
+   }
+
+   if (obj instanceof Table)
+   {
+     out "it is a Table" + newline;
+   }
+}
+</pre>
+<p>
+
+<hr size=3 noshade>
+Last modified on January 29, 2010.<p>
+Comments and questions should be directed to
+<a href="mailto:hatcher@unh.edu">hatcher@unh.edu</a>
+

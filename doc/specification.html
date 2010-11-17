@@ -1,0 +1,6688 @@
+<!-- Niels Widger -->
+<!-- Time-stamp: <06 May 2010 at 13:30:42 by nwidger on macros.local> -->
+<html>
+<head>
+<title> The maTe Language Specification, Version 1 </title>
+</head>
+<body>
+
+<LINK REL="stylesheet" TYPE="text/css" HREF="styles.css" TITLE="Default">
+ 
+<h1 align=center> The maTe Language Specification, Version 1 </h1>
+ 
+ <h2>Table of Contents</h2>
+<dl>
+
+<a href="#1">
+<H2>	1	 Lexical Structure	 </H2>
+</a><dl>
+<a href="#1.1">
+<dt><dd>1.1	 Line Terminators	
+</a><a href="#1.2">
+<dt><dd>1.2	 Input Elements and Tokens	
+</a><a href="#1.3">
+<dt><dd>1.3	 White Space	
+</a><a href="#1.4">
+<dt><dd>1.4	 Comments	
+</a><a href="#1.5">
+<dt><dd>1.5	 Identifiers	
+</a><a href="#1.6">
+<dt><dd>1.6	 Keywords	
+</a><a href="#1.7">
+<dt><dd>1.7	 Literals	
+</a><dl>
+<a href="#1.7.1">
+<dt><dd>1.7.1	 Integer Literals	
+</a><a href="#1.7.2">
+<dt><dd>1.7.2	 The Null Literal
+</a><a href="#1.7.3">
+<dt><dd>1.7.3	 The String Literal	    
+</a></dl>
+<a href="#1.8">
+<dt><dd>1.8	 Separators	
+</a><a href="#1.9">
+<dt><dd>1.9	 Operators	
+</a></dl>
+
+<a href="#2">
+<H2>	2	 Types, Values, and Variables	 </H2>
+</a><dl>
+<a href="#2.1">
+<dt><dd>2.1	 The Kinds of Types and Values
+<a href="#2.2">
+<dt><dd>2.2	 Predefined Types and Values
+<a href="#2.3">
+<dt><dd>2.3	 Reference Types and Values	
+</a><dl>
+<a href="#2.3.1">
+<dt><dd>2.3.1	 Objects	
+</a><a href="#2.3.2">
+<dt><dd>2.3.2	 The Class Object
+</a><a href="#2.3.3">
+<dt><dd>2.3.3	 The Class Integer
+</a><a href="#2.3.4">
+<dt><dd>2.3.4	 The Class String
+</a><a href="#2.3.5">
+<dt><dd>2.3.5	 The Class Table		
+</a><a href="#2.3.6">
+<dt><dd>2.3.6	 When Reference Types Are the Same	
+</a></dl>
+<a href="#2.4">
+<dt><dd>2.4	 Where Types Are Used	
+</a><a href="#2.5">
+<dt><dd>2.5	 Variables	
+</a><dl>
+</a><a href="#2.5.1">
+<dt><dd>2.5.1	 Variables of Reference Type	
+</a><a href="#2.5.2">
+<dt><dd>2.5.2	 Kinds of Variables	
+</a><a href="#2.5.3">
+<dt><dd>2.5.3	 Initial Values of Variables	
+</a><a href="#2.5.4">
+<dt><dd>2.5.4	 Types and Classes	
+</a></dl>
+</dl>
+
+<a href="#3">
+<H2>	3	 Conversions	 </H2>
+</a><dl>
+<a href="#3.1">
+<dt><dd>3.1	 Kinds of Conversion	
+</a><dl>
+<a href="#3.1.1">
+<dt><dd>3.1.1	 Identity Conversions		
+</a><a href="#3.1.2">
+<dt><dd>3.1.2	 Widening Reference Conversions	
+</a><a href="#3.1.3">
+<dt><dd>3.1.3	 Narrowing Reference Conversions	
+</a><a href="#3.1.4">
+<dt><dd>3.1.4	 Forbidden Conversions	
+</a></dl>
+<a href="#3.2">
+<dt><dd>3.2	 Assignment Conversion	
+</a><a href="#3.3">
+<dt><dd>3.3	 Method Invocation Conversion	
+</a><a href="#3.4">
+<dt><dd>3.4	 Casting Conversion	
+</a>
+</dl>
+
+<a href="#4">
+<H2>	4	 Names	 </H2>
+</a><dl>
+<a href="#4.1">
+<dt><dd>4.1	 Declarations	
+</a><a href="#4.2">
+<dt><dd>4.2	 Names and Identifiers	
+</a><a href="#4.3">
+<dt><dd>4.3	 Scope of a Declaration	
+</a><dl>
+<a href="#4.3.1">
+<dt><dd>4.3.1	 Shadowing Declarations	
+</a></dl>
+<a href="#4.4">
+<dt><dd>4.4	 Members and Inheritance
+</a><dl>
+<a href="#4.4.1">
+<dt><dd>4.4.1	 The Members of a Class Type
+</a></dl>
+<a href="#4.5">
+<dt><dd>4.5	 Determining the Meaning of a Name	
+</a><dl>
+<a href="#4.5.1">
+<dt><dd>4.5.1	 Syntactic Classification of a Name According to Context	
+</a><a href="#4.5.2">
+<dt><dd>4.5.2	 Meaning of Type Names	
+<a href="#4.5.3">
+<dt><dd>4.5.3	 Meaning of Expression Names	
+</a><dl>
+<a href="#4.5.3.1">
+<dt><dd>4.5.3.1	 Simple Expression Names	
+</a><a href="#4.5.3.2">
+<dt><dd>4.5.3.2	 Qualified Expression Names	
+</a></dl>
+<a href="#4.5.4">
+<dt><dd>4.5.4	 Meaning of Method Names	
+</a><dl>
+<a href="#4.5.4.1">
+<dt><dd>4.5.4.1	 Simple Method Names	
+</a><a href="#4.5.4.2">
+<dt><dd>4.5.4.2	 Qualified Method Names	
+</a></dl>
+</dl></dl> 
+
+<a href="#5">
+<H2>	5	 Classes	 </H2>
+</a><dl>
+<a href="#5.1">
+<dt><dd>5.1	 Class Declaration	
+</a><dl>
+<a href="#5.1.1">
+<dt><dd>5.1.1	 Superclasses and Subclasses	
+</a><a href="#5.1.2">
+<dt><dd>5.1.2	 Class Body and Member Declarations	
+</a></dl>
+<a href="#5.2">
+<dt><dd>5.2	 Class Members	
+</a><a href="#5.3">
+<dt><dd>5.3	 Field Declarations	
+</a><a href="#5.4">
+<dt><dd>5.4	 Method Declarations	
+</a><dl>
+<a href="#5.4.1">
+<dt><dd>5.4.1	 Formal Parameters	
+</a><a href="#5.4.2">
+<dt><dd>5.4.2	 Method Signature	
+</a><a href="#5.4.3">
+<dt><dd>5.4.3	 Method Body	
+</a><a href="#5.4.4">
+<dt><dd>5.4.4	 Inheritance and Overriding	
+<a href="#5.4.5">
+<dt><dd>5.4.5	 Overloading	
+</a></dl>
+<a href="#5.5">
+<dt><dd>5.5	 Constructor Declarations	
+</a><dl>
+<a href="#5.5.1">
+<dt><dd>5.5.1	 Formal Parameters	
+</a><a href="#5.5.2">
+<dt><dd>5.5.2	 Constructor Signature	
+</a><a href="#5.5.3">
+<dt><dd>5.5.3	 Constructor Body	
+</a><dl>
+<a href="#5.5.3.1">
+<dt><dd>5.5.3.1	 Explicit Constructor Invocations	
+</a></dl>
+<a href="#5.5.4">
+<dt><dd>5.5.4	 Constructor Overloading	
+</a><a href="#5.5.5">
+<dt><dd>5.5.5	 Default Constructor	
+</a></dl>
+</a><a href="#5.6">
+<dt><dd>5.6	 Operator Declarations	
+</a><dl>
+<a href="#5.6.1">
+<dt><dd>5.6.1	 Formal Parameters	
+</a><a href="#5.6.2">
+<dt><dd>5.6.2	 Operator Signature	
+</a><a href="#5.6.3">
+<dt><dd>5.6.3	 Operator Body	
+</a><a href="#5.6.4">
+<dt><dd>5.6.4	 Inheritance and Overriding	
+<a href="#5.6.5">
+<dt><dd>5.6.5	 Overloading	
+</a></dl>
+</dl>
+
+<a href="#6">
+<H2>	6	 Blocks and Statements	 </H2>
+</a><dl>
+<a href="#6.1">
+<dt><dd>6.1	 Main Block	
+</a><a href="#6.2">
+<dt><dd>6.2	 Statements	
+</a><a href="#6.3">
+<dt><dd>6.3	 Blocks	
+</a><a href="#6.4">
+<dt><dd>6.4	 The Empty Statement	
+</a><a href="#6.5">
+<dt><dd>6.5	 Expression Statements	
+</a><a href="#6.6">
+<dt><dd>6.6	 The if-then-else Statement
+</a><a href="#6.7">
+<dt><dd>6.7	 The if-then Statement	  
+</a><a href="#6.8">
+<dt><dd>6.8	 The while Statement	
+</a><a href="#6.9">
+<dt><dd>6.9	 The return Statement	
+</a><a href="#6.10">
+<dt><dd>6.10	The out Statement
+</a><a href="#6.11">
+<dt><dd>6.11	The break Statement	
+</a><a href="#6.12">
+<dt><dd>6.12	The continue Statement
+</a><a href="#6.13">
+<dt><dd>6.13	The Local Variable Declaration Statement	  
+</a></dl>
+
+<a href="#7">
+<H2>	7	 Expressions	 </H2>
+</a><dl>
+<a href="#7.1">
+<dt><dd>7.1	 Evaluation, Denotation, and Result	
+</a><a href="#7.2">
+<dt><dd>7.2	 Variables as Values	
+</a><a href="#7.3">
+<dt><dd>7.3	 Type of an Expression	
+</a><a href="#7.4">
+<dt><dd>7.4	 Expressions and Run-Time Checks	
+</a><a href="#7.5">
+<dt><dd>7.5	 Evaluation Order	
+</a><dl>
+<a href="#7.5.1">
+<dt><dd>7.5.1	 Evaluate Left-Hand Operand First	
+</a><a href="#7.5.2">
+<dt><dd>7.5.2	 Evaluate Operands before Operation	
+</a><a href="#7.5.3">
+<dt><dd>7.5.3	 Evaluation Respects Parentheses and Precedence	
+</a><a href="#7.5.4">
+<dt><dd>7.5.4	 Argument Lists are Evaluated Left-to-Right	
+</a></dl>
+<a href="#7.6">
+<dt><dd>7.6	 Primary Expressions	
+</a><dl>
+<a href="#7.6.1">
+<dt><dd>7.6.1	 Lexical Literals	
+</a><a href="#7.6.2">
+<dt><dd>7.6.2	 this	
+</a><a href="#7.6.3">
+<dt><dd>7.6.3	 Parenthesized Expressions	
+</a><a href="#7.6.4">
+<dt><dd>7.6.4	 Expression Names
+</a></dl>
+<a href="#7.7">
+<dt><dd>7.7	 Class Instance Creation Expressions	
+</a><dl>
+<a href="#7.7.1">
+<dt><dd>7.7.1	 Determining the Class being Instantiated	
+</a><a href="#7.7.2">
+<dt><dd>7.7.2	 Choosing the Constructor and its Arguments	
+</a><a href="#7.7.3">
+<dt><dd>7.7.3	 Run-time Evaluation of Class Instance Creation Expressions	
+</a></dl>
+<a href="#7.8">
+<dt><dd>7.8	 Field Access Expressions	
+</a><dl>
+<a href="#7.8.1">
+<dt><dd>7.8.1	 Field Access Using a Primary	
+</a><a href="#7.8.2">
+<dt><dd>7.8.2	 Accessing Superclass Members Using super	
+</a></dl>
+<a href="#7.9">
+<dt><dd>7.9	 Method Invocation Expressions	
+</a><dl>
+<a href="#7.9.1">
+<dt><dd>7.9.1	 Compile-Time Step 1: Determine Class to Search	
+</a><a href="#7.9.2">
+<dt><dd>7.9.2	 Compile-Time Step 2: Determine Method Signature	
+</a><dl>
+<a href="#7.9.2.1">
+<dt><dd>7.9.2.1	 Find Methods that are Applicable
+</a><a href="#7.9.2.2">
+<dt><dd>7.9.2.2	 Choose the Most Specific Method	
+</a></dl>
+<a href="#7.9.3">
+<dt><dd>7.9.3	 Runtime Evaluation of Method Invocation	
+</a><dl>
+<a href="#7.9.3.1">
+<dt><dd>7.9.3.1	 Compute Target Reference (If Necessary)	
+</a><a href="#7.9.3.2">
+<dt><dd>7.9.3.2	 Evaluate Arguments	
+</a><a href="#7.9.3.3">
+<dt><dd>7.9.3.3	 Locate Method to Invoke	
+</a><a href="#7.9.3.4">
+<dt><dd>7.9.3.4	 Create Frame
+</a></dl>
+</dl>
+<a href="#7.10">
+<dt><dd>7.10	 Unary Operators	
+</a><dl>
+</a><a href="#7.10.1">
+<dt><dd>7.10.1	 Cast Operator	
+</a><a href="#7.10.2">
+<dt><dd>7.10.2	 instanceof Operator
+</a></dl>
+<a href="#7.11">
+<dt><dd>7.11	 Arithmetic Operators
+</a><dl>
+<a href="#7.11.1">
+<dt><dd>7.11.1	 Multiplicative Operators	
+<a href="#7.11.2">
+<dt><dd>7.11.2	 Additive Operators	
+</a></dl>
+<a href="#7.12">
+<dt><dd>7.12	 Relational Operators	
+<a href="#7.13">
+<dt><dd>7.13	 Equality Operator
+<a href="#7.14">
+<dt><dd>7.14	 Assignment Operator
+<a href="#7.15">
+<dt><dd>7.15	 Input Operator  
+</a><a href="#7.16">
+<dt><dd>7.16	 Operator Invocation Expressions
+</a><a href="#7.17">
+<dt><dd>7.17	 Expression	  
+</a><a href="#7.18">
+<dt><dd>7.18	 Run-Time Errors	  
+</a></dl>
+
+<a href="http://www.cs.unh.edu/~cs712/maTe/grammar.y"><h2>8 LALR(1) Grammar (yacc file)</h2>
+</a>
+
+</font>
+
+<hr>
+
+
+
+<p><strong id="1">
+
+CHAPTER 1 </strong></p>
+
+
+
+<h1>Lexical Structure</h1>
+
+
+
+<hr>
+
+
+
+<p>
+
+This chapter specifies the structure of the language.
+
+</p>
+
+
+
+<p>
+
+Programs are written in <em>ASCII</em> characters. Line terminators
+are defined (<a href="#1.1">1.1</a>) to support the different
+conventions of existing host systems while maintaining consistent line
+numbers.
+
+</p>
+
+
+
+<p>
+
+The ASCII characters are reduced to a sequence of <em>input
+elements</em> (<a href="#1.2">1.2</a>), which are <em>white
+space</em> (<a href="#1.3">1.3</a>), <em>comments</em> (<a
+href="#1.4">1.4</a>), and <em>tokens</em>. The tokens are the
+<em>identifiers</em> (<a href="#1.5">1.5</a>), <em>keywords</em> (<a
+href="#1.6">1.6</a>), <em>literals</em> (<a href="#1.7">1.7</a>),
+<em>separators</em> (<a href="#1.8">1.8</a>), and <em>operators</em>
+(<a href="#1.9">1.9</a>) of the syntactic grammar.
+
+</p>
+
+
+
+<h2 id="1.1">1.1    Line Terminators</h2>
+
+
+
+<p>
+
+Implementation divides the sequence of ASCII characters into lines by
+recognizing <em>line terminators</em>. (This definition of lines
+determines the line numbers produced). It also specifies the
+termination of the <b><code>//</code></b> form of a comment.
+
+</p>
+
+
+
+<pre id="indent">
+
+<i>
+
+LineTerminator:
+
+    <code>the ASCII LF character, also known as &quot;newline&quot;</code>
+
+    <code>the ASCII CR character, also known as &quot;return&quot;</code>
+
+    <code>the ASCII CR character followed by the ASCII LF character</code>
+
+	
+
+InputCharacter:
+
+    ASCIICharacter <code>but not CR or LF</code>
+
+</i>
+
+</pre>
+
+
+
+<p>
+
+Lines are terminated by the ASCII characters <code>CR</code>, or
+<code>LF</code>, or <code>CR LF</code>. The two characters
+<code>CR</code> immediately followed by <code>LF</code> are counted as
+one line terminator, not two.
+
+</p>
+
+
+
+<p>
+
+The result is a sequence of line terminators and input characters,
+which are the terminal symbols for the third step in the tokenization
+process.
+
+</p>
+
+
+
+<h2 id="1.2">1.2    Input Elements and Tokens</h2>
+
+
+
+<p>
+
+The input characters and line terminators are reduced to a sequence of
+<em>input elements</em>. Those input elements that are not white space
+(<a href="#1.3">1.3</a>) or comments (<a href="#1.4">1.4</a>) are
+<em>tokens</em>.
+
+</p>
+
+
+
+<p>
+
+This process is specified by the following productions:
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+Input:
+
+    InputElements<sub>opt</sub>
+
+
+
+InputElements:
+
+    InputElement InputElements
+
+    InputElement
+
+
+
+InputElement:
+
+    WhiteSpace
+
+    Comment
+
+    Token
+
+
+
+Token:
+
+    Identifier
+
+    Keyword
+
+    Literal
+
+    Separator
+
+    Operator
+
+</i>
+
+</pre>
+
+
+
+<h2 id="1.3">1.3    White Space</h2>
+
+
+
+<p>
+
+<em>White space</em> is defined as the ASCII space, horizontal tab,
+and form feed characters, as well as line terminators.
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+WhiteSpace:
+
+    <code>the ASCII SP character, also known as &quot;space&quot;</code>
+
+    <code>the ASCII HT character, also known as &quot;horizontal tab&quot;</code>
+
+    <code>the ASCII FF character, also known as &quot;form feed&quot;</code>
+
+    LineTerminator
+
+</i>
+
+</pre>
+
+
+
+<h2 id="1.4">1.4    Comments</h2>
+
+
+
+<p>
+
+The <em>comment</em> can be of the following form.
+
+</p>
+
+
+
+<pre class="indent">
+
+<code>
+
+// text
+
+</code>
+
+</pre>
+
+
+
+<p>
+
+All the text from the ASCII // characters to the LineTerminator will
+be ignored.
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+EndOfLineComment:
+
+    <code>/ /</code> CharactersInLine<sub>opt</sub> LineTerminator
+
+
+
+CharactersInLine:
+
+    InputCharacter
+
+    CharactersInLine InputCharacter
+
+</i>
+
+</pre>
+
+
+
+
+
+<h2 id="1.5">1.5    Identifiers</h2>
+
+
+
+<p>
+
+An <em>identifier</em> is an unlimited-length sequence of letters and
+digits, the first of which must be a letter. An identifier cannot have
+the same spelling (ASCII character sequence) as a keyword (<a
+href="#1.6">1.6</a>), the null literal (<a href="#1.7.2">1.7.2</a>),
+the tab string literal, or the newline string literal
+(<a href="#1.7.3">1.7.3</a>).
+
+</p>
+
+
+
+
+
+
+
+<pre class="indent">
+
+<i>
+
+Identifier:
+
+    IdentifierChars <code>but not</code> a Keyword or NullLiteral
+
+
+
+IdentifierChars:
+
+    Letter
+
+    IdentifierChars LetterOrDigit
+
+
+
+Letter:
+
+    <code>any ASCII character that is a letter (see below)</code>
+
+
+
+LetterOrDigit:
+
+    <code>any ASCII character that is a letter or digit (see below)</code>
+
+</i>
+
+</pre>
+
+
+
+
+
+
+
+<p>
+
+The letters include uppercase and lowercase ASCII Latin letters A-Z
+(0x41-0x5a), and a-z (0x61-0x7a), and the ASCII underscore (_, or
+0x5f). The digits include the ASCII digits 0-9 (0x30-0x39).
+
+</p>
+
+
+
+<p>
+
+Two identifiers are the same only if they are identical, that is, have
+the same ASCII character for each letter or digit.
+
+</p>
+
+
+
+<h2 id="1.6">1.6    Keywords</h2>
+
+
+
+<p>
+
+The following character sequences, formed from ASCII letters, are
+reserved for use as <em>keywords</em> and cannot be used as
+identifiers.
+
+<p>
+
+
+
+<pre class="indent">
+
+<i>
+
+Keyword: <code>one of
+
+    break
+
+    class 
+
+    continue
+
+    else
+
+    extends
+
+    if
+
+    in
+
+    instanceof
+
+    main
+
+    new
+
+    newline
+ 
+    null
+
+    out
+
+    operator
+
+    return
+
+    super
+
+    tab
+
+    this
+
+    while
+
+</code>
+
+</i>
+
+</pre>
+
+
+
+<h2 id="1.7">1.7    Literals</h2>
+
+
+
+<p>
+
+A <em>literal</em> is the source code representation of a value of an
+Integer, String or a null type.
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+Literal: 
+
+    IntegerLiteral
+
+    NullLiteral
+
+    StringLiteral
+
+</i>
+
+</pre>
+
+
+
+<h3 id="1.7.1">1.7.1    Integer Literals</h3>
+
+
+
+<p>
+
+An <em>integer literal</em> should be expressed in decimal (base 10).
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+IntegerLiteral:
+
+    DecimalNumeral
+
+</i>
+
+</pre>
+
+
+
+<p>
+
+A <em>decimal numeral</em> consists of an ASCII digit from 0 to 9,
+optionally followed by one or more ASCII digits from 0 to 9,
+representing a positive integer.
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+DecimalNumeral:
+
+    Digits
+
+
+
+Digits:
+
+    Digit
+
+    Digits Digit
+
+
+
+Digit: <code>one of</code>
+
+    <code>0 1 2 3 4 5 6 7 8 9</code>
+
+</i>
+
+</pre>
+
+
+
+<p>
+
+An integer literal is of type <code>Integer</code> (<a
+href="#2.3.3">2.3.3</a>).
+
+</p>
+
+
+
+<p>
+
+The largest decimal literal is <em>2147483648</em>
+(2<sup>31</sup>). All decimal literals from 0 to 2147483647 may appear
+anywhere an integer literal may appear, but the literal 2147483648 may
+appear only as the operand of the unary negation operator
+"<code>-</code>" .
+
+</p>
+
+
+
+<p>
+
+A compile-time error occurs if a decimal literal is larger than
+2147483648 (2<sup>31</sup>), or if the literal 2147483648 appears
+anywhere other than as the operand of the unary "<code>-</code>"
+operator.
+
+</p>
+
+
+<p>
+
+An integer literal is mapped by the compiler to a class instance
+creation expression which generates a new Integer object whose value
+is the value of the integer literal parsed as a signed decimal integer
+(base 10).  The value of the class instance creation expression is a
+reference to the Integer instance which was created.
+
+</p>
+
+
+<h3 id="1.7.2">1.7.2    Null Literal</h3>
+
+
+
+<p>
+
+The <em>null type</em> has one value, the null reference, represented
+by the literal null, which is formed from ASCII characters.
+A null literal has null type (<a href="#2.1">2.1</a>).
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+NullLiteral:
+
+    <code>null</code>
+
+</i>
+
+</pre>
+
+<h3 id="1.7.3">1.7.3    String Literal</h3>
+
+<p>
+A string literal is of type <code>String</code>.
+</p>
+
+<pre class="indent">
+
+<i>
+StringLiteral:
+
+    " StringCharacters "
+    WhitespaceStringLiteral
+
+WhitespaceStringLiteral:
+    newline
+    tab
+
+StringCharacters:
+
+    StringCharacters
+    ASCIICharacter but not " (double quote), CR, LF or tab    
+
+</i>
+</pre>
+
+<p>
+
+A string literal is mapped by the compiler to a class instance
+creation expression which generates a new String object.  For the
+quote-delimited string literal, the characters of the new
+String object will be all characters contained within the double
+quotes.  For the newline string literal, the characters
+will be a single newline character.  For the tab string literal,
+the characters will be a single tab character.  The value
+of the class instance creation expression is a reference to the String
+instance which was created.
+A string literal is of type <code>String</code>
+(<a href="#2.3.4">2.3.4</a>).
+
+</p>
+
+<h2 id="1.8">1.8     Separators</h2>
+
+<p>
+
+The following nine ASCII characters are the <em>separators</em>
+(punctuators):
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+Separator: <code>one of</code>
+
+    <code>(    )    {    }    ;    ,    .    </code>
+
+</i>
+
+</pre>
+
+
+
+
+
+<h2 id="1.9">1.9    Operators</h2>
+
+
+
+<p>
+
+The following 9 tokens are the <em>operators</em>, formed from ASCII
+characters:
+
+</p>
+
+
+
+<pre class="indent">
+
+<code>
+
+Operator:
+
+    =
+
+    ==
+
+    new
+
+    UserDefinedOperator
+
+UserDefinedOperator:
+
+    UnaryOperator
+    BinaryOperator
+    MinusOperator
+
+UnaryOperator:
+
+    !
+
+BinaryOperator:
+
+    +
+    *
+    /
+    >
+    <
+
+MinusOperator:
+
+    -
+
+</code>
+
+</pre>
+
+<p>
+
+Only <code>UserDefinedOperator</code> operators may be used in class
+operator declarations (<a href="#5.6">5.6</a>).
+
+</p>
+
+
+<hr>
+
+<table border="0" width="100%">
+
+<tr>
+
+<table border="0" width="100%">
+
+<tbody><tr>
+
+
+
+
+<p><strong id="2">
+
+CHAPTER 2 </strong></p>
+
+
+
+<h1>Types, Values, and Variables</h1>
+
+<hr>
+
+<p> The maTe programming language is a <em>strongly typed</em>
+language, which means that every variable and every expression has a
+type that is known at compile time. Types limit the values that a
+variable can hold or that an expression can produce, limit the
+operations supported on those values, and determine the meaning of the
+operations. Strong typing helps detect errors at compile time. </p>
+
+<p> The maTe programming language is a pure object-oriented language.
+All types are classes.  Class types are divided into two categories:
+predefined types and user-defined types. There are four predefined
+types: the object type <code>Object</code>, the integer type
+<code>Integer</code>, the table type <code>Table</code> and the string
+type <code>String</code>.  User-defined class types are subclasses of
+one of the predefined types.  There is also a special null type. An
+object is a dynamically created instance of a class type. The values
+of a class type are references to objects. All objects support the
+methods of class <code>Object</code>. Names of types are used in
+declarations, class instance creation expressions, and cast operators.
+</p>
+
+<p> A variable is a storage location. A variable of a class type
+<i>T</i> can hold a null reference or a reference to an instance of
+class <i>T</i> or of any class that is a subclass of <i>T</i>. A
+variable of type <code>Object</code> can hold a null reference or a
+reference to any object.  </p>
+
+<h2 id="2.1">2.1    The Kinds of Types and Values</h2>
+
+
+
+<p>
+
+There are two kinds of <em>types</em> in the maTe programming
+language: predefined types and user-defined types.  maTe being a pure
+object-oriented programming language, there is only one kind of data
+value that can be stored in variables, passed as arguments, returned
+by methods, and operated on: class object references.
+
+</p>
+
+<pre class="indent"><i>
+
+Type:
+
+    ReferenceType
+
+</i>
+
+</pre>
+
+<p> There is also a special <em>null type</em>, the type of the
+expression <code>null</code>, which has no name. Because the null type
+has no name, it is impossible to declare a variable of the null
+type. The null reference is the only possible value of an expression
+of null type. The null reference can always be converted to any
+reference type. In practice, the programmer can ignore the null type
+and just pretend that <code>null</code> is merely a special literal
+that can be of any reference type.  </p>
+
+
+
+<h2 id="2.2">2.2    Predefined Types and Values</h2>
+
+
+
+<p>
+
+A <em>predefined type</em> is predefined by the maTe programming
+language and named by its reserved keyword.  There are four of these:
+
+</p>
+
+
+
+<pre class="indent"><i>PredefinedType:</i>
+
+    <code>Object
+
+    Integer
+
+    Table
+
+    String
+
+    </code>
+
+</pre>
+
+<p> User-defined types are subclasses of at least one of these types.
+</p>
+
+<h2 id="2.3">2.3    Reference Types and Values</h2>
+
+<p>
+
+There is one kind of <em>reference type</em>: class types.
+
+</p>
+
+
+
+<pre class="indent"><i>
+
+ReferenceType:
+
+    ClassType
+
+ClassType:
+
+    TypeName
+
+</i>
+
+</pre>
+
+
+
+<p>
+
+The sample code:
+
+</p>
+
+
+
+<pre class="indent">class Point { Integer metrics; }
+
+</pre>
+
+
+
+<p>
+
+declares a class type <code>Point</code>, and uses an
+<code>Integer</code> to declare the field <code>metrics</code> of the
+class <code>Point</code>.
+
+</p>
+
+
+
+<h3 id="2.3.1">2.3.1    Objects</h3>
+
+
+
+<p>
+
+An <em>object</em> is a <em>class</em> <em>instance</em>.
+
+</p>
+
+
+
+<p>
+
+The reference values (often just <em>references</em>) may be
+<em>pointers </em>to these objects, or a special null reference, which
+refers to no object.
+
+</p>
+
+
+
+<p> A class instance is explicitly created by a class instance
+creation expression. </p>
+
+<p>
+
+The operators on references to objects are:
+
+</p>
+
+
+
+<ul>
+
+<li>Field access, using either a qualified name or a field access expression
+
+</li><li>Method invocation
+
+</li><li>The reference equality operator <code>==</code>
+
+</li></ul>
+
+
+
+<p> There may be many references to the same object. Most objects have
+a state, stored in the fields of objects that are instances of
+classes. If two variables contain references to the same object, the
+state of the object can be modified using one variable's reference to
+the object, and then the altered state can be observed through the
+reference in the other variable. </p>
+
+<h3 id="2.3.2">2.3.2    The Class Object</h3>
+
+<p>
+
+The class <code>Object</code> is a superclass of all other classes. A
+variable of type <code>Object</code> can hold a reference to any
+object. All classes inherit the methods of class <code>Object</code>,
+which are summarized here:
+
+</p>
+
+<pre class="indent">
+
+Integer equals(Object obj) { . . . }
+Integer hashCode() { . . . }
+String  toString() { . . . }
+
+</pre>
+
+<p>
+
+The <code>equals</code> method defined by class <code>Object</code>
+returns a new <code>Integer</code> object whose value is 1 if the two
+references refer to the same object and 0 otherwise. This method can
+be overridden in subclasses to define a notion of object equality,
+which is based on value, not reference, comparison.
+
+</p>
+
+<p>
+
+The <code>hashCode</code> method defined by class <code>Object</code>
+returns a new <code>Integer</code> object whose value is computed from
+the <code>Object</code> reference which invoked the method.  This
+method can be overridden in subclasses to define a sensible hashing
+algorithm for the class.
+
+</p>
+
+<p>
+
+The <code>toString</code> method defined by class <code>Object</code>
+returns a new <code>String</code> object whose characters will be
+"Object".  This method can be overridden in subclasses to define an
+output format for the class.
+
+</p>
+
+<p>
+
+The <code>Object</code> class defines a constructor:
+
+<pre class="indent">
+
+Object() { }
+
+</pre>
+
+<p>
+
+Note that the body of the constructor is empty. Since
+<code>Object</code> is the primordial class and has no superclass,
+there is no call, either implicit or explicit, to the superclass
+constructor.
+
+</p>
+
+<h3 id="2.3.3">2.3.3    The Class Integer</h3>
+
+<p>
+
+The class <code>Integer</code> is a subclass of the class
+<code>Object</code>.  A variable of type <code>Integer</code> can hold
+a reference to any <code>Integer</code> object or a reference to any
+object whose class type is a descendant of <code>Integer</code>.
+
+</p>
+
+<p>
+
+An <code>Integer</code> object holds a single integer value.  The
+smallest legal value is -2147483648 and the largest is 2147483647.
+Overflow is not viewed as an error for methods defined by class
+<code>Integer</code>.
+
+</p>
+
+<p>
+
+All classes which extend <code>Integer</code> inherit all of the
+methods of <code>Integer</code>, which are summarized here:
+
+</p>
+
+<pre class="indent">
+
+Integer equals(Object obj) { . . . }
+Integer hashCode() { . . . }
+String  toString() { . . . }
+Integer add(Integer i) { . . . }
+Integer subtract(Integer i) { . . . }
+Integer multiply(Integer i) { . . . }
+Integer divide(Integer i) { . . . }
+Integer greaterThan(Integer i) { . . . }
+Integer lessThan(Integer i) { . . . }
+Integer not() { . . . }
+Integer minus() { . . . }
+Integer operator + (Integer i) { . . . }
+Integer operator - (Integer i) { . . . }
+Integer operator * (Integer i) { . . . }
+Integer operator / (Integer i) { . . . }
+Integer operator > (Integer i) { . . . }
+Integer operator < (Integer i) { . . . }
+Integer operator ! () { . . . }
+Integer operator - () { . . . }
+
+</pre>
+
+<p>
+
+The <code>equals</code> method defined by class <code>Integer</code>
+returns a new <code>Integer</code> object whose value is either 0 or
+1.  The value is 1 if and only if <i>obj</i> is convertible by casting
+conversion (<a href="#3.4">3.4</a>) to <code>Integer</code> and the
+value of the <code>Integer</code> reference that invoked the method is
+equal to the value of <i>obj</i>.
+
+</p>
+
+<p>
+
+The <code>hashCode</code> method defined by class <code>Integer</code>
+returns a new <code>Integer</code> object whose value is the value of
+the <code>Integer</code> reference which invoked the method.
+
+</p>
+
+<p>
+
+The <code>toString</code> method defined by class <code>Integer</code>
+returns a new <code>String</code> object whose characters are the
+string representation of the <code>Integer</code> reference which
+invoked the method's value in base 10 using signed decimal
+representation.
+
+</p>
+
+<p>
+
+The <code>add</code> method defined by class <code>Integer</code>
+returns a new <code>Integer</code> object whose value is the value of
+<i>i</i> added to the value of the <code>Integer</code> reference
+which invoked the method.  The value of the <code>Integer</code>
+reference which invoked the method will be unchanged.
+
+</p>
+
+<p>
+
+The <code>operator +</code> method defined by class
+<code>Integer</code> is completely similar to the method
+<code>add</code>.  If <i>s</i> and <i>t</i> are <code>Integer</code>
+references, an invocation of <i>s + t</i> will have all the same
+effects as an invocation of <i>s.add(t)</i>.
+
+</p>
+
+<p>
+
+The <code>subtract</code> method defined by class <code>Integer</code>
+returns a new <code>Integer</code> object whose value is the value of
+<i>i</i> subtracted from the value of the <code>Integer</code>
+reference which invoked the method.  The value of the
+<code>Integer</code> reference which invoked the method will be
+unchanged.
+
+</p>
+
+<p>
+
+The <code>operator -</code> method defined by class
+<code>Integer</code> is completely similar to the method
+<code>subtract</code>.  If <i>s</i> and <i>t</i> are
+<code>Integer</code> references, an invocation of <i>s - t</i> will
+have all the same effects as an invocation of <i>s.subtract(t)</i>.
+
+</p>
+
+<p>
+
+The <code>multiply</code> method defined by class <code>Integer</code>
+returns a new <code>Integer</code> object whose value is the value of
+<i>i</i> multiplied by the value of the <code>Integer</code> reference
+which invoked the method.  The value of the <code>Integer</code>
+reference which invoked the method will be unchanged.
+
+</p>
+
+<p>
+
+The <code>operator *</code> method defined by class
+<code>Integer</code> is completely similar to the method
+<code>multiply</code>.  If <i>s</i> and <i>t</i> are
+<code>Integer</code> references, an invocation of <i>s * t</i> will
+have all the same effects as an invocation of <i>s.multiply(t)</i>.
+
+</p>
+
+<p>
+
+The <code>divide</code> method defined by class <code>Integer</code>
+returns a new <code>Integer</code> object whose value is the value of
+the <code>Integer</code> reference which invoked the method divided by
+the value of <i>i</i>.  The value of the <code>Integer</code>
+reference which invoked the method will be unchanged.
+
+</p>
+
+<p>
+
+The following run-time errors must be detected for the
+<code>divide</code> method:
+
+</p>
+
+<p>
+
+<ul>
+  
+<li>
+
+Invoking the divide method in which the value of <i>i</i> is 0.
+
+</li>
+
+</ul>
+
+</p>
+
+<p>
+
+For all detected run-time errors, the action is to terminate the
+program with an error message.
+
+</p>
+
+<p>
+
+The <code>operator /</code> method defined by class
+<code>Integer</code> is completely similar to the method
+<code>divide</code>.  If <i>s</i> and <i>t</i> are
+<code>Integer</code> references, an invocation of <i>s / t</i> will
+have all the same effects as an invocation of <i>s.divide(t)</i>.
+
+</p>
+
+<p>
+
+The <code>lessThan</code> method defined by class <code>Integer</code>
+returns a new <code>Integer</code> object whose value is either 0 or
+1.  The value is 1 if and only if the value of the
+<code>Integer</code> reference that invoked the method is less than
+the value of <i>i</i>.
+
+</p>
+
+<p>
+
+The <code>operator <</code> method defined by class
+<code>Integer</code> is completely similar to the method
+<code>lessThan</code>.  If <i>s</i> and <i>t</i> are
+<code>Integer</code> references, an invocation of <i>s < t</i> will
+have all the same effects as an invocation of <i>s.lessThan(t)</i>.
+
+</p>
+
+<p>
+
+The <code>greaterThan</code> method defined by class
+<code>Integer</code> returns a new <code>Integer</code> object whose
+value is either 0 or 1.  The value is 1 if and only if the value of
+the <code>Integer</code> reference that invoked the method is greater
+than the value of <i>i</i>.
+
+</p>
+
+<p>
+
+The <code>operator ></code> method defined by class
+<code>Integer</code> is completely similar to the method
+<code>greaterThan</code>.  If <i>s</i> and <i>t</i> are
+<code>Integer</code> references, an invocation of <i>s > t</i> will
+have all the same effects as an invocation of <i>s.greaterThan(t)</i>.
+
+</p>
+
+<p>
+
+The <code>not</code> method defined by class <code>Integer</code>
+returns a new <code>Integer</code> object whose value is either 0 or
+1.  The value is 1 if and only if the value of the
+<code>Integer</code> reference that invoked the method is 0.  The
+value of the <code>Integer</code> reference which invoked the method
+will be unchaged.
+
+</p>
+
+<p>
+
+The <code>operator !</code> method defined by class
+<code>Integer</code> is completely similar to the method not.  If
+<i>s</i> is an <code>Integer</code> reference, an invocation of
+<i>!s</i> will have all the same effects as an invocation of
+<i>s.not()</i>.
+
+</p>
+
+<p>
+
+The <code>minus</code> method defined by class <code>Integer</code>
+returns a new <code>Integer</code> object whose value is the
+arithmetic negation of the value of the <code>Integer</code> reference
+which invoked the method.  The value of the <code>Integer</code>
+reference which invoked the method will be unchanged.
+
+</p>
+
+<p>
+
+The <code>operator -</code> method (invoked with no arguments) defined
+by class <code>Integer</code> is completely similar to the method
+<code>minus</code>.  If <i>s</i> is an <code>Integer</code> reference,
+an invocation of <i>-s</i> will have all the same effects as an
+invocation of <i>s.minus()</i>.
+
+</p>
+
+<p>
+
+The <code>Integer</code> class defines the following constructors:
+
+</p>
+
+<pre class="indent">
+
+Integer()
+
+</pre>
+
+<p>
+
+This constructor defined by class <code>Integer</code> creates a new
+<code>Integer</code> object whose value is 0.
+
+</p>
+
+<pre class="indent">
+
+Integer(Integer i)
+
+</pre>
+
+<p>
+
+This constructor defined by class <code>Integer</code> creates a new
+<code>Integer</code> object whose value is the same as the value of
+<i>i</i>.
+
+</p>
+
+
+<h3 id="2.3.4">2.3.4    The Class String</h3>
+
+<p>
+
+The class <code>String</code> is a subclass of the class
+<code>Object</code>.  A variable of type <code>String</code> can hold
+a reference to any <code>String</code> object or a reference to any
+object whose class type is a descendant of <code>String</code>.
+
+</p>
+
+<p>
+
+A <code>String</code> object contains an array of ASCII characters.
+<code>String</code> objects are static in that their characters cannot
+be modified once instantiated, nor can their size change (characters
+cannot be added or removed).
+
+</p>
+
+<p>
+
+All classes which extend <code>String</code> inherit all of the
+methods of <code>String</code>, which are summarized here:
+
+</p>
+
+<pre class="indent">
+
+Integer equals(Object obj) { . . . }
+Integer hashCode() { . . . }
+String  toString() { . . . }
+Integer length() { . . . }
+String  substr(Integer beg, Integer end) { . . . }
+String  concat(String s) { . . . }
+Integer toInteger() { . . . }
+String  operator + (String s) { . . . }
+Integer operator > (String s) { . . . }
+Integer operator < (String s) { . . . }
+
+</pre>
+
+<p>
+
+The <code>equals</code> method defined by class <code>String</code>
+returns a new <code>Integer</code> object whose value will be either 0
+or 1.  The value will be 1 if and only if <i>obj</i> is convertible by
+casting conversion (<a href="#3.4">3.4</a>) to <code>String</code>
+and the characters of the <code>String</code> reference that invoked
+the method are lexicographically equal to the characters of the
+<code>String</code> reference <i>obj</i>.
+
+</p>
+
+<p>
+
+The <code>hashCode</code> method defined by class <code>String</code>
+returns a new <code>Integer</code> object whose value is the summation
+of the ASCII values of all characters in the <code>String</code>
+reference which invoked the method.
+
+</p>
+
+<p>
+
+The <code>toString</code> method defined by class <code>String</code>
+returns a new <code>String</code> object whose characters will be the
+same characters as the <code>String</code> reference which invoked the
+method.
+
+</p>
+
+<p>
+
+The <code>length</code> method defined by class <code>String</code>
+returns a new <code>Integer</code> object whose value is the number of
+characters in the <code>String</code> reference which invoked the
+method.
+
+</p>
+
+<p>
+
+The <code>substr</code> method defined by class <code>String</code>
+returns a new <code>String</code> object whose value is the characters
+whose indices are defined between the range of <i>beg</i> to
+<i>end</i>, inclusive.  Indices of a <code>String</code> object are
+assigned in the following manner: the first character of a
+<code>String</code> object is assigned index 0, the second character
+is assigned index 1, the third character is assigned index 2, and so
+on.  The characters of the new <code>String</code> object will be in
+the same order as those in the <code>String</code> reference which
+invoked the method.  The minimum legal index for a <code>String</code>
+reference is 0.  The maximum legal index for a <code>String</code>
+reference is the number of characters it contains minus 1.  Thus,
+legal indices for a <code>String</code> reference containing 5
+characters would range from 0 to 4.  A <code>String</code> reference
+containing 0 characters has no legal indices.
+
+</p>
+
+<p>
+
+The following run-time errors must be detected for the
+<code>substr</code> method:
+
+</p>
+
+<ul>
+
+<li>
+  
+Invoking the <code>substr</code> method on a <code>String</code>
+reference containing 0 characters.
+  
+</li>
+
+<li>
+
+Invoking the <code>substr</code> method in which the <i>beg</i> or
+<i>end</i> indices are not legal indices (see above).
+
+</li>
+
+<li>
+
+An invocation of the <code>substr</code> method in which <i>end</i> is
+smaller than <i>beg</i>.
+
+</li>
+
+</ul>
+
+<p>
+
+For all detected run-time errors, the action is to terminate the
+program with an error message.
+
+</p>
+
+<p>
+
+The <code>concat</code> method defined by class <code>String</code>
+returns a new <code>String</code> object whose value is the characters
+of <code>String</code> <i>s</i> appended to the characters in the
+<code>String</code> reference which invoked the method.
+
+</p>
+
+<p>
+
+The <code>toInteger</code> method defined by class <code>String</code>
+returns a new <code>Integer</code> object whose value is the decimal
+value obtained by parsing the characters of the <code>String</code>
+reference which invoked the method as a signed decimal integer.
+
+</p>
+
+<p>
+
+The following run-time errors must be detected for the
+<code>toInteger</code> method:
+
+</p>
+
+<ul>
+
+<li>
+  
+Invoking the <code>toInteger</code> method on a <code>String</code>
+reference that contains characters other than the ASCII characters
+'0', '1', '2', '3', '4', '5', '6', '7', '8', or '9'.  An ASCII minus
+sign '-' is the exception, but only if it is the first character
+(index 0).
+
+</li>
+
+<li>
+  
+Invoking the <code>toInteger</code> method on a <code>String</code>
+reference whose parsed integer value is less than -2147483648 or
+greater than 2147483647.
+
+</li>
+
+
+</ul>
+
+<p>
+
+For all detected run-time errors, the action is to terminate the
+program with an error message.
+
+</p>
+
+<p>
+
+The <code>operator +</code> method defined by class
+<code>String</code> is completely similar to the method
+<code>concat</code>.  If <i>s</i> and <i>t</i> are <code>String</code>
+references, an invocation of <i>s + t</i> will have all the same
+effects as an invocation of <i>s.concat(t)</i>.
+
+</p>
+
+<p>
+
+The <code>operator ></code> method defined by class
+<code>String</code> returns a new <code>Integer</code> object whose
+value will be either 0 or 1.  The value will be 1 if and only if the
+characters of the <code>String</code> reference <i>s</i>
+lexicographically precede the characters of the <code>String</code>
+reference that invoked the method.
+
+</p>
+
+<p>
+
+The <code>operator <</code> method defined by class
+<code>String</code> returns a new <code>Integer</code> object whose
+value will be either 0 or 1.  The value will be 1 if and only if the
+characters of the <code>String</code> reference that invoked the
+method lexicographically precede the characters of the
+<code>String</code> reference <i>s</i>.
+
+</p>
+
+<p>
+
+The <code>String</code> class defines the following constructor:
+
+</p>
+
+<pre class="indent">
+
+String(String s)
+
+</pre>
+
+<p>
+
+This constructor defined by class <code>String</code> creates a new
+<code>String</code> object whose characters are the same as the characters in
+<i>s</i>.
+
+</p>
+
+<h3 id="2.3.5">2.3.5    The Class Table</h3>
+
+<p>
+
+The class <code>Table</code> is a subclass of the class
+<code>Object</code>.  A variable of type <code>Table</code> can hold a
+reference to any <code>Table</code> object or a reference to any
+object whose class type is a descendant of <code>Table</code>.
+
+</p>
+
+<p>
+
+A <code>Table</code> object is an implementation of a hash map.  The
+number of buckets in a <code>Table</code> object is known as its
+capacity.  A <code>Table</code> object's initial capacity is set at
+the time it is constructed.  A <code>Table</code> object's load factor
+is a measure of how full the <code>Table</code> is allowed to get
+before its capacity is automatically increased.  When the number of
+entries in a <code>Table</code> exceeds the product of the load factor
+and the current capacity, the capacity is roughly doubled and the
+<code>hashCode</code> method is called on all entries in the
+<code>Table</code> to determine their new bucket placement with the
+new capacity.
+
+</p>
+
+<p>
+
+Each entry in a bucket is a key/value pair.  Thus each entry in a
+<code>Table</code> object will contain a key reference and a value
+reference.  Each bucket of a <code>Table</code> object can hold any
+number of entries.  The first bucket is known as bucket 0, the second
+bucket is bucket 1, the third bucket is bucket 2, and so on.  Bucket n
+is the bucket an entry will be placed in if its key's hash value is n.
+The hash value for a key is computed by invoking the
+<code>hashCode</code> method on the key then taking modulo n of that
+number, where n is the current capacity of the <code>Table</code>
+reference.
+
+</p>
+
+<p>
+
+A <code>Table</code> reference can be iterated over using the
+<code>firstKey</code> and <code>nextKey</code> methods.  The
+<code>Table</code> iterator is fail-fast.  This means that if an entry
+is added to or removed from the <code>Table</code> after the iterator
+has been initialized with a call to <code>firstKey</code> but before a
+call to <code>nextKey</code> causes it to reach the end of the
+<code>Table</code>, a run-time error occurs.
+
+</p>
+
+<p>
+
+All classes which extend <code>Table</code> inherit all of the methods
+of <code>Table</code>, which are summarized here:
+
+</p>
+
+<pre class="indent">
+
+Object  get(Object key) { . . . }
+Object  put(Object key, Object value) { . . . }
+Object  remove(Object key) { . . . }
+Integer firstKey() { . . . }
+Object  nextKey() { . . . }
+
+</pre>
+
+<p>
+
+The <code>get</code> method defined by class <code>Table</code>
+returns the value reference of the <code>Table</code> entry whose key
+reference is equal to <i>key</i>, or a null reference if no such entry
+exists.  To find this entry, inspect bucket n, where n is the hash
+value for <i>key</i> (computed using the <code>hashCode</code> method
+and the <code>Table</code>'s current capacity, see above).  Then, run
+the following search algorithm:
+
+</p>
+
+<ul>
+
+<li>  
+
+If the bucket is empty, return a null reference.
+
+</li>
+
+<li>
+
+Iterate over each entry in the bucket.
+
+</li>
+
+<ul>
+  
+<li>
+
+Invoke the <code>equals</code> method on <i>key</i> using the current
+entry's key reference as its argument.
+
+</li>
+
+<li>
+
+If the method invocation returns an <code>Integer</code> object with a
+value of 1, return the current entry's value reference.
+
+</li>
+
+</ul>
+
+</li>
+
+<li>
+
+Return a null reference.
+
+</ul>
+
+<p>
+
+The <code>put</code> method defined by class <code>Table</code>
+inserts a new entry into the <code>Table</code> reference which
+invoked the method, and returns the old value reference for <i>key</i>
+or a null reference if there was none.  To add a new entry, the hash
+value for <i>key</i> is first computed (using the
+<code>hashCode</code> method and the <code>Table</code>'s current
+capacity, see above).  Then, bucket n is inspected, where n is the
+computed hash value, using the following insertion algorithm:
+
+</p>
+
+<ul>
+
+<li>
+  
+If the bucket is empty, add a new entry to the bucket using <i>key</i>
+as the key reference and <i>value</i> as the value reference, then
+return a null reference.
+
+</li>
+
+<li>
+
+Iterate over each entry in the bucket.
+
+<ul>
+
+<li>
+
+Invoke the <code>equals</code> method on <i>key</i> using the current
+entry's key reference as its argument.
+
+</li>
+
+<li>
+
+If the method invocation returns an <code>Integer</code> object with a
+value of 1, remove the current entry from the bucket.  Add a new entry
+to the bucket using <i>key</i> as the key reference and <i>value</i>
+as the value reference, then return the value reference of the removed
+entry.
+
+</li>
+
+</ul>
+
+<li>
+
+Add a new entry to the bucket using <i>key</i> as the key reference
+and <i>value</i> as the value reference, then return a null reference.
+
+</li>
+
+</li>
+
+</ul>
+
+<p>
+
+The following run-time errors must be detected for the
+<code>put</code> method:
+
+</p>
+
+<ul>
+  
+Invoking the <code>put</code> method when the iterator of the
+<code>Table</code> reference which invoked the method has been
+initialized but has not reached the end of the <code>Table</code>.
+
+</ul>
+
+<p>
+
+For all detected run-time errors, the action is to terminate the
+program with an error message.
+
+</p>
+
+<p>
+
+The <code>remove</code> method defined by class <code>Table</code>
+removes the entry whose key reference is equal to <i>key</i> in the
+<code>Table</code> reference which invoked the method.  If an entry
+with a matching key reference is found, the value reference of the
+removed entry is returned.  Otherwise, the <code>remove</code> method
+returns a null reference.  To find the entry to remove, inspect bucket
+n, where n is the hash value for <i>key</i> (computed using the
+<code>hashCode</code> method and the <code>Table</code>'s current
+capacity, see above).  Then, run the following search algorithm:
+
+</p>
+
+<ul>
+
+<li>  
+
+If the bucket is empty, return a null reference.
+
+</li>
+
+<li>
+
+Iterate over each entry in the bucket.
+
+</li>
+
+<ul>
+  
+<li>
+
+Invoke the <code>equals</code> method on <i>key</i> using the current
+entry's key reference as its argument.
+
+</li>
+
+<li>
+
+If the method invocation returns an <code>Integer</code> object with a
+value of 1, remove the current entry and return its value reference.
+
+</li>
+
+</ul>
+
+</li>
+
+<li>
+
+Return a null reference.
+
+</ul>
+
+<p>
+
+The following run-time errors must be detected for the
+<code>remove</code> method:
+
+</p>
+
+<ul>
+  
+Invoking the <code>remove</code> method when the iterator of the
+<code>Table</code> reference which invoked the method has been
+initialized but has not reached the end of the <code>Table</code>.
+
+</ul>
+
+<p>
+
+For all detected run-time errors, the action is to terminate the
+program with an error message.
+
+</p>
+
+<p>
+
+The <code>firstKey</code> method defined by class <code>Table</code>
+initializes an iterator over the <code>Table</code> reference which
+invoked the method.  After invoking this method on a
+<code>Table</code> reference, the next invocation of
+<code>nextKey</code> will return the key reference of the first entry
+in the first non-empty bucket of that <code>Table</code> reference, or
+a null reference if none exist. If the first invocation of
+<code>nextKey</code> would return a null reference,
+<code>firstKey</code> returns a new <code>Integer</code> object with a
+value of 0, otherwise <code>firstKey</code> will return a new
+<code>Integer</code> object with a value of 1.
+
+</p>
+
+<p>
+
+The <code>nextKey</code> method defined by class <code>Table</code>
+advances the iterator and returns the key reference of the entry
+previously pointed to by the iterator of the <code>Table</code>
+reference which invoked the method.  Advancing the iterator is done as
+follows:
+
+</p>
+
+<ul>
+
+<li>
+  
+If there is an entry immediately after the pointer in the current
+bucket, advance the pointer to that entry.
+
+</li>
+
+<li>
+
+Otherwise, advance the pointer to the first entry in the next
+non-empty bucket after the current bucket.
+
+</li>
+
+<li>
+
+If the current bucket is the last bucket or no non-empty buckets exist
+after the current bucket, then the iterator has reached the end of the
+<code>Table</code>.
+
+</li>
+
+</ul>
+
+<p>
+
+All further calls to <code>nextKey</code> on a <code>Table</code>
+reference whose iterator has reached the end of the <code>Table</code>
+will return a null reference until the <code>firstKey</code> method is
+invoked again.
+
+</p>
+
+<p>
+
+The <code>Table</code> class defines the following constructors:
+
+</p>
+
+<pre class="indent">
+
+Table()
+
+</pre>
+
+<p>
+
+This constructor defined by class <code>Table</code> creates a new
+<code>Table</code> object whose initial capacity is 16.
+
+</p>
+
+<pre class="indent">
+
+Table(Integer n)
+
+</pre>
+
+<p>
+
+This constructor defined by class <code>Table</code> creates a new
+<code>Table</code> object whose initial capacity is the value of the
+<code>Integer</code> reference <i>n</i>.
+
+</p>
+
+<h3 id="2.3.6">2.3.6    When Reference Types Are the Same</h3>
+
+<p>
+
+Two reference types are the <em>same type</em> if:
+
+</p>
+
+
+
+<ul>
+
+<li>They are both class types and have the same name.
+
+</li></ul>
+
+<h2 id="2.4">2.4    Where Types Are Used</h2>
+
+
+
+<p>
+
+Types are used in declarations, in class instance creation expressions,
+
+and in cast operator expressions.
+
+</p>
+
+
+
+<h2 id="2.5">2.5    Variables</h2>
+
+
+
+<p>
+
+A variable is a storage location and has an associated type, sometimes
+called its <em>compile-time type</em>, that is, a reference type. A
+variable's value can be changed by an assignment and a variable may
+only be assigned a value that is assignment compatible with its type.
+
+</p>
+
+
+
+<p> Compatibility of the value of a variable with its type is
+guaranteed by the design of the maTe programming language. Otherwise,
+default values are compatible and all variable assignments are checked
+for assignment compatibility at compile time, run time, or both
+(reference types).
+
+</p>
+
+<h3 id="2.5.1">2.5.1    Variables of Reference Type</h3>
+
+
+
+<p>
+
+A variable of reference type can hold either of the following:
+
+</p>
+
+
+
+<ul>
+
+<li>A null reference
+
+</li><li>A reference to any object whose class is assignment
+compatible with the type of the variable
+
+</li></ul>
+
+
+
+<h3 id="2.5.2">2.5.2    Kinds of Variables</h3>
+
+
+
+<p>
+
+There are five kinds of variables:
+
+</p>
+
+
+
+<ol>
+
+<li>An <em>instance variable</em> is a field declared within a class
+declaration. If a class <i>T</i> has a field <i>a</i> that is an
+instance variable, then a new instance variable <i>a</i> is created
+and initialized to a default value as part of each newly created
+object of class <i>T</i> or of any class that is a subclass of
+<i>T</i>. The instance variable effectively ceases to exist when the
+object of which it is a field has been destroyed (deleted). </li>
+
+<li><em>Method parameters</em> name argument values passed to a
+method. For every parameter declared in a method declaration, a new
+parameter variable is created each time that method is invoked. The
+new variable is initialized with the corresponding argument value from
+the method invocation. The method parameter effectively ceases to
+exist when the execution of the body of the method is complete. </li>
+
+<li><em>Constructor parameters</em> name argument values passed to a
+constructor. For every parameter declared in a constructor
+declaration, a new parameter variable is created each time a class
+instance creation expression or explicit constructor invocation
+invokes that constructor. The new variable is initialized with the
+corresponding argument value from the creation expression or
+constructor invocation. The constructor parameter effectively ceases
+to exist when the execution of the body of the constructor is
+complete. </li>
+
+<li> <em>Local Variables</em> are declared by variable declaration
+statements within the main block or the body of a class constructor,
+method or operator.
+Declaration statements are supported at all block levels.
+A local variables become visible when flow of control reaches
+its declaration.
+A local variable effectively ceases to exist when execution leaves the
+block in which it is declared.</li></ol>
+
+<h3 id="2.5.3">2.5.3    Initial Values of Variables</h3>
+
+<p>
+
+Every variable in a program must have a value before its value is
+used:
+
+</p>
+
+<ul>
+
+<li>Each local variable, class variable or instance variable is
+initialized with a <em>default value</em> when it is created:
+
+<ul>
+
+<li>For all reference types, the default value is <code>null</code>.</li>
+
+</ul>
+
+</li><li>Each method parameter is initialized to the corresponding
+argument value provided by the invoker of the method.
+
+
+
+</li><li>Each constructor parameter is initialized to the
+corresponding argument value provided by a class instance creation
+expression or explicit constructor invocation.
+
+</li></ul>
+
+<h3 id="2.5.4">2.5.4    Types and Classes</h3>
+
+<p> In the maTe programming language, every variable and every
+expression has a type that can be determined at compile
+time. Reference types are introduced by type declarations, which
+include class declarations. </p>
+
+<p> Every object belongs to some particular class: the class that was
+mentioned in the creation expression that produced the object. This
+class is called the <em>class of the object</em>.  An object is said
+to be an instance of its class and of all superclasses of its
+class. </p>
+
+<p> Sometimes a variable or expression is said to have a "run-time
+type". This refers to the class of the object referred to by the value
+of the variable or expression at run time, assuming that the value is
+not <code>null</code>.  </p>
+
+<p> The compile time type of a variable is always declared, and the
+compile time type of an expression can be deduced at compile time. The
+compile time type limits the possible values that the variable can
+hold or the expression can produce at run time. If a run-time value is
+a reference that is not <code>null</code>, it refers to an object that
+has a class, and that class will necessarily be compatible with the
+compile-time type.  </p>
+
+<hr>
+
+<table border="0" width="100%">
+
+<tbody><tr>
+
+<table border="0" width="100%">
+<tbody><tr>
+
+<p><strong id="3">
+CHAPTER 3 </strong></p>
+
+<h1>Conversions</h1>
+
+<hr>
+
+<p> Every expression written in the maTe programming language has a type
+that can be deduced from the structure of the expression and the types
+of the literals, variables, and methods mentioned in the expression. It
+is possible, however, to write an expression in a context where the
+type of the expression is not appropriate. In some cases, this leads to
+an error at compile time. </p>
+
+<p> A specific conversion from type <i>S</i> to type <i>T</i> allows
+an expression of type <i>S</i> to be treated at compile time as if it
+had type <i>T</i> instead. In some cases this will require a
+corresponding action at run time to check the validity of the
+conversion.  </p>
+
+<p> For convenience of description, the specific conversions that are
+possible in the maTe programming language are grouped into several
+broad categories: </p>
+
+<ul>
+<li>Identity conversions 
+</li><li>Widening reference conversions 
+</li><li>Narrowing reference conversions 
+</li></ul>
+
+<p> There are three <em>conversion contexts</em> in which conversion
+of expressions may occur.  The term "conversion" is also used to
+describe the process of choosing a specific conversion for such a
+context. For example, we say that an expression that is an actual
+argument in a method invocation is subject to "method invocation
+conversion," meaning that a specific conversion will be implicitly
+chosen for that expression according to the rules for the method
+invocation argument context. </p>
+
+<p> This chapter first describes the three categories of conversions
+(<a href="#3.1">3.1</a>).  Then the three conversion contexts are
+described: </p>
+
+<ul>
+
+<li>Assignment conversion (<a href="#3.2">3.2</a>, <a
+href="#7.14">7.14</a>) converts the type of an expression to the type
+of a specified variable.  </li>
+
+<li>Method invocation conversion (<a href="#3.3">3.3</a>, <a
+href="#7.7">7.7</a>, <a href="#7.9">7.9</a>) is applied to each
+argument in a method or constructor invocation and performs the same
+conversions that assignment conversion does.  </li>
+
+<li>Casting conversion (<a href="#3.4">3.4</a>) converts the type of
+an expression to a type explicitly specified by a cast operator (<a
+href="#7.10.1">7.10.1</a>) or instanceof operator (<a
+href="#7.10.2">7.10.2</a>).  </li>
+
+</ul>
+
+<h2 id="3.1">3.1 Kinds of Conversion</h2>
+
+<p> Specific type conversions in the maTe programming language are
+divided into the following categories.  </p>
+
+<h3 id="3.1.1">3.1.1 Identity Conversions</h3>
+
+<p> A conversion from a type to that same type is permitted for any
+type.  </p>
+
+<p> This may seem trivial, but it does have practical consequences. It
+is always permitted for an expression to have the desired type to
+begin with, thus allowing the simply stated rule that every expression
+is subject to conversion, if only a trivial identity conversion. </p>
+
+<h3 id="3.1.2">3.1.2 Widening Reference Conversions</h3>
+
+<p> The following conversions are called the <em>widening reference
+conversions</em>: </p>
+
+<ul>
+
+<li>From any class type <i>S</i> to any class type <i>T</i>, provided
+that <i>S</i> is a subclass of <i>T</i>. (An important special case is
+that there is a widening conversion to the class type
+<code>Object</code> from any other class type.) </li>
+
+<li>From the <code>null</code> type to any class type. </li>
+
+</ul>
+
+<p> Such conversions never require a special action at run time. They
+consist simply in regarding a reference as having some other type in a
+manner that can be proved correct at compile time. </p>
+
+<p> See <a href="#5">5</a> for the detailed specifications for
+classes.  </p>
+
+<h3 id="3.1.3">3.1.3 Narrowing Reference Conversions</h3>
+
+<p> The following conversions are called the <em>narrowing reference
+conversions</em>: </p>
+
+<ul>
+
+<li>From any class type <i>S</i> to any class type <i>T</i>, provided
+that <i>S</i> is a superclass of <i>T</i>. (An important special case
+is that there is a narrowing conversion from the class type
+<code>Object</code> to any other class type.) </li>
+
+</ul>
+
+<p> Such conversions require a test at run time to find out whether the
+actual reference value is a legitimate value of the new type. </p>
+
+<h3 id="3.1.4">3.1.4 Forbidden Conversions</h3>
+
+<ul>
+
+<li>There is no permitted conversion to the <code>null</code> type
+other than the identity conversion. </li>
+
+<li>There is no permitted conversion from class type <i>S</i> to a
+different class type <i>T</i> if <i>S</i> is not a subclass of
+<i>T</i> and <i>T</i> is not a subclass of <i>S</i>. </li>
+
+</ul>
+
+<h2 id="3.2">3.2 Assignment Conversion</h2>
+
+<p> <em>Assignment conversion</em> occurs when the value of an
+expression is assigned (<a href="#7.14">7.14</a>) to a variable: the
+type of the expression must be converted to the type of the
+variable. Assignment contexts allow the use of an identity conversion
+(<a href="#3.1.1">3.1.1</a>) or a widening reference conversion (<a
+href="#3.1.2">3.1.2</a>). </p>
+
+<p> If the type of the expression cannot be converted to the type of
+the variable by a conversion permitted in an assignment context, then
+a compile-time error occurs. </p>
+
+<p> If the type of an expression can be converted to the type of a
+variable by assignment conversion, we say the expression (or its
+value) is <em>assignable</em> to the variable or, equivalently, that
+the type of the expression is <em>assignment compatible</em> with the
+type of the variable.  </p>
+
+<p> A value of the <code>null</code> type (the <code>null</code>
+reference is the only such value) may be assigned to any reference
+type, resulting in a <code>null</code> reference of that type.  </p>
+
+<p> Assignment of a value of compile-time reference type <i>S</i>
+(source) to a variable of compile-time reference type <i>T</i>
+(target) is checked as follows: </p>
+
+<ul>
+  
+<li>If <i>S</i> is a class type:
+
+<ul>
+<li>If <i>T</i> is a class type, then one of the following must be
+  true, otherwise a compile-time error occurs:
+<ul>
+<li><i>S</i> is the same class as <i>T</i>
+<li><i>S</i> is a subclass of <i>T</i>
+</ul>
+</li>
+</ul>
+
+</li>
+
+</ul>
+
+<p>
+See <a href="#5">5</a> for the specification of classes.
+</p>
+
+
+<h2 id="3.3">3.3 Method Invocation Conversion</h2>
+
+<p> <em>Method invocation conversion</em> is applied to each argument
+value in a method or constructor invocation (<a
+href="#7.7">7.7</a>, <a href="#7.9">7.9</a>): the type of the
+argument expression must be converted to the type of the corresponding
+parameter. Method invocation contexts allow the use of an identity
+conversion (<a href="#3.1.1">3.1.1</a>) or a widening reference
+conversion (<a href="#3.1.2">3.1.2</a>). </p>
+
+<h2 id="3.4">3.4 Casting Conversion</h2>
+
+<p> <em>Casting conversion</em> is applied to the operand of the cast
+operator: the type of the operand expression must be converted to the
+type explicitly named by the cast operator.  Casting conversion allows
+the use of an identity conversion (<a href="#3.1.1">3.1.1</a>), a
+widening reference conversion (<a href="#3.1.2">3.1.2</a>), or a
+narrowing reference conversion (<a href="#3.1.3">3.1.3</a>).  Casting
+using narrowing reference conversion (<a href="#3.1.3">3.1.3</a>)
+will require a run-time check to see if the cast is valid.  In the
+event that the cast is not valid the program will terminate with an
+appropriate error message.  </p>
+
+<hr>
+<table border="0" width="100%">
+<tbody><tr>
+
+<table border="0" width="100%">
+
+<tbody><tr>
+
+<p><strong id="4">
+
+CHAPTER 4 </strong></p>
+
+<h1>Names</h1>
+
+<hr>
+
+<p> Names are used to refer to entities declared in a program (<a
+href="#4.1">4.1</a>). A declared entity is a class type, a member
+(field or method) of a reference type, a parameter (to a method or
+constructor) or a local variable.  </p>
+
+<p> Names in maTe programs are simple, consisting of a single
+identifier (<a href="#4.2">4.2</a>).  </p>
+
+<p> Every declaration that introduces a name has a scope (<a
+href="#4.3">4.3</a>), which is the part of the program text within
+which the declared entity can be referred to by a name.  </p>
+
+<p> Reference types (that is, class types) have members (<a
+href="#4.4">4.4</a>).  A member can be referred to using a qualified
+name N.x, where N is a variable of a reference type (or
+<code>this</code> or <code>super</code>) and x is an identifier that
+names a member of that type, which is either a field or a method.
+</p>
+
+<p> In determining the meaning of a name (<a href="#4.5">4.5</a>),
+the context of the occurrence is used to disambiguate among types,
+variables, and methods with the same name.  </p>
+
+<p> The name of a field, parameter, or local variable may be used as
+an expression (<a href="#7.2">7.2</a>).  The name of a method may
+appear in an expression only as part of a method invocation expression
+(<a href="#7.9">7.9</a>).  The name of a class type may appear in
+an expression only as part of a class instance creation expression (<a
+href="#7.7">7.7</a>), a cast operator (<a href="#7.10.1">7.10.1</a>)
+or an instanceof operator (<a href="#7.10.2">7.10.2</a>).  </p>
+
+<h2 id="4.1">4.1 Declarations</h2>
+
+<p> A <em>declaration</em> introduces an entity into a program and
+includes an identifier that can be used as a name to refer to this
+entity. A declared entity is one of the following: </p>
+
+<ul>
+
+<li>A class, declared in a class type declaration.</li>
+
+<li>A member of a reference type, one of the following:
+
+<ul>
+
+<li>A field, declared in a class type, </li>
+
+<li>A method declared in a class type, </li>
+
+</ul>
+
+</li>
+
+<li>A parameter of a method or constructor of a class. </li>
+
+<li>A local variable. </li>
+
+</ul>
+
+<p>Constructors are also introduced by declarations, but use a name
+based upon the name of the class in which they are declared rather
+than introducing a new name.  </p>
+
+<h2 id="4.2">4.2 Names and Identifiers</h2>
+
+
+
+<p>
+
+A <em>name</em> is used to refer to an entity declared in a program.
+All names are <em>simple names</em>: a single identifier.
+
+</p>
+
+
+
+<h2 id="4.3">4.3 Scope of a Declaration</h2>
+
+
+
+<p>
+
+The <em>scope</em> of a declaration is the region of the program
+within which the entity declared by the declaration can be referred to
+using a name (provided it is visible). A declaration is said to be
+<em>in scope</em> at a particular point in a program if and only if
+the declaration's scope includes that point.
+
+</p>
+
+
+
+<ul>
+
+<li>The scope of a <b>type</b> is all type declarations in the program.
+
+</li><li>The scope of a declaration of a <b>member</b> <i>m</i>
+declared in or inherited by a class type <i>C</i> is the entire body
+of <i>C</i>.
+
+</li><li>The scope of a <b>parameter</b> of a method or constructor is
+the entire body of the method or constructor.
+
+</li><li>The scope of a <b>local variable</b> declaration is from the
+point of declaration to the end of the block in which it was declared.
+
+</li></ul>
+
+<p> These rules imply that declarations of class types need not appear
+before uses of the types.  </p>
+
+<h3 id="4.3.1">4.3.1 Shadowing Declarations</h3>
+
+
+
+<p>
+
+Some declarations may be <em>shadowed</em> in part of their scope by
+another declaration of the same name, in which case a name cannot be
+used to refer to the declared entity.
+
+</p>
+
+
+
+<p>
+
+A declaration <i>d</i> of a <b>method parameter</b> or <b>constructor
+parameter</b> named <i>n</i> shadows the declarations of any fields
+named <i>n</i> that are in scope at the point where <i>d</i> occurs
+throughout the scope of <i>d</i>.
+
+<p>
+Similarly,
+a local variable in a method or constructor body shadows
+throughout its scope a parameter or a field with the same name.
+And, an inner declaration of a local variable shadows throughout its
+scope an outer declaration of a local variable of the same name that
+is in scope.
+
+</p>
+
+
+
+<p>
+
+A declaration <i>d</i> is said to be <em>visible</em> at point
+<i>p</i> in a program if the scope of <i>d</i> includes <i>p</i>, and
+<i>d</i> is not shadowed by any other declaration at <i>p</i>.
+
+</p>
+
+
+
+<p>
+
+Note that shadowing is distinct from <em>hiding</em>. Hiding applies
+only to members which would otherwise be inherited but are not because
+of a declaration in a subclass.
+
+</p>
+
+
+
+<h2 id="4.4">4.4 Members and Inheritance</h2>
+
+
+
+<p>
+
+Reference types have members.
+
+</p>
+
+
+
+<p>
+
+This section provides an overview of the members of reference types
+here, as background for the discussion of the determination of the
+meaning of names.
+
+</p>
+
+
+
+<h3 id="4.4.1">4.4.1 The Members of a Class Type</h3>
+
+<p> The members of a class type are fields and methods.  Members are
+either declared in the type, or inherited because they are members of
+a superclass which are not overridden.  </p>
+
+<p>
+The members of a class type are all of the following:
+
+<ul>
+
+<li>Members inherited from its direct superclass, if it has one (the
+class Object has no direct superclass)
+
+<li>Members declared in the body of the class
+
+</ul>
+
+</p>
+
+<p> Constructors are not members.  </p>
+
+<p> There is no restriction against a field and a method of a class
+type having the same name.  </p>
+
+<p> A class type may have two or more methods with the same name if
+the methods have different signatures, that is, if they have different
+numbers of parameters or different parameter types in at least one
+parameter position.  Such a method member name is said to be
+<em>overloaded</em>. </p>
+
+<p> A class type may contain a declaration for a method with the same
+name and the same signature as a method that would otherwise be
+inherited from a superclass. In this case, the method of the
+superclass is not inherited.  The new declaration is said to override
+it.  </p>
+
+<h2 id="4.5">4.5 Determining the Meaning of a Name</h2>
+
+<p> The meaning of a name depends on the context in which it is used.
+The determination of the meaning of a name requires two steps.  First,
+context causes a name syntactically to fall into one of three
+categories: <em>TypeName</em>, <em>ExpressionName</em> or
+<em>MethodName</em>.  Second, the resulting category then dictates the
+final determination of the meaning of the name (or a compilation error
+if the name has no meaning).  </p>
+
+<pre class="indent"><i>
+
+TypeName:
+
+    Identifier
+
+
+
+ExpressionName:
+
+    Identifier
+
+
+
+MethodName:
+
+    Identifier
+
+</i>
+
+</pre>
+
+        
+
+<h3 id="4.5.1">4.5.1 Syntactic Classification of a Name According to Context</h3>
+
+<p> A name is syntactically classified as a TypeName in these
+contexts: </p>
+
+<ul>
+
+<li>In an <code>extends</code> clause in a class declaration</li>
+
+<li>As a <em>Type</em> in any of the following contexts:
+
+<ul>
+
+<li>In a field declaration
+
+</li><li>As the result type of a method
+
+</li><li>As the type of a formal parameter of a method, operator or
+constructor
+
+</li><li>As the type of a local variable
+
+</li><li>As the class type which is to be instantiated in a class
+instance creation expression
+
+</li><li>As the type mentioned in the cast operator of a cast
+expression
+(<a href="#7.10.1">7.10.1</a>)
+or the instanceof operator of an instanceof expression
+(<a href="#7.10.2">7.10.2</a>).
+
+</li></ul>
+
+</li></ul>
+
+<p> A name is syntactically classified as an <em>ExpressionName</em>
+in these contexts: </p>
+
+<ul>
+
+<li>As a <em>Primary Expression</em> (<a href="#7.6">7.6</a>)</li>
+
+<li>As the left-hand operand of an assignment operator</li>
+
+</ul>
+
+<p>
+
+A name is syntactically classified as a <em>MethodName</em> in this
+context:
+
+</p>
+
+
+
+<ul>
+
+<li>Before the "(" in a method invocation expression
+
+</li></ul>
+
+
+
+<h3 id="4.5.2">4.5.2 Meaning of Type Names</h3>
+
+
+
+<p>
+
+A type name consists of a single <em>Identifier</em>.  The identifier
+must occur in the scope of a declaration of a type with this name, or
+a compile-time error occurs.
+
+</p>
+
+
+
+<h3 id="4.5.3">4.5.3 Meaning of Expression Names</h3>
+
+
+
+<p>
+
+The meaning of a name classified as an <em>ExpressionName</em> is
+determined as follows.
+
+</p>
+
+
+
+<h4 id="4.5.3.1">4.5.3.1 Simple Expression Names</h4>
+
+
+
+<p>
+
+If an expression name consists of a single <em>Identifier</em>, then:
+
+</p>
+
+
+
+<ul>
+
+<li>If the <em>Identifier</em> appears within the scope of a local
+variable declaration with that name,
+then the expression name denotes a variable, that is, that local variable.
+The type of the expression name is the declared type of the local variable.
+</li>
+
+<li>Otherwise, if the <em>Identifier</em> appears within the scope of
+a method parameter with that name,
+then the expression name denotes a parameter, that is, that parameter.
+The type of the expression name is the declared type of the parameter.
+</li>
+
+<li>Otherwise, if the <em>Identifier</em> appears within a class declaration:
+
+
+
+<ul>
+
+<li> If there is not exactly one member that is a field with that
+name, then a compile-time error results.
+
+</li><li>Otherwise, the expression name denotes a variable, the single
+member field with that name. The type of the expression name is the
+field's declared type. </li></ul>
+
+</li></ul>
+
+
+
+<h4 id="4.5.3.2">4.5.3.2 Qualified Expression Names</h4>
+
+<p> If an expression name is of the form <i>Q.Id</i>, then <i>Q</i>
+has already been classified as an expression name. Let <i>T</i> be the
+type of <i>Q</i>: </p>
+
+<ul>
+
+<li>If there is not exactly one accessible member of the type <i>T</i>
+that is a field named <i>Id</i>, then a compile-time error
+occurs. </li>
+
+<li>Otherwise, <i>Q.Id</i> denotes a variable.  The type of the
+expression <i>Q.Id</i> is the declared type of the field.  </li>
+
+</ul>
+
+
+
+<h3 id="4.5.4">4.5.4 Meaning of Method Names</h3>
+
+
+
+<p>
+
+A <em>MethodName</em> can appear only in a method invocation
+expression.  The meaning of a name classified as a <em>MethodName</em>
+is determined as follows.
+
+</p>
+
+
+
+<h4 id="4.5.4.1">4.5.4.1 Simple Method Names</h4>
+
+
+
+<p>
+
+If a method name consists of a single <em>Identifier</em>, then
+<em>Identifier</em> is the method name to be used for method
+invocation. The <em>Identifier</em> must name at least one method of a
+class within whose declaration the <em>Identifier</em> appears.
+
+</p>
+
+
+
+<h4 id="4.5.4.2">4.5.4.2 Qualified Method Names</h4>
+
+
+
+<p>
+
+If a method name is of the form <i>Q.Id</i>, then <i>Q</i> has already
+been classified as an expression name.  <i>Id</i> is the method name
+to be used for method invocation.  Let <i>T</i> be the type of the
+expression <i>Q</i>; <i>Id</i> must name at least one method of the
+type <i>T</i>.
+
+</p>
+
+
+
+<hr>
+
+<table border="0" width="100%">
+
+<tbody><tr>
+
+<table border="0" width="100%">
+
+<tr>
+
+
+
+
+<p><strong id="5">
+
+CHAPTER 5 </strong></p>
+
+<h1>Classes</h1>
+
+<hr>
+
+<p> Class declarations define new reference types and describe how
+they are implemented (<a href="#5.1">5.1</a>).  </p>
+
+<p> Each class except <code>Object</code> is an extension of (that is,
+a subclass of) a single existing class (<a href="#5.1.1">5.1.1</a>).
+</p>
+
+<p> The body of a class declares members (fields, methods and
+operators) and constructors (<a href="#5.1.2">5.1.2</a>). The scope
+(<a href="#4.3">4.3</a>) of a member (<a href="#5.2">5.2</a>) is the
+entire declaration of the class to which the member belongs. The
+members of a class include both declared and inherited members (<a
+href="#5.2">5.2</a>). Newly declared fields can hide fields declared
+in a superclass. Newly declared methods can override methods declared
+in a superclass.  </p>
+
+<p> Field declarations (<a href="#5.3">5.3</a>) describe instance
+variables, which are freshly incarnated for each instance of the
+class.  </p>
+
+<p> Method declarations (<a href="#5.4">5.4</a>) describe code that
+may be invoked by method invocation expressions (<a
+href="#7.9">7.9</a>). A method is invoked with respect to some
+particular object that is an instance of the class type.  </p>
+
+<p> Operator declarations (<a href="#5.6">5.6</a>) describe code that
+may be invoked by operator invocation expressions (<a
+href="#7.16">7.16</a>). An operator is invoked with respect to some
+particular object that is an instance of the class type.  </p>
+
+<p> Method names may be overloaded (<a href="#5.4.5">5.4.5</a>).
+</p>
+
+<p> Constructors (<a href="#5.5">5.5</a>) are similar to methods, but
+cannot be invoked directly by a method call; they are used to
+initialize new class instances.  Like methods, they may be overloaded
+(<a href="#5.5.4">5.5.4</a>).  </p>
+
+<h2 id="5.1">5.1 Class Declaration</h2>
+
+<p> A <em>class declaration</em> specifies a new reference type: </p>
+
+<pre class="indent">
+
+<i>
+
+ClassDeclaration:
+
+    <code>class</code> Identifier Super<sub>opt</sub> ClassBody
+
+</i>
+
+</pre>
+
+<p> The <i>Identifier</i> in a class declaration specifies the name of
+the class.  A compile-time error occurs if a class has the same name
+as any other class in the program.  </p>
+
+<h3 id="5.1.1">5.1.1 Superclasses and Subclasses</h3>
+
+<p> The optional <code>extends</code> clause in a class declaration
+specifies the <em>direct superclass</em> of the current class. A class
+is said to be a <em>direct subclass</em> of the class it extends. The
+direct superclass is the class from whose implementation the
+implementation of the current class is derived.  If the class
+declaration for any class has no <code>extends</code> clause, then the
+class has the class <code>Object</code> as its implicit direct
+superclass.  </p>
+
+<pre class="indent">
+
+<i>
+
+Super:
+
+    <code>extends</code> ClassType
+
+</i>
+
+</pre>
+
+<p> The following is repeated from <a href="#2.3">2.3</a> to make the
+presentation here clearer: </p>
+
+<pre class="indent">
+
+<i>
+
+ClassType:
+
+	TypeName
+
+</i>
+
+</pre>
+
+<p> The <i>ClassType</i> must name a class type, or a compile-time
+error occurs.  </p>
+
+<p> The <em>subclass</em> relationship is the transitive closure of
+the direct subclass relationship. A class <i>A</i> is a subclass of
+class <i>C</i> if either of the following is true: </p>
+
+<ul>
+
+<li><i>A</i> is the direct subclass of <i>C</i>. 
+
+<li>There exists a class <i>B</i> such that <i>A</i> is a subclass of
+<i>B</i>, and <i>B</i> is a subclass of <i>C</i>, applying this
+definition recursively.
+
+</ul>
+
+
+
+<p>
+
+Class <i>C</i> is said to be a <em>superclass</em> of class <i>A</i>
+whenever
+
+<i>A</i> is a subclass of <i>C</i>.
+
+</p>
+
+<p> A class C directly <em>depends</em> on a type T if T is mentioned
+in the extends clause of C. A class C depends on a reference type T if
+any of the following conditions hold: </p>
+
+<ul>
+<li>C directly depends on T.
+  
+<li>C directly depends on a class D that depends on T (using this
+  definition recursively).
+  
+</ul>
+
+<p>
+It is a compile-time error if a class depends on itself.
+</p>
+
+<p>
+For example:
+</p>
+
+<pre class="indent">
+<code>
+class Point extends ColoredPoint { Integer x, y; }
+class ColoredPoint extends Point { Integer color; }
+</code>
+</pre>
+
+<p>
+causes a compile-time error.
+</p>
+
+
+
+<h3 id="5.1.2">5.1.2 Class Body and Member Declarations</h3>
+
+<p> A <em>class body</em> may contain declarations of members of the
+class, that is, fields (<a href="#5.3">5.3</a>) methods (<a
+href="#5.4">5.4</a>) and operators (<a href="#5.6">5.6</a>). A class
+body may also contain declarations of constructors (<a
+href="#5.5">5.5</a>) for the class.  </p>
+
+<pre class="indent">
+
+<i>
+
+ClassBody:
+
+    { ClassBodyDeclarations<sub>opt</sub> }
+
+
+
+
+
+ClassBodyDeclarations:
+
+    ClassBodyDeclaration
+
+    ClassBodyDeclarations ClassBodyDeclaration
+
+
+
+
+
+ClassBodyDeclaration:
+
+    ClassMemberDeclaration
+
+    ConstructorDeclaration
+
+
+
+
+
+ClassMemberDeclaration:
+
+    FieldDeclaration
+
+    MethodDeclaration
+
+    OperatorDeclaration
+
+</i>
+
+</pre>
+
+<p> The scope of a declaration of a member <i>m</i> declared in or
+inherited by a class type <i>C</i> is the entire body of <i>C</i>.
+</p>
+
+<h2 id="5.2">5.2 Class Members</h2>
+
+<p> The members of a class type are all of the following: </p>
+
+<ul>
+
+<li>Members inherited from its direct superclass (<a
+href="#5.1.1">5.1.1</a>), except in class <code>Object</code>, which
+has no direct superclass
+
+<li>Members declared in the body of the class (<a
+href="#5.1.2">5.1.2</a>)
+
+</ul>
+
+<p> Constructors are not members and therefore are not inherited.</p>
+
+<h2 id="5.3">5.3 Field Declarations</h2>
+
+<p> The variables of a class type are introduced by <em>field
+declarations</em>: </p>
+
+<pre class="indent">
+
+<i>
+
+FieldDeclaration:
+
+    <i>Type</i> VariableDeclarators ;
+
+
+
+VariableDeclarators:
+
+    VariableDeclarator
+
+    VariableDeclarators , VariableDeclarator
+
+
+
+VariableDeclarator:
+
+    Identifier
+
+</i>
+
+</pre>
+
+<p> The <i>Identifier</i> in a <i>FieldDeclarator</i> may be used in a
+name to refer to the field. Fields are members; the scope (<a
+href="#4.3">4.3</a>) of a field declaration is specified in <a
+href="#5.1.2">5.1.2</a>. More than one field may be declared in a
+single field declaration by using more than one declarator; the
+<i>Type</i> apply to all the declarators in the declaration.</p>
+
+<p> It is a compile-time error for the body of a class declaration to
+declare two fields with the same name.  </p>
+
+<p> Methods, types, and fields may have the same name, since they are
+used in different contexts and are disambiguated by different lookup
+procedures (<a href="#4.5">4.5</a>).  </p>
+
+<p> If the class declares a field with a certain name, then the
+declaration of that field is said to <i>hide</i> any declarations of
+fields with the same name in superclasses of the class.  </p>
+
+<p> If a field declaration hides the declaration of another field, the
+two fields need not have the same type.  </p>
+
+<p> A class inherits from its direct superclass all the fields of the
+superclass that are not hidden by a declaration in the class.  </p>
+
+<p> It is not possible for a class to inherit more than one field with
+the same name.  </p>
+
+<p> A hidden field can be accessed by using a field access expression
+(<a href="#7.8">7.8</a>) that contains the keyword
+<code>super</code>.  </p>
+
+<h2 id="5.4">5.4 Method Declarations</h2>
+
+<p> A <em>method</em> declares executable code that can be invoked,
+passing a fixed number of values as arguments.  </p>
+
+<pre class="indent">
+
+<i>
+
+MethodDeclaration:
+
+    MethodHeader MethodBody
+
+
+
+MethodHeader:
+
+    ResultType MethodDeclarator
+
+
+
+ResultType:
+
+    Type
+
+
+
+MethodDeclarator:
+
+    Identifier ( FormalParameterList<sub>opt</sub> )
+
+</i>
+
+</pre>
+
+<p> A method declaration specifies the type of value that the method
+returns.  </p>
+
+<p> The <i>Identifier</i> in a <i>MethodDeclarator</i> may be used in
+a name to refer to the method. A class can declare a method with the
+same name as the class or a field of the class.  </p>
+
+<p> It is a compile-time error for the body of a class to have as
+members two methods with the same signature (<a
+href="#5.4.2">5.4.2</a>) (name, number of parameters, and types of
+any parameters). Methods and fields may have the same name, since they
+are used in different contexts and are disambiguated by the different
+lookup procedures (<a href="#4.5">4.5</a>).  </p>
+
+<h3 id="5.4.1">5.4.1 Formal Parameters</h3>
+
+<p> The <em>formal parameters</em> of a method or constructor, if any,
+are specified by a list of comma-separated parameter specifiers. Each
+parameter specifier consists of a type and an identifier (optionally
+followed by brackets) that specifies the name of the parameter: </p>
+
+<pre class="indent">
+
+<i>
+
+FormalParameterList:
+
+	FormalParameter
+
+	FormalParameterList , FormalParameter
+
+
+
+FormalParameter:
+
+	Type Identifier
+
+</i>
+
+</pre>
+
+<p> If a method or constructor has no parameters, only an empty pair
+of parentheses appears in the declaration of the method, operator or
+constructor.  </p>
+
+<p> If two formal parameters of the same method, operator or
+constructor are declared to have the same name (that is, their
+declarations mention the same <i>Identifier</i>), then a compile-time
+error occurs.  </p>
+
+<p> When the method, operator or constructor is invoked (<a
+href="#7.9">7.9</a>), the values of the actual argument expressions
+initialize newly created parameter variables, each of the declared
+<i>Type</i>, before execution of the body of the method, operator or
+constructor. The <i>Identifier</i> that appears in the
+<i>DeclaratorId</i> may be used as a simple name in the body of the
+method, operator or constructor to refer to the formal parameter.
+</p>
+
+<p> The scope of a parameter of a method, operator or constructor is
+the entire body of the method or constructor.  </p>
+
+<h3 id="5.4.2">5.4.2 Method Signature</h3>
+
+
+
+
+
+<p>
+
+The signature of a method consists of the name of the method and the
+number and types of formal parameters to the method.
+
+</p>
+
+
+
+<p>
+
+A class may not declare two methods with the same signature, or a
+compile-time error occurs.
+
+</p>
+
+
+
+
+
+<h3 id="5.4.3">5.4.3 Method Body</h3>
+
+
+
+
+
+<p>
+
+A method body is a block of code that implements the method.
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+MethodBody:
+
+	Block 
+
+</i>
+
+</pre>
+
+
+
+<p>
+
+If an implementation requires no executable code, the method body
+should be written as a block that contains no statements: "{ }".
+
+</p>
+
+
+
+<p>
+
+Since a method must always have a return type, then every return
+statement (<a href="#6.9">6.9</a>) in its body must have an
+<i>Expression</i>.
+
+</p>
+
+
+
+<p>
+
+Moreover, a method may only explicitly return by using a
+<code>return</code> statement that provides a value return. Otherwise,
+the method may "drop off" the end of its body by executing an implicit
+return at the very end of its method body; the value of the expression
+for this implicit return is the same as the default value for the
+return type of the method (i.e. <code>null</code> for reference
+types).
+
+</p>
+
+
+
+<h3 id="5.4.4">5.4.4 Inheritance and Overriding</h3>
+
+
+
+<p>
+A class <em>inherits</em> from its direct superclass all the methods
+of the superclass that are not <em>overridden</em> 
+by a declaration in the class.
+</p>
+
+<p>
+A method declared in a class <i>C</i> <em>overrides</em>
+another method with the same signature declared in class
+<i>A</i> if <i>C</i> is a subclass of <i>A</i>. 
+</p>
+
+<p>
+A compile-time error occurs if a method has a different return type
+than the method it overrides.
+</p>
+
+<p>
+An overridden method can be accessed by using a method invocation
+expression (<a href="#7.9">7.9</a>) that contains the keyword
+<code>super</code>.
+</p>
+
+
+
+<h3 id="5.4.5">5.4.5 Overloading</h3>
+
+
+
+<p>
+
+If two methods of a class (whether both declared in the same class, or
+both inherited by a class, or one declared and one inherited) have the
+same name but different signatures, then the method name is said to be
+<em>overloaded</em>. This fact causes no difficulty and never of
+itself results in a compile-time error.
+
+</p>
+
+
+
+<p>
+
+There is no required relationship between the return types of two
+methods with the same name but different signatures.
+
+</p>
+
+
+
+<p>
+
+Methods are overridden on a signature-by-signature basis. 
+
+</p>
+
+
+
+<p>
+
+If, for example, a class declares two methods with the same name, and
+a subclass overrides one of them, the subclass still inherits the
+other method.
+
+</p>
+
+
+
+<p>
+
+When a method is invoked (<a href="#7.9">7.9</a>), the number of
+actual arguments and the compile-time types of the arguments are used,
+at compile time, to determine the signature of the method that will be
+invoked (<a href="#7.9.2">7.9.2</a>).  The actual method to be
+invoked will be determined at run time, using dynamic method lookup
+(<a href="#7.9.3">7.9.3</a>).
+
+</p>
+
+
+
+<h2 id="5.5">5.5 Constructor Declarations</h2>
+
+
+
+<p>
+
+A <em>constructor</em> is used in the creation of an object that is an
+instance of a class:
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+ConstructorDeclaration:
+
+    ConstructorDeclarator ConstructorBody
+
+
+
+ConstructorDeclarator:
+
+    TypeName ( FormalParameterList<sub>opt</sub> )
+
+</i>
+
+</pre>
+
+
+
+<p>
+
+The <i>TypeName</i> in the <i>ConstructorDeclarator</i> must be the
+name of the class that contains the constructor declaration; otherwise
+a compile-time error occurs. In all other respects, the constructor
+declaration looks just like a method declaration that has no result
+type.
+
+</p>
+
+
+
+<p>
+
+Constructors are invoked by class instance creation expressions, and
+by explicit constructor invocations from other constructors (<a
+href="#5.5.3.1">5.5.3.1</a>).  Constructors are never invoked by
+method invocation expressions.
+
+</p>
+
+
+
+<p>
+
+Constructors are not members. They are never inherited and therefore
+are not subject to hiding or overriding.
+
+</p>
+
+
+
+<h3 id="5.5.1">5.5.1 Formal Parameters</h3>
+
+
+
+<p>
+
+The <em>formal parameters</em> of a constructor are identical in
+structure and behavior to the formal parameters of a method.
+
+</p>
+
+
+
+<h3 id="5.5.2">5.5.2 Constructor Signature</h3>
+
+
+
+<p>
+
+The <em>signature</em> of a constructor consists of the number and
+types of formal parameters to the constructor. A class may not declare
+two constructors with the same signature, or a compile-time error
+occurs.
+
+
+
+<h3 id="5.5.3">5.5.3 Constructor Body</h3>
+
+
+
+<p>
+
+The first statement of a constructor body may be an explicit
+invocation of another constructor of the same class or of the direct
+superclass (<a href="#5.5.3.1">5.5.3.1</a>).
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+ConstructorBody:
+
+    { ExplicitConstructorInvocation<sub>opt</sub> BlockStatements<sub>opt</sub> }
+
+</i>
+
+</pre>
+
+
+
+<p>
+
+It is a compile-time error for a constructor to directly or indirectly
+invoke itself through a series of one or more explicit constructor
+invocations involving <code>this</code>.
+
+</p>
+
+<p> If a constructor body does not begin with an explicit constructor
+invocation, then the constructor body is implicitly assumed by the
+compiler to begin with a superclass constructor invocation "super();",
+an invocation of the constructor of its direct superclass that takes
+no arguments.  A compile-time error occurs if an implicit superclass
+constructor invocation is assumed by the compiler but the superclass
+does not have a constructor that takes no arguments.  </p>
+
+
+<h4 id="5.5.3.1">5.5.3.1 Explicit Constructor Invocations</h4>
+
+
+
+<pre class="indent">
+
+<i>
+
+ExplicitConstructorInvocation:
+
+	<code>this</code> ( ArgumentList<sub>opt</sub> ) ;
+
+	<code>super</code> ( ArgumentList<sub>opt</sub> ) ;
+
+</i>
+
+</pre>
+
+
+
+<p>
+
+Explicit constructor invocation statements can be divided into two
+kinds:
+
+</p>
+
+
+
+<ul>
+
+<li><em>Alternate constructor invocations</em> begin with the keyword
+<code>this</code>. They are used to invoke an alternate constructor of
+the same class.
+
+<li><em>Superclass constructor invocations</em> begin with the keyword
+<code>super</code>. They are used to invoke a constructor of the
+direct superclass.
+
+</ul>
+
+
+
+<p>
+
+An explicit constructor invocation statement in a constructor body may
+not refer to any variables or methods declared or inherited in the
+object being constructed, or use <code>this</code> or
+<code>super</code> in any expression; otherwise, a compile-time error
+occurs.
+
+</p>
+
+
+
+<p>
+
+The evaluation of an explicit constructor invocation proceeds in
+several steps:
+
+</p>
+
+
+
+<ul>
+
+<li>First, the connection with the superclass must be established.  If
+a constructor body does not begin with an explicit constructor
+invocation then the constructor body is implicitly assumed by the
+compiler to begin with a superclass constructor invocation
+"<code>super();</code>", an invocation of the constructor of its
+direct superclass that takes no arguments. Since class
+<code>Object</code> is a fundamental superclass of all classes,
+invocation of the superclass constructor will precede the execution of
+the local class constructor during the constructor invocation step.
+
+<li>Second, the arguments to the constructor are evaluated,
+left-to-right, as in an ordinary method invocation.
+
+<li>Next, the constructor is invoked.
+
+</ul>
+
+
+
+<h3 id="5.5.4">5.5.4 Constructor Overloading</h3>
+
+
+
+<p>
+
+<em>Overloading of constructors</em> is identical in behavior to
+overloading of methods. The overloading is resolved at compile time by
+each class instance creation expression.
+
+</p>
+
+
+
+<h3 id="5.5.5">5.5.5 Default Constructor</h3>
+
+
+
+<p>
+
+If a class contains no constructor declarations, then a <em>default
+constructor</em> that takes no parameters is automatically provided.
+
+</p>
+
+
+
+<p>
+
+The default constructor takes no parameters and simply implicitly
+invokes the superclass constructor with no arguments.  A compile-time
+error occurs if a default constructor is provided by the compiler but
+the super class does not have a constructor that takes no arguments.
+
+</p>
+
+<h2 id="5.6">5.6 Operator Declarations</h2>
+
+
+
+<p>
+
+A <em>operator</em> declares executable code that can be invoked,
+passing a fixed number of values as arguments.
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+OperatorDeclaration:
+
+    OperatorHeader OperatorBody
+
+
+
+OperatorHeader:
+
+    ResultType OperatorDeclarator
+
+
+
+ResultType:
+
+    Type
+
+
+
+OperatorDeclarator:
+
+    operator UnaryOperator ( )
+
+    operator BinaryOperator ( FormalParameter )
+
+    operator MinusOperator ( )
+
+    operator MinusOperator ( FormalParameter )
+
+</i>
+
+</pre>
+
+
+
+<p>
+
+An operator declaration specifies the type of value that the operator
+returns.
+
+</p>
+
+
+
+<p>
+
+The token immediately after <i>operator</i> in an
+<i>OperatorDeclarator</i> (<i>UnaryOperator</i>, <i>BinaryOperator</i>
+or <i>MinusOperator</i>) may be used in properly formed operator
+invocation expression (<a href="#7.16">7.16</a>) as a name for the
+operator.
+
+</p>
+
+<p>
+
+It is a compile-time error for the body of a class to have as members
+two operators with the same signature (<a href="#5.6.2">5.6.2</a>)
+(operator name, number of parameters, and types of any parameters).
+
+</p>
+
+
+
+<h3 id="5.6.1">5.6.1 Formal Parameters</h3>
+
+
+
+<p>
+
+The <em>formal parameter</em> of an operator, if any, is specified by
+parameter specifiers. The optional parameter specifier consists of a
+type and an identifier (optionally followed by brackets) that
+specifies the name of the parameter:
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+FormalParameter:
+
+	Type Identifier
+
+</i>
+
+</pre>
+
+<p>
+
+If an operator has no parameter, only an empty pair of parentheses
+appears in the declaration of the operator.
+
+</p>
+
+
+
+<p>
+
+When the operator is invoked (<a href="#7.16">7.16</a>), the values
+of the actual argument expressions initialize newly created parameter
+variables, each of the declared <i>Type</i>, before execution of the
+body of the operator. The <i>Identifier</i> may be used as a simple
+name in the body of the operator to refer to the formal parameter.
+
+</p>
+
+
+
+<p>
+
+The scope of a parameter of an operator is the entire body of the
+operator.
+
+</p>
+
+
+
+<h3 id="5.6.2">5.6.2 Operator Signature</h3>
+
+
+
+
+
+<p>
+
+The signature of a operator consists of the operator (<a
+href="#1.9">1.9</a>) and the number and types of formal parameters to
+the operator.
+
+</p>
+
+
+
+<p>
+
+A class may not declare two operators with the same signature, or a
+compile-time error occurs.
+
+</p>
+
+
+
+
+
+<h3 id="5.6.3">5.6.3 Operator Body</h3>
+
+
+
+
+
+<p>
+
+An operator body is a block of code that implements the operator.
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+OperatorBody:
+
+	Block 
+
+</i>
+
+</pre>
+
+
+
+<p>
+
+If an implementation requires no executable code, the operator body
+should be written as a block that contains no statements: "{ }".
+
+</p>
+
+
+
+<p>
+
+Since an operator must always have a return type, then every return
+statement (<a href="#6.9">6.9</a>) in its body must have an
+<i>Expression</i>.
+
+</p>
+
+
+
+<p>
+
+Moreover, an operator may only explicitly return by using a
+<code>return</code> statement that provides a value return. Otherwise,
+the operator may "drop off" the end of its body by executing an
+implicit return at the very end of its operator body; the value of the
+expression for this implicit return is the same as the default value
+for the return type of the operator.
+
+</p>
+
+<h3 id="5.6.4">5.6.4 Inheritance and Overriding</h3>
+
+
+
+<p>
+A class <em>inherits</em> from its direct superclass all the operators
+of the superclass that are not <em>overridden</em> 
+by a declaration in the class.
+</p>
+
+<p>
+An operator declared in a class <i>C</i> <em>overrides</em>
+another operator with the same signature declared in class
+<i>A</i> if <i>C</i> is a subclass of <i>A</i>. 
+</p>
+
+<p>
+A compile-time error occurs if an operator has a different return type
+than the operator it overrides.
+</p>
+
+
+
+
+
+<h3 id="5.6.5">5.6.5 Overloading</h3>
+
+
+
+<p>
+
+If two operators of a class (whether both declared in the same class,
+or both inherited by a class, or one declared and one inherited) have
+the same operator token but different signatures, then the operator is
+said to be <em>overloaded</em>. This fact causes no difficulty and
+never of itself results in a compile-time error.
+
+</p>
+
+
+
+<p>
+
+There is no required relationship between the return types of two
+operators with the same name but different signatures.
+
+</p>
+
+
+
+<p>
+
+Operators are overridden on a signature-by-signature basis.
+
+</p>
+
+
+
+<p>
+
+If, for example, a class declares two operators with the same name,
+and a subclass overrides one of them, the subclass still inherits the
+other operator.
+
+</p>
+
+
+
+<p>
+
+When an operator is invoked (<a href="#7.16">7.16</a>), the number of
+actual arguments and the compile-time types of the arguments are used,
+at compile time, to determine the signature of the operator that will
+be invoked.  The actual operator to be invoked will be determined at
+run time, using dynamic method lookup.
+
+</p>
+
+<hr>
+
+<table border="0" width="100%">
+
+<tr>
+
+<table border="0" width="100%">
+
+<tr>
+
+
+
+
+<p><strong id="6">
+
+CHAPTER 6 </strong></p>
+
+
+
+<h1>Blocks and Statements</h1>
+
+
+
+<hr>
+
+
+
+<p>
+
+The sequence of execution of a maTe program is controlled by a
+sequence of <em>statements</em>, which are executed for their effect
+and do not have values.
+
+</p>
+
+
+
+<p>
+
+Some statements contain other statements as part of their structure;
+such other statements are substatements of the statement.  In the same
+manner, some statements contain expressions (<a href="#7">7</a>) as
+part of their structure.
+
+</p>
+
+
+
+<p>
+
+Sequences of statements are organized into <em>blocks</em>. There are
+two primary blocks defined for a maTe program: the main block, which
+is explained in section (<a href="#6.1">6.1</a>), and statement
+blocks which are explained in section (<a href="#6.3">6.3</a>).
+
+</p>
+
+
+
+<p>
+
+Statements that will be familiar to C and C++ programmers are the
+block (<a href="#6.3">6.3</a>), empty (<a href="#6.4">6.4</a>),
+expression (<a href="#6.5">6.5</a>), <code>if</code>
+(<a href="#6.6">6.6</a>, <a href="#6.7">6.7</a>),
+<code>while</code> (<a href="#6.8">6.8</a>),
+<code>return</code> (<a href="#6.9">6.9</a>), <code>break</code> (<a
+href="#6.11">6.11</a>), <code>continue</code> (<a
+href="#6.12">6.12</a>), and local variable declaration (<a
+href="#6.13">6.13</a>) statements.
+
+</p>
+
+
+
+<h2 id="6.1">6.1 Main Block</h2>
+
+<p> A program shall contain a global construct called <em>main</em>
+(the main block), which is the designated start of the execution of a
+program. Exactly one main block must exist for every maTe program.
+The block is entered when program execution starts.  Program execution
+continues until a <code>return</code> statement in the main block is
+executed or the end of the main block is reached (or a run-time error
+is encountered).  If the end of the main block is reached, then the
+result is as if the program executed a return of 0.  The declaration
+of a main block includes the definition of a return type, which must
+be <code>Integer</code>.  The return value exists to provide a way to
+pass a single status value to the surrounding environment.  </p>
+
+<p> All implementations of the main block will have the following
+definition: </p>
+
+<pre class="indent">
+
+<i>
+
+MainFunctionDeclaration:
+
+    <code>Integer</code> <code>main()</code> <code>{</code> MainBlockStatements<sub>opt</sub> <code>}</code>
+
+MainBlockStatements:
+
+    MainBlockStatements MainBlockStatement
+
+    MainBlockStatement
+
+MainBlockStatement:
+
+    BlockStatement
+	
+BlockStatement:
+
+    Statement
+
+</i>
+
+</pre>
+
+<p> maTe does not allow for arguments to be passed into the main
+block.  </p>
+
+<p> The main block can exist at the beginning of the source file, at
+the end of the source file or in between any two class definitions
+within the source file.  </p>
+
+<p> Local variable declaration statements (<a href="#6.13">6.13</a>)
+can be provided at any level of the main block.  The scope of a local
+variable declared in the main block is from its declaration point to
+the end of the block in which it is declared.  It is a compile-time
+error to declare a local variable with the same name as a previously
+declared local variable which is still visible from the new local
+variable's declaration point. </p>
+
+<h2 id="6.2">6.2 Statements</h2>
+
+
+
+<p>
+
+There are many kinds of statements in the maTe programming language.
+Most correspond to statements in the C and C++ languages.  Statements
+are given by the following grammar:
+
+</p>
+
+
+<pre class="indent">
+
+<i>
+
+Statement:
+
+    Block (<a href="#6.3">6.3</a>)
+
+    EmptyStatement (<a href="#6.4">6.4</a>)
+
+    ExpressionStatement (<a href="#6.5">6.5</a>)
+
+    IfThenElseStatement (<a href="#6.6">6.6</a>)
+
+    IfThenStatement (<a href="#6.7">6.7</a>)
+
+    WhileStatement (<a href="#6.8">6.8</a>)
+
+    ReturnStatement (<a href="#6.9">6.9</a>)
+
+    OutputStatement (<a href="#6.10">6.10</a>)
+
+    BreakStatement (<a href="#6.11">6.11</a>)
+
+    ContinueStatement (<a href="#6.12">6.12</a>)
+
+    LocalVariableDeclarationStatement (<a href="#6.13">6.13</a>)
+</i>
+
+</pre>
+
+
+
+<h2 id="6.3">6.3 Blocks</h2>
+
+
+
+<p>
+
+A <em>block</em> is a sequence of statements within braces. 
+
+
+
+<pre class="indent">
+
+<i>
+
+Block:
+
+    <code>{</code> BlockStatements<sub>opt</sub> <code>}</code>
+
+
+
+BlockStatements:
+
+    BlockStatement
+
+    BlockStatements BlockStatement
+
+</i>
+
+</pre>
+
+
+<p> The following production from (<a href="#6.1">6.1</a>) is
+repeated here for convenience: </p>
+</p>
+
+<pre class="indent">
+
+<i>
+
+
+BlockStatement:
+
+    Statement
+
+</i>
+
+</pre>
+
+
+
+<p>
+
+A block is executed by executing each of the statements in order from
+first to last (left to right).  It is possible for a block to
+terminate early through a <code>return</code> statement.
+
+</p>
+
+
+
+	
+
+<h2 id="6.4">6.4 The Empty Statement</h2>
+
+
+
+<p>
+
+An empty statement does nothing. 
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+EmptyStatement:
+
+    <code>;</code>
+
+</i>
+
+</pre>
+
+
+
+<h2 id="6.5">6.5 Expression Statements</h2>
+
+
+
+<p>
+
+Certain kinds of expressions may be used as statements by following
+
+them with semicolons: 
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+ExpressionStatement:
+
+    StatementExpression ;
+
+
+
+StatementExpression:
+
+    Assignment
+
+    MethodInvocation
+
+</i>
+
+</pre>
+
+
+
+<p>
+
+An <em>expression statement</em> is executed by evaluating the
+expression; if the expression has a value, the value is discarded.
+
+</p>
+
+
+
+<!---------------------------------------------------------------------------->
+
+
+
+<h2 id="6.6">6.6 The <code>if-then-else</code> Statement</h2>
+
+
+
+<p>
+
+The <code>if-then-else</code> statement allows a conditional choice of
+two statements, executing one or the other but not both.
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+IfThenElseStatement:
+
+    <code>if</code> <code>(</code> Expression <code>)</code> Statement <code>else</code> Statement
+
+</i>
+
+</pre>
+
+
+
+<p>
+
+The <i>Expression</i> must have type <code>Integer</code>, or a
+compile-time error occurs.
+
+</p>
+
+
+
+<p>
+
+An <code>if-then-else</code> statement is executed by first evaluating
+the <i>Expression</i>.  Execution continues by making a choice based
+on the resulting value:
+
+</p>
+
+
+
+<ul>
+
+<li>If the value is not 0, then the first contained <i>Statement</i>
+(the one before the <code>else</code> keyword) is executed.
+
+<li>If the value is 0, then the second contained <i>Statement</i> (the
+one after the <code>else</code> keyword) is executed.
+
+</ul>
+<p>
+An <code>else</code> is associated with the lexically immediately preceding
+<code>else</code>-less <code>if</code> that is in the same block
+(but not in an enclosed block).
+
+<h2 id="6.7">6.7 The <code>if-then</code> Statement</h2>
+
+
+
+<p>
+
+The <code>if-then</code> statement allows a conditional choice of one
+statement, executing the statement or not executing it.
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+IfThenStatement:
+
+    <code>if</code> <code>(</code> Expression <code>)</code> Statement
+
+</i>
+
+</pre>
+
+
+
+<p>
+
+The <i>Expression</i> must have type <code>Integer</code>, or a
+compile-time error occurs.
+
+</p>
+
+
+
+<p>
+
+An <code>if-then</code> statement is executed by first evaluating the
+<i>Expression</i>.  Execution continues by making a choice based on
+the resulting value:
+
+</p>
+
+
+
+<ul>
+
+<li>If the value is not 0, then the contained <i>Statement</i> is
+executed.
+
+<li>If the value is 0, then the contained <i>Statement</i> is not
+executed.
+
+</ul>
+
+<h2 id="6.8">6.8 The <code>while</code> Statement</h2>
+
+
+
+<p>
+
+The <code>while</code> statement executes an <i>Expression</i> and a
+<i>Statement</i> repeatedly until the value of the <i>Expression</i>
+is 0.
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+WhileStatement:
+
+    <code>while</code> <code>(</code> Expression <code>)</code> Statement
+
+</i>
+
+</pre>
+
+
+
+<p>
+
+The <i>Expression</i> must have type <code>Integer</code>, or a
+compile-time error occurs.  A <code>while</code> statement is executed
+by first evaluating the <i>Expression</i>.  Execution continues by
+making a choice based on the resulting value:
+
+</p>
+
+
+
+<ul>
+
+<li>If the value is not 0, then the contained <i>Statement</i> is
+executed.
+
+
+
+<ul>
+
+<li>If execution of the <i>Statement</i> completes, then the entire
+while statement is executed again, beginning by re-evaluating the
+<i>Expression</i>.  (Note that the <i>Statement</i> can be exited
+early, via a <code>return</code> statement.)
+
+</ul>
+
+
+
+<li>If the value of the <i>Expression</i> is 0, no further action is
+taken.
+
+</ul>
+
+
+
+<p>
+
+If the value of the <i>Expression</i> is 0 the first time it is
+evaluated, then the <i>Statement</i> is not executed.
+
+</p>
+
+
+
+<!---------------------------------------------------------------------------->
+
+
+
+<h2 id="6.9">6.9 The <code>return</code> Statement</h2>
+
+<p> A <code>return</code> statement returns control to the invoker of
+a method (<a href="#5.4">5.4</a>, <a href="#7.9">7.9</a>), returns
+control to the invoker of a constructor (<a href="#5.5">5.5</a>, <a
+href="#7.7">7.7</a>), returns control to the invoker of an operator
+(<a href="#5.6">5.6</a>, <a href="#7.16">7.16</a>), or terminates
+the main block (<a href="#6.1">6.1</a>), and is given by the
+following grammar: </p>
+
+<pre class="indent">
+
+<i>
+
+ReturnStatement:
+
+    <code>return</code> Expression <code>;</code>
+
+    <code>return</code> <code>;</code>
+
+</i>
+
+</pre>
+
+<p> Use of a <code>return</code> without an expression shall only be
+used within a constructor.  A <code>return</code> with an expression
+in a constructor is a compile-time error. </p>
+
+<p> If a <code>return</code> statement is contained within a method or
+operator, the value of the <i>Expression</i> becomes the value of the
+method or operator invocation. More precisely, execution of such a
+<code>return</code> statement first evaluates the <i>Expression</i>.
+The value produced by the <i>Expression</i> is communicated to the
+invoker.  A <code>return</code> statement with no <i>Expression</i> is
+not allowed in this context and will result in a compile-time error.
+</p>
+
+<p> If a <code>return</code> statement is contained within the main
+block, the value of the <i>Expression</i> becomes the value of the
+program. More precisely, execution of such a <code>return</code>
+statement first evaluates the <i>Expression</i>.  The value produced
+by the <i>Expression</i> is communicated to the surrounding execution
+environment.  A <code>return</code> statement with no
+<i>Expression</i> is not allowed in this context and will result in a
+compile-time error.  </p>
+
+<p> It is possible to <code>return</code> from the middle of a
+<code>while</code> or <code>if-then-else</code> block.  </p>
+
+<p> A compile-time error occurs if the type of the return expression
+is not convertible by assignment conversion to the return type of the
+enclosing method or operator, or to <code>Integer</code> if the return
+statement is in the main block.  </p>
+
+<h2 id="6.10">6.10 The <code>out</code> Statement</h2>
+
+
+
+<p>
+
+The <code>out</code> statement is a rudimentary mechanism for printing
+strings and it provides the only way to generate output in the maTe
+programming language.  Its syntax is described by the following
+grammar:
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+OutputStatement:
+
+    <code>out</code> Expression <code>;</code>
+
+</i>
+
+</pre>
+
+
+
+<p>
+If the <i>Expression</i> has type <code>String</code> then the
+<code>out</code> statement will print to <i>stdout</i> all characters
+in the <code>String</code> object.  If the <i>Expression</i> is not of
+type <code>String</code> then the <code>toString</code> method will
+first be invoked on <i>Expression</i>, and the resulting
+<code>String</code> object will be output in the manner described
+above.
+</p>
+
+<p>
+If the <i>Expression</i> evaluates to null, then a run-time error
+occurs and the program terminates (<a href="#7.18">7.18</a>).
+</p>
+
+<h2 id="6.11">6.11 The <code>break</code> Statement</h2>
+
+
+
+<p>
+
+The <code>break</code> statement transfers control out of an enclosing
+<code>while</code> statement.  Its syntax is described by the
+following grammar:
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+BreakStatement:
+
+    <code>break</code> <code>;</code>
+
+</i>
+
+</pre>
+
+<p> A <code>break</code> statement transfers control to the innermost
+enclosing <code>while</code> statement of the enclosing method or main
+block; this statement, which is called the <em>break</em> target, then
+immediately exits.  If no <code>while</code> statement encloses the
+<code>break</code> statement, a compile-time error occurs.  </p>
+
+<h2 id="6.12">6.12 The <code>continue</code> Statement</h2>
+
+
+
+<p>
+
+The <code>continue</code> statement transfers control to the
+loop-continuation point of an enclosing <code>while</code> statement.
+
+Its syntax is described by the following grammar:
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+ContinueStatement:
+
+    <code>continue</code> <code>;</code>
+
+</i>
+
+</pre>
+
+<p> A <code>continue</code> statement transfers control to the
+innermost enclosing <code>while</code> statement of the enclosing
+method or main block; this statement, which is called the
+<em>continue</em> target, then immediately ends the current iteration
+and begins a new one.  If no <code>while</code> statement encloses the
+<code>continue</code> statement, a compile-time error occurs.  </p>
+
+<h2 id="6.13">6.13 The Local Variable Declaration Statement</h2>
+
+<p>
+Local variable declaration statements may be provided at any level
+of a main block, class constructor or method body.
+The scope of a local variable is from its declaration point to the end of the
+enclosing block in which it was declared.
+Two variables have the same scope if and only if their scopes terminate
+at the same point.
+It is a compile-time error
+to declare two local variables with the same name in the same scope.
+If an outer declaration of a variable with the same name exists,
+it is hidden until the end of the scope of the inner variable,
+after which the outer variable becomes visible again.
+It is a compile-time error to declare a local variable in a
+constructor, method or operator body with the same name as a parameter
+declared in the enclosing constructor, method or operator's signature.
+Local variable declaration statements are given by the following
+grammar: </p>
+
+<pre class="indent">
+
+LocalVariableDeclarationStatement:
+
+    <code>Type</code> <code>VariableDeclarators</code> <code>;</code>
+
+VariableDeclarators:
+
+    VariableDeclarator
+
+    VariableDeclarators <code>,</code> VariableDeclarator
+
+VariableDeclarator:
+
+    Identifier
+
+</pre>
+
+<hr>
+
+<table border="0" width="100%">
+
+<tr>
+
+<table border="0" width="100%">
+
+<tr>
+
+
+
+<p><strong id="7">
+
+CHAPTER 7 </strong></p>
+
+
+
+<h1>Expressions</h1>
+
+
+
+<hr>
+
+
+
+<p>
+
+Much of the work in a program is done by evaluating
+<em>expressions</em>, either for their side effects, such as
+assignments to variables, or for their values, which can be used as
+arguments or operands in larger expressions, or to affect the
+execution sequence in statements, or both.
+
+</p>
+
+
+
+<p>
+
+This chapter specifies the meanings of expressions and the rules for
+their evaluation.
+
+</p>
+
+
+
+<h2 id="7.1">7.1 Evaluation, Denotation, and Result</h2>
+
+<p> When an expression in a program is <em>evaluated</em>
+(<em>executed</em>), the <em>result </em>denotes one of two things:
+</p>
+
+<p>
+
+<ul>
+
+  <li> A variable (<a href="#2.5">2.5</a>) (in C, this would be
+  called an <em>lvalue</em>)
+
+  <li> A value (<a href="#2.2">2.2</a>, <a href="#2.3">2.3</a>)
+
+</ul>
+
+</p>
+
+<p> Evaluation of an expression can also produce side effects, because
+expressions may contain embedded assignments and method invocations.
+</p>
+
+<p> Each expression occurs either in the main block (<a
+href="#6.1">6.1</a>) or in the declaration of some class type that is
+being declared.  In a class declaration the expression might occur in
+a constructor declaration, or in the code for an operator or method.
+</p>
+
+<h2 id="7.2">7.2 Variables as Values</h2>
+
+
+
+<p>
+
+If an expression denotes a variable, and a value is required for use
+in further evaluation, then the value of that variable is used.  In
+this context, if the expression denotes a variable or a value, we may
+speak simply of the <em>value</em> of the expression.
+
+</p>
+
+
+
+<h2 id="7.3">7.3 Type of an Expression</h2>
+
+
+<p>
+
+If an expression denotes a variable or a value, then the expression
+has a type known at compile time. The rules for determining the type
+of an expression are explained separately below for each kind of
+expression.
+
+</p>
+
+
+
+<p>
+
+The value of an expression is always assignment compatible (<a
+href="#3.2">3.2</a>) with the type of the expression, just as the
+value stored in a variable is always compatible with the type of the
+variable.  In other words, the value of an expression whose type is
+<i>T</i> is always suitable for assignment to a variable of type
+<i>T</i>.
+
+</p>
+
+
+
+<h2 id="7.4">7.4 Expressions and Run-Time Checks</h2>
+
+<p> If the type of an expression is a reference type, then the class
+of the referenced object, or even whether the value is a reference to
+an object rather than <code>null</code>, is not necessarily known at
+compile time.  There are a few places in the maTe programming language
+where the actual class of a referenced object affects program
+execution in a manner that cannot be deduced from the type of the
+expression. They are as follows: </p>
+
+<p>
+
+<ul>
+
+  <li> Method invocation (<a href="#7.9">7.9</a>). The particular
+  method used for an invocation <code>o.m(</code>...<code>)</code> is
+  chosen based on the methods that are part of the class that is the
+  type of <code>o</code>. The class of the object referenced by the
+  run-time value of <code>o</code> participates because a subclass may
+  override a specific method already declared in a parent class so
+  that this overriding method is invoked. (The overriding method may
+  or may not choose to further invoke the original overridden
+  <code>m</code> method.)
+
+  <li> Casting (<a href="#3.4">3.4</a>, <a
+  href="#7.10.1">7.10.1</a>).  The class of the object referenced by
+  the run-time value of the operand expression might not be compatible
+  with the type specified by the cast.  This may require a run-time
+  check to ensure that the class of the referenced object, as
+  determined at run-time, is assignment compatible (<a
+  href="#3.2">3.2</a>) with the target type.
+
+</ul>
+
+</p>
+
+<p> The first of the cases just listed ought never to result in
+detecting a type error, as it is compile-time constrained to be valid.
+Thus, a run-time type error can occur only when the actual class of
+the object referenced by the value to be assigned (either implicitly
+or explicitly) is not compatible with the actual run-time reference
+variable.  In these cases, the program terminates with a Run-Time
+error (<a href="#7.18">7.18</a>).  </p>
+
+<h2 id="7.5">7.5 Evaluation Order</h2>
+
+
+
+<p>
+
+The maTe programming language guarantees that the operands of
+operators appear to be evaluated in a specific <em>evaluation
+order</em>, namely, from left to right.
+
+</p>
+
+
+
+<p>
+
+It is recommended that code not rely crucially on this
+specification. Code is usually clearer when each expression contains
+at most one side effect, as its outermost operation.
+
+</p>
+
+
+
+<h3 id="7.5.1">7.5.1 Evaluate Left-Hand Operand First</h3>
+
+
+
+<p>
+
+The left-hand operand of a binary operator appears to be fully
+evaluated before any part of the right-hand operand is evaluated. For
+example, if the left-hand operand contains an assignment to a variable
+and the right-hand operand contains a reference to that same variable,
+then the value produced by the reference will reflect the fact that
+the assignment occurred first.
+
+</p>
+
+
+
+<h3 id="7.5.2">7.5.2 Evaluate Operands before Operation</h3>
+
+
+
+<p>
+
+The maTe programming language also guarantees that every operand of an
+operator appears to be fully evaluated before any part of the
+operation itself is performed.
+
+</p>
+
+
+
+<h3 id="7.5.3">7.5.3 Evaluation Respects Parentheses and Precedence</h3>
+
+<p> maTe programming language implementations must respect the order
+of evaluation as indicated explicitly by parentheses and implicitly by
+operator precedence. An implementation may not take advantage of
+algebraic identities such as the associative law to rewrite
+expressions into a more convenient computational order unless it can
+be proven that the replacement expression is equivalent in value and
+in its observable side effects for all possible computational values
+that might be involved.  </p>
+
+<p> Note that Integer addition and multiplication <em>are</em>
+provably associative in the maTe programming language.  </p>
+
+<p> For example <code>a+b+c</code>, where <code>a</code>,
+<code>b</code>, and <code>c</code> are local variables will always
+produce the same answer whether evaluated as <code>(a+b)+c</code> or
+<code>a+(b+c)</code>; if the expression <code>b+c</code> occurs nearby
+in the code, a smart compiler may be able to use this common
+subexpression.  </p>
+
+<h3 id="7.5.4">7.5.4 Argument Lists are Evaluated Left-to-Right</h3>
+
+
+
+<p>
+
+In a method or constructor invocation or class instance creation
+expression, argument expressions may appear within the parentheses,
+separated by commas. Each argument expression appears to be fully
+evaluated before any part of any argument expression to its right.
+
+</p>
+
+
+
+<!---------------------------------------------------------------------------->
+
+
+
+<h2 id="7.6">7.6 <i>Primary</i> Expressions</h2>
+
+<p> <i>Primary</i> expressions include most of the simplest kinds of
+expressions, from which all others are constructed: literals, field
+accesses, method invocations and names.  A parenthesized expression is
+also treated syntactically as a primary expression.  </p>
+
+<pre class="indent">
+
+<i>
+
+Primary:
+
+    Identifier
+
+    ParenExpression
+
+    this
+
+    FieldAccess
+
+    MethodInvocation
+
+    OperatorInvocation
+
+    ClassInstanceCreationExpression
+
+    Literal
+
+</i>
+
+</pre>
+
+<h3 id="7.6.1">7.6.1 Lexical Literals</h3>
+
+<p> A <em>literal</em> denotes a fixed, unchanging value.  </p>
+
+<p> The following production from (<a href="#1.7">1.7</a>) is
+repeated here for convenience: </p>
+
+<pre class="indent">
+
+<i>
+
+Literal:
+
+    IntegerLiteral
+
+    NullLiteral
+
+    StringLiteral
+
+</i>
+
+</pre>
+
+<p> The type of a literal is determined as follows: </p>
+
+<ul>
+
+<li>The type of an integer literal is <code>Integer</code>.
+
+<li>The type of a string literal is <code>String</code>.
+
+<li>The type of the null literal <code>null</code> is the null type;
+its value is the null reference.
+
+</ul>
+
+<h3 id="7.6.2">7.6.2 <code>this</code></h3>
+
+<p> The keyword <code>this</code> may be used only in the body of an
+method, operator or constructor.  </p>
+
+<p> When used as a primary expression, the keyword <code>this</code>
+denotes a value, that is a reference to the object for which the
+method was invoked, or to the object being constructed.  The type of
+<code>this</code> is the class <i>C</i> within which the keyword
+<code>this</code> occurs. At run time, the class of the actual object
+referred to may be the class <i>C</i> or any subclass of <i>C</i>.
+</p>
+
+<h3 id="7.6.3">7.6.3 Parenthesized Expressions</h3>
+
+<p> A <em>parenthesized expression</em> is a primary expression whose
+type is the type of the contained expression and whose value at run
+time is the value of the contained expression. If the contained
+expression denotes a variable then the parenthesized expression also
+denotes that variable.  </p>
+
+<pre class="indent">
+
+<i>
+
+ParenExpression:
+
+
+    <code>(</code> Expression <code>)</code> 
+
+</i>
+
+</pre>
+
+<h3 id="7.6.4">7.6.4 Expression Names</h3>
+
+The rules for evaluating expression names are given in <a
+href="#4.5.3">4.5.3</a>.
+
+<h2 id="7.7">7.7 Class Instance Creation Expressions</h2>
+
+<p> A class instance creation expression is used to create new objects
+that are instances of classes.  </p>
+
+<pre class="indent">
+
+<i>
+
+ClassInstanceCreationExpression:
+
+    <code>new</code> ClassType Arguments 
+
+
+
+Arguments:
+
+    <code>(</code> ArgumentList <code>)</code>
+
+    <code>(</code> <code>)</code>
+
+
+
+ArgumentList:
+
+    ArgumentList <code>,</code> Expression
+
+    Expression
+
+</i>
+
+</pre>
+
+<p> We say that a class is <em>instantiated</em> when an instance of
+the class is created by a class instance creation expression. Class
+instantiation involves determining what class is to be instantiated,
+what constructor should be invoked to create the new instance and what
+arguments should be passed to that constructor.  </p>
+
+<h3 id="7.7.1">7.7.1 Determining the Class being Instantiated</h3>
+
+
+
+<p>
+
+The class being instantiated is the class denoted by <i>ClassType</i>.
+
+</p>
+
+
+
+<p>
+
+The type of the class instance creation expression is the class type
+being instantiated.
+
+</p>
+
+
+
+<h3 id="7.7.2">7.7.2 Choosing the Constructor and its Arguments</h3>
+
+
+
+<p>
+
+Let <i>C</i> be the class type being instantiated. To create an
+instance of <i>C</i>, <i>i</i>, a constructor of <i>C</i> is chosen at
+compile-time by the following rules:
+
+</p>
+
+
+
+<ul>
+
+<li>First, the actual arguments to the constructor invocation are
+determined.
+
+
+
+<ul>
+
+<li>The arguments in the argument list, if any, are the arguments to
+the constructor, in the order they appear in the expression.
+
+</ul>
+
+
+
+<li>Once the actual arguments have been determined, they are used to
+select a constructor of <i>C</i>, using the same rules as for method
+invocations (<a href="#7.9">7.9</a>). As in method invocations, a
+<em>compile-time method matching error</em> results if there is no
+unique most-specific constructor that is both applicable and
+accessible.
+
+</ul>
+
+
+
+<h3 id="7.7.3">7.7.3 Run-time Evaluation of Class Instance Creation Expressions</h3>
+
+
+
+<p>
+
+At run time, a class instance creation expression requires memory
+space to be allocated for the new class instance.  If there is
+insufficient space to allocate the object, the program terminates with
+a run-time error.
+
+</p>
+
+
+
+<p>
+
+The new object contains new instances of all the fields declared in
+the specified class type and all its superclasses. As each new field
+instance is created, it is initialized to its default value.
+
+</p>
+
+
+
+<p>
+
+Next, the actual arguments to the constructor are evaluated,
+left-to-right.
+
+</p>
+
+
+
+<p>
+
+Next, the selected constructor of the specified class type is
+invoked. This results in invoking at least one constructor for each
+superclass of the class type.
+
+</p>
+
+
+
+<p>
+
+The value of a class instance creation expression is a reference to
+the newly created object of the specified class. Every time the
+expression is evaluated, a fresh object is created.
+
+</p>
+
+<!---------------------------------------------------------------------------->
+
+
+
+<h2 id="7.8">7.8 Field Access Expressions</h2>
+
+
+
+<p> A <em>field access expression</em> may access a field of an
+object, a reference to which is the value of either an expression or
+the special keyword <code>super</code>.  </p>
+
+
+
+<pre class="indent">
+
+<i>
+
+FieldAccess: 
+
+    <i>Primary</i> . <i>Identifier</i>
+
+    <code>super</code> . <i>Identifier</i>
+
+</i>
+
+</pre>
+
+
+
+
+
+<h3 id="7.8.1">7.8.1 Field Access Using a <i>Primary</i></h3>
+
+
+
+<p>
+
+The type of the <i>Primary</i> must be a reference type T, or a
+compile-time error occurs. The meaning of the field access expression
+is determined as follows:
+
+</p>
+
+
+
+<ul>
+
+<li>If the identifier does not name a member field of type <i>T</i>,
+then the field access is undefined and a compile-time error occurs.
+
+<li>Otherwise, the identifier names a member field of type <i>T</i>
+and the type of the field access expression is the declared type of
+the field. <li>At run time, the result of the field access expression
+is computed as follows:
+
+<ul>
+
+<li>If the value of the <i>Primary</i> is <code>null</code>, then the
+program terminate with a run-time error.
+
+<li>If not, then the result is a variable, namely, the specified
+instance variable in the object referenced by the value of the
+<i>Primary</i>.
+
+</ul>
+
+</ul>
+
+
+
+<p>
+
+Note, specifically, that only the type of the <i>Primary</i>
+expression, not the class of the actual object referred to at run
+time, is used in determining which field to use.
+
+</p>
+
+
+
+<h3 id="7.8.2">7.8.2 Accessing Superclass Members Using super</h3>
+
+<p> The special forms using the keyword <code>super</code> are valid
+only in an instance method, operator or constructor of a class; these
+are exactly the same situations in which the keyword <code>this</code>
+may be used.  </p>
+
+<p> Suppose that a field access expression <code>super.name</code>
+appears within class <i>C</i>, and the immediate superclass of
+<i>C</i> is class <i>S</i>. Then super.name refers to the field named
+name of the current object, but with the current object viewed as an
+instance of the superclass. Thus it can access the field named
+<i>name</i> that is visible in class <i>S</i>, even if that field is
+hidden by a declaration of a field named name in class <i>C</i>.  </p>
+
+<!---------------------------------------------------------------------------->
+
+
+
+
+
+<h2 id="7.9">7.9 Method Invocation Expressions</h2>
+
+
+
+<p>
+
+A <em>method invocation expression</em> is used to invoke a class or instance method.
+
+</p>
+
+
+
+<pre class="indent">
+
+<i>
+
+MethodInvocation:
+
+    Identifier ( ArgumentList<sub>opt</sub> )
+
+    Primary . Identifier ( ArgumentList<sub>opt</sub> )
+
+    <code>super</code> . Identifier ( ArgumentList<sub>opt</sub> )
+
+</i>
+
+</pre>
+
+
+
+<h3 id="7.9.1">7.9.1 Compile-Time Step 1: Determine Class to Search</h3>
+
+
+
+
+
+<p>
+
+The first step in processing a method invocation at compile time is to
+figure out the name of the method to be invoked and which class to
+check for definitions of methods of that name. There are several cases
+to consider, depending on the form that precedes the left parenthesis,
+as follows:
+
+</p>
+
+
+
+<ul>
+
+<li>If the form is <i>Identifier</i>, then the name of the method is
+the <i>Identifier</i>.  The class to search is the one whose
+declaration contains the method invocation.
+
+<li>If the form is <i>Primary</i> . <i>Identifier</i>, then the name
+of the method is the <i>Identifier</i> and the class to be searched is
+the type of the <i>Primary</i> expression.
+
+<li>If the form is <code>super</code> .  <i>Identifier</i>, then the
+name of the method is the <i>Identifier</i> and the class to be
+searched is the immediate superclass of the class whose declaration
+contains the method invocation.
+
+</ul>
+
+
+
+<h3 id="7.9.2">7.9.2 Compile-Time Step 2: Determine Method Signature</h3>
+
+
+
+<p>
+
+The second step searches the class determined in the previous step for
+method declarations. This step uses the name of the method and the
+types of the argument expressions to locate method declarations that
+are applicable, that is, declarations that can be correctly invoked on
+the given arguments. There may be more than one such method
+declaration, in which case the most specific one is chosen. The
+descriptor (signature plus return type) of the most specific method
+declaration is one used at run time to do the method dispatch.
+
+</p>
+
+
+
+<h4 id="7.9.2.1">7.9.2.1 Find Methods that are Applicable</h4>
+
+
+
+<p>
+
+A method declaration is <em>applicable</em> to a method invocation if
+and only if both of the following are true:
+
+</p>
+
+
+
+<ul>
+
+<li>The number of parameters in the method declaration equals the
+number of argument expressions in the method invocation.
+
+<li>The type of each actual argument can be converted by method
+invocation conversion (<a href="#3.3">3.3</a>) to the type of the
+corresponding parameter.
+
+</ul>
+
+
+
+<p>
+
+The class determined by the process described in <a
+href="#7.9.1">7.9.1</a> is searched for all method declarations
+applicable to this method invocation; method definitions inherited
+from superclasses are included in this search.
+
+</p>
+
+
+
+<p>
+
+If the class has no method declaration that is applicable, then a
+compile-time error occurs.
+
+</p>
+
+
+
+<h4 id="7.9.2.2">7.9.2.2 Choose the Most Specific Method</h4>
+
+
+
+<p>
+
+If more than one method declaration is applicable to a method
+invocation, it is necessary to choose one to provide the descriptor
+for the run-time method dispatch. In this case the <em>most
+specific</em> method is chosen.
+
+</p>
+
+
+
+<p>
+
+The informal intuition is that one method declaration is more specific
+than another if any invocation handled by the first method could be
+passed on to the other one without a compile-time type error.
+
+</p>
+
+
+
+<p>
+
+<p>
+The precise definition is as follows:
+</p>
+
+<ul>
+  
+<li>If there is only one applicable method, then that method is most
+  specific.
+  
+<li>Otherwise: Let <i>m</i> be a name and suppose that there are two
+  declarations of methods named <i>m</i>, each having <i>n</i>
+  parameters. Suppose that the types of the parameters of one
+  declaration are <i>T1</i>, . . . , <i>Tn</i>; and suppose, moreover,
+  that the types of the parameters of the other declaration are
+  <i>U1</i>, . . . , <i>Un</i>. Then the method with parameter types
+  <i>T1</i>, . . . , <i>Tn</i> is more specific than the method with
+  parameter types <i>U1</i>, . . . , <i>Un</i> if and only if:
+  
+<ul>
+  
+<li><i>Tj</i> can be converted to <i>Uj</i> by method invocation
+  conversion, for all <i>j</i> from 1 to <i>n</i>.
+  
+</ul>
+</ul>
+
+<p>
+
+A method is said to be maximally specific for a method invocation if
+it is applicable and there is no other applicable method that is more
+specific.
+
+</p>
+
+
+
+<p>
+
+If there is exactly one maximally specific method, then it is in fact
+the most specific method; it is necessarily more specific than any
+other method that is applicable.
+
+</p>
+
+
+
+<p>
+
+It is possible that no method is the most specific, because there are
+two or more maximally specific methods. In this case a compile-time
+error occurs.
+
+</p>
+
+<p>
+
+The type of the method invocation expression is the result type specified
+in the compile-time declaration of the most specific method.
+
+</p>
+
+<!--
+
+<h3 id="7.9.3">7.9.3 Compile-Time Step 3: Is the Chosen Method Appropriate?</h3>
+
+
+
+<p>
+
+If there is a most specific method declaration for a method
+invocation, it is called the compile-time declaration for the method
+invocation.
+
+</p>
+
+<p>
+
+The following compile-time information is then associated with the
+method invocation for use at run time:
+
+</p>
+
+
+
+<ul>
+
+<li>The name of the method. 
+
+<li>The number of parameters and the types of the parameters, in
+order.
+
+<li>The result type as declared in the compile-time declaration.
+
+<li>The invocation mode, if the part of the method invocation before
+the left parenthesis is of the form <code>super</code>
+. <i>Identifier</i> then the invocation mode is <code>super</code>.
+Otherwise the invocation mode is <i>virtual</i>.
+
+</ul>
+
+
+
+<p>
+
+The type of the method invocation expression is the result type
+specified in the compile-time declaration.
+
+</p>
+
+
+
+-->
+
+<h3 id="7.9.3">7.9.3 Runtime Evaluation of Method Invocation</h3>
+
+
+
+<p>
+
+At run time, method invocation requires four steps. First, a
+<em>target reference</em> may be computed. Second, the <em>argument
+expressions</em> are evaluated. Third, the actual code for the method
+to be executed is <em>located</em>. Fourth, a new <em>activation
+frame</em> is created and control is transferred to the method code.
+
+</p>
+
+
+
+<h4 id="7.9.3.1">7.9.3.1 Compute Target Reference (If Necessary)</h4>
+
+
+
+<p>
+
+There are several cases to consider, depending on which of the three
+productions for <i>MethodInvocation</i> (<a href="#7.9">7.9</a>) is
+involved:
+
+</p>
+
+
+
+<ul>
+
+<li>If the first production for <i>MethodInvocation</i>, which
+includes a <i>Identifier</i>, is involved, then the target reference
+is the value of <code>this</code>.
+
+<li>If the second production for <i>MethodInvocation</i>, which
+includes a <i>Primary</i>, is involved, then the expression
+<i>Primary</i> is evaluated and the result is used as the target
+reference.
+
+<li>If the third production for <i>MethodInvocation</i>, which
+includes the keyword super, is involved, then the target reference is
+the value of this.
+
+</ul>
+
+
+
+<h4 id="7.9.3.2">7.9.3.2 Evaluate Arguments</h4>
+
+
+
+<p>
+
+The argument expressions are evaluated in order, from left to right.
+
+</p>
+
+
+
+<h4 id="7.9.3.3">7.9.3.3 Locate Method to Invoke</h4>
+
+
+
+<p>
+
+If the target reference is <code>null</code>, a run-time error occurs
+and the program terminates.  Otherwise, the target reference is said
+to refer to a target object and will be used as the value of the
+keyword <code>this</code> in the invoked method.
+
+</p>
+
+
+
+<p>
+
+A dynamic method lookup is used. The dynamic lookup process starts
+from a class <i>S</i>, determined as follows:
+
+<ul>
+  
+<li> If the invocation is via the keyword <code>super</code>, then
+<i>S</i> is initially the superclass of the class that contains the
+method invocation.
+  
+<li> Otherwise <i>S</i> is initially the actual run-time class
+<i>R</i> of the target object.
+  
+</ul>
+
+</p>
+
+<p>
+
+The dynamic method lookup uses the following procedure to search class
+<i>S</i>, and then the superclasses of class <i>S</i>, as necessary,
+for method <i>m</i>.
+
+</p>
+
+<ul>
+
+<li>If class <i>S </i>contains a declaration for a method named
+<i>m</i> with the same descriptor (same number of parameters, the same
+parameter types, and the same return type) required by the method
+invocation as determined at compile time, then this is the method to
+be invoked, and the procedure terminates.
+
+<li>If <i>S</i> has a superclass, this same lookup procedure is
+performed recursively using the direct superclass of <i>S</i> in place
+of <i>S</i>; the method to be invoked is the result of the recursive
+invocation of this lookup procedure.
+
+</ul> 
+
+
+
+<p>
+
+We note that the dynamic lookup process, while described here
+explicitly, will often be implemented implicitly, for example as a
+side-effect of the construction and use of per-class method dispatch
+tables, or the construction of other per-class structures used for
+efficient dispatch.
+
+</p>
+
+
+
+<h4 id="7.9.3.4">7.9.3.4 Create Frame</h4>
+
+
+
+<p>
+
+A method <i>m</i> in some class <i>S</i> has been identified as the
+one to be invoked.
+
+</p>
+
+
+
+<p>
+
+Now a new activation frame is created, containing the target reference
+and the argument values (if any), as well as enough space for the
+stack for the method to be invoked and any other bookkeeping
+information that may be required by the implementation (stack pointer,
+program counter, reference to previous activation frame, and the
+like). If there is not sufficient memory available to create such an
+activation frame, a run-time error occurs and the program terminates.
+
+</p>
+
+
+
+<p>
+
+The newly created activation frame becomes the current activation
+frame. The effect of this is to assign the argument values to
+corresponding freshly created parameter variables of the method, and
+to make the target reference available as this. Before each argument
+value is assigned to its corresponding parameter variable, it is
+subjected to method invocation conversion (<a href="#3.3">3.3</a>).
+
+</p>
+
+<!---------------------------------------------------------------------------->
+
+<h2 id="7.10">7.10 Unary Operators</h2>
+
+<p> The unary operators include <code>-</code>, <code>!</code> and
+cast operators.  Expressions with unary operators group right-to-left,
+so that <code>-!x</code> means the same as <code>-(!x)</code>.  </p>
+
+<pre class="indent">
+
+<i>
+
+UnaryExpression:
+
+    <code>-</code> UnaryExpression
+
+    <code>!</code> UnaryExpression
+
+    CastExpression
+
+CastExpression:
+
+    ParenExpression CastExpression
+
+    <code>(</code> ReferenceType <code>)</code> CastExpression
+
+    Primary
+</i>
+
+</pre>
+
+<h3 id="7.10.1">7.10.1 Cast Operator</h3>
+
+<p> Conceptually, the grammar for cast expressions is: </p>
+
+<pre class="indent">
+
+<i>
+
+CastExpression:
+
+    <code>(</code> ReferenceType <code>)</code> CastExpression
+
+    Primary
+</i>
+</pre>
+
+<p> However, for technical reasons (to make the grammar LALR(1)), the
+grammar was rewritten to parse a simple class name as an Expression.
+This eliminates an ambiquity that exists with one-token lookahead,
+where a parenthesized name cannot be distinguished from a cast.  (See
+<a
+href="http://java.sun.com/docs/books/jls/first_edition/html/19.doc.html#44559">Section
+19.1.5 of the first edition of the Java Language Specification</a> for
+a discussion of this same problem in Java.)  </p>
+
+<p> The type of a cast expression is the type whose name appears
+within the parentheses.  (The parentheses and the type they contain
+are sometimes called the <i>cast operator</i>.)  The result of a cast
+expression is not a variable, but a value, even if the result of the
+operand expression is a variable.  </p>
+
+<p> At compile time, the type of the operand expression must be
+convertible by casting conversion (<a href="#3.4">3.4</a>) to the
+type of the cast operator.  </p>
+
+<p> A run-time error (<a href="#7.18">7.18</a>) occurs if the type of
+the cast operator is a reference type and the run-time type of the
+cast operand is not assignable to that type.  That is, for reference
+types, the run-time type of the right-hand operand must be the same
+type as the left-hand type, or it must be a subclass of that type.</p>
+
+<h3 id="7.10.2">7.10.2 instanceof Operator</h3>
+
+<p>The grammar for an instanceof expression is:
+
+<pre class="indent">
+
+<i>
+
+InstanceOfExpression:
+
+     InstanceOfExpression instanceof ReferenceType
+
+     RelationalExpression
+
+</i>
+</pre>
+
+<p>
+
+The type of the instanceof expression is <code>Integer</code>.  The
+value of the <code>Integer</code> reference is either 0 or 1.  It is 1
+if and only if the type of InstanceOfExpression is convertible by
+casting conversion (<a href="#3.4">3.4</a>) to the type
+ReferenceType.  If the value of an instanceof expression is 1, a cast
+to the same type is guaranteed to succeed.
+
+</p>
+
+
+<h2 id="7.11">7.11 Arithmetic Operators</h2>
+
+<h3 id="7.11.1">7.11.1 Multiplicative Operators</h3>
+
+<p> The operators <code>*</code> and <code>/</code> are called the
+multiplicative operators. They have the same precedence and are
+syntactically left-associative (they group left-to-right).  </p>
+
+<pre class="indent">
+
+<i>
+
+MultiplicativeExpression:
+
+    UnaryExpression
+
+    MultiplicativeExpression <code>*</code> UnaryExpression
+
+    MultiplicativeExpression <code>/</code> UnaryExpression
+
+</i>
+
+</pre>
+
+
+<h3 id="7.11.2">7.11.2 Additive Operators</h3>
+
+<p> The operators <code>+</code> and <code>-</code> are called the
+additive operators. They have the same precedence and are
+syntactically left-associative (they group left-to-right).  </p>
+
+<pre class="indent">
+
+<i>
+
+AdditiveExpression:
+
+    MultiplicativeExpression
+
+    AdditiveExpression <code>+</code> MultiplicativeExpression
+
+    AdditiveExpression <code>-</code> MultiplicativeExpression
+
+</i>
+
+</pre>
+
+<h2 id="7.12">7.12 Relational Operators</h2>
+
+<p> The relational operators are syntactically left-associative (they
+group left-to-right).  </p>
+
+<pre class="indent">
+
+<i>
+
+RelationalExpression:
+
+    AdditiveExpression
+
+    RelationalExpression <code>&lt;</code> AdditiveExpression
+
+    RelationalExpression <code>&gt;</code> AdditiveExpression
+
+</i>
+
+</pre>
+
+<h2 id="7.13">7.13 Equality Operator</h2>
+
+<p> The equality operator is syntactically left-associative (it groups
+left-to-right).  </p>
+
+<pre class="indent">
+
+<i>
+
+EqualityExpression:
+
+    InstanceOfExpression
+
+    EqualityExpression <code>==</code> InstanceOfExpression
+
+</i>
+
+</pre>
+
+<p> The equality operator may be used to compare two operands for
+object equality.  </p>
+
+<p> At run time, the result of <code>==</code> is an Integer object
+with value of either 0 or 1.  The value will be 1 if the two operands
+denote the same object, and 0 otherwise.  </p>
+
+<!---------------------------------------------------------------------------->
+
+<h2 id="7.14">7.14 Assignment Operator</h2>
+
+<p> The assignment operator is syntactically right-associative (groups
+right-to-left). Thus, <code>a=b=c</code> means <code>a=(b=c)</code>,
+which assigns the value of <i>c</i> to <i>b</i> and then assigns the
+value of <i>b</i> to <i>a</i>.  </p>
+
+<pre class="indent">
+
+<i>
+
+Assignment:
+
+    LeftHandSide <code>=</code> AssignmentExpression
+
+
+
+LeftHandSide:
+
+    Identifier
+
+    FieldAccess
+
+
+
+AssignmentExpression:
+
+    EqualityExpression
+
+    Assignment
+
+</i>
+
+</pre>
+
+<p> The result of the first operand of an assignment operator must be
+a variable, or a compile-time error occurs. This operand may be a
+named variable, such as a field of the current object or class, or it
+may be a computed variable, as can result from a field access. The
+type of the assignment expression is the type of the variable.  </p>
+
+<p> At run time, the result of the assignment expression is the value
+of the variable after the assignment has occurred. The result of an
+assignment expression is not itself a variable.  </p>
+
+<p> A compile-time error occurs if the type of the right-hand operand
+cannot be converted to the type of the variable by assignment
+conversion.  </p>
+
+<p> At run time, three steps are required: </p>
+
+<ul>
+
+<li>The left-hand operand is evaluated to produce a variable.
+
+<li>The right-hand operand is evaluated.
+
+<li>The value of the right-hand operand is converted to the type of
+the left-hand variable, and the result of the conversion is stored
+into the variable.
+
+</ul>
+
+<p>
+
+<h2 id="7.15">7.15 Input Operator</h2>
+
+<p>
+
+The <code>in</code> operator is a rudimentary mechanism for accepting
+strings as user input and it provides the only way to accept input in the
+maTe programming language.
+
+</p>
+
+<pre class="indent">
+
+<i>
+
+InputOperator:
+
+    <code>in</code>
+
+</i>
+
+</pre>
+
+<p>
+
+The <code>in</code> operator reads a string of input from
+<i>stdin</i>.  The <code>in</code> operator skips any leading
+whitespace characters (CR, LR, LF, tab) in the input, and stops when
+it encounters the first non-leading whitespace character (or EOF).  If
+there are no non-whitespace characters prior to EOF, the
+<code>in</code> operator returns a null reference.  Otherwise, a new
+String object is created, whose characters are those read in by the
+operator (except for leading whitespace characters).  The value of the
+in expression is a null reference if no non-whitespace characters were
+found prior to EOF, or a reference to the String object that was
+created.  The type of the in expression is String.
+
+
+</p>
+
+<h2 id="7.16">7.16 Operator Invocation Expressions</h2>
+
+<p>
+
+An <i>operator invocation expression</i> is used to invoke a class or instance operator.
+
+</p>
+
+<pre class="indent">
+
+OperatorInvocation:
+
+    Expression BinaryOperator Expression
+
+    UnaryOperator Expression
+
+    MinusOperator Expression
+
+    Expression MinusOperator Expression
+
+</pre>
+
+<p>
+
+The first step in processing an operator invocation at compile time is
+to figure out the operator to be invoked and which class to check for
+definitions of operators with the specified operator.  There are
+several cases to consider, depending on the form, as follows:
+
+<ul>
+  
+  <li>If the form is <i>Expression BinaryOperator Expression</i>, then
+  the operator is <i>BinaryOperator</i>.  The class to search is the
+  type of the left-most <i>Expression</i> expression.  In this form,
+  the operator takes as its only argument the right-most
+  <i>Expression</i> expression.
+  
+  <li>If the form is <i>UnaryOperator Expression</i>, then the
+  operator is <i>UnaryOperator</i>.  The class to search is the type
+  of the <i>Expression</i> expression.  In this form, the operator
+  takes no arguments.
+
+  <li>If the form is <i>MinusOperator Expression</i>, then the
+  operator is <i>MinusOperator</i> (unary minus operator).  The class
+  to search is the type of the <i>Expression</i> expression.  In this
+  form, the operator takes no arguments.
+
+  <li>If the form is <i>Expression MinusOperator Expression</i>
+  (binary minus operator).  The class to search is the type of the
+  left-most <i>Expression</i> expression.  In this form, the operator
+  takes as its only argument the right-most <i>Expression</i>
+  expression.
+  
+</ul>
+
+</p>
+
+<p>
+
+The second step searches the class determined in the previous step for
+operator declarations.  This step uses the operator and class
+determined in the previous step to locate operator declarations that
+are applicable, that is, declarations that can be correctly invoked on
+the given number of arguments. There may be more than one such
+operator declaration, in which case the most specific one is
+chosen. The descriptor (signature plus return type) of the most
+specific operator declaration is one used at run time to do the
+operator dispatch.
+
+</p>
+
+<p>
+
+Finding applicable operator declarations is entirely similar to
+finding applicable method declarations (<a
+href="#7.9.2.1">7.9.2.1</a>).
+
+</p>
+
+<p>
+
+Find the most specific operator declaration is entirely similar to
+finding the most specific method declaration (<a
+href="#7.9.2.2">7.9.2.2</a>).
+
+</p>
+
+<p>
+
+At run-time, operator invocation is entirely similar to run-time
+evaluation of a method invocation (<a href="#7.9.3">7.9.3</a>).
+
+</p>
+
+<!---------------------------------------------------------------------------->
+
+<h2 id="7.17">7.17 Expression</h2>
+
+<p>
+An <code>Expression</code> is any assignment expression:
+
+<pre class="indent">
+
+<i>
+
+Expression:
+
+    <code>AssignmentExpression</code>
+
+</i>
+
+</pre>
+
+</p>
+
+<!---------------------------------------------------------------------------->
+
+<h2 id="7.18">7.18 Run-Time Errors</h2>
+
+<p>
+
+There is no exception "handling" in the maTe programming
+language. Run-Time errors will cause the abrupt termination of the
+program with an associated error message.
+
+</p>
+
+<p>
+
+<dl> <!-- Definition List -->
+
+
+
+  <dt>
+
+  Run-Time Error conditions and messages are as follows:
+
+  <dd>
+
+  <p></p>
+
+
+
+  <hr>
+
+
+
+  <dt>
+
+  <code>
+
+  ERROR: Out of memory.
+
+  </code>
+
+  <dd>
+
+  	A class instance creation expression (<a href="#7.7">7.7</a>)
+        fails due to insufficient memory available.
+
+  <p></p>
+
+
+  <hr>
+
+
+
+  <dt><code>
+
+  ERROR: Null reference.
+
+  </code>
+
+  <dd>A field access (<a href="#7.8">7.8</a>) is attempted when the
+    value of the object reference expression is <code>null</code>.
+
+  <p></p>
+
+  <dd>A method or operator invocation expression (<a
+    href="#7.9">7.9</a>, <a href="#7.16">7.16</a>) that invokes an
+    instance method is attempted when the target reference is
+    <code>null</code>.
+
+  <p></p>
+
+  <dd> A null reference is passed to the <strong>out</strong> statement
+  (<a href="#6.10">6.10</a>).
+  <p></p>
+
+  <hr>
+
+
+
+  <dt><code>
+
+  ERROR: Divide by zero.
+
+  </code>
+
+  <dd>An <code>Integer</code> division (<a
+    href="#2.3.3">2.3.3</a>)</a> operation is attempted where the
+    value of the denominator is zero.
+
+  <p></p>
+
+
+
+  <hr>
+
+
+
+  <dt><code>
+
+  ERROR: Invalid cast.
+
+  </code>
+
+  <dd>
+
+    A cast (<a href="#7.10.1">7.10.1</a>) to a reference type is
+    attempted where the actual type of the operand expression is
+    incompatible with (not a subclass of) the reference type to which
+    it is being cast.
+
+  <p></p>
+
+  <hr>
+
+
+
+  <dt><code>
+
+  ERROR: Index out of bounds.
+
+  </code>
+
+  <dd>
+
+    The <code>substr</code> method defined by class
+    <code>String</code> was invoked such that at least one of the
+    following conditions was true (see <a href="#2.3.4">2.3.4</a>):
+
+    <ul>
+
+      <li>The <code>String</code> reference which invoked the method
+      contained 0 characters.
+
+      <li>The <i>beg</i> or <i>end</i> indices were not legal indices.
+
+      <li>The <i>end</i> index was smaller than <i>beg</i>.
+
+    </ul>
+
+  <p></p>
+
+
+  <hr>
+
+
+
+  <dt><code>
+
+  ERROR: Number format exception.
+
+  </code>
+
+  <dd>
+
+    The <code>toInteger</code> method defined by class
+    <code>String</code> was invoked such that at least one of the
+    following conditions was true (see <a href="#2.3.4">2.3.4</a>):
+
+    <ul>
+
+      <li>The characters of the <code>String</code> reference that
+      invoked the method were other than the ASCII characters '0',
+      '1', '2', '3', '4', '5', '6', '7', '8', or '9'. An ASCII minus
+      sign '-' is the exception, but only if it is the first character
+      (index 0).
+
+      <li>The parsed integer value of the <code>String</code>
+      reference that invoked the method was less than -2147483648 or
+      greater than 2147483647.
+
+    </ul>
+
+  <p></p>    
+
+  <hr>
+
+
+
+  <dt><code>
+
+  ERROR: Concurrent modification exception.
+
+  </code>
+
+  <dd>
+
+    The <code>put</code> or <code>remove</code> method defined by
+    class <code>Table</code> was invoked after the <code>Table</code>
+    reference that invoked the method's iterator had been initialized
+    but before it had reached the end of the <code>Table</code>.
+
+  <p></p>    
+
+    
+    <!-- String substr -->
+    <!--   invoked on str ref w/ 0 chars -->
+    <!--   invoked where beg or end are not legal indices -->
+    <!--   invoked where end is smaller than beg -->
+
+    <!-- String toInteger -->
+    <!--   invoked where all characters are not 0-9 or - -->
+    <!--   invoked where parsed value out of range -->
+
+    <!-- Table put -->
+    <!--   invoked where iterator not finished -->
+
+    <!-- Table remove -->
+    <!--   invoked where iterator not finished -->
+
+    
+
+</dl>
+
+</p>
+
+
+
+<hr>
+
+</body>
+</html>

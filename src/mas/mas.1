@@ -1,0 +1,27 @@
+.TH "MAS" 1
+.SH NAME
+mas \- An assembler for the maTe programming language.
+.SH SYNOPSIS
+.B mas
+[\-h] [\-s]
+.SH DESCRIPTION
+Reads maTe assembler code from standard input and writes a maTe class
+file to standard output.
+.SH OPTIONS
+.TP
+\-s
+Dump the contents of the symbol table, do not output class file.
+.TP
+\-h
+Display a short help text.
+.SH EXIT STATUS
+Returns a zero exist status if it was successful, and returns non-zero
+if it encountered an error while processing input.
+.SH SEE ALSO
+mc(1), mvm(1)
+.SH AUTHOR
+.TP
+Niels Widger <niels.widger@unh.edu>
+.SH HOMEPAGE
+.TP
+.B http://www.cs.unh.edu

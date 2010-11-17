@@ -1,0 +1,35 @@
+.TH "MC" 1
+.SH NAME
+mc \- A compiler for the maTe programming language.
+.SH SYNOPSIS
+.B mc
+[\-h] [\-before] [\-after] [\-classes]
+.SH DESCRIPTION
+Reads maTe source code from standard input and writes maTe assembler
+code to standard output.  Error messages are printed to standard
+error.  No code is generated if the compiler encounters an error while
+processing input.
+.SH OPTIONS
+.TP
+\-h
+Display a short help text and exit.
+.TP
+\-before
+Write contents of the AST before semantic analysis to standard error.
+.TP
+\-after
+Write contents of the AST after semantic analysis to standard error.
+.TP
+\-classes
+Write contents of class table after semantic analysis to standard error.
+.SH EXIT STATUS
+Returns a zero exist status if it was successful, and returns non-zero
+if it encountered an error while processing input.
+.SH SEE ALSO
+mas(1), mvm(1)
+.SH AUTHOR
+.TP
+Niels Widger <niels.widger@unh.edu>
+.SH HOMEPAGE
+.TP
+.B http://www.cs.unh.edu
