@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DOXYGEN=/Applications/Doxygen.app/Contents/Resources/doxygen
+DOXYGEN=doxygen
 
 pushd doc
 $DOXYGEN mc.doxygen
