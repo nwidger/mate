@@ -2,7 +2,7 @@
 
 // Niels Widger
 // CS 712
-// Time-stamp: <16 Nov 2010 at 20:36:17 by nwidger on macros.local>
+// Time-stamp: <17 Nov 2010 at 20:08:00 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -500,9 +500,13 @@ BlockStatements
 	;
 
 SynchronizedStatement
-	: SYNCHRONIZED '(' Expression ')' Block
+	: SYNCHRONIZED '(' Expression ')' '{' BlockStatements '}'
 	{
-	  $$ = new SynchronizedStatementNode($3, $5);
+	  $$ = new SynchronizedStatementNode($3, $6);
+	}
+	| SYNCHRONIZED '(' Expression ')' '{' '}'
+	{
+	  $$ = new SynchronizedStatementNode($3, new Seq(0, 0));
 	}
 	;
 	

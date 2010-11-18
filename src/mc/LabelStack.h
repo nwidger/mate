@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <30 Nov 2009 at 19:19:31 by nwidger on macros.local>
+// Time-stamp: <17 Nov 2010 at 20:19:55 by nwidger on macros.local>
 
 #ifndef _LABELSTACK
 #define _LABELSTACK
@@ -9,6 +9,18 @@
 class StringPool;
 class LabelStack;
 class LabelStackRecord;
+class MonitorRecord;
+
+class MonitorRecord {
+public:
+	MonitorRecord(int p, MonitorRecord *n);
+	~MonitorRecord();
+	int getPosition();
+	MonitorRecord * getNext();
+protected:
+	int position;
+	MonitorRecord *next;
+};
 
 class LabelStackRecord {
 public:
@@ -17,9 +29,16 @@ public:
 	string * getEntryLabel();
 	string * getExitLabel();
 	LabelStackRecord * getNext();
+	MonitorRecord * getMonitors();
+	int * getMonitorsArray();	
+	void setMonitors(MonitorRecord *m);
+	int getMonitorCount();
+	void incMonitorCount();
 protected:
 	string *entryLabel;
 	string *exitLabel;
+	MonitorRecord *monitors;
+	int monitorCount;
 	LabelStackRecord *next;
 };
 
@@ -30,6 +49,7 @@ public:
 	LabelStackRecord * push();
 	LabelStackRecord * peek();
 	LabelStackRecord * pop();
+	void addMonitor(int p);
 	bool empty();
 protected:
 	LabelStackRecord *head;

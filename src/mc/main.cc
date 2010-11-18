@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <22 Sep 2010 at 21:19:18 by nwidger on macros.local>
+// Time-stamp: <17 Nov 2010 at 20:37:43 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -35,6 +35,7 @@ LabelStack *labelStack;
 Seq *ast;
 
 int labelCounter;
+int synchronizedCounter;
 const char *whileLabel = "W.";
 const char *label = "L.";
 
@@ -81,6 +82,7 @@ int main(int argc, char *argv[]) {
 	labelStack = new LabelStack(whileLabel, 0);
 
 	labelCounter = 0;
+	synchronizedCounter = 0;
 
 	if (yyparse() != 0) {
 		delete ast;

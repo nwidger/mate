@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <17 Nov 2010 at 18:25:12 by nwidger on macros.local>
+// Time-stamp: <17 Nov 2010 at 21:12:49 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -1519,41 +1519,48 @@ void StatementNode::dump() {
 	cerr << *(Node::toString()) << '\n';
 }
 
-SynchronizedStatementNode::SynchronizedStatementNode(ExpressionNode *e, BlockStatementNode *b) {
-	varNode = 0;
+SynchronizedStatementNode::SynchronizedStatementNode(ExpressionNode *e, Seq *s) {
 	expression = e;
-	body = b;
+	statements = s;
+	varNode = 0;
+	position = 0;
 	nodeName = "SynchronizedStatementNode";
 }
 
 SynchronizedStatementNode::~SynchronizedStatementNode() {
 	delete expression;
-	delete body;
+
+	if (statements != 0)
+		delete statements;
 }
 
 void SynchronizedStatementNode::dump() {
 	StatementNode::dump();	
 	expression->dump();
-	body->dump();
+	statements->dump();
 }
 
-// TODO: need to create unique varnode name and push it onto the local
-// variable stack.  At code generation time, store result of
-// expression into varnode's local variable slot a load it onto the
-// stack each time 'monitorenter'/'monitorexit' is executed.  Ensure
-// that if 'break' statement is used inside a synchronized block,
-// 'monitorexit' is executed before the 'goto' is executed.  Pop
-// varnode after body is finished.
-
 Node * SynchronizedStatementNode::analyze(void *param) {
-	string *name;
+	string *name, str;
+	ostringstream nameO;
 
-	name = stringPool->newString("synchronized");
-	varNode = new VarNode(name);
-	
 	expression = (ExpressionNode *)expression->analyze(param);
-	body = (BlockStatementNode *)body->analyze(param);
 
+	localVariableStack->enterBlock();
+
+	nameO << "synchronized$." << synchronizedCounter++;
+	str = nameO.str();
+	name = stringPool->newString(str);
+	varNode = new VarNode(name);
+	varNode->setParentIsDeref(true);
+	localVariableStack->push(varNode);
+	position = varNode->getPosition();
+	labelStack->addMonitor(position);
+
+	statements = statements->analyze(param);
+
+	localVariableStack->leaveBlock();
+	
 	return (Node *)this;
 }
 
@@ -1561,8 +1568,8 @@ ExpressionNode * SynchronizedStatementNode::getExpression() {
 	return expression;
 }
 
-BlockStatementNode * SynchronizedStatementNode::getBody() {
-	return body;
+Seq * SynchronizedStatementNode::getStatements() {
+	return statements;
 }
 
 BlockStatementNode::BlockStatementNode() {
@@ -1761,6 +1768,7 @@ Node * WhileStatementNode::analyze(void *param) {
 ReturnStatementNode::ReturnStatementNode() {
 	expression = 0;
 	label = 0;
+	monitors = 0;
 	nodeName = "ReturnStatementNode";
 }
 
@@ -1773,6 +1781,8 @@ ReturnStatementNode::ReturnStatementNode(ExpressionNode *e) {
 ReturnStatementNode::~ReturnStatementNode() {
 	if (expression != 0)
 		delete expression;
+	if (monitors != 0)
+		delete[] monitors;
 }
 
 void ReturnStatementNode::dump() {
@@ -1784,6 +1794,7 @@ void ReturnStatementNode::dump() {
 Node * ReturnStatementNode::analyze(void *param) {
 	Type *methodType;
 	string str;
+	LabelStackRecord *lsr;
 
 	if (expression != 0)
 		expression = (ExpressionNode *)expression->analyze(param);
@@ -1840,6 +1851,9 @@ Node * ReturnStatementNode::analyze(void *param) {
 		}
 	}
 
+	if ((lsr = labelStack->peek()) != 0)
+		monitors = lsr->getMonitorsArray();
+
 	return (Node *)this;
 }
 
@@ -1884,7 +1898,12 @@ Node * OutStatementNode::analyze(void *param) {
 
 BreakStatementNode::BreakStatementNode() {
 	exitLabel = 0;
+	monitors = 0;
 	nodeName = "BreakStatementNode";
+}
+
+BreakStatementNode::~BreakStatementNode() {
+
 }
 
 Node * BreakStatementNode::analyze(void *param) {
@@ -1899,12 +1918,19 @@ Node * BreakStatementNode::analyze(void *param) {
 	}
 
 	exitLabel = lsr->getExitLabel();
+	monitors = lsr->getMonitorsArray();
 
 	return (Node *)this;
 }
 
 ContinueStatementNode::ContinueStatementNode() {
+	monitors = 0;
 	nodeName = "ContinueStatementNode";
+}
+
+ContinueStatementNode::~ContinueStatementNode() {
+	if (monitors != 0)
+		delete[] monitors;
 }
 
 Node * ContinueStatementNode::analyze(void *param) {

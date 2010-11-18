@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <17 Nov 2010 at 12:46:14 by nwidger on macros.local>
+// Time-stamp: <17 Nov 2010 at 21:12:26 by nwidger on macros.local>
 
 #ifndef _NODE_H
 #define _NODE_H
@@ -515,17 +515,18 @@ protected:
 
 class SynchronizedStatementNode : public StatementNode {
 public:
-	SynchronizedStatementNode(ExpressionNode *e, BlockStatementNode *b);
+	SynchronizedStatementNode(ExpressionNode *e, Seq *s);
 	~SynchronizedStatementNode();
 	void dump();
 	void encode();
 	Node * analyze(void *param);
 	ExpressionNode * getExpression();
-	BlockStatementNode * getBody();
+	Seq * getStatements();
 protected:
 	ExpressionNode *expression;
-	BlockStatementNode *body;
+	Seq *statements;
 	VarNode *varNode;
+	int position;
 };
 
 class BlockStatementNode : public StatementNode {
@@ -607,6 +608,7 @@ public:
 protected:
 	ExpressionNode *expression;
 	string *label;
+	int *monitors;
 };
 
 class OutStatementNode : public StatementNode {
@@ -625,19 +627,23 @@ protected:
 class BreakStatementNode : public StatementNode {
 public:
 	BreakStatementNode();
+	~BreakStatementNode();
 	void encode();
 	Node * analyze(void *param);	
 protected:
 	string *exitLabel;
+	int *monitors;
 };
 
 class ContinueStatementNode : public StatementNode {
 public:
 	ContinueStatementNode();
+	~ContinueStatementNode();	
 	void encode();
 	Node * analyze(void *param);	
 protected:
 	string *entryLabel;
+	int *monitors;
 };
 
 class ConstructorInvocationStatementNode : public StatementNode {

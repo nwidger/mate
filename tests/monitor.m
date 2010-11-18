@@ -1,14 +1,24 @@
 class MonitorTest {
-  Integer x;
+  Integer x, y;
 
   MonitorTest() {
 
   }
 
   Integer getX() {
-    synchronized (x) {
-      return x;
+    while (1) {
+      synchronized (x) {
+	synchronized (y) {
+	  if (0) {
+	    break;
+	  }
+	  
+	  return x;
+	}
+      }
     }
+
+    return x;
   }
 }
 

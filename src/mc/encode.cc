@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <16 Nov 2010 at 20:54:04 by nwidger on macros.local>
+// Time-stamp: <17 Nov 2010 at 21:11:53 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -25,11 +25,13 @@ void SynchronizedStatementNode::encode() {
 	expression->encode();
 
 	cout << "  dup\n"
+	     << "  astore " << position << '\n'
 	     << "  monitorenter\n";
 
-	body->encode();
+	statements->encode();
 
-	cout << "  monitorexit\n";	
+	cout << "  aload " << position << '\n'
+	     << "  monitorexit\n";	
 }
 
 void BlockStatementNode::encode() {
@@ -244,19 +246,40 @@ void WhileStatementNode::encode() {
 }
 
 void BreakStatementNode::encode() {
-	Node::encode();	
-	
+	Node::encode();
+
+	if (monitors != 0) {
+		for (int i = 0; monitors[i] != -1; i++) {
+			cout << "  aload " << monitors[i] << '\n'
+			     << "  monitorexit\n";
+		}
+	}
+
 	cout << "  goto $" << *exitLabel << "\n";
 }
 
 void ContinueStatementNode::encode() {
-	Node::encode();	
+	Node::encode();
+
+	if (monitors != 0) {
+		for (int i = 0; monitors[i] != -1; i++) {
+			cout << "  aload " << monitors[i] << '\n'
+			     << "  monitorexit\n";
+		}
+	}
 	
 	cout << "  goto $" << *entryLabel << "\n";
 }
 
 void ReturnStatementNode::encode() {
 	Node::encode();
+
+	if (monitors != 0) {
+		for (int i = 0; monitors[i] != -1; i++) {
+			cout << "  aload " << monitors[i] << '\n'
+			     << "  monitorexit\n";
+		}
+	}
 
 	if (expression != 0)
 		expression->encode();
