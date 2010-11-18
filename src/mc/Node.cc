@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <17 Nov 2010 at 21:12:49 by nwidger on macros.local>
+// Time-stamp: <18 Nov 2010 at 15:11:02 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -1852,7 +1852,7 @@ Node * ReturnStatementNode::analyze(void *param) {
 	}
 
 	if ((lsr = labelStack->peek()) != 0)
-		monitors = lsr->getMonitorsArray();
+		monitors = labelStack->getAllMonitors();
 
 	return (Node *)this;
 }
@@ -1918,7 +1918,7 @@ Node * BreakStatementNode::analyze(void *param) {
 	}
 
 	exitLabel = lsr->getExitLabel();
-	monitors = lsr->getMonitorsArray();
+	monitors = labelStack->getMonitors();
 
 	return (Node *)this;
 }
@@ -1946,7 +1946,8 @@ Node * ContinueStatementNode::analyze(void *param) {
 
 
 	entryLabel = lsr->getEntryLabel();
-
+	monitors = labelStack->getMonitors();	
+	
 	return (Node *)this;
 }
 

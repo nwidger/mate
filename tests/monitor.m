@@ -2,7 +2,8 @@ class MonitorTest {
   Integer x, y;
 
   MonitorTest() {
-
+    x = 0;
+    y = 0;
   }
 
   Integer getX() {
@@ -23,5 +24,11 @@ class MonitorTest {
 }
 
 Integer main() {
-  return 0;
+  Integer x;
+  MonitorTest m;
+
+  m = new MonitorTest();
+  x = m.getX();
+  
+  return x;
 }

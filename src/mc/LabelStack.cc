@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <17 Nov 2010 at 21:01:08 by nwidger on macros.local>
+// Time-stamp: <18 Nov 2010 at 15:11:27 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -146,6 +146,54 @@ void LabelStack::addMonitor(int p) {
 
 	lsr->setMonitors(new MonitorRecord(p, lsr->getMonitors()));
 	lsr->incMonitorCount();
+}
+
+int * LabelStack::getMonitors() {
+	int i, count, *monitors;
+	LabelStackRecord *lsr;
+	MonitorRecord *mr;
+
+	if (head == 0)
+		return 0;
+
+	lsr = head;
+	count = lsr->getMonitorCount();
+
+	if (count == 0)
+		return 0;
+
+	monitors = new int[count+1];
+
+	for (i = 0, mr = lsr->getMonitors(); mr != 0; mr = mr->getNext())
+		monitors[i++] = mr->getPosition();
+
+	monitors[count] = -1;
+	return monitors;
+}
+
+int * LabelStack::getAllMonitors() {
+	int i, count, *monitors;
+	LabelStackRecord *lsr;
+	MonitorRecord *mr;
+
+	if (head == 0)
+		return 0;
+
+	for (count = 0, lsr = head; lsr != 0; lsr = lsr->getNext())
+		count += lsr->getMonitorCount();
+
+	if (count == 0)
+		return 0;
+
+	monitors = new int[count+1];
+
+	for (i = 0, lsr = head; lsr != 0; lsr = lsr->getNext()) {
+		for (mr = lsr->getMonitors(); mr != 0; mr = mr->getNext())
+			monitors[i++] = mr->getPosition();
+	}
+
+	monitors[count] = -1;
+	return monitors;
 }
 
 bool LabelStack::empty() {

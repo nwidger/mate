@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <17 Nov 2010 at 21:11:53 by nwidger on macros.local>
+// Time-stamp: <18 Nov 2010 at 14:57:49 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -274,15 +274,15 @@ void ContinueStatementNode::encode() {
 void ReturnStatementNode::encode() {
 	Node::encode();
 
+	if (expression != 0)
+		expression->encode();
+	
 	if (monitors != 0) {
 		for (int i = 0; monitors[i] != -1; i++) {
 			cout << "  aload " << monitors[i] << '\n'
 			     << "  monitorexit\n";
 		}
 	}
-
-	if (expression != 0)
-		expression->encode();
 
 	cout << "  goto $" << *label << '\n';			
 }

@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <17 Nov 2010 at 20:19:55 by nwidger on macros.local>
+// Time-stamp: <18 Nov 2010 at 15:10:26 by nwidger on macros.local>
 
 #ifndef _LABELSTACK
 #define _LABELSTACK
@@ -50,6 +50,8 @@ public:
 	LabelStackRecord * peek();
 	LabelStackRecord * pop();
 	void addMonitor(int p);
+	int * getMonitors();	
+	int * getAllMonitors();	
 	bool empty();
 protected:
 	LabelStackRecord *head;
