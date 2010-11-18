@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <18 Nov 2010 at 15:11:27 by nwidger on macros.local>
+// Time-stamp: <18 Nov 2010 at 16:34:35 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -48,28 +48,12 @@ MonitorRecord * LabelStackRecord::getMonitors() {
 	return monitors;
 }
 
-int * LabelStackRecord::getMonitorsArray() {
+void LabelStackRecord::addMonitor(int p) {
 	MonitorRecord *mr;
-	int *array, i;
 
-	if (monitors == 0)
-		return 0;
+	mr = new MonitorRecord(p, monitors);
+	monitors = mr;
 
-	array = new int[monitorCount+1];
-
-	for (i = 0, mr = monitors; mr != 0; mr = mr->getNext())
-		array[i++] = mr->getPosition();
-
-	array[monitorCount] = -1;
-
-	return array;
-}
-
-void LabelStackRecord::setMonitors(MonitorRecord *m) {
-	monitors = m;
-}
-
-void LabelStackRecord::incMonitorCount() {
 	monitorCount++;
 }
 
@@ -137,15 +121,10 @@ LabelStackRecord * LabelStack::peek() {
 }
 
 void LabelStack::addMonitor(int p) {
-	LabelStackRecord *lsr;
-	
 	if (head == 0)
 		return;
 
-	lsr = head;
-
-	lsr->setMonitors(new MonitorRecord(p, lsr->getMonitors()));
-	lsr->incMonitorCount();
+	head->addMonitor(p);
 }
 
 int * LabelStack::getMonitors() {

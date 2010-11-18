@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <18 Nov 2010 at 15:10:26 by nwidger on macros.local>
+// Time-stamp: <18 Nov 2010 at 16:33:57 by nwidger on macros.local>
 
 #ifndef _LABELSTACK
 #define _LABELSTACK
@@ -30,10 +30,8 @@ public:
 	string * getExitLabel();
 	LabelStackRecord * getNext();
 	MonitorRecord * getMonitors();
-	int * getMonitorsArray();	
-	void setMonitors(MonitorRecord *m);
+	void addMonitor(int p);
 	int getMonitorCount();
-	void incMonitorCount();
 protected:
 	string *entryLabel;
 	string *exitLabel;

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <16 Nov 2010 at 21:33:50 by nwidger on macros.local>
+ * Time-stamp: <18 Nov 2010 at 16:40:21 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -614,6 +614,12 @@ int monitorenter_instruction(uint32_t o) {
 	SETUP_INSTRUCTION();
 
 	ref = operand_stack_pop(operand_stack);
+
+	if (ref == 0) {
+		fprintf(stderr, "mvm: cannot acquire monitor on null reference!\n");		
+		mvm_halt();
+	}
+	
 	object = heap_fetch_object(heap, ref);
 	object_acquire_monitor(object);
 	
@@ -637,6 +643,12 @@ int monitorexit_instruction(uint32_t o) {
 	SETUP_INSTRUCTION();
 
 	ref = operand_stack_pop(operand_stack);
+
+	if (ref == 0) {
+		fprintf(stderr, "mvm: cannot release monitor of null reference!\n");		
+		mvm_halt();
+	}
+	
 	object = heap_fetch_object(heap, ref);
 	object_release_monitor(object);
 	
