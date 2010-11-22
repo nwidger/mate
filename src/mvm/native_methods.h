@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Feb 2010 at 14:00:37 by nwidger on macros.local>
+ * Time-stamp: <21 Nov 2010 at 23:03:19 by nwidger on macros.local>
  */
 
 #ifndef _MVM_NATIVEMETHODS_H
@@ -46,6 +46,11 @@ int native_table_put(uint32_t i);
 int native_table_remove(uint32_t i);
 int native_table_first_key(uint32_t i);
 int native_table_next_key(uint32_t i);
+
+int native_thread_constructor(uint32_t i);
+int native_thread_start(uint32_t i);
+int native_thread_run(uint32_t i);
+int native_thread_join(uint32_t i);
 
 /** adds all necessary native methods to the given native_method_array.
  *

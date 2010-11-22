@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Feb 2010 at 13:20:43 by nwidger on macros.local>
+ * Time-stamp: <19 Nov 2010 at 20:05:57 by nwidger on macros.local>
  */
 
 #ifndef _MVM_CLASSTABLE_H
@@ -22,6 +22,8 @@ enum class_type {
 	string_type	= 2,
 	/** class is predefined Table class */	
 	table_type	= 3,
+	/** class is predefined Thread class */	
+	thread_type	= 4,
 	/** class is user defined class */
 	user_type       = 5
 };
@@ -55,11 +57,12 @@ void class_table_clear(struct class_table *c);
 
 /** adds a new class n to the given class_table.
  *
- * @param c - the class_table to add to
- * @param t - the type of the new class.  Must be one of 'object_type',
- * 'integer_type', 'string_type', 'table_type', or 'user_type'.  All
- * classes besides Object, Integer, String, and Table should be
+ * @param c - the class_table to add to @param t - the type of the new
+ * class.  Must be one of 'object_type', 'integer_type',
+ * 'string_type', 'table_type', 'thread_type' or 'user_type'.  All
+ * classes besides Object, Integer, String, Table and Thread should be
  * added as type 'user_type'.
+ * 
  * @param n - the new class to add
  *
  * @return 0 on success, non-zero on failure.
@@ -81,8 +84,9 @@ struct class * class_table_find(struct class_table *c, uint32_t v);
 /** find a predefined class.
  *
  * @param c - the class_table to search
- * @param t - predefined class type to find.  Must be one of 'object_type',
- * 'integer_type', 'string_type' or 'table_type'..
+ * @param t - predefined class type to find.  Must be one of
+ * 'object_type', 'integer_type', 'string_type', 'table_type' or
+ * 'thread_type'.
  *
  * @return pointer to class if found, NULL otherwise.
  * @see class_type
@@ -94,7 +98,7 @@ struct class * class_table_find_predefined(struct class_table *c, enum class_typ
  * returns a reference to the new object.  To create an instance of a
  * predefined class, use class_table_new_object,
  * class_table_new_integer, class_table_new_string,
- * class_table_new_table.
+ * class_table_new_table or class_table_new_thread.
  *
  * @param c - the class_table to use
  * @param v - the vmt of the class to create an instance of
@@ -151,6 +155,17 @@ int class_table_new_string(struct class_table *c, char *b, struct object **o);
  */
 
 int class_table_new_table(struct class_table *c, int n, struct object **o);
+
+/** creates a new instance of the predefined Thread class and returns
+ * a reference to the new object.
+ *
+ * @param c - the class_table to use
+ * @param o - if non-NULL, pointer to object will be saved to this variable
+ *
+ * @return reference to the new Thread instance, or 0 on failure
+ */
+
+int class_table_new_thread(struct class_table *c, struct object **o);
 
 /** performs analysis on the class_table in order to determine class
  * hierarchy.  In particular, calls class_set_super_class on each

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <15 Apr 2010 at 21:22:29 by nwidger on macros.local>
+ * Time-stamp: <21 Nov 2010 at 21:23:28 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -35,6 +35,7 @@
 #include "string.h"
 #include "symbol_table.h"
 #include "table.h"
+#include "thread.h"
 #include "vm_stack.h"
 
 /* constants */
@@ -801,6 +802,10 @@ int add_symbol_file_function(char **t, int n) {
 }
 
 int backtrace_function(char **t, int n) {
+	struct vm_stack *vm_stack;
+
+	vm_stack = thread_get_vm_stack();
+	
 	repeat = 1;
 
 	if (vm_stack_empty(vm_stack)) {
@@ -824,7 +829,9 @@ int break_function(char **t, int n) {
 	char *where;
 	int is_native;
 	struct breakpoint *b, *c;
-	uint32_t address, native_index;
+	uint32_t pc, address, native_index;
+
+	pc = thread_get_pc();
 
 	repeat = 1;
 	is_native = 0;
@@ -1034,6 +1041,9 @@ int disassemble_function(char **t, int n) {
 int down_function(char **t, int n) {
 	int num, i;
 	struct frame *tmp;
+	struct vm_stack *vm_stack;
+
+	vm_stack = thread_get_vm_stack();
 
 	repeat = 1;
 
@@ -1096,6 +1106,10 @@ int enable_function(char **t, int n) {
 }
 
 int finish_function(char **t, int n) {
+	struct vm_stack *vm_stack;
+
+	vm_stack = thread_get_vm_stack();
+	
 	repeat = 1;
 
 	if (mode == startup_mode || mode == terminated_mode) {
@@ -1119,6 +1133,9 @@ int finish_function(char **t, int n) {
 int frame_function(char **t, int n) {
 	int num;
 	struct frame *tmp;
+	struct vm_stack *vm_stack;
+
+	vm_stack = thread_get_vm_stack();
 
 	repeat = 1;
 
@@ -1194,6 +1211,11 @@ int help_function(char **t, int n) {
 int info_function(char **t, int n) {
 	int i, index;
 	char *command;
+	uint32_t pc;
+	struct vm_stack *vm_stack;
+
+	pc = thread_get_pc();
+	vm_stack = thread_get_vm_stack();
 
 	repeat = 1;
 
@@ -1270,8 +1292,9 @@ int info_function(char **t, int n) {
 }
 
 int jump_function(char **t, int n) {
-	uint32_t address;
+	uint32_t pc, address;
 
+	pc = thread_get_pc();
 	repeat = 1;
 
 	if (mode == startup_mode || mode == terminated_mode) {
@@ -1296,13 +1319,17 @@ int jump_function(char **t, int n) {
 		return 0;
 	}
 
-	pc = address;
+	thread_set_pc(address);
 	fprintf(stderr, "Continuing at %" PRIu32 ".\n", address);
 
 	return 1;
 }
 
 int nexti_function(char **t, int n) {
+	struct vm_stack *vm_stack;
+
+	vm_stack = thread_get_vm_stack();
+	
 	repeat = 1;
 
 	if (mode == startup_mode || mode == terminated_mode) {
@@ -1542,6 +1569,9 @@ int until_function(char **t, int n) {
 
 int up_function(char **t, int n) {
 	int num;
+	struct vm_stack *vm_stack;
+
+	vm_stack = thread_get_vm_stack();
 
 	repeat = 1;
 
@@ -1795,6 +1825,10 @@ char ** mdb_completion(const char *l, int s, int e) {
 }
 
 void mdb_sigint_handler(int s) {
+	struct vm_stack *vm_stack;
+
+	vm_stack = thread_get_vm_stack();
+	
 	fprintf(stderr, "\nProgram interrupted.\n");
 	frame = vm_stack_peek(vm_stack);
 	mdb_update_frame();
@@ -2042,7 +2076,11 @@ int mdb_insert_enabled_breakpoints() {
 uint32_t mdb_hook(enum mdb_hook h) {
 	int enter_cli, hits;
 	struct breakpoint *b;
-	uint32_t retval, opcode;
+	uint32_t pc, retval, opcode;
+	struct vm_stack *vm_stack;
+
+	pc = thread_get_pc();
+	vm_stack = thread_get_vm_stack();
 
 	last_hook = h;
 	enter_cli = 0;

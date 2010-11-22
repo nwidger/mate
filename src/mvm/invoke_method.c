@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <09 Apr 2010 at 15:58:30 by nwidger on macros.local>
+ * Time-stamp: <21 Nov 2010 at 21:38:39 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -27,6 +27,7 @@
 #include "object.h"
 #include "operand_stack.h"
 #include "symbol_table.h"
+#include "thread.h"
 #include "vm_stack.h"
 
 /* forward declarations */
@@ -112,8 +113,13 @@ int invoke_virtual_method(int r, int i, int n, uint32_t a) {
 }
 
 int invoke_native_method(int i, uint32_t r) {
+	uint32_t pc;
 	int num_args;
 	char *name;
+	struct vm_stack *vm_stack;
+
+	pc = thread_get_pc();
+	vm_stack = thread_get_vm_stack();
 
 	name = native_method_array_get_name(native_method_array, i);
 	num_args = native_method_array_get_num_args(native_method_array, i);
@@ -135,7 +141,7 @@ int invoke_native_method(int i, uint32_t r) {
 	if (native_method_array_execute(native_method_array, i) != 0)
 		mvm_halt();
 
-	pc = vm_stack_pop(vm_stack);
+	thread_set_pc(vm_stack_pop(vm_stack));
 
 	if (debug != 0) {
 		mdb_hook(leave_method_hook);
@@ -152,8 +158,11 @@ int invoke_method(char *e, uint32_t a, uint32_t b, int n, int m, uint32_t r) {
 
 int execute_method(char *e, uint32_t a, uint32_t b, uint32_t n, uint32_t m, uint32_t r) {
 	int old_size;
-	uint32_t opcode;
+	uint32_t pc, opcode;
 	struct frame *frame;
+	struct vm_stack *vm_stack;
+
+	vm_stack = thread_get_vm_stack();	
 
 	/* lock */
 	garbage_collector_lock(garbage_collector);
@@ -164,10 +173,12 @@ int execute_method(char *e, uint32_t a, uint32_t b, uint32_t n, uint32_t m, uint
 	/* unlock */
 	garbage_collector_unlock(garbage_collector);
 
-	pc = a;
+	thread_set_pc(a);
 
 	while (vm_stack_empty(vm_stack) == 0 &&
 	       vm_stack_size(vm_stack) > old_size) {
+		pc = thread_get_pc();
+		
 		frame_set_current_address(frame, pc);
 		opcode = method_area_fetch(method_area, pc);
 

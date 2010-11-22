@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Feb 2010 at 15:27:31 by nwidger on macros.local>
+ * Time-stamp: <21 Nov 2010 at 21:55:22 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -22,6 +22,7 @@
 #include "object.h"
 #include "string.h"
 #include "table.h"
+#include "thread.h"
 
 /* struct definitions */
 struct class_table {
@@ -343,6 +344,47 @@ int class_table_new_table(struct class_table *c, int n, struct object **o) {
 	table = table_create(n);
 	heap_include_ref(heap, ref);
 	object_set_table(object, table);
+
+	if (o != NULL)
+		*o = object;
+
+	/* unlock */
+	class_table_unlock(c);
+
+	return ref;
+}
+
+int class_table_new_thread(struct class_table *c, struct object **o) {
+	int ref;
+	uint32_t vmt;
+	struct object *object;
+	struct thread *thread;
+	struct class *thread_class;
+
+	if (c == NULL) {
+		fprintf(stderr, "mvm: class table not initialized!\n");
+		mvm_halt();
+	}
+
+	/* lock */
+	class_table_lock(c);
+
+	thread_class = c->predefined_classes[thread_type];
+	vmt = class_get_vmt(thread_class);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = class_table_new(class_table, vmt, &object);
+	heap_exclude_ref(heap, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	thread = thread_create();
+	/* thread instances are not collectable until run method terminates */
+	/* heap_include_ref(heap, ref); */
+	object_set_thread(object, thread);
 
 	if (o != NULL)
 		*o = object;

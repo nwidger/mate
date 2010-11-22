@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <13 Mar 2010 at 15:53:16 by nwidger on macros.local>
+ * Time-stamp: <21 Nov 2010 at 23:39:22 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -24,14 +24,18 @@
 #include "operand_stack.h"
 #include "string.h"
 #include "table.h"
+#include "thread.h"
 #include "vm_stack.h"
 
 #define SETUP_NATIVE_METHOD()						\
+	struct vm_stack *vm_stack;					\
 	struct frame *frame;						\
 	struct operand_stack *operand_stack;				\
 	struct local_variable_array *local_variable_array;		\
 	struct frame *calling_frame;					\
 	struct operand_stack *calling_frame_operand_stack;		\
+									\
+        vm_stack = thread_get_vm_stack();				\
 									\
 	frame = vm_stack_peek(vm_stack);				\
 	if (frame == NULL) {						\
@@ -852,6 +856,71 @@ int native_table_next_key(uint32_t i) {
 	return 0;
 }
 
+int native_thread_constructor(uint32_t i) {
+	int ref, n;
+	struct object *this;
+	struct thread *thread;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	thread = thread_create();
+	object_set_thread(this, thread);
+	
+	return 0;
+}
+
+int native_thread_start(uint32_t i) {
+	int ref, n;
+	struct object *this;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	ref = thread_start(this);
+	operand_stack_push(calling_frame_operand_stack, ref);
+	
+	return 0;
+}
+
+int native_thread_run(uint32_t i) {
+	int ref, n;
+	struct object *this;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	ref = thread_run(this);
+	operand_stack_push(calling_frame_operand_stack, ref);
+	
+	return 0;
+}
+
+int native_thread_join(uint32_t i) {
+	int ref, n;
+	struct object *this;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	ref = thread_join(this);
+	operand_stack_push(calling_frame_operand_stack, ref);
+	
+	return 0;
+}
+
 int add_native_methods(struct native_method_array *n) {
 	native_method_array_set(n, OBJECT_CONSTRUCTOR_NATIVE_INDEX,
 				OBJECT_CONSTRUCTOR_NATIVE_NAME,
@@ -1029,6 +1098,24 @@ int add_native_methods(struct native_method_array *n) {
 				TABLE_NEXT_KEY_NATIVE_NAME,
 				TABLE_NEXT_KEY_NATIVE_ARGS,				
 				native_table_next_key);
+
+	native_method_array_set(n, THREAD_CONSTRUCTOR_NATIVE_INDEX,
+				THREAD_CONSTRUCTOR_NATIVE_NAME,
+				THREAD_CONSTRUCTOR_NATIVE_ARGS,				
+				native_thread_constructor);
+	native_method_array_set(n, THREAD_START_NATIVE_INDEX,
+				THREAD_START_NATIVE_NAME,
+				THREAD_START_NATIVE_ARGS,				
+				native_thread_start);
+	native_method_array_set(n, THREAD_RUN_NATIVE_INDEX,
+				THREAD_RUN_NATIVE_NAME,
+				THREAD_RUN_NATIVE_ARGS,				
+				native_thread_run);
+	native_method_array_set(n, THREAD_JOIN_NATIVE_INDEX,
+				THREAD_JOIN_NATIVE_NAME,
+				THREAD_JOIN_NATIVE_ARGS,				
+				native_thread_join);
+	
 	
 	return 0;
 }

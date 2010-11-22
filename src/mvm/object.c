@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <17 Nov 2010 at 10:57:32 by nwidger on macros.local>
+ * Time-stamp: <19 Nov 2010 at 20:10:16 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -23,6 +23,7 @@
 #include "ref_set.h"
 #include "string.h"
 #include "table.h"
+#include "thread.h"
 #include "vm_stack.h"
 
 /* struct definitions */
@@ -34,6 +35,7 @@ struct object {
 		struct integer *integer;
 		struct string *string;
 		struct table *table;
+		struct thread *thread;		
 	} predefined;
 
 	struct class *class;
@@ -245,6 +247,20 @@ struct table * object_get_table(struct object *o) {
 	return (o->predefined).table;
 }
 
+struct thread * object_get_thread(struct object *o) {
+	if (o == NULL) {
+		fprintf(stderr, "mvm: object has not been initialized!\n");
+		mvm_halt();
+	}
+
+	if (o->predefined_type != thread_type) {
+		fprintf(stderr, "mvm: object's predefined type is not thread!\n");
+		mvm_halt();
+	}
+
+	return (o->predefined).thread;
+}
+
 int object_set_integer(struct object *o, struct integer *i) {
 	if (o == NULL) {
 		fprintf(stderr, "mvm: object has not been initialized!\n");
@@ -286,6 +302,21 @@ int object_set_table(struct object *o, struct table *t) {
 
 	o->predefined_type = table_type;
 	(o->predefined).table = t;
+
+	return 0;
+}
+
+int object_set_thread(struct object *o, struct thread *t) {
+	if (o == NULL) {
+		fprintf(stderr, "mvm: object has not been initialized!\n");
+		mvm_halt();
+	}
+
+	if (object_destroy_predefined_type(o) != 0)
+		mvm_halt();
+
+	o->predefined_type = thread_type;
+	(o->predefined).thread = t;
 
 	return 0;
 }
@@ -373,6 +404,12 @@ int object_destroy_predefined_type(struct object *o) {
 		if (o->predefined.table != NULL) {
 			table_destroy(o->predefined.table);
 			o->predefined.table = NULL;
+		}
+		break;
+	case thread_type:
+		if (o->predefined.thread != NULL) {
+			thread_destroy(o->predefined.thread);
+			o->predefined.thread = NULL;
 		}
 		break;
 	}

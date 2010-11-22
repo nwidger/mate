@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Feb 2010 at 15:16:30 by nwidger on macros.local>
+ * Time-stamp: <19 Nov 2010 at 21:08:16 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -279,11 +279,14 @@ int garbage_collector_collect_now(struct garbage_collector *g) {
 
 int tricolor_garbage_collector(struct garbage_collector *g) {
 	int i, size, object_ref, ref;
+	struct vm_stack *vm_stack;
 	struct frame *frame;
 	struct operand_stack *operand_stack;
 	struct object *object;
 	struct local_variable_array *local_variable_array;
 	struct ref_set *tmp;
+
+	vm_stack = NULL;
 
 	mvm_print("garbage_collector: collection started\n");
 

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <16 Nov 2010 at 21:03:01 by nwidger on macros.local>
+ * Time-stamp: <21 Nov 2010 at 23:11:28 by nwidger on macros.local>
  */
 
 #ifndef _MVM_CONSTANTS_H
@@ -69,8 +69,8 @@
 #define MONITOREXIT_NAME "monitorexit"
 
 /* native methods */
-#define NUM_NATIVES 43
-#define MAX_NATIVE_INDEX 42
+#define NUM_NATIVES 47
+#define MAX_NATIVE_INDEX 46
 
 /* native method indices */
 #define OBJECT_CONSTRUCTOR_NATIVE_INDEX 0
@@ -120,6 +120,11 @@
 #define TABLE_FIRST_KEY_NATIVE_INDEX 41
 #define TABLE_NEXT_KEY_NATIVE_INDEX 42
 
+#define THREAD_CONSTRUCTOR_NATIVE_INDEX 43
+#define THREAD_START_NATIVE_INDEX 44
+#define THREAD_RUN_NATIVE_INDEX 45
+#define THREAD_JOIN_NATIVE_INDEX 46
+
 /* native method names */
 #define OBJECT_CONSTRUCTOR_NATIVE_NAME "Object_constructor"
 #define OBJECT_EQUALS_NATIVE_NAME "Object$equals$Object"
@@ -167,6 +172,11 @@
 #define TABLE_REMOVE_NATIVE_NAME "Table$remove$Object"
 #define TABLE_FIRST_KEY_NATIVE_NAME "Table$firstKey"
 #define TABLE_NEXT_KEY_NATIVE_NAME "Table$nextKey"
+
+#define THREAD_CONSTRUCTOR_NATIVE_NAME "Thread_constructor"
+#define THREAD_START_NATIVE_NAME "Thread$start"
+#define THREAD_RUN_NATIVE_NAME "Thread$run"
+#define THREAD_JOIN_NATIVE_NAME "Thread$join"
 
 /* native method argument counts */
 #define OBJECT_CONSTRUCTOR_NATIVE_ARGS 1
@@ -216,6 +226,11 @@
 #define TABLE_FIRST_KEY_NATIVE_ARGS 1
 #define TABLE_NEXT_KEY_NATIVE_ARGS 1
 
+#define THREAD_CONSTRUCTOR_NATIVE_ARGS 1
+#define THREAD_START_NATIVE_ARGS 1
+#define THREAD_RUN_NATIVE_ARGS 1
+#define THREAD_JOIN_NATIVE_ARGS 1
+
 /* ref_set constants */
 #define REF_SET_DEFAULT_INITIAL_CAPACITY 300
 #define REF_SET_DEFAULT_LOAD_FACTOR 0.75
@@ -229,12 +244,13 @@
 #define METHOD_AREA_BUFFER_RESIZE_FACTOR 2
 
 /* class file constants */
-#define NUM_PREDEFINED_CLASSES 4
+#define NUM_PREDEFINED_CLASSES 5
 
 #define OBJECT_PREDEFINED_CLASS_NAME "Object"
 #define INTEGER_PREDEFINED_CLASS_NAME "Integer"
 #define STRING_PREDEFINED_CLASS_NAME "String"
 #define TABLE_PREDEFINED_CLASS_NAME "Table"
+#define THREAD_PREDEFINED_CLASS_NAME "Thread"
 
 #define NATIVE_ADDRESS 0
 

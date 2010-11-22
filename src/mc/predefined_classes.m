@@ -53,8 +53,9 @@ class Table extends Object {
 	native:42 Object nextKey();
 }
 
-//class Thread extends Object {
-//    native:43 Thread();
-//    native:44 Integer start();
-//    native:45 Integer run();
-//}
+class Thread extends Object {
+    native:43 Thread();
+    native:44 Integer start();
+    native:45 Integer run();
+    native:46 Integer join();
+}

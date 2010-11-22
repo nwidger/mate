@@ -1,11 +1,12 @@
 /* Niels Widger
- * Time-stamp: <18 Feb 2010 at 13:51:40 by nwidger on macros.local>
+ * Time-stamp: <21 Nov 2010 at 22:18:27 by nwidger on macros.local>
  */
 
 #ifndef _MVM_GLOBALS_H
 #define _MVM_GLOBALS_H
 
 #include <inttypes.h>
+#include <pthread.h>
 #include <stdarg.h>
 
 /* forward declarations */
@@ -41,6 +42,21 @@ void mvm_print(const char *f, ...);
 
 char * mvm_strdup(const char *s);
 
+/** cleans up mvm.  Must be called before terminating.
+ *
+ * @return 0 on success, non-zero on failure
+ */
+
+int mvm_cleanup();
+
+/** clears the heap and vm_stack, resets the garbage_collector so that
+ * program can be rerun.  If input is a regular file, it will be
+ * rewound.  If output is a regular file, it will be truncated to
+ * length 0.
+ */
+
+void mvm_clear();
+
 /* globals */
 
 /** input stream used by in instruction, default is stdin */
@@ -58,9 +74,12 @@ extern struct instruction_table *instruction_table;
 extern struct method_area *method_area;
 extern struct native_method_array *native_method_array;
 extern struct symbol_table *symbol_table;
-extern struct vm_stack *vm_stack;
+pthread_key_t key;
 /** instruction pointer */
-extern uint32_t pc;
+/* extern uint32_t pc; */
+extern uint32_t main_block_address;
+extern uint32_t main_block_end;
+extern uint32_t main_block_max_locals;
 extern int32_t main_block_return_value;
 /** if non-zero, stack trace printed in mvm_halt.
  * @see mvm_halt

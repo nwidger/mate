@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Feb 2010 at 14:08:33 by nwidger on macros.local>
+ * Time-stamp: <19 Nov 2010 at 19:41:38 by nwidger on macros.local>
  */
 
 #ifndef _MVM_INVOKEMETHOD_H
@@ -23,7 +23,7 @@
  *
  * examples:
  * invoking the two-arg substr method on the reference 1:
- * invoke_virtual_method_by_name(1, ret, "substr", 2, "Integer", Integer");
+ * invoke_virtual_method_by_name(1, ret, "substr", 2, "Integer", "Integer");
  *
  * invoking the no-arg hashCode method on the reference 2:
  * invoke_virtual_method_by_name(2, ret, "hashCode", 0);

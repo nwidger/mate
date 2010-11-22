@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <17 Nov 2010 at 11:03:28 by nwidger on macros.local>
+ * Time-stamp: <19 Nov 2010 at 20:01:20 by nwidger on macros.local>
  */
 
 #ifndef _MVM_OBJECT_H
@@ -13,6 +13,7 @@ struct object;
 struct ref_set;
 struct string;
 struct table;
+struct thread;
 
 /** creates a new object from class c with n fields. Memory for the new
  * object shall be allocated from the heap.  Returns a reference to
@@ -166,9 +167,9 @@ int object_store_field(struct object *o, int i, int r);
 
 uint32_t object_get_num_fields(struct object *o);
 
-/** returns the predefined type of the given object.  Return value will
- * be one of 'object_type', 'integer_type', 'string_type' or
- * 'table_type'.
+/** returns the predefined type of the given object.  Return value
+ * will be one of 'object_type', 'integer_type', 'string_type',
+ * 'table_type' or 'thread_type'.
  *
  * @param o - the object to access
  *
@@ -210,6 +211,17 @@ struct string * object_get_string(struct object *o);
 
 struct table * object_get_table(struct object *o);
 
+/** returns pointer to the thread stored in the given object.  This
+ * function should only be called after ensuring that
+ * object_get_predefined_type returns 'thread_type'.
+ *
+ * @param o - the object to access
+ *
+ * @return pointer to the thread stored in the object
+ */
+
+struct thread * object_get_thread(struct object *o);
+
 /** stores the integer i into the given object.  Calling
  * object_get_predefined_type immediately after calling this function
  * should return 'integer_type'.
@@ -245,6 +257,18 @@ int object_set_string(struct object *o, struct string *s);
  */
 
 int object_set_table(struct object *o, struct table *t);
+
+/** stores the thread t into the given object.  Calling
+ * object_get_predefined_type immediately after calling this function
+ * should return 'thread_type'.
+ *
+ * @param o - the object to store into
+ * @param t - the thread to store
+ *
+ * @return 0 on success, non-zero on failure
+ */
+
+int object_set_thread(struct object *o, struct thread *t);
 
 /** adds all references stored inside the given object to the ref_set
  * r.  Any references stored inside predefined types (Table in

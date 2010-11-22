@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <17 Feb 2010 at 18:45:06 by nwidger on macros.local>
+ * Time-stamp: <21 Nov 2010 at 21:23:36 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -23,6 +23,7 @@
 #include "ref_set.h"
 #include "string.h"
 #include "table.h"
+#include "thread.h"
 #include "vm_stack.h"
 
 /* struct definitions */
@@ -342,8 +343,10 @@ int table_resize(struct table *t, int n) {
 int table_run_hash_code(struct table *t, struct object *o) {
 	int ref;
 	int32_t value;
+	uint32_t pc;
 	struct integer *integer;
 	struct object *object;
+	struct vm_stack *vm_stack;
 	struct frame *frame;
 	struct operand_stack *operand_stack;
 
@@ -352,6 +355,9 @@ int table_run_hash_code(struct table *t, struct object *o) {
 		mvm_halt();
 	}
 
+	pc = thread_get_pc();
+	vm_stack = thread_get_vm_stack();
+	
 	frame = vm_stack_peek(vm_stack);
 	operand_stack = frame_get_operand_stack(frame);
 	operand_stack_push(operand_stack, object_get_ref(o));
@@ -371,8 +377,10 @@ int table_run_hash_code(struct table *t, struct object *o) {
 int table_run_equals(struct table *t, struct object *o, struct object *p) {
 	int ref;
 	int32_t value;
+	uint32_t pc;
 	struct integer *integer;
 	struct object *object;
+	struct vm_stack *vm_stack;
 	struct frame *frame;
 	struct operand_stack *operand_stack;
 
@@ -380,6 +388,9 @@ int table_run_equals(struct table *t, struct object *o, struct object *p) {
 		fprintf(stderr, "mvm: table not initialized!\n");
 		mvm_halt();
 	}
+
+	pc = thread_get_pc();
+	vm_stack = thread_get_vm_stack();
 
 	frame = vm_stack_peek(vm_stack);
 	operand_stack = frame_get_operand_stack(frame);

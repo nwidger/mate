@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <13 Apr 2010 at 13:30:03 by nwidger on macros.local>
+ * Time-stamp: <21 Nov 2010 at 22:56:54 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -30,6 +30,7 @@
 #include "native_methods.h"
 #include "object.h"
 #include "symbol_table.h"
+#include "thread.h"
 #include "vm_stack.h"
 
 #define OPTARGS ":m:s:i:daqcvh"
@@ -48,11 +49,12 @@ struct instruction_table *instruction_table;
 struct method_area *method_area;
 struct native_method_array *native_method_array;
 struct symbol_table *symbol_table;
-struct vm_stack *vm_stack;
 int garbage_collector_interval;
 enum garbage_collector_type garbage_collector_type;
 
-uint32_t pc;
+uint32_t main_block_address;
+uint32_t main_block_end;
+uint32_t main_block_max_locals;
 int32_t main_block_return_value;
 int print_trace;
 int verbose;
@@ -62,8 +64,8 @@ int restart;
 /* forward declarations */
 void usage();
 int mvm_initialize(int h);
-int mvm_cleanup();
 void mvm_halt();
+int mvm_cleanup();
 void mvm_clear();
 void mvm_print(const char *f, ...);
 
@@ -109,10 +111,10 @@ int mvm_initialize(int h) {
 		return 1;
 	}
 
-	if ((vm_stack = vm_stack_create()) == NULL) {
-		fprintf(stderr, "mvm: error creating vm stack!\n");
-		return 1;
-	}
+	/* if ((vm_stack = vm_stack_create()) == NULL) { */
+	/* 	fprintf(stderr, "mvm: error creating vm stack!\n"); */
+	/* 	return 1; */
+	/* } */
 
 	if ((symbol_table = symbol_table_create()) == NULL) {
 		fprintf(stderr, "mvm: error creating symbol table!\n");
@@ -166,11 +168,6 @@ int mvm_initialize(int h) {
 	return 0;
 }
 
-/** cleans up mvm.  Must be called before terminating.
- *
- * @return 0 on success, non-zero on failure
- */
-
 int mvm_cleanup() {
 	if (fclose(input) == EOF) {
 		perror("fclose");
@@ -203,19 +200,13 @@ int mvm_cleanup() {
 		native_method_array_destroy(native_method_array);
 	if (class_table != NULL)
 		class_table_destroy(class_table);
-	if (vm_stack != NULL)
-		vm_stack_destroy(vm_stack);
+	/* if (vm_stack != NULL) */
+	/* 	vm_stack_destroy(vm_stack); */
 	if (debug != 0)
 		mdb_cleanup();
 
 	return 0;
 }
-
-/** clears the heap and vm_stack, resets the garbage_collector so that
- * program can be rerun.  If input is a regular file, it will be
- * rewound.  If output is a regular file, it will be truncated to
- * length 0.
- */
 
 void mvm_clear() {
 	int fd;
@@ -254,7 +245,7 @@ void mvm_clear() {
 	garbage_collector_stop(garbage_collector);
 	
 	heap_clear(heap);
-	vm_stack_clear(vm_stack);
+	/* vm_stack_clear(vm_stack); */
 
 	garbage_collector_start(garbage_collector,
 				garbage_collector_type,
@@ -262,8 +253,12 @@ void mvm_clear() {
 }
 
 void mvm_halt() {
-	uint32_t opcode;
+	uint32_t pc, opcode;
+	struct vm_stack *vm_stack;
 	char *class_file, *instruction_name;
+
+	pc = thread_get_pc();
+	vm_stack = thread_get_vm_stack();
 
 	if (debug != 0) {
 		mdb_hook(halt_vm_hook);
@@ -314,8 +309,8 @@ char * mvm_strdup(const char *s) {
 }
 
 int main(int argc, char *argv[]) {
+	struct object *object;
 	int err, c, heap_size, disassemble;
-	uint32_t main_block_address, main_block_end, main_block_max_locals;
 
 	class_table = NULL;
 	garbage_collector = NULL;
@@ -324,7 +319,7 @@ int main(int argc, char *argv[]) {
 	method_area = NULL;
 	native_method_array = NULL;
 	symbol_table = NULL;
-	vm_stack = NULL;
+	/* vm_stack = NULL; */
 
 	garbage_collector_type = GARBAGE_COLLECTOR_DEFAULT_TYPE;
 	garbage_collector_interval = GARBAGE_COLLECTOR_DEFAULT_INTERVAL;
@@ -424,13 +419,12 @@ int main(int argc, char *argv[]) {
 	do {
 		mvm_clear();
 		restart = 0;
-
-		main_block_return_value = 0;
-		if (invoke_method("mainBlock", main_block_address, main_block_end,
-				  0, main_block_max_locals, 0) != 0)
-			break;
+		
+		class_table_new_thread(class_table, &object);
+		thread_start_main(object);
+		thread_join(object);
 	} while (restart != 0);
-
+	
 	mvm_cleanup();
 	return main_block_return_value;
 }

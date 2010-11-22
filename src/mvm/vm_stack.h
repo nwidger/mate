@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Feb 2010 at 14:09:23 by nwidger on macros.local>
+ * Time-stamp: <19 Nov 2010 at 21:02:22 by nwidger on macros.local>
  */
 
 #ifndef _MVM_VMSTACK_H
