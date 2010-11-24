@@ -18,7 +18,7 @@ A maTe Language Tutorial
 This document provides an introduction to the maTe language, largely
 by example.
 However, it does contain links to the
-<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html">maTe
+<a href="specification.html">maTe
 language specification,</a>
 where the technical details are given.
 <p>
@@ -26,19 +26,19 @@ where the technical details are given.
 maTe is a pure object-oriented programming language, meaning
 every data item is an object.
 There are built-in classes for integers
-(<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#2.3.3"><strong>Integer</strong></a>),
+(<a href="specification.html#2.3.3"><strong>Integer</strong></a>),
 strings
-(<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#2.3.4"><strong>String</strong></a>),
+(<a href="specification.html#2.3.4"><strong>String</strong></a>),
 and hashtables
-(<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#2.3.5"><strong>Table</strong></a>).
+(<a href="specification.html#2.3.5"><strong>Table</strong></a>).
 Users can create classes using these built-in classes.
 There is also a built-in class
-<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#2.3.2"><strong>Object</strong></a>,
+<a href="specification.html#2.3.2"><strong>Object</strong></a>,
 which is the root of the inheritance hierarchy.
 maTe supports only single-inheritance.
 <p>
 
-<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#8">maTe syntax</a>
+<a href="specification.html#8">maTe syntax</a>
 is derived from Java syntax.
 However, maTe programs are single-file programs.
 The file can contain a collection of user-defined classes, but
@@ -58,7 +58,7 @@ Integer main()
 maTe has very primitive I/O capabilities:
 <ul>
 <li> The
-<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#6.10"><strong>out</strong> statement</a>,
+<a href="specification.html#6.10"><strong>out</strong> statement</a>,
 which prints the value of an expression to stdout.
 If the type of the expression is <strong>String</strong>,
 the contents of the String object is printed.
@@ -67,7 +67,7 @@ the object denoted by the expression, and then the contents of
 the resulting <strong>String</strong> object is printed.
 <p>
 <li> The
-<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#7.15"><strong>in</strong> operator</a>,
+<a href="specification.html#7.15"><strong>in</strong> operator</a>,
 which takes no operands and
 reads a string of input from stdin.
 It first skips any leading whitespace characters in the input.
@@ -82,7 +82,7 @@ produced by the operator.
 </ul>
 <p>
 
-<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#1.7.3">maTe
+<a href="specification.html#1.7.3">maTe
 string literals</a>
 are delimited by double quotes, and can contain any
 printable ASCII character except newline, line feed or tab.
@@ -112,23 +112,23 @@ Integer main()
 Note that maTe only has these basic control-flow structures:
 <ul>
 <li>
-<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#6.7"><strong>if-then</strong></a>
+<a href="specification.html#6.7"><strong>if-then</strong></a>
 and
-<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#6.6"><strong>if-then-else</strong></a>
+<a href="specification.html#6.6"><strong>if-then-else</strong></a>
 statements
 <li>
-<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#6.8"><strong>while</strong></a>
+<a href="specification.html#6.8"><strong>while</strong></a>
 statements
 <li>
-<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#6.11"><strong>break</strong></a>
+<a href="specification.html#6.11"><strong>break</strong></a>
 and
-<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#6.12"><strong>continue</strong></a>
+<a href="specification.html#6.12"><strong>continue</strong></a>
 statements
 </ul>
 <p>
 
 The maTe built-in class
-<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#2.3.3"><strong>Integer</strong></a>
+<a href="specification.html#2.3.3"><strong>Integer</strong></a>
 provides basic support
 for integer operations, including addition, subtraction, multiplication,
 division, unary minus, greater than, less than, equals and logical not.
@@ -173,7 +173,7 @@ Integer main()
 <p>
 
 The maTe built-in class
-<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#2.3.4"><strong>String</strong></a>
+<a href="specification.html#2.3.4"><strong>String</strong></a>
 provides basic support for string operations,
 including length, concatenation, substring and comparison.
 The length operation is accessed via the <strong>length</strong> method.
@@ -207,7 +207,7 @@ Integer main()
 <p>
 
 The maTe built-in class
-<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#2.3.5"><strong>Table</strong></a>
+<a href="specification.html#2.3.5"><strong>Table</strong></a>
 provides basic support for hashtable operations.
 <p>
 
@@ -450,7 +450,7 @@ Integer main()
 </pre>
 This example also illustrates the iterator mechanism (<strong>firstKey</strong>
 and <strong>nextKey</strong> methods) available in the
-<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#2.3.5"><strong>Table</strong></a>
+<a href="specification.html#2.3.5"><strong>Table</strong></a>
 class.
 Note that the iterator does not return the values in the order they were
 inserted, rather the order is dependent on the hashing function and size
@@ -459,7 +459,7 @@ of the table.
 
 The run-time type of an object is accessible to the programmer via
 the
-<a href="http://www.cs.unh.edu/~cs712/maTe/specification.html#7.10.2"><strong>instanceof</strong></a>
+<a href="specification.html#7.10.2"><strong>instanceof</strong></a>
 operator.
 Here is a simple example to illustrate that operator:
 <pre>
