@@ -1,5 +1,5 @@
 Niels Widger
-Time-stamp: <13 Mar 2010 at 16:00:03 by nwidger on macros.local>
+Time-stamp: <23 Nov 2010 at 20:50:50 by nwidger on macros.local>
 
 aconst_null - push null
 aload - load reference from local variable
@@ -114,48 +114,57 @@ invokenative - invoke native method
 	nativeTable[1]	= Object$equals$Object
 	nativeTable[2]	= Object$hashCode
 	nativeTable[3]	= Object$toString
+	nativeTable[4]	= Object$notify
+	nativeTable[5]	= Object$notifyAll
+	nativeTable[6]	= Object$wait
+	nativeTable[7]	= Object$wait$Integer
+	
+	nativeTable[8]	= Integer_constructor
+	nativeTable[9]	= Integer_constructor$Integer
+	nativeTable[10]	= Integer$add$Integer
+	nativeTable[11]	= Integer$subtract$Integer
+	nativeTable[12] = Integer$multiply$Integer
+	nativeTable[13] = Integer$divide$Integer
+	nativeTable[14] = Integer$greaterThan$Integer
+	nativeTable[15] = Integer$lessThan$Integer
+	nativeTable[16] = Integer$not
+	nativeTable[17] = Integer$minus
+	nativeTable[18] = Integer$operator+$Integer
+	nativeTable[19] = Integer$operator-$Integer
+	nativeTable[20] = Integer$operator*$Integer
+	nativeTable[21] = Integer$operator/$Integer
+	nativeTable[22] = Integer$operator>$Integer
+	nativeTable[23] = Integer$operator<$Integer
+	nativeTable[24] = Integer$operator!
+	nativeTable[25] = Integer$operator-
+	nativeTable[26] = Integer$equals$Object
+	nativeTable[27] = Integer$hashCode
+	nativeTable[28] = Integer$toString
 
-	nativeTable[4]	= Integer_constructor
-	nativeTable[5]	= Integer_constructor$Integer
-	nativeTable[6]	= Integer$add$Integer
-	nativeTable[7]	= Integer$subtract$Integer
-	nativeTable[8] = Integer$multiply$Integer
-	nativeTable[9] = Integer$divide$Integer
-	nativeTable[10] = Integer$greaterThan$Integer
-	nativeTable[11] = Integer$lessThan$Integer
-	nativeTable[12] = Integer$not
-	nativeTable[13] = Integer$minus
-	nativeTable[14] = Integer$operator+$Integer
-	nativeTable[15] = Integer$operator-$Integer
-	nativeTable[16] = Integer$operator*$Integer
-	nativeTable[17] = Integer$operator/$Integer
-	nativeTable[18] = Integer$operator>$Integer
-	nativeTable[19] = Integer$operator<$Integer
-	nativeTable[20] = Integer$operator!
-	nativeTable[21] = Integer$operator-
-	nativeTable[22] = Integer$equals$Object
-	nativeTable[23] = Integer$hashCode
-	nativeTable[24] = Integer$toString
+	nativeTable[29] = String_constructor$String
+	nativeTable[30] = String$length
+	nativeTable[31] = String$substr$Integer$Integer
+	nativeTable[32] = String$toInteger
+	nativeTable[33] = String$concat$String	
+	nativeTable[34] = String$operator+$String
+	nativeTable[35] = String$operator>$String
+	nativeTable[36] = String$operator<$String
+	nativeTable[37] = String$hashCode
+	nativeTable[38] = String$equals$Object
+	nativeTable[39] = String$toString
 
-	nativeTable[25] = String_constructor$String
-	nativeTable[26] = String$length
-	nativeTable[27] = String$substr$Integer$Integer
-	nativeTable[28] = String$toInteger
-	nativeTable[29] = String$concat$String	
-	nativeTable[30] = String$operator+$String
-	nativeTable[31] = String$operator>$String
-	nativeTable[32] = String$operator<$String
-	nativeTable[33] = String$hashCode
-	nativeTable[34] = String$equals$Object
-	nativeTable[35] = String$toString
+	nativeTable[40] = Table_constructor
+	nativeTable[41] = Table_constructor$Integer
+	nativeTable[42] = Table$get$Object
+	nativeTable[43] = Table$put$Object$Object
+	nativeTable[44] = Table$remove$Object
+	nativeTable[45] = Table$firstKey
+	nativeTable[46] = Table$nextKey
 
-	nativeTable[36] = Table_constructor
-	nativeTable[37] = Table_constructor$Integer
-	nativeTable[38] = Table$get$Object
-	nativeTable[39] = Table$put$Object$Object
-	nativeTable[40] = Table$remove$Object
-	nativeTable[41] = Table$firstKey
-	nativeTable[42] = Table$nextKey
+	nativeTable[47] = Thread_constructor
+	nativeTable[48] = Thread$start
+	nativeTable[49] = Thread$run
+	nativeTable[50] = Thread$join
 	
 invokevirtual - invoke instance method; dispatch based on class
 	format: invokevirtual index n
@@ -166,6 +175,16 @@ invokevirtual - invoke instance method; dispatch based on class
 	n in the number of arguments to the method to be invoked.
 	refvalref is the return value of the invoked method.
 
+monitorenter - enter monitor for object
+        format: monitorenter
+	opcode: 252 (0xfc)
+	operand stack: ..., objectref  => ...
+
+monitorexit - exit monitor for object
+        format: monitorexit
+	opcode: 253 (0xfd)
+	operand stack: ..., objectref  => ...
+	
 new - create new object
         format: new index
 	opcode: 187 (0xbb)
