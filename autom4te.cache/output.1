@@ -7456,6 +7456,40 @@ _ACEOF
 ;;
   esac
 
+ac_fn_c_find_intX_t "$LINENO" "16" "ac_cv_c_int16_t"
+case $ac_cv_c_int16_t in #(
+  no|yes) ;; #(
+  *)
+    
+cat >>confdefs.h <<_ACEOF
+@%:@define int16_t $ac_cv_c_int16_t
+_ACEOF
+;;
+esac
+
+ac_fn_c_find_intX_t "$LINENO" "8" "ac_cv_c_int8_t"
+case $ac_cv_c_int8_t in #(
+  no|yes) ;; #(
+  *)
+    
+cat >>confdefs.h <<_ACEOF
+@%:@define int8_t $ac_cv_c_int8_t
+_ACEOF
+;;
+esac
+
+ac_fn_c_find_uintX_t "$LINENO" "16" "ac_cv_c_uint16_t"
+case $ac_cv_c_uint16_t in #(
+  no|yes) ;; #(
+  *)
+    
+    
+cat >>confdefs.h <<_ACEOF
+@%:@define uint16_t $ac_cv_c_uint16_t
+_ACEOF
+;;
+  esac
+
 
 
 $as_echo "@%:@define __STDC_LIMIT_MACROS 1" >>confdefs.h

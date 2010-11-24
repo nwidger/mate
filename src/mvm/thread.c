@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Nov 2010 at 23:38:51 by nwidger on macros.local>
+ * Time-stamp: <23 Nov 2010 at 20:29:05 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -65,9 +65,24 @@ void thread_destroy(struct thread *t) {
 }
 
 void thread_clear(struct thread *t) {
-	if (t != NULL) {
-
+	if (t == NULL)
+		return;
+	
+	if (t->state == new_state ||
+	    t->state == terminated_state) {
+		return;
 	}
+
+	if (pthread_kill(t->id, 0) != 0) {
+		perror("mvm: pthread_kill");
+		mvm_halt();
+	}
+
+	t->ref = 0;
+	t->state = new_state;
+	t->pc = 0;
+
+	vm_stack_clear(t->vm_stack);
 }
 
 void thread_make_key() {

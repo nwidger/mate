@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Nov 2010 at 20:10:16 by nwidger on macros.local>
+ * Time-stamp: <23 Nov 2010 at 20:30:19 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -35,7 +35,7 @@ struct object {
 		struct integer *integer;
 		struct string *string;
 		struct table *table;
-		struct thread *thread;		
+		struct thread *thread;
 	} predefined;
 
 	struct class *class;
@@ -64,10 +64,10 @@ int object_create(struct class *c, uint32_t n, struct object **o) {
 	object->fields = (uint32_t *)(((uint8_t *)object)+sizeof(struct object));
 
 	memset(object->fields, 0, sizeof(uint32_t)*object->num_fields);
-	
+
 	if ((object->monitor = nlock_create()) == NULL)
 		mvm_halt();
-	
+
 	if (o != NULL)
 		*o = object;
 
@@ -104,7 +104,7 @@ int object_release_monitor(struct object *o) {
 	if (o == NULL) {
 		fprintf(stderr, "mvm: object has not been initialized!\n");
 		mvm_halt();
-	}	
+	}
 
 	nlock_unlock(o->monitor);
 	return 0;
@@ -114,18 +114,24 @@ int object_wait(struct object *o) {
 	if (o == NULL) {
 		fprintf(stderr, "mvm: object has not been initialized!\n");
 		mvm_halt();
-	}	
-	
+	}
+
 	return nlock_wait(o->monitor);
 }
 
-int object_timedwait(struct object *o, unsigned t) {
+int object_timedwait(struct object *o, struct object *p) {
+	int32_t timeout;
+	struct integer *i;
+
 	if (o == NULL) {
 		fprintf(stderr, "mvm: object has not been initialized!\n");
 		mvm_halt();
-	}	
-	
-	return nlock_timedwait(o->monitor, t);
+	}
+
+	i = object_get_integer(p);
+	timeout = integer_get_value(i);
+
+	return nlock_timedwait(o->monitor, (long)timeout);
 }
 
 int object_notify(struct object *o) {

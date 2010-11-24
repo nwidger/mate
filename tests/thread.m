@@ -1,5 +1,5 @@
 class MyThread extends Thread {
-  Integer run() {
+  Object run() {
     synchronized (this) {
       out "1 omg it works!" + newline;
       out "2 omg it works!" + newline;

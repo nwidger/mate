@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Nov 2010 at 23:03:19 by nwidger on macros.local>
+ * Time-stamp: <23 Nov 2010 at 20:25:32 by nwidger on macros.local>
  */
 
 #ifndef _MVM_NATIVEMETHODS_H
@@ -13,6 +13,10 @@ int native_object_constructor(uint32_t i);
 int native_object_equals(uint32_t i);
 int native_object_hash_code(uint32_t i);
 int native_object_to_string(uint32_t i);
+int native_object_notify(uint32_t i);
+int native_object_notify_all(uint32_t i);
+int native_object_wait(uint32_t i);
+int native_object_wait_integer(uint32_t i);
 
 int native_integer_constructor(uint32_t i);
 int native_integer_constructor_integer(uint32_t i);

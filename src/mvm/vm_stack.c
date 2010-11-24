@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Nov 2010 at 21:02:18 by nwidger on macros.local>
+ * Time-stamp: <23 Nov 2010 at 20:05:47 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -25,7 +25,7 @@ struct vm_stack {
 struct vm_stack * vm_stack_create() {
 	struct vm_stack *s;
 
-	if ((s = (struct vm_stack *)heap_malloc(heap, sizeof(struct vm_stack))) == NULL) {
+	if ((s = (struct vm_stack *)malloc(sizeof(struct vm_stack))) == NULL) {
 		perror("mvm: malloc");
 		mvm_halt();
 	}
@@ -50,7 +50,7 @@ void vm_stack_destroy(struct vm_stack *s) {
 		vm_stack_unlock(s);
 
 		nlock_destroy(s->nlock);
-		heap_free(heap, s);
+		free(s);
 	}
 }
 

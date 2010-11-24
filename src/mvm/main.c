@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Nov 2010 at 22:56:54 by nwidger on macros.local>
+ * Time-stamp: <23 Nov 2010 at 20:04:25 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -111,11 +111,6 @@ int mvm_initialize(int h) {
 		return 1;
 	}
 
-	/* if ((vm_stack = vm_stack_create()) == NULL) { */
-	/* 	fprintf(stderr, "mvm: error creating vm stack!\n"); */
-	/* 	return 1; */
-	/* } */
-
 	if ((symbol_table = symbol_table_create()) == NULL) {
 		fprintf(stderr, "mvm: error creating symbol table!\n");
 		return 1;
@@ -200,8 +195,6 @@ int mvm_cleanup() {
 		native_method_array_destroy(native_method_array);
 	if (class_table != NULL)
 		class_table_destroy(class_table);
-	/* if (vm_stack != NULL) */
-	/* 	vm_stack_destroy(vm_stack); */
 	if (debug != 0)
 		mdb_cleanup();
 
@@ -245,7 +238,6 @@ void mvm_clear() {
 	garbage_collector_stop(garbage_collector);
 	
 	heap_clear(heap);
-	/* vm_stack_clear(vm_stack); */
 
 	garbage_collector_start(garbage_collector,
 				garbage_collector_type,
@@ -319,7 +311,6 @@ int main(int argc, char *argv[]) {
 	method_area = NULL;
 	native_method_array = NULL;
 	symbol_table = NULL;
-	/* vm_stack = NULL; */
 
 	garbage_collector_type = GARBAGE_COLLECTOR_DEFAULT_TYPE;
 	garbage_collector_interval = GARBAGE_COLLECTOR_DEFAULT_INTERVAL;

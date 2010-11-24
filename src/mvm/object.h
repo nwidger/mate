@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Nov 2010 at 20:01:20 by nwidger on macros.local>
+ * Time-stamp: <23 Nov 2010 at 20:28:34 by nwidger on macros.local>
  */
 
 #ifndef _MVM_OBJECT_H
@@ -86,12 +86,12 @@ int object_wait(struct object *o);
  * calling this function.
  *
  * @param o - the object to wait on
- * @param t - wait timeout in milliseconds
+ * @param p - Integer object indicating wait timeout in milliseconds
  *
  * @return 0 on success, non-zero on failure
  */
 
-int object_timedwait(struct object *o, unsigned t);
+int object_timedwait(struct object *o, struct object *p);
 
 /** wakes up a single thread waiting on the given object via a call to
  * object_wait or object_timedwait.  The calling thread must acquire
