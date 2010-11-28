@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <18 Nov 2010 at 15:11:02 by nwidger on macros.local>
+// Time-stamp: <23 Nov 2010 at 21:55:44 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -1178,11 +1178,6 @@ Node * MethodInvocationExpressionNode::analyze(void *param) {
 
 	if ((sen = dynamic_cast<SuperExpressionNode *>(expression)) != 0)
 		callDirectly = true;
-
-	if (method->getIsNative() == true) {		
-		callNative = true;
-		nativeIndex = method->getNativeIndex();
-	}
 
 	type = method->getType();
 	offset = method->getOffset();

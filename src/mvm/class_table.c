@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Nov 2010 at 21:55:22 by nwidger on macros.local>
+ * Time-stamp: <28 Nov 2010 at 18:12:14 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -385,6 +385,7 @@ int class_table_new_thread(struct class_table *c, struct object **o) {
 	/* thread instances are not collectable until run method terminates */
 	/* heap_include_ref(heap, ref); */
 	object_set_thread(object, thread);
+	heap_add_thread_ref(heap, ref);
 
 	if (o != NULL)
 		*o = object;

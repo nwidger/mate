@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <05 Mar 2010 at 15:11:42 by nwidger on macros.local>
+ * Time-stamp: <28 Nov 2010 at 18:05:02 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "class_table.h"
 #include "constants.h"
 #include "garbage_collector.h"
 #include "globals.h"
@@ -47,6 +48,7 @@ struct heap {
 	struct free_ref *free_list;
 
 	struct ref_set *excluded_set;
+	struct ref_set *thread_set;
 	struct nlock *nlock;
 };
 
@@ -101,6 +103,9 @@ struct heap * heap_create(int m) {
 	if ((h->excluded_set = ref_set_create()) == NULL)
 		mvm_halt();
 
+	if ((h->thread_set = ref_set_create()) == NULL)
+		mvm_halt();
+
 	if ((h->nlock = nlock_create()) == NULL)
 		mvm_halt();
 
@@ -114,6 +119,7 @@ void heap_destroy(struct heap *h) {
 
 		heap_clear(h);
 		ref_set_destroy(h->excluded_set);
+		ref_set_destroy(h->thread_set);		
 
 		/* unlock */
 		heap_unlock(h);
@@ -161,6 +167,7 @@ void heap_clear(struct heap *h) {
 		h->next_ref = 1;
 
 		ref_set_clear(h->excluded_set);
+		ref_set_clear(h->thread_set);		
 		h->mem_free = h->mem_size;
 
 		/* unlock */
@@ -428,6 +435,28 @@ int heap_populate_ref_set(struct heap *h, struct ref_set *r) {
 	return 0;
 }
 
+int heap_populate_thread_set(struct heap *h, struct ref_set *r) {
+	int ref;
+
+	if (h == NULL) {
+		fprintf(stderr, "mvm: heap has not been initialized!\n");
+		mvm_halt();
+	}
+
+	/* lock */
+	heap_lock(h);
+
+	ref_set_iterator_init(h->thread_set);
+
+	while ((ref = ref_set_iterator_next(h->thread_set)) != 0)
+		ref_set_add(r, ref);
+
+	/* unlock */
+	heap_unlock(h);
+
+	return 0;
+}
+
 int heap_exclude_ref(struct heap *h, int r) {
 	if (h == NULL) {
 		fprintf(stderr, "mvm: heap has not been initialized!\n");
@@ -457,6 +486,60 @@ int heap_include_ref(struct heap *h, int r) {
 
 	if (r != 0)
 		ref_set_remove(h->excluded_set, r);
+
+	/* unlock */
+	heap_unlock(h);
+
+	return 0;
+}
+
+int heap_add_thread_ref(struct heap *h, int r) {
+	struct object *o;
+	
+	if (h == NULL) {
+		fprintf(stderr, "mvm: heap has not been initialized!\n");
+		mvm_halt();
+	}
+
+	o = heap_fetch_object(h, r);
+
+	if (object_get_predefined_type(o) != thread_type) {
+		fprintf(stderr, "mvm: object is not of type thread!\n");
+		mvm_halt();
+	}
+
+	/* lock */
+	heap_lock(h);
+
+	if (r != 0)
+		ref_set_add(h->thread_set, r);
+
+	/* unlock */
+	heap_unlock(h);
+
+	return 0;
+}
+
+int heap_remove_thread_ref(struct heap *h, int r) {
+	struct object *o;
+	
+	if (h == NULL) {
+		fprintf(stderr, "mvm: heap has not been initialized!\n");
+		mvm_halt();
+	}
+
+	o = heap_fetch_object(h, r);
+
+	if (object_get_predefined_type(o) != thread_type) {
+		fprintf(stderr, "mvm: object is not of type thread!\n");
+		mvm_halt();
+	}
+	
+	/* lock */
+	heap_lock(h);
+
+	if (r != 0)
+		ref_set_remove(h->thread_set, r);
 
 	/* unlock */
 	heap_unlock(h);

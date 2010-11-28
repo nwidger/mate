@@ -1,14 +1,16 @@
 /* Niels Widger
- * Time-stamp: <23 Nov 2010 at 20:29:05 by nwidger on macros.local>
+ * Time-stamp: <28 Nov 2010 at 18:10:26 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
 
+#include <pthread.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
 
 #include "class_table.h"
 #include "globals.h"
@@ -35,6 +37,7 @@ pthread_once_t key_once = PTHREAD_ONCE_INIT;
 
 /* forward declarations */
 void thread_make_key();
+int thread_pthread_create(struct thread *t, void * (*s)(void *));
 void * thread_run0(void *p);
 void * thread_run0_main(void *p);
 
@@ -67,7 +70,7 @@ void thread_destroy(struct thread *t) {
 void thread_clear(struct thread *t) {
 	if (t == NULL)
 		return;
-	
+
 	if (t->state == new_state ||
 	    t->state == terminated_state) {
 		return;
@@ -122,6 +125,24 @@ struct vm_stack * thread_get_vm_stack() {
 	return t->vm_stack;
 }
 
+struct vm_stack * _thread_get_vm_stack(struct thread *t) {
+	if (t == NULL) {
+		fprintf(stderr, "mvm: thread not initialized!\n");
+		mvm_halt();
+	}
+
+	return t->vm_stack;
+}
+
+int thread_get_state(struct thread *t) {
+	if (t == NULL) {
+		fprintf(stderr, "mvm: thread not initialized!\n");
+		mvm_halt();
+	}
+
+	return t->state;
+}
+
 uint32_t thread_get_pc() {
 	struct thread *t;
 
@@ -147,7 +168,7 @@ int thread_start(struct object *o) {
 
 	t = object_get_thread(o);
 	vm_stack = t->vm_stack;
-	
+
 	if (t == NULL) {
 		fprintf(stderr, "mvm: thread not initialized!\n");
 		mvm_halt();
@@ -160,10 +181,8 @@ int thread_start(struct object *o) {
 	operand_stack = frame_get_operand_stack(frame);
 	operand_stack_push(operand_stack, t->ref);
 
-	if (pthread_create(&t->id, NULL, thread_run0, (void *)t) != 0) {
-		perror("mvm: pthread_create");
+	if (thread_pthread_create(t, thread_run0) != 0)
 		mvm_halt();
-	}
 
 	return 0;
 }
@@ -180,7 +199,26 @@ int thread_start_main(struct object *o) {
 
 	t->ref = object_get_ref(o);
 
-	if (pthread_create(&t->id, NULL, thread_run0_main, (void *)t) != 0) {
+	if (thread_pthread_create(t, thread_run0_main) != 0)
+		mvm_halt();
+
+	return 0;
+}
+
+int thread_pthread_create(struct thread *t, void * (*s)(void *)) {
+	pthread_attr_t attr;
+
+	if (pthread_attr_init(&attr) != 0) {
+		perror("mvm: pthread_attr_init");
+		mvm_halt();
+	}
+
+	if (pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE) != 0) {
+		perror("mvm: pthread_attr_setdetachstate");
+		mvm_halt();
+	}
+
+	if (pthread_create(&t->id, &attr, s, (void *)t) != 0) {
 		perror("mvm: pthread_create");
 		mvm_halt();
 	}
@@ -189,6 +227,7 @@ int thread_start_main(struct object *o) {
 }
 
 int thread_join(struct object *o) {
+	void *value;
 	struct thread *t;
 
 	t = object_get_thread(o);
@@ -198,7 +237,7 @@ int thread_join(struct object *o) {
 		mvm_halt();
 	}
 
-	if (pthread_join(t->id, NULL) != 0) {
+	if (pthread_join(t->id, &value) != 0) {
 		perror("mvm: pthread_join");
 		mvm_halt();
 	}
@@ -235,6 +274,7 @@ void * thread_run0(void *p) {
 	t->state = terminated_state;
 	/* run method has terminated, thread instance can now be collected */
 	heap_include_ref(heap, t->ref);
+	heap_remove_thread_ref(heap, t->ref);
 	pthread_exit(0);
 }
 
@@ -257,5 +297,6 @@ void * thread_run0_main(void *p) {
 	t->state = terminated_state;
 	/* run method has terminated, thread instance can now be collected */
 	heap_include_ref(heap, t->ref);
+	heap_remove_thread_ref(heap, t->ref);
 	pthread_exit(0);
 }

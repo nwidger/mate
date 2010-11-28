@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Feb 2010 at 13:38:52 by nwidger on macros.local>
+ * Time-stamp: <28 Nov 2010 at 18:05:08 by nwidger on macros.local>
  */
 
 #ifndef _MVM_HEAP_H
@@ -121,6 +121,8 @@ int heap_resize(struct heap *h, int m);
 
 int heap_populate_ref_set(struct heap *h, struct ref_set *r);
 
+int heap_populate_thread_set(struct heap *h, struct ref_set *r);
+
 /** adds the given reference to the set of references which are
  * excluded from garbage collection.  Care must be taken to ensure
  * heap_include_ref is called on the given reference as soon as
@@ -144,6 +146,10 @@ int heap_exclude_ref(struct heap *h, int r);
  */
 
 int heap_include_ref(struct heap *h, int r);
+
+int heap_add_thread_ref(struct heap *h, int r);
+
+int heap_remove_thread_ref(struct heap *h, int r);
 
 /** dumps the contents of the heap to standard error.
  *

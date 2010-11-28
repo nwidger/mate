@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <17 Nov 2010 at 10:54:53 by nwidger on macros.local>
+ * Time-stamp: <23 Nov 2010 at 21:43:35 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -96,7 +96,6 @@ int nlock_lock(struct nlock *n) {
 		n->owner = pthread_self();
 
 	n->locks++;
-	
 	return 0;
 }
 

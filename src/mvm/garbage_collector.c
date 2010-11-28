@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Nov 2010 at 21:08:16 by nwidger on macros.local>
+ * Time-stamp: <28 Nov 2010 at 18:14:41 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -23,6 +23,7 @@
 #include "object.h"
 #include "operand_stack.h"
 #include "ref_set.h"
+#include "thread.h"
 #include "vm_stack.h"
 
 /* struct definitions */
@@ -278,17 +279,18 @@ int garbage_collector_collect_now(struct garbage_collector *g) {
 }
 
 int tricolor_garbage_collector(struct garbage_collector *g) {
-	int i, size, object_ref, ref;
+	int i, size, object_ref, ref, thread_ref;
 	struct vm_stack *vm_stack;
 	struct frame *frame;
 	struct operand_stack *operand_stack;
 	struct object *object;
 	struct local_variable_array *local_variable_array;
-	struct ref_set *tmp;
-
-	vm_stack = NULL;
+	struct ref_set *tmp, *threads;
+	struct thread *thread;
 
 	mvm_print("garbage_collector: collection started\n");
+
+	threads = ref_set_create();
 
 	g->white = ref_set_create();
 	g->grey = ref_set_create();
@@ -300,40 +302,57 @@ int tricolor_garbage_collector(struct garbage_collector *g) {
 	/* add all references in heap to white set */
 	heap_populate_ref_set(heap, g->white);
 
-	vm_stack_lock(vm_stack);
+	/* add all threads to thread set */
+	heap_populate_thread_set(heap, threads);
 
-	/* move root set to grey set */
-	for (frame = vm_stack_peek(vm_stack); frame != NULL; frame = frame_get_calling_frame(frame)) {
-		frame_lock(frame);
+	/* iterate over each running thread */
+	ref_set_iterator_init(threads);
 
-		operand_stack = frame_get_operand_stack(frame);
-		operand_stack_lock(operand_stack);
+	while ((thread_ref = ref_set_iterator_next(threads)) != 0) {
+		object = heap_fetch_object(heap, thread_ref);
+		thread = object_get_thread(object);
 
-		size = operand_stack_size(operand_stack);
-		for (i = 0; i < size; i++) {
-			ref = operand_stack_peek_n(operand_stack, i);
-			if (ref != 0)
-				move_ref_to(g, g->grey, ref);
+		if (thread_get_state(thread) == terminated_state)
+			continue;
+
+		fprintf(stderr, "***GC***: adding thread's root set...\n");
+
+		vm_stack = _thread_get_vm_stack(thread);
+		vm_stack_lock(vm_stack);
+
+		/* move root set to grey set */
+		for (frame = vm_stack_peek(vm_stack); frame != NULL; frame = frame_get_calling_frame(frame)) {
+			frame_lock(frame);
+
+			operand_stack = frame_get_operand_stack(frame);
+			operand_stack_lock(operand_stack);
+
+			size = operand_stack_size(operand_stack);
+			for (i = 0; i < size; i++) {
+				ref = operand_stack_peek_n(operand_stack, i);
+				if (ref != 0)
+					move_ref_to(g, g->grey, ref);
+			}
+
+			operand_stack_unlock(operand_stack);
+
+			local_variable_array = frame_get_local_variable_array(frame);
+			local_variable_array_lock(local_variable_array);
+
+			size = local_variable_array_size(local_variable_array);
+			for (i = 0; i < size; i++) {
+				ref = local_variable_array_load(local_variable_array, i);
+				if (ref != 0)
+					move_ref_to(g, g->grey, ref);
+			}
+
+			local_variable_array_unlock(local_variable_array);
+
+			frame_unlock(frame);
 		}
 
-		operand_stack_unlock(operand_stack);
-
-		local_variable_array = frame_get_local_variable_array(frame);
-		local_variable_array_lock(local_variable_array);
-
-		size = local_variable_array_size(local_variable_array);
-		for (i = 0; i < size; i++) {
-			ref = local_variable_array_load(local_variable_array, i);
-			if (ref != 0)
-				move_ref_to(g, g->grey, ref);
-		}
-
-		local_variable_array_unlock(local_variable_array);
-
-		frame_unlock(frame);
+		vm_stack_unlock(vm_stack);
 	}
-
-	vm_stack_unlock(vm_stack);
 
 	/* unlock */
 	garbage_collector_unlock(g);
