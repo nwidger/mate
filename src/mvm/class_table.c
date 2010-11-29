@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Nov 2010 at 18:12:14 by nwidger on macros.local>
+ * Time-stamp: <28 Nov 2010 at 21:45:56 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -440,7 +440,7 @@ int class_table_lock(struct class_table *c) {
 	}
 
 	/* lock */
-	nlock_lock(c->nlock);
+	/* nlock_lock(c->nlock); */
 
 	return 0;
 }
@@ -452,7 +452,7 @@ int class_table_unlock(struct class_table *c) {
 	}
 
 	/* unlock */
-	nlock_unlock(c->nlock);
+	/* nlock_unlock(c->nlock); */
 
 	return 0;
 }

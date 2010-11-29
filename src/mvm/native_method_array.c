@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <14 Feb 2010 at 16:49:02 by nwidger on macros.local>
+ * Time-stamp: <28 Nov 2010 at 22:30:32 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -27,8 +27,9 @@ struct native_method_array {
 
 /* forward declarations */
 int native_method_array_compare_names(const void *n, const void *o);
-struct native_method_record * native_method_record_create(char *n, int a, int (*m)(uint32_t));
+struct native_method_record * native_method_record_create(char *n, int (*m)(uint32_t));
 void native_method_record_destroy(struct native_method_record *r);
+int native_method_record_decode_num_args(char *n);
 
 struct native_method_array * native_method_array_create(int s) {
 	struct native_method_array *n;
@@ -73,7 +74,7 @@ void native_method_array_clear(struct native_method_array *n) {
 }
 
 int native_method_array_set(struct native_method_array *n, int i, char *s,
-			    int a, int (*m)(uint32_t)) {
+			    int (*m)(uint32_t)) {
 	if (n == NULL) {
 		fprintf(stderr, "mvm: native method array not initialized!\n");
 		mvm_halt();
@@ -87,7 +88,7 @@ int native_method_array_set(struct native_method_array *n, int i, char *s,
 	if (n->native_methods[i] != NULL)
 		native_method_record_destroy(n->native_methods[i]);
 
-	if ((n->native_methods[i] = native_method_record_create(s, a, m)) == NULL)
+	if ((n->native_methods[i] = native_method_record_create(s, m)) == NULL)
 		mvm_halt();
 
 	return 0;
@@ -225,7 +226,7 @@ int native_method_array_compare_names(const void *n, const void *o) {
 	return strcmp((char *)n, (char *)o);
 }
 
-struct native_method_record * native_method_record_create(char *n, int a, int (*m)(uint32_t)) {
+struct native_method_record * native_method_record_create(char *n, int (*m)(uint32_t)) {
 	struct native_method_record *r;
 
 	if ((r = (struct native_method_record *)malloc(sizeof(struct native_method_record))) == NULL) {
@@ -239,7 +240,7 @@ struct native_method_record * native_method_record_create(char *n, int a, int (*
 	}
 
 	strcpy(r->name, n);
-	r->num_args = a;
+	r->num_args = native_method_record_decode_num_args(n);
 	r->method = m;
 
 	return r;
@@ -250,4 +251,29 @@ void native_method_record_destroy(struct native_method_record *r) {
 		free(r->name);
 		free(r);
 	}
+}
+
+int native_method_record_decode_num_args(char *n) {
+	char *p, *q;
+	int num_args;
+
+	/* "CLASS_constructor" */
+	if ((p = strchr(n, '$')) == NULL)
+		return 1;
+
+	if ((q = strchr(n, '_')) != NULL && q < p &&
+	    strspn(q, "_constructor") == strlen("_constructor")) {
+		/* "CLASS_constructor[$arg]..." */
+		num_args = 1;
+	} else {
+		/* "CLASS$method[$arg]..." */
+		num_args = 0;
+	}
+
+	while ((n = strchr(n, '$')) != NULL) {
+		num_args++;
+		n++;
+	};
+
+	return num_args;
 }

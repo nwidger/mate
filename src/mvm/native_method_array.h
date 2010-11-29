@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Feb 2010 at 13:59:52 by nwidger on macros.local>
+ * Time-stamp: <28 Nov 2010 at 21:59:40 by nwidger on macros.local>
  */
 
 #ifndef _MVM_NATIVEMETHODARRAY_H
@@ -46,7 +46,7 @@ void native_method_array_clear(struct native_method_array *n);
  */
 
 int native_method_array_set(struct native_method_array *n, int i, char *s,
-			    int a, int (*m)(uint32_t));
+			    int (*m)(uint32_t));
 
 /** executes the native method at index i of the given
  * native_method_array.

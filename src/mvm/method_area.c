@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Nov 2010 at 22:13:19 by nwidger on macros.local>
+ * Time-stamp: <28 Nov 2010 at 21:52:30 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -478,6 +478,7 @@ int method_area_read_string(struct method_area *m, uint32_t a, char **b) {
 	}
 
 	i = 0;
+	
 	do {
 		c = (char)method_area_fetch(m, a);
 		buf[i++] = c;
@@ -524,7 +525,7 @@ int method_area_lock(struct method_area *m) {
 	}
 
 	/* lock */
-	nlock_lock(m->nlock);
+	/* nlock_lock(m->nlock); */
 
 	return 0;
 }
@@ -536,7 +537,7 @@ int method_area_unlock(struct method_area *m) {
 	}
 
 	/* unlock */
-	nlock_unlock(m->nlock);
+	/* nlock_unlock(m->nlock); */
 	
 	return 0;
 }
