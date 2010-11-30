@@ -1,5 +1,13 @@
 #!/bin/bash
 
+PWD=`pwd`
+DIR=`basename $PWD`
+
+if [ "$DIR" != "tests" ];
+then
+    cd tests
+fi
+
 rm -f *.s *~ *.sym *.class
 
 i=1;
@@ -8,28 +16,17 @@ for e in *.m; do
     echo "$i. ${e%%.m}"
     echo "===================="
 
-    cat predefined_classes.m $e | mc > ${e%%.m}.s
-    if [[ $? -ne 0 ]];
-    then
-        rm -f ${e%%.m}.s
-        continue
-    fi
+    # generate assembler file
+    mcc -S $e
+    # generate symbol table
+    mcc -s $e
+    # generate class file
+    mcc $e
 
-    mas -s < ${e%%.m}.s > ${e%%.m}.sym
-    if [[ $? -ne 0 ]];
+    if [[ $? -eq 0 ]];
     then
-        rm -f ${e%%.m}.sym
-        continue
+	mvm ${e%%.m}.class < input
     fi
-
-    mas < ${e%%.m}.s > ${e%%.m}.class
-    if [[ $? -ne 0 ]];
-    then
-        rm -f ${e%%.m}.class
-        continue
-    fi
-
-    mvm ${e%%.m}.class < input
 
     i=$(($i+1));
 done

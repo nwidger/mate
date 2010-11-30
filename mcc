@@ -84,12 +84,21 @@ fi
 
 # generate OUTPUT by stripping .m suffix from INPUT and adding .class
 
-OUTPUT=${INPUT%%.m}.class
+if [ "$OUTPUT" == "" ];
+then
+    OUTPUT=${INPUT%%.m}.class
+fi
 
 # dump compiler output to TEMP
 
 TEMP=`tempfile`
-mc < $INPUT > $TEMP
+
+if [ ! -r predefined_classes.m ];
+then
+    mc < $INPUT > $TEMP        
+else
+    cat predefined_classes.m $INPUT | mc > $TEMP
+fi
 
 # abort if compile stage failed
 
@@ -103,25 +112,51 @@ fi
 
 if [[ $STOP_AFTER_COMPILE -ne 0 ]];
 then
-    OUTPUT=${INPUT%%.m}.s
+    if [ "$OUTPUT" == "" ];
+    then
+	OUTPUT=${INPUT%%.m}.s
+    fi
+    
     cp $TEMP $OUTPUT > /dev/null 2>&1
     rm -rf $TEMP > /dev/null 2>&1
     exit 0
 fi
 
-# write generate symbol table to OUTPUT and exit
+# write symbol table to OUTPUT and exit
 
 if [[ $GENERATE_SYMBOL_TABLE -ne 0 ]];
 then
-    OUTPUT=${INPUT%%.m}.sym
+    if [ "$OUTPUT" == "" ];
+    then
+	OUTPUT=${INPUT%%.m}.sym
+    fi
+    
     mas -s < $TEMP > $OUTPUT
-    rm -rf $TEMP > /dev/null > 2>&1
+
+    # abort if writing symbol table failed
+    
+    if [[ $? -ne 0 ]];
+    then
+	rm -rf $TEMP $OUTPUT > /dev/null 2>&1
+	exit 1
+    fi
+    
+    rm -rf $TEMP > /dev/null 2>&1
     exit 0
 fi
 
 # assemble, writing class file to OUTPUT
 
 mas < $TEMP > $OUTPUT
+
+# abort if assembler stage failed
+
+if [[ $? -ne 0 ]];
+then
+    rm -rf $TEMP $OUTPUT > /dev/null 2>&1
+    exit 1
+fi
+
 
 # cleanup and exit success
 
