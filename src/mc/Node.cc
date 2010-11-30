@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <23 Nov 2010 at 21:55:44 by nwidger on macros.local>
+// Time-stamp: <29 Nov 2010 at 20:47:25 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -1770,6 +1770,7 @@ ReturnStatementNode::ReturnStatementNode() {
 ReturnStatementNode::ReturnStatementNode(ExpressionNode *e) {
 	expression = e;
 	label = 0;
+	monitors = 0;
 	nodeName = "ReturnStatementNode";
 }
 

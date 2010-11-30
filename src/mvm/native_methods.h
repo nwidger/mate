@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Nov 2010 at 20:25:32 by nwidger on macros.local>
+ * Time-stamp: <29 Nov 2010 at 20:17:33 by nwidger on macros.local>
  */
 
 #ifndef _MVM_NATIVEMETHODS_H
@@ -55,6 +55,7 @@ int native_thread_constructor(uint32_t i);
 int native_thread_start(uint32_t i);
 int native_thread_run(uint32_t i);
 int native_thread_join(uint32_t i);
+int native_thread_sleep(uint32_t i);
 
 /** adds all necessary native methods to the given native_method_array.
  *

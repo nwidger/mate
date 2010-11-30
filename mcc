@@ -1,5 +1,6 @@
 #!/bin/bash
 
+PREDEFINED="/usr/local/share/doc/mate/predefined_classes.m"
 STOP_AFTER_COMPILE=0
 GENERATE_SYMBOL_TABLE=0
 INPUT=""
@@ -11,13 +12,15 @@ function usage() {
     echo "-h       Print this help message and exit"
     echo "-s       Generate symbol table and exit"
     echo "-S       Compile only; do not assemble"
+    echo "-p FILE  Specify location of predefined classes file"
+    echo "         Default is '/usr/local/share/doc/mate/predefined_classes.m'"
     echo "-o FILE  Place the output into FILE"
 }
 
 # parse arguments
 
 OPTERR=0
-OPTARGS=":sSo:h"
+OPTARGS=":sSp:o:h"
 
 if [[ $# -eq 0 ]];
 then
@@ -30,6 +33,9 @@ while getopts $OPTARGS opt; do
     h)
     usage
     exit 1
+    ;;
+    p)
+    PREDEFINED="$OPTARG"
     ;;
     S)
     STOP_AFTER_COMPILE=1
@@ -93,11 +99,11 @@ fi
 
 TEMP=`tempfile`
 
-if [ ! -r predefined_classes.m ];
+if [ ! -r $PREDEFINED ];
 then
     mc < $INPUT > $TEMP        
 else
-    cat predefined_classes.m $INPUT | mc > $TEMP
+    cat $PREDEFINED $INPUT | mc > $TEMP
 fi
 
 # abort if compile stage failed
@@ -156,7 +162,6 @@ then
     rm -rf $TEMP $OUTPUT > /dev/null 2>&1
     exit 1
 fi
-
 
 # cleanup and exit success
 

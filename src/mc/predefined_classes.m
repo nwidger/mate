@@ -62,4 +62,5 @@ class Thread extends Object {
         native:48 Object start();
         native:49 Object run();
         native:50 Object join();
+        native:51 Object sleep(Integer millisec);  
 }

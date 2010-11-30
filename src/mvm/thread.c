@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Nov 2010 at 18:10:26 by nwidger on macros.local>
+ * Time-stamp: <29 Nov 2010 at 20:20:46 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -11,10 +11,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #include "class_table.h"
 #include "globals.h"
 #include "heap.h"
+#include "integer.h"
 #include "invoke_method.h"
 #include "object.h"
 #include "operand_stack.h"
@@ -242,6 +244,29 @@ int thread_join(struct object *o) {
 		mvm_halt();
 	}
 
+	return 0;
+}
+
+int thread_sleep(struct object *o, struct object *p) {
+	int32_t millisec;
+	struct thread *t;
+	struct integer *i;
+
+	t = object_get_thread(o);
+
+	if (t == NULL) {
+		fprintf(stderr, "mvm: thread not initialized!\n");
+		mvm_halt();
+	}
+
+	i = object_get_integer(p);	
+	millisec = integer_get_value(i);
+
+	if (usleep(millisec * 1000) != 0) {
+		perror("mvm: usleep");
+		mvm_halt();
+	}
+	
 	return 0;
 }
 

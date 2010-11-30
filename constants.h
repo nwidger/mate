@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Nov 2010 at 22:02:06 by nwidger on macros.local>
+ * Time-stamp: <29 Nov 2010 at 20:17:18 by nwidger on macros.local>
  */
 
 #ifndef _MVM_CONSTANTS_H
@@ -69,8 +69,8 @@
 #define MONITOREXIT_NAME "monitorexit"
 
 /* native methods */
-#define NUM_NATIVES 51
-#define MAX_NATIVE_INDEX 50
+#define NUM_NATIVES 52
+#define MAX_NATIVE_INDEX 51
 
 /* native method indices */
 #define OBJECT_CONSTRUCTOR_NATIVE_INDEX 0
@@ -128,6 +128,7 @@
 #define THREAD_START_NATIVE_INDEX 48
 #define THREAD_RUN_NATIVE_INDEX 49
 #define THREAD_JOIN_NATIVE_INDEX 50
+#define THREAD_SLEEP_NATIVE_INDEX 51
 
 /* native method names */
 #define OBJECT_CONSTRUCTOR_NATIVE_NAME "Object_constructor"
@@ -185,6 +186,7 @@
 #define THREAD_START_NATIVE_NAME "Thread$start"
 #define THREAD_RUN_NATIVE_NAME "Thread$run"
 #define THREAD_JOIN_NATIVE_NAME "Thread$join"
+#define THREAD_SLEEP_NATIVE_NAME "Thread$sleep$Integer"
 
 /* ref_set constants */
 #define REF_SET_DEFAULT_INITIAL_CAPACITY 300

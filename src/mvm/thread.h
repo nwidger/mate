@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Nov 2010 at 18:10:13 by nwidger on macros.local>
+ * Time-stamp: <29 Nov 2010 at 20:16:45 by nwidger on macros.local>
  */
 
 #ifndef _MVM_THREAD_H
@@ -48,5 +48,7 @@ int thread_start(struct object *o);
 int thread_start_main(struct object *o);
 
 int thread_join(struct object *o);
+
+int thread_sleep(struct object *o, struct object *p);
 
 int thread_run(struct object *o);

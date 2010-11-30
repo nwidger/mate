@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Nov 2010 at 22:01:37 by nwidger on macros.local>
+ * Time-stamp: <29 Nov 2010 at 20:19:32 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -988,6 +988,25 @@ int native_thread_join(uint32_t i) {
 	return 0;
 }
 
+int native_thread_sleep(uint32_t i) {
+	int ref, n;
+	struct object *this, *millisec;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	millisec = heap_fetch_object(heap, ref);
+
+	ref = thread_sleep(this, millisec);
+	operand_stack_push(calling_frame_operand_stack, ref);
+
+	return 0;
+}
+
 int add_native_methods(struct native_method_array *n) {
 	native_method_array_set(n, OBJECT_CONSTRUCTOR_NATIVE_INDEX,
 				OBJECT_CONSTRUCTOR_NATIVE_NAME,
@@ -1147,6 +1166,9 @@ int add_native_methods(struct native_method_array *n) {
 	native_method_array_set(n, THREAD_JOIN_NATIVE_INDEX,
 				THREAD_JOIN_NATIVE_NAME,
 				native_thread_join);
+	native_method_array_set(n, THREAD_SLEEP_NATIVE_INDEX,
+				THREAD_SLEEP_NATIVE_NAME,
+				native_thread_sleep);
 
 
 	return 0;
