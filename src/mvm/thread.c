@@ -1,11 +1,12 @@
 /* Niels Widger
- * Time-stamp: <29 Nov 2010 at 20:20:46 by nwidger on macros.local>
+ * Time-stamp: <02 Dec 2010 at 13:55:38 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
 
+#include <errno.h>
 #include <pthread.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -208,6 +209,7 @@ int thread_start_main(struct object *o) {
 }
 
 int thread_pthread_create(struct thread *t, void * (*s)(void *)) {
+	int err;
 	pthread_attr_t attr;
 
 	if (pthread_attr_init(&attr) != 0) {
@@ -220,9 +222,18 @@ int thread_pthread_create(struct thread *t, void * (*s)(void *)) {
 		mvm_halt();
 	}
 
-	if (pthread_create(&t->id, &attr, s, (void *)t) != 0) {
-		perror("mvm: pthread_create");
-		mvm_halt();
+	while (1) {
+		err = pthread_create(&t->id, &attr, s, (void *)t);
+
+		if (err == 0) {
+			break;
+		} else if (err == EAGAIN) {
+			sleep(500);
+			continue;
+		} else {
+			perror("mvm: pthread_create");
+			mvm_halt();
+		}
 	}
 
 	return 0;

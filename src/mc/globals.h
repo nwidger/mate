@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <17 Nov 2010 at 20:37:33 by nwidger on macros.local>
+// Time-stamp: <02 Dec 2010 at 13:04:06 by nwidger on macros.local>
 
 #ifndef _GLOBALS_H
 #define _GLOBALS_H
@@ -11,6 +11,7 @@ class ClassMethodNode;
 class LabelStack;
 class LocalVariableStack;
 class MainBlockNode;
+class MonitorStack;
 class Seq;
 class StringPool;
 class TypeModule;
@@ -19,6 +20,7 @@ extern StringPool *stringPool;
 extern TypeModule *types;
 extern LocalVariableStack *localVariableStack;
 extern LabelStack *labelStack;
+extern MonitorStack *monitorStack;
 extern Seq *ast;
 
 extern int labelCounter;

@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <29 Nov 2010 at 20:47:25 by nwidger on macros.local>
+// Time-stamp: <02 Dec 2010 at 13:28:38 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -13,6 +13,7 @@ using namespace std;
 #include "globals.h"
 #include "LabelStack.h"
 #include "LocalVariableStack.h"
+#include "MonitorStack.h"
 #include "Node.h"
 #include "Seq.h"
 #include "StringPool.h"
@@ -1541,6 +1542,7 @@ Node * SynchronizedStatementNode::analyze(void *param) {
 
 	expression = (ExpressionNode *)expression->analyze(param);
 
+	monitorStack->push(position);
 	localVariableStack->enterBlock();
 
 	nameO << "synchronized$." << synchronizedCounter++;
@@ -1555,6 +1557,7 @@ Node * SynchronizedStatementNode::analyze(void *param) {
 	statements = statements->analyze(param);
 
 	localVariableStack->leaveBlock();
+	monitorStack->pop();
 	
 	return (Node *)this;
 }
@@ -1790,7 +1793,6 @@ void ReturnStatementNode::dump() {
 Node * ReturnStatementNode::analyze(void *param) {
 	Type *methodType;
 	string str;
-	LabelStackRecord *lsr;
 
 	if (expression != 0)
 		expression = (ExpressionNode *)expression->analyze(param);
@@ -1847,8 +1849,7 @@ Node * ReturnStatementNode::analyze(void *param) {
 		}
 	}
 
-	if ((lsr = labelStack->peek()) != 0)
-		monitors = labelStack->getAllMonitors();
+	monitors = monitorStack->toArray();
 
 	return (Node *)this;
 }

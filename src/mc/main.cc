@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <17 Nov 2010 at 20:37:43 by nwidger on macros.local>
+// Time-stamp: <02 Dec 2010 at 13:03:29 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -14,6 +14,7 @@ using namespace std;
 #include "ClassTable.h"
 #include "LabelStack.h"
 #include "LocalVariableStack.h"
+#include "MonitorStack.h"
 #include "Node.h"
 #include "Seq.h"
 #include "StringPool.h"
@@ -32,6 +33,7 @@ StringPool *stringPool;
 TypeModule *types;
 LocalVariableStack *localVariableStack;
 LabelStack *labelStack;
+MonitorStack *monitorStack;
 Seq *ast;
 
 int labelCounter;
@@ -80,6 +82,7 @@ int main(int argc, char *argv[]) {
 	types = new TypeModule();
 	localVariableStack = new LocalVariableStack(0);
 	labelStack = new LabelStack(whileLabel, 0);
+	monitorStack = new MonitorStack();
 
 	labelCounter = 0;
 	synchronizedCounter = 0;
@@ -87,6 +90,7 @@ int main(int argc, char *argv[]) {
 	if (yyparse() != 0) {
 		delete ast;
 		delete labelStack;
+		delete monitorStack;
 		delete localVariableStack;
 		delete types;
 		delete stringPool;
@@ -120,6 +124,7 @@ int main(int argc, char *argv[]) {
 
 	delete ast;
 	delete labelStack;
+	delete monitorStack;
 	delete localVariableStack;
 	delete types;
 	delete stringPool;
