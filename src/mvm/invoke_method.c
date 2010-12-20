@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Nov 2010 at 21:38:39 by nwidger on macros.local>
+ * Time-stamp: <19 Dec 2010 at 18:33:15 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -193,6 +193,8 @@ int execute_method(char *e, uint32_t a, uint32_t b, uint32_t n, uint32_t m, uint
 
 		if (instruction_table_execute(instruction_table, opcode) != 0)
 			mvm_halt();
+
+		thread_increment_instruction_counter();
 
 		if (debug != 0 && restart != 0)
 			return 0;

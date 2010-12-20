@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <29 Nov 2010 at 20:19:32 by nwidger on macros.local>
+ * Time-stamp: <03 Dec 2010 at 21:05:29 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -936,6 +936,7 @@ int native_thread_constructor(uint32_t i) {
 
 	thread = thread_create();
 	object_set_thread(this, thread);
+	heap_add_thread_ref(heap, ref);	
 
 	return 0;
 }

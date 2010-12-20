@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Nov 2010 at 21:43:35 by nwidger on macros.local>
+ * Time-stamp: <19 Dec 2010 at 21:11:19 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -163,8 +163,10 @@ int nlock_timedwait(struct nlock *n, long t) {
 		mvm_halt();
 	}
 
-	abstime.tv_sec = time(NULL);
-	abstime.tv_nsec = t * 1000000;
+	if (t == 0L) {
+		abstime.tv_sec = time(NULL);
+		abstime.tv_nsec = t * 1000000;
+	}
 	
 	notifies = n->notifies;
 	

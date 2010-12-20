@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Nov 2010 at 21:23:28 by nwidger on macros.local>
+ * Time-stamp: <03 Dec 2010 at 20:54:34 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -32,6 +32,7 @@
 #include "native_method_array.h"
 #include "object.h"
 #include "operand_stack.h"
+#include "ref_set.h"
 #include "string.h"
 #include "symbol_table.h"
 #include "table.h"
@@ -161,6 +162,7 @@ int up_function(char **t, int n);
 int quit_function(char **t, int n);
 int x_function(char **t, int n);
 
+void mdb_dump_threads();
 int mdb_print_location(int d);
 int mdb_restart();
 int mdb_update_frame();
@@ -276,6 +278,11 @@ struct mdb_command info_commands[] = {
 	{
 		"symbol-table", 0, INFO_SYMBOL_TABLE_SHORT_HELP,
 		INFO_SYMBOL_TABLE_HELP, info_function,
+		NONE, 0
+	},
+	{
+		"threads", 0, INFO_THREADS_SHORT_HELP,
+		INFO_THREADS_HELP, info_function,
 		NONE, 0
 	},
 	{
@@ -1279,6 +1286,8 @@ int info_function(char **t, int n) {
 		fprintf(stderr, "%-16s%" PRIu32 "\n", "pc", pc);
 	} else if (strcmp(command, "symbol-table") == 0) {
 		symbol_table_dump(symbol_table);
+	} else if (strcmp(command, "threads") == 0) {
+		mdb_dump_threads();
 	} else if (strcmp(command, "vm-stack") == 0) {
 		if (vm_stack_size(vm_stack) == 0) {
 			fprintf(stderr, "No stack.\n");
@@ -1289,6 +1298,40 @@ int info_function(char **t, int n) {
 	}
 
 	return 0;
+}
+
+void mdb_dump_threads() {
+	char *name;
+	int i, ref;
+	uint32_t pc;
+	struct frame *frame;
+	struct thread *thread;
+	struct object *object;
+	struct ref_set *threads;
+	struct vm_stack *vm_stack;
+
+	threads = ref_set_create();
+	heap_populate_thread_set(heap, threads);
+	i = ref_set_size(threads);
+
+	ref_set_iterator_init(threads);
+
+	while ((ref = ref_set_iterator_next(threads)) != 0) {
+		object = heap_fetch_object(heap, ref);
+		thread = object_get_thread(object);
+
+		pc = _thread_get_pc(thread);
+		vm_stack = _thread_get_vm_stack(thread);
+
+		frame = vm_stack_peek(vm_stack);
+
+		if (frame == NULL) {
+			fprintf(stderr, "* %d %-14" PRIu32 " in ??? ()\n", i--, pc);
+		} else {
+			name = frame_get_method_name(frame);
+			fprintf(stderr, "* %d %-14" PRIu32 " in %s ()\n", i--, pc, name);
+		}
+	}
 }
 
 int jump_function(char **t, int n) {

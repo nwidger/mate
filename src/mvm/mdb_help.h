@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <08 Apr 2010 at 11:52:07 by nwidger on macros.local>
+ * Time-stamp: <03 Dec 2010 at 20:39:26 by nwidger on macros.local>
  */
 
 #ifndef _MVM_MDB_HELP_H
@@ -157,6 +157,9 @@ i(instruction), c(char) and s(string).\n"
 
 #define INFO_SYMBOL_TABLE_SHORT_HELP "List all symbols in symbol table."
 #define INFO_SYMBOL_TABLE_HELP "Load symbol table with add-symbol-file command, or -s switch.\n"
+
+#define INFO_THREADS_SHORT_HELP "IDs of currently known threads."
+#define INFO_THREADS_HELP ""
 
 #define INFO_VM_STACK_SHORT_HELP "Backtrace of the stack."
 #define INFO_VM_STACK_HELP ""

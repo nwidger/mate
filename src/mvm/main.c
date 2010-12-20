@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Nov 2010 at 20:04:25 by nwidger on macros.local>
+ * Time-stamp: <03 Dec 2010 at 20:21:19 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -244,6 +244,7 @@ void mvm_clear() {
 				garbage_collector_interval);
 }
 
+
 void mvm_halt() {
 	uint32_t pc, opcode;
 	struct vm_stack *vm_stack;
@@ -399,9 +400,6 @@ int main(int argc, char *argv[]) {
 		mvm_cleanup();
 		return 0;
 	}
-
-	if (debug != 0)
-		mdb_hook(startup_hook);
 
 	main_block_address = method_area_get_main_block_address(method_area);
 	main_block_end = mvm_disassemble_method_end(main_block_address);

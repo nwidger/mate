@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <29 Nov 2010 at 20:16:45 by nwidger on macros.local>
+ * Time-stamp: <19 Dec 2010 at 18:32:11 by nwidger on macros.local>
  */
 
 #ifndef _MVM_THREAD_H
@@ -33,15 +33,31 @@ void thread_clear(struct thread *t);
 
 struct thread * thread_get_current();
 
+int thread_get_ref();
+
+int _thread_get_ref(struct thread *t);
+
 struct vm_stack * thread_get_vm_stack();
 
 struct vm_stack * _thread_get_vm_stack(struct thread *t);
 
-int thread_get_state(struct thread *t);
+int thread_get_state();
+
+int _thread_get_state(struct thread *t);
 
 uint32_t thread_get_pc();
 
+uint32_t _thread_get_pc(struct thread *t);
+
 uint32_t thread_set_pc(uint32_t p);
+
+uint32_t thread_get_instruction_counter();
+
+uint32_t _thread_get_instruction_counter(struct thread *t);
+
+uint32_t thread_increment_instruction_counter();
+
+uint32_t _thread_increment_instruction_counter(struct thread *t);
 
 int thread_start(struct object *o);
 
