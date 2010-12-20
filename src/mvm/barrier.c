@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Dec 2010 at 21:45:12 by nwidger on macros.local>
+ * Time-stamp: <19 Dec 2010 at 21:59:55 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -16,7 +16,7 @@
 
 /* struct definitions */
 struct barrier {
-	uint32_t generation;
+	uint64_t generation;
 	int parties;
 	int waiting;
 	pthread_mutex_t mutex;
@@ -70,8 +70,8 @@ void barrier_clear(struct barrier *b) {
 
 int barrier_await(struct barrier *b) {
 	int i;
-	uint32_t g;
-	
+	uint64_t g;
+
 	if (b == NULL) {
 		fprintf(stderr, "mvm: barrier not initialized!\n");
 		mvm_halt();
@@ -87,10 +87,10 @@ int barrier_await(struct barrier *b) {
 		pthread_cond_broadcast(&b->cond);
 	} else {
 		g = b->generation;
-		while (g == b->generation)
+		while (g == b->generation);
 			pthread_cond_wait(&b->cond, &b->mutex);
 	}
-	
+
 	pthread_mutex_unlock(&b->mutex);
 
 	return i;
@@ -101,7 +101,7 @@ void barrier_reset(struct barrier *b) {
 		fprintf(stderr, "mvm: barrier not initialized!\n");
 		mvm_halt();
 	}
-	
+
 	b->waiting = 0;
 }
 
@@ -110,6 +110,6 @@ int barrier_get_waiting(struct barrier *b) {
 		fprintf(stderr, "mvm: barrier not initialized!\n");
 		mvm_halt();
 	}
-	
+
 	return b->waiting;
 }
