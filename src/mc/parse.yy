@@ -2,7 +2,7 @@
 
 // Niels Widger
 // CS 712
-// Time-stamp: <17 Nov 2010 at 20:08:00 by nwidger on macros.local>
+// Time-stamp: <23 Dec 2010 at 20:27:27 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -34,6 +34,8 @@ extern TypeModule *types;
 	Seq *seq;
 
         unsigned long value;
+        float float_value;
+	
 	string *str;
 	char c;
 
@@ -67,6 +69,7 @@ extern TypeModule *types;
 %token TAB
 %token <value> NATIVE
 %token <value> INTEGER_LITERAL
+%token <float_value> FLOAT_LITERAL
 %token NULL_LITERAL
 %token OPERATOR
 
@@ -945,6 +948,10 @@ Literal
 	: INTEGER_LITERAL
 	{
 	  $$ = new IntegerLiteralNode($1);
+	}
+	| FLOAT_LITERAL
+	{
+	  $$ = new RealLiteralNode($1);
 	}
 	| NULL_LITERAL
 	{

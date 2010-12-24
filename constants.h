@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <29 Nov 2010 at 20:17:18 by nwidger on macros.local>
+ * Time-stamp: <23 Dec 2010 at 21:19:01 by nwidger on macros.local>
  */
 
 #ifndef _MVM_CONSTANTS_H
@@ -12,10 +12,10 @@
 #define GARBAGE_COLLECTOR_DEFAULT_TYPE serial_type
 
 /* instructions */
-#define NUM_INSTRUCTIONS 24
+#define NUM_INSTRUCTIONS 25
 
 /* instruction opcodes */
-#define MAX_OPCODE 0xfd
+#define MAX_OPCODE 0xfe
 
 #define ACONST_NULL_OPCODE 0x01
 #define ALOAD_OPCODE 0x19
@@ -41,6 +41,7 @@
 #define DUP_X1_OPCODE 0xfb
 #define MONITORENTER_OPCODE 0xfc
 #define MONITOREXIT_OPCODE 0xfd
+#define NEWREAL_OPCODE 0xfe
 
 /* instruction names */
 #define ACONST_NULL_NAME "aconst_null"
@@ -67,10 +68,11 @@
 #define DUP_X1_NAME "dup_x1"
 #define MONITORENTER_NAME "monitorenter"
 #define MONITOREXIT_NAME "monitorexit"
+#define NEWREAL_NAME "newreal"
 
 /* native methods */
-#define NUM_NATIVES 52
-#define MAX_NATIVE_INDEX 51
+#define NUM_NATIVES 73
+#define MAX_NATIVE_INDEX 72
 
 /* native method indices */
 #define OBJECT_CONSTRUCTOR_NATIVE_INDEX 0
@@ -130,6 +132,28 @@
 #define THREAD_JOIN_NATIVE_INDEX 50
 #define THREAD_SLEEP_NATIVE_INDEX 51
 
+#define REAL_CONSTRUCTOR_NATIVE_INDEX 52
+#define REAL_CONSTRUCTOR_REAL_NATIVE_INDEX 53
+#define REAL_ADD_NATIVE_INDEX 54
+#define REAL_SUBTRACT_NATIVE_INDEX 55
+#define REAL_MULTIPLY_NATIVE_INDEX 56
+#define REAL_DIVIDE_NATIVE_INDEX 57
+#define REAL_GREATER_THAN_NATIVE_INDEX 58
+#define REAL_LESS_THAN_NATIVE_INDEX 59
+#define REAL_NOT_NATIVE_INDEX 60
+#define REAL_MINUS_NATIVE_INDEX 61
+#define REAL_ADD_OP_NATIVE_INDEX 62
+#define REAL_SUBTRACT_OP_NATIVE_INDEX 63
+#define REAL_MULTIPLY_OP_NATIVE_INDEX 64
+#define REAL_DIVIDE_OP_NATIVE_INDEX 65
+#define REAL_GREATER_THAN_OP_NATIVE_INDEX 66
+#define REAL_LESS_THAN_OP_NATIVE_INDEX 67
+#define REAL_NOT_OP_NATIVE_INDEX 68
+#define REAL_MINUS_OP_NATIVE_INDEX 69
+#define REAL_EQUALS_NATIVE_INDEX 70
+#define REAL_HASH_CODE_NATIVE_INDEX 71
+#define REAL_TO_STRING_NATIVE_INDEX 72
+
 /* native method names */
 #define OBJECT_CONSTRUCTOR_NATIVE_NAME "Object_constructor"
 #define OBJECT_EQUALS_NATIVE_NAME "Object$equals$Object"
@@ -188,6 +212,28 @@
 #define THREAD_JOIN_NATIVE_NAME "Thread$join"
 #define THREAD_SLEEP_NATIVE_NAME "Thread$sleep$Integer"
 
+#define REAL_CONSTRUCTOR_NATIVE_NAME "Real_constructor"
+#define REAL_CONSTRUCTOR_REAL_NATIVE_NAME "Real_constructor$Real"
+#define REAL_ADD_NATIVE_NAME "Real$add$Real"
+#define REAL_SUBTRACT_NATIVE_NAME "Real$subtract$Real"
+#define REAL_MULTIPLY_NATIVE_NAME "Real$multiply$Real"
+#define REAL_DIVIDE_NATIVE_NAME "Real$divide$Real"
+#define REAL_GREATER_THAN_NATIVE_NAME "Real$greaterThan$Real"
+#define REAL_LESS_THAN_NATIVE_NAME "Real$lessThan$Real"
+#define REAL_NOT_NATIVE_NAME "Real$not"
+#define REAL_MINUS_NATIVE_NAME "Real$minus"
+#define REAL_ADD_OP_NATIVE_NAME "Real$operator+$Real"
+#define REAL_SUBTRACT_OP_NATIVE_NAME "Real$operator-$Real"
+#define REAL_MULTIPLY_OP_NATIVE_NAME "Real$operator*$Real"
+#define REAL_DIVIDE_OP_NATIVE_NAME "Real$operator/$Real"
+#define REAL_GREATER_THAN_OP_NATIVE_NAME "Real$operator>$Real"
+#define REAL_LESS_THAN_OP_NATIVE_NAME "Real$operator<$Real"
+#define REAL_NOT_OP_NATIVE_NAME "Real$operator!"
+#define REAL_MINUS_OP_NATIVE_NAME "Real$operator-"
+#define REAL_EQUALS_NATIVE_NAME "Real$equals$Object"
+#define REAL_HASH_CODE_NATIVE_NAME "Real$hashCode"
+#define REAL_TO_STRING_NATIVE_NAME "Real$toString"
+
 /* ref_set constants */
 #define REF_SET_DEFAULT_INITIAL_CAPACITY 300
 #define REF_SET_DEFAULT_LOAD_FACTOR 0.75
@@ -201,13 +247,14 @@
 #define METHOD_AREA_BUFFER_RESIZE_FACTOR 2
 
 /* class file constants */
-#define NUM_PREDEFINED_CLASSES 5
+#define NUM_PREDEFINED_CLASSES 6
 
 #define OBJECT_PREDEFINED_CLASS_NAME "Object"
 #define INTEGER_PREDEFINED_CLASS_NAME "Integer"
 #define STRING_PREDEFINED_CLASS_NAME "String"
 #define TABLE_PREDEFINED_CLASS_NAME "Table"
 #define THREAD_PREDEFINED_CLASS_NAME "Thread"
+#define REAL_PREDEFINED_CLASS_NAME "Real"
 
 #define NATIVE_ADDRESS 0
 
@@ -224,6 +271,7 @@
 #define INTEGER_MAX_INTEGER 2147483648U
 #define INTEGER_MIN_INTEGER 0
 #define INTEGER_TO_STRING_BUFFER_SIZE 12 /* strlen("-2147483648") == 11 */
+#define REAL_TO_STRING_BUFFER_SIZE 100
 
 /* predefined table constants */
 #define TABLE_DEFAULT_INITIAL_CAPACITY 16

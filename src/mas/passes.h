@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <20 Feb 2010 at 12:37:55 by nwidger on macros.local>
+ * Time-stamp: <23 Dec 2010 at 20:59:04 by nwidger on macros.local>
  */
 
 #ifndef PASSES_H
@@ -81,6 +81,16 @@ int first_pass_process_instruction(int line, char *instruction);
 
 int first_pass_process_integer(int line, char *integer);
 
+/** processes real literal read on first pass
+ * 
+ * @param line - current line of scanner
+ * @param real - real as c-string
+ * 
+ * @return 0 on success, non-zero on failure
+ */
+
+int first_pass_process_real(int line, char *real);
+
 /** processes string literal read on first pass
  * 
  * @param line - current line of scanner
@@ -122,6 +132,16 @@ int second_pass_process_instruction(int line, char *instruction);
  */
 
 int second_pass_process_integer(int line, char *integer);
+
+/** processes real literal read on second pass
+ * 
+ * @param line - current line of scanner
+ * @param real - real as c-string
+ * 
+ * @return 0 on success, non-zero on failure
+ */
+
+int second_pass_process_real(int line, char *real);
 
 /** processes string literal read on second pass
  * 

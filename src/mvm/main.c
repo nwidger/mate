@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <03 Dec 2010 at 20:21:19 by nwidger on macros.local>
+ * Time-stamp: <20 Dec 2010 at 12:52:01 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -15,6 +15,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "barrier.h"
 #include "class_table.h"
 #include "constants.h"
 #include "disassemble.h"
@@ -42,6 +43,7 @@ FILE *output;
 char *class_file;
 char *symbol_file;
 
+struct barrier *barrier;
 struct class_table *class_table;
 struct garbage_collector *garbage_collector;
 struct heap *heap;
@@ -408,6 +410,8 @@ int main(int argc, char *argv[]) {
 	do {
 		mvm_clear();
 		restart = 0;
+
+		barrier = barrier_create(1);
 		
 		class_table_new_thread(class_table, &object);
 		thread_start_main(object);

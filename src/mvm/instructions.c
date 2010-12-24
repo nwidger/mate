@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Nov 2010 at 21:33:10 by nwidger on macros.local>
+ * Time-stamp: <23 Dec 2010 at 21:16:45 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -743,6 +743,47 @@ int newint_instruction(uint32_t o) {
 	return 0;
 }
 
+int newreal_decode_size(uint32_t a) {
+	return newstr_decode_size(a);
+}
+
+
+int newreal_decode(uint32_t a) {
+	int len;
+	char *buf;
+
+	buf = mvm_disassemble_string_argument(a);
+	len = strlen(buf);
+
+	fprintf(stderr, "  %s \"%s\"\n", NEWREAL_NAME, buf);
+	free(buf);
+	return len+2;
+}
+
+int newreal_instruction(uint32_t o) {
+	int ref;
+	char *buf;
+	float value;
+
+	SETUP_INSTRUCTION();
+
+	buf = mvm_disassemble_string_argument(pc);
+	value = strtof(buf, NULL);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = class_table_new_real(class_table, value, NULL);
+	operand_stack_push(operand_stack, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	thread_set_pc(increment_pc(strlen(buf)+2));
+	free(buf);
+	return 0;
+}
+
 int newstr_decode_size(uint32_t a) {
 	int len;
 	char *buf;
@@ -975,6 +1016,9 @@ int add_instructions(struct instruction_table *i) {
 	instruction_table_add(i, NEWINT_NAME, NEWINT_OPCODE,
 			      newint_instruction, newint_decode,
 			      newint_decode_size);
+	instruction_table_add(i, NEWREAL_NAME, NEWREAL_OPCODE,
+			      newreal_instruction, newreal_decode,
+			      newreal_decode_size);
 	instruction_table_add(i, NEWSTR_NAME, NEWSTR_OPCODE,
 			      newstr_instruction, newstr_decode,
 			      newstr_decode_size);

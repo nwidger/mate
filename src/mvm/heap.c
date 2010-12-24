@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <03 Dec 2010 at 20:57:18 by nwidger on macros.local>
+ * Time-stamp: <23 Dec 2010 at 20:15:50 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -510,8 +510,6 @@ int heap_add_thread_ref(struct heap *h, int r) {
 
 	/* lock */
 	heap_lock(h);
-
-	fprintf(stderr, "adding thread ref %d\n", r);
 
 	if (r != 0)
 		ref_set_add(h->thread_set, r);

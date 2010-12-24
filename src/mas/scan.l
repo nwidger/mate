@@ -1,7 +1,7 @@
 %{
 
 /* Niels Widger
- * Time-stamp: <16 Nov 2010 at 21:05:46 by nwidger on macros.local>
+ * Time-stamp: <23 Dec 2010 at 20:58:46 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -20,6 +20,7 @@
 
 /* local prototypes */
 static unsigned long a2int(char *);
+static float a2float(char *tptr);
 
 /* need to use global string pool from main.C */
 extern int yyparse();
@@ -156,6 +157,10 @@ newint			 {
 			   return token(NEWINT);
 			 }
 
+newreal			 {
+			   return token(NEWREAL);
+			 }
+
 newstr			 {
 			   return token(NEWSTR);
 			 }
@@ -185,6 +190,13 @@ return			 {
 			   yytext++;
 			   return token(STRING_LITERAL);
 			 }			 
+
+(([0-9])+)?\.(([0-9])+)? |
+([0-9])+\.([0-9])+([eE][-+]?([0-9])+)? |
+([0-9])+[eE][-+]?([0-9])+ {
+                           yylval.float_value = a2float(yytext);
+                           return token(FLOAT_LITERAL);
+                         }
 
 ({digit})+               {
 			   yylval.value = a2int(yytext);
@@ -249,6 +261,35 @@ static unsigned long a2int(char *tptr)
   }
 
   return uint32_t_tmp;
+}
+
+
+/*
+ * Convert from ascii hex to a float.
+ */
+static float a2float(char *tptr)
+{
+  float float_tmp;
+
+  // errno used to detect overflow/underflow of float
+  errno = 0;
+  float_tmp = strtof(tptr, NULL);
+  if (errno)
+  {
+    if (errno == ERANGE)
+    {
+      fprintf(stderr, "mas: float literal out of range\n");
+    }
+
+    if (errno == EINVAL)
+    {
+      fprintf(stderr, "mas: float literal is invalid\n");
+    }
+    
+    return 0;
+  }
+
+  return float_tmp;
 }
 
 /* provide the AST routines access to the line number */

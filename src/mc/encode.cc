@@ -1,10 +1,11 @@
 // Niels Widger
-// Time-stamp: <18 Nov 2010 at 14:57:49 by nwidger on macros.local>
+// Time-stamp: <23 Dec 2010 at 21:09:42 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
 
+#include <float.h>
 #include <iostream>
 using namespace std;
 
@@ -148,6 +149,12 @@ void IntegerLiteralNode::encode() {
 	Node::encode();
 
 	cout << "  newint " << value << '\n';
+}
+
+void RealLiteralNode::encode() {
+	Node::encode();
+
+	fprintf(stdout, "  newreal %.*e\n", DBL_DIG, value);
 }
 
 void NullLiteralNode::encode() {

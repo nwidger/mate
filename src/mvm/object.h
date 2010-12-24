@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Nov 2010 at 20:28:34 by nwidger on macros.local>
+ * Time-stamp: <23 Dec 2010 at 17:44:59 by nwidger on macros.local>
  */
 
 #ifndef _MVM_OBJECT_H
@@ -14,6 +14,17 @@ struct ref_set;
 struct string;
 struct table;
 struct thread;
+
+/* enum */
+enum ownership_status {
+	owned_status   = 0,
+	unowned_status = 1,
+};
+
+enum shared_status {
+	private_status = 0,
+	shared_status  = 1
+};
 
 /** creates a new object from class c with n fields. Memory for the new
  * object shall be allocated from the heap.  Returns a reference to
@@ -169,7 +180,7 @@ uint32_t object_get_num_fields(struct object *o);
 
 /** returns the predefined type of the given object.  Return value
  * will be one of 'object_type', 'integer_type', 'string_type',
- * 'table_type' or 'thread_type'.
+ * 'table_type', 'thread_type' or 'real_type'.
  *
  * @param o - the object to access
  *
@@ -222,6 +233,17 @@ struct table * object_get_table(struct object *o);
 
 struct thread * object_get_thread(struct object *o);
 
+/** returns pointer to the real stored in the given object.  This
+ * function should only be called after ensuring that
+ * object_get_predefined_type returns 'real_type'.
+ *
+ * @param o - the object to access
+ *
+ * @return pointer to the real stored in the object
+ */
+
+struct real * object_get_real(struct object *o);
+
 /** stores the integer i into the given object.  Calling
  * object_get_predefined_type immediately after calling this function
  * should return 'integer_type'.
@@ -269,6 +291,18 @@ int object_set_table(struct object *o, struct table *t);
  */
 
 int object_set_thread(struct object *o, struct thread *t);
+
+/** stores the real i into the given object.  Calling
+ * object_get_predefined_type immediately after calling this function
+ * should return 'real_type'.
+ *
+ * @param o - the object to store into
+ * @param f - the real to store
+ *
+ * @return 0 on success, non-zero on failure
+ */
+
+int object_set_real(struct object *o, struct real *f);
 
 /** adds all references stored inside the given object to the ref_set
  * r.  Any references stored inside predefined types (Table in

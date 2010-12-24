@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <03 Dec 2010 at 21:05:29 by nwidger on macros.local>
+ * Time-stamp: <23 Dec 2010 at 21:22:27 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -22,6 +22,7 @@
 #include "native_methods.h"
 #include "object.h"
 #include "operand_stack.h"
+#include "real.h"
 #include "string.h"
 #include "table.h"
 #include "thread.h"
@@ -1008,6 +1009,309 @@ int native_thread_sleep(uint32_t i) {
 	return 0;
 }
 
+int native_real_constructor(uint32_t i) {
+	int ref, n;
+	struct real *real;
+	struct object *this;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	real = real_create(0.0);
+	object_set_real(this, real);
+
+	return 0;
+}
+
+int native_real_constructor_real(uint32_t i) {
+	int ref, n;
+	float value;
+	struct real *real;
+	struct object *this, *object;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	object = heap_fetch_object(heap, ref);
+	real = object_get_real(object);
+	value = real_get_value(real);
+
+	real = real_create(value);
+	object_set_real(this, real);
+
+	return 0;
+}
+
+int native_real_add(uint32_t i) {
+	int ref, n;
+	struct object *this, *object;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	object = heap_fetch_object(heap, ref);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = real_add(this, object);
+	operand_stack_push(calling_frame_operand_stack, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	return 0;
+}
+
+int native_real_subtract(uint32_t i) {
+	int ref, n;
+	struct object *this, *object;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	object = heap_fetch_object(heap, ref);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = real_subtract(this, object);
+	operand_stack_push(calling_frame_operand_stack, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	return 0;
+}
+
+int native_real_multiply(uint32_t i) {
+	int ref, n;
+	struct object *this, *object;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	object = heap_fetch_object(heap, ref);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = real_multiply(this, object);
+	operand_stack_push(calling_frame_operand_stack, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	return 0;
+}
+
+int native_real_divide(uint32_t i) {
+	int ref, n;
+	struct object *this, *object;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	object = heap_fetch_object(heap, ref);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = real_divide(this, object);
+	operand_stack_push(calling_frame_operand_stack, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	return 0;
+}
+
+int native_real_greater_than(uint32_t i) {
+	int ref, n;
+	struct object *this, *object;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	object = heap_fetch_object(heap, ref);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = real_greater_than(this, object);
+	operand_stack_push(calling_frame_operand_stack, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	return 0;
+}
+
+int native_real_less_than(uint32_t i) {
+	int ref, n;
+	struct object *this, *object;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	object = heap_fetch_object(heap, ref);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = real_less_than(this, object);
+	operand_stack_push(calling_frame_operand_stack, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	return 0;
+}
+
+int native_real_not(uint32_t i) {
+	int ref, n;
+	struct object *this;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = real_not(this);
+	operand_stack_push(calling_frame_operand_stack, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	return 0;
+}
+
+int native_real_minus(uint32_t i) {
+	int ref, n;
+	struct object *this;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = real_minus(this);
+	operand_stack_push(calling_frame_operand_stack, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	return 0;
+}
+
+int native_real_equals(uint32_t i) {
+	int ref, n;
+	struct object *this, *object;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	object = heap_fetch_object(heap, ref);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = real_equals(this, object);
+	operand_stack_push(calling_frame_operand_stack, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	return 0;
+}
+
+int native_real_hash_code(uint32_t i) {
+	int ref, n;
+	struct object *this;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = real_hash_code(this);
+	operand_stack_push(calling_frame_operand_stack, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	return 0;
+}
+
+int native_real_to_string(uint32_t i) {
+	int ref, n;
+	struct object *this;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = real_to_string(this);
+	operand_stack_push(calling_frame_operand_stack, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	return 0;
+}
+
 int add_native_methods(struct native_method_array *n) {
 	native_method_array_set(n, OBJECT_CONSTRUCTOR_NATIVE_INDEX,
 				OBJECT_CONSTRUCTOR_NATIVE_NAME,
@@ -1171,6 +1475,69 @@ int add_native_methods(struct native_method_array *n) {
 				THREAD_SLEEP_NATIVE_NAME,
 				native_thread_sleep);
 
-
+	native_method_array_set(n, REAL_CONSTRUCTOR_NATIVE_INDEX,
+				REAL_CONSTRUCTOR_NATIVE_NAME,
+				native_real_constructor);
+	native_method_array_set(n, REAL_CONSTRUCTOR_REAL_NATIVE_INDEX,
+				REAL_CONSTRUCTOR_REAL_NATIVE_NAME,
+				native_real_constructor_real);
+	native_method_array_set(n, REAL_ADD_NATIVE_INDEX,
+				REAL_ADD_NATIVE_NAME,
+				native_real_add);
+	native_method_array_set(n, REAL_SUBTRACT_NATIVE_INDEX,
+				REAL_SUBTRACT_NATIVE_NAME,
+				native_real_subtract);
+	native_method_array_set(n, REAL_MULTIPLY_NATIVE_INDEX,
+				REAL_MULTIPLY_NATIVE_NAME,
+				native_real_multiply);
+	native_method_array_set(n, REAL_DIVIDE_NATIVE_INDEX,
+				REAL_DIVIDE_NATIVE_NAME,
+				native_real_divide);
+	native_method_array_set(n, REAL_GREATER_THAN_NATIVE_INDEX,
+				REAL_GREATER_THAN_NATIVE_NAME,
+				native_real_greater_than);
+	native_method_array_set(n, REAL_LESS_THAN_NATIVE_INDEX,
+				REAL_LESS_THAN_NATIVE_NAME,
+				native_real_less_than);
+	native_method_array_set(n, REAL_NOT_NATIVE_INDEX,
+				REAL_NOT_NATIVE_NAME,
+				native_real_not);
+	native_method_array_set(n, REAL_MINUS_NATIVE_INDEX,
+				REAL_MINUS_NATIVE_NAME,
+				native_real_minus);
+	native_method_array_set(n, REAL_ADD_OP_NATIVE_INDEX,
+				REAL_ADD_OP_NATIVE_NAME,
+				native_real_add);
+	native_method_array_set(n, REAL_SUBTRACT_OP_NATIVE_INDEX,
+				REAL_SUBTRACT_OP_NATIVE_NAME,
+				native_real_subtract);
+	native_method_array_set(n, REAL_MULTIPLY_OP_NATIVE_INDEX,
+				REAL_MULTIPLY_OP_NATIVE_NAME,
+				native_real_multiply);
+	native_method_array_set(n, REAL_DIVIDE_OP_NATIVE_INDEX,
+				REAL_DIVIDE_OP_NATIVE_NAME,
+				native_real_divide);
+	native_method_array_set(n, REAL_GREATER_THAN_OP_NATIVE_INDEX,
+				REAL_GREATER_THAN_OP_NATIVE_NAME,
+				native_real_greater_than);
+	native_method_array_set(n, REAL_LESS_THAN_OP_NATIVE_INDEX,
+				REAL_LESS_THAN_OP_NATIVE_NAME,
+				native_real_less_than);
+	native_method_array_set(n, REAL_NOT_OP_NATIVE_INDEX,
+				REAL_NOT_OP_NATIVE_NAME,
+				native_real_not);
+	native_method_array_set(n, REAL_MINUS_OP_NATIVE_INDEX,
+				REAL_MINUS_OP_NATIVE_NAME,
+				native_real_minus);
+	native_method_array_set(n, REAL_EQUALS_NATIVE_INDEX,
+				REAL_EQUALS_NATIVE_NAME,
+				native_real_equals);
+	native_method_array_set(n, REAL_HASH_CODE_NATIVE_INDEX,
+				REAL_HASH_CODE_NATIVE_NAME,
+				native_real_hash_code);
+	native_method_array_set(n, REAL_TO_STRING_NATIVE_INDEX,
+				REAL_TO_STRING_NATIVE_NAME,
+				native_real_to_string);
+	
 	return 0;
 }

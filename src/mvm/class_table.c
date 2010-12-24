@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Nov 2010 at 21:45:56 by nwidger on macros.local>
+ * Time-stamp: <23 Dec 2010 at 17:48:56 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -20,6 +20,7 @@
 #include "native_method_array.h"
 #include "nlock.h"
 #include "object.h"
+#include "real.h"
 #include "string.h"
 #include "table.h"
 #include "thread.h"
@@ -386,6 +387,46 @@ int class_table_new_thread(struct class_table *c, struct object **o) {
 	/* heap_include_ref(heap, ref); */
 	object_set_thread(object, thread);
 	heap_add_thread_ref(heap, ref);
+
+	if (o != NULL)
+		*o = object;
+
+	/* unlock */
+	class_table_unlock(c);
+
+	return ref;
+}
+
+int class_table_new_real(struct class_table *c, float v, struct object **o) {
+	int ref;
+	uint32_t vmt;
+	struct object *object;
+	struct real *real;
+	struct class *real_class;
+
+	if (c == NULL) {
+		fprintf(stderr, "mvm: class table not initialized!\n");
+		mvm_halt();
+	}
+
+	/* lock */
+	class_table_lock(c);
+
+	real_class = c->predefined_classes[real_type];
+	vmt = class_get_vmt(real_class);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = class_table_new(class_table, vmt, &object);
+	heap_exclude_ref(heap, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	real = real_create(v);
+	heap_include_ref(heap, ref);
+	object_set_real(object, real);
 
 	if (o != NULL)
 		*o = object;

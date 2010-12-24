@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <29 Mar 2010 at 23:03:29 by nwidger on macros.local>
+ * Time-stamp: <23 Dec 2010 at 20:59:12 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -126,6 +126,9 @@ int first_pass() {
 		case INTEGER_LITERAL:
 			if (first_pass_process_integer(line, yytext) != 0) err = 1;
 			break;
+		case FLOAT_LITERAL:
+			if (first_pass_process_real(line, yytext) != 0) err = 1;
+			break;
 		case STRING_LITERAL:
 			if (first_pass_process_string(line, yytext) != 0) err = 1;
 			break;
@@ -167,6 +170,9 @@ int second_pass() {
 			break;
 		case INTEGER_LITERAL:
 			if (second_pass_process_integer(line, yytext) != 0) err = 1;
+			break;
+		case FLOAT_LITERAL:
+			if (second_pass_process_real(line, yytext) != 0) err = 1;
 			break;
 		case STRING_LITERAL:
 			if (second_pass_process_string(line, yytext) != 0) err = 1;

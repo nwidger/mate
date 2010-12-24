@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Nov 2010 at 20:30:19 by nwidger on macros.local>
+ * Time-stamp: <23 Dec 2010 at 17:44:58 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -36,6 +36,7 @@ struct object {
 		struct string *string;
 		struct table *table;
 		struct thread *thread;
+		struct real *real;
 	} predefined;
 
 	struct class *class;
@@ -43,6 +44,10 @@ struct object {
 	uint32_t *fields;
 
 	struct nlock *monitor;
+
+	int owner;
+	int ownership_status;
+	int shared_status;
 };
 
 /* forward declarations */
@@ -67,6 +72,10 @@ int object_create(struct class *c, uint32_t n, struct object **o) {
 
 	if ((object->monitor = nlock_create()) == NULL)
 		mvm_halt();
+
+	object->owner = 0;
+	object->ownership_status = unowned_status;
+	object->shared_status = private_status;
 
 	if (o != NULL)
 		*o = object;
@@ -267,6 +276,20 @@ struct thread * object_get_thread(struct object *o) {
 	return (o->predefined).thread;
 }
 
+struct real * object_get_real(struct object *o) {
+	if (o == NULL) {
+		fprintf(stderr, "mvm: object has not been initialized!\n");
+		mvm_halt();
+	}
+
+	if (o->predefined_type != real_type) {
+		fprintf(stderr, "mvm: object's predefined type is not real!\n");
+		mvm_halt();
+	}
+
+	return (o->predefined).real;
+}
+
 int object_set_integer(struct object *o, struct integer *i) {
 	if (o == NULL) {
 		fprintf(stderr, "mvm: object has not been initialized!\n");
@@ -323,6 +346,21 @@ int object_set_thread(struct object *o, struct thread *t) {
 
 	o->predefined_type = thread_type;
 	(o->predefined).thread = t;
+
+	return 0;
+}
+
+int object_set_real(struct object *o, struct real *f) {
+	if (o == NULL) {
+		fprintf(stderr, "mvm: object has not been initialized!\n");
+		mvm_halt();
+	}
+
+	if (object_destroy_predefined_type(o) != 0)
+		mvm_halt();
+
+	o->predefined_type = real_type;
+	(o->predefined).real = f;
 
 	return 0;
 }
@@ -420,6 +458,73 @@ int object_destroy_predefined_type(struct object *o) {
 		break;
 	}
 
+	return 0;
+}
+
+int object_get_owner(struct object *o) {
+	if (o == NULL) {
+		fprintf(stderr, "mvm: object instance not initialized!\n");
+		mvm_halt();
+	}
+
+	return o->owner;
+}
+
+int object_set_owner(struct object *o, int r) {
+	if (o == NULL) {
+		fprintf(stderr, "mvm: object instance not initialized!\n");
+		mvm_halt();
+	}
+
+	if (r != 0)
+		o->ownership_status = owned_status;		
+	else
+		o->ownership_status = unowned_status;
+
+	o->owner = r;
+	return 0;
+}
+
+int object_get_ownership_status(struct object *o) {
+	if (o == NULL) {
+		fprintf(stderr, "mvm: object instance not initialized!\n");
+		mvm_halt();
+	}
+
+	return o->ownership_status;
+}
+
+int object_set_ownership_status(struct object *o, enum ownership_status s, int r) {
+	if (o == NULL) {
+		fprintf(stderr, "mvm: object instance not initialized!\n");
+		mvm_halt();
+	}
+
+	if (s == owned_status)
+		o->owner = r;
+	else if (s == unowned_status)
+		o->owner = 0;
+	
+	o->ownership_status = s;
+	return 0;
+}
+
+int object_get_shared_status(struct object *o) {
+	if (o == NULL) {
+		fprintf(stderr, "mvm: object instance not initialized!\n");
+		mvm_halt();
+	}
+
+	return o->shared_status;
+}
+
+int object_set_shared_status(struct object *o, enum shared_status s) {
+	if (o == NULL) {
+		fprintf(stderr, "mvm: object instance not initialized!\n");
+		mvm_halt();
+	}
+
+	o->shared_status = s;
 	return 0;
 }
 

@@ -45,26 +45,27 @@
      TAB = 261,
      NATIVE = 262,
      INTEGER_LITERAL = 263,
-     NULL_LITERAL = 264,
-     OPERATOR = 265,
-     EQ_OP = 266,
-     INSTANCEOF_OP = 267,
-     MAIN = 268,
-     CLASS = 269,
-     EXTENDS = 270,
-     THIS = 271,
-     SUPER = 272,
-     SYNCHRONIZED = 273,
-     IF = 274,
-     ELSE = 275,
-     WHILE = 276,
-     NEW = 277,
-     RETURN = 278,
-     OUT = 279,
-     IN = 280,
-     BREAK = 281,
-     CONTINUE = 282,
-     BAD = 283
+     FLOAT_LITERAL = 264,
+     NULL_LITERAL = 265,
+     OPERATOR = 266,
+     EQ_OP = 267,
+     INSTANCEOF_OP = 268,
+     MAIN = 269,
+     CLASS = 270,
+     EXTENDS = 271,
+     THIS = 272,
+     SUPER = 273,
+     SYNCHRONIZED = 274,
+     IF = 275,
+     ELSE = 276,
+     WHILE = 277,
+     NEW = 278,
+     RETURN = 279,
+     OUT = 280,
+     IN = 281,
+     BREAK = 282,
+     CONTINUE = 283,
+     BAD = 284
    };
 #endif
 /* Tokens.  */
@@ -74,26 +75,27 @@
 #define TAB 261
 #define NATIVE 262
 #define INTEGER_LITERAL 263
-#define NULL_LITERAL 264
-#define OPERATOR 265
-#define EQ_OP 266
-#define INSTANCEOF_OP 267
-#define MAIN 268
-#define CLASS 269
-#define EXTENDS 270
-#define THIS 271
-#define SUPER 272
-#define SYNCHRONIZED 273
-#define IF 274
-#define ELSE 275
-#define WHILE 276
-#define NEW 277
-#define RETURN 278
-#define OUT 279
-#define IN 280
-#define BREAK 281
-#define CONTINUE 282
-#define BAD 283
+#define FLOAT_LITERAL 264
+#define NULL_LITERAL 265
+#define OPERATOR 266
+#define EQ_OP 267
+#define INSTANCEOF_OP 268
+#define MAIN 269
+#define CLASS 270
+#define EXTENDS 271
+#define THIS 272
+#define SUPER 273
+#define SYNCHRONIZED 274
+#define IF 275
+#define ELSE 276
+#define WHILE 277
+#define NEW 278
+#define RETURN 279
+#define OUT 280
+#define IN 281
+#define BREAK 282
+#define CONTINUE 283
+#define BAD 284
 
 
 
@@ -105,6 +107,8 @@ typedef union YYSTYPE
 	Seq *seq;
 
         unsigned long value;
+        float float_value;
+	
 	string *str;
 	char c;
 
@@ -130,7 +134,7 @@ typedef union YYSTYPE
 	BlockStatementNode *blockStmnt;
 }
 /* Line 1529 of yacc.c.  */
-#line 134 "parse.h"
+#line 138 "parse.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

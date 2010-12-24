@@ -45,32 +45,34 @@
      MAINBLOCKLABEL = 261,
      STRING_LITERAL = 262,
      INTEGER_LITERAL = 263,
-     ACONST_NULL = 264,
-     ALOAD = 265,
-     ARETURN = 266,
-     ASTORE = 267,
-     CHECKCAST = 268,
-     DELETE = 269,
-     DUP = 270,
-     DUP_X1 = 271,
-     GETFIELD = 272,
-     GOTO = 273,
-     IFEQ = 274,
-     IN = 275,
-     INVOKESPECIAL = 276,
-     INVOKENATIVE = 277,
-     INVOKEVIRTUAL = 278,
-     MONITORENTER = 279,
-     MONITOREXIT = 280,
-     NEW = 281,
-     NEWINT = 282,
-     NEWSTR = 283,
-     OUT = 284,
-     POP = 285,
-     PUTFIELD = 286,
-     REFCMP = 287,
-     RETURN = 288,
-     BAD = 289
+     FLOAT_LITERAL = 264,
+     ACONST_NULL = 265,
+     ALOAD = 266,
+     ARETURN = 267,
+     ASTORE = 268,
+     CHECKCAST = 269,
+     DELETE = 270,
+     DUP = 271,
+     DUP_X1 = 272,
+     GETFIELD = 273,
+     GOTO = 274,
+     IFEQ = 275,
+     IN = 276,
+     INVOKESPECIAL = 277,
+     INVOKENATIVE = 278,
+     INVOKEVIRTUAL = 279,
+     MONITORENTER = 280,
+     MONITOREXIT = 281,
+     NEW = 282,
+     NEWINT = 283,
+     NEWREAL = 284,
+     NEWSTR = 285,
+     OUT = 286,
+     POP = 287,
+     PUTFIELD = 288,
+     REFCMP = 289,
+     RETURN = 290,
+     BAD = 291
    };
 #endif
 /* Tokens.  */
@@ -80,32 +82,34 @@
 #define MAINBLOCKLABEL 261
 #define STRING_LITERAL 262
 #define INTEGER_LITERAL 263
-#define ACONST_NULL 264
-#define ALOAD 265
-#define ARETURN 266
-#define ASTORE 267
-#define CHECKCAST 268
-#define DELETE 269
-#define DUP 270
-#define DUP_X1 271
-#define GETFIELD 272
-#define GOTO 273
-#define IFEQ 274
-#define IN 275
-#define INVOKESPECIAL 276
-#define INVOKENATIVE 277
-#define INVOKEVIRTUAL 278
-#define MONITORENTER 279
-#define MONITOREXIT 280
-#define NEW 281
-#define NEWINT 282
-#define NEWSTR 283
-#define OUT 284
-#define POP 285
-#define PUTFIELD 286
-#define REFCMP 287
-#define RETURN 288
-#define BAD 289
+#define FLOAT_LITERAL 264
+#define ACONST_NULL 265
+#define ALOAD 266
+#define ARETURN 267
+#define ASTORE 268
+#define CHECKCAST 269
+#define DELETE 270
+#define DUP 271
+#define DUP_X1 272
+#define GETFIELD 273
+#define GOTO 274
+#define IFEQ 275
+#define IN 276
+#define INVOKESPECIAL 277
+#define INVOKENATIVE 278
+#define INVOKEVIRTUAL 279
+#define MONITORENTER 280
+#define MONITOREXIT 281
+#define NEW 282
+#define NEWINT 283
+#define NEWREAL 284
+#define NEWSTR 285
+#define OUT 286
+#define POP 287
+#define PUTFIELD 288
+#define REFCMP 289
+#define RETURN 290
+#define BAD 291
 
 
 
@@ -115,10 +119,11 @@ typedef union YYSTYPE
 #line 23 "parse.y"
 {
         unsigned long value;
+	float float_value;
 	char *str;
 }
-/* Line 1489 of yacc.c.  */
-#line 122 "parse.h"
+/* Line 1529 of yacc.c.  */
+#line 127 "parse.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

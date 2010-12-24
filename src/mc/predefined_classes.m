@@ -64,3 +64,27 @@ class Thread extends Object {
         native:50 Object join();
         native:51 Object sleep(Integer millisec);  
 }
+
+class Real extends Object {
+	native:52 Real();
+	native:53 Real(Real r);
+	native:54 Real add(Real r);
+	native:55 Real subtract(Real r);
+	native:56 Real multiply(Real r);
+	native:57 Real divide(Real r);
+	native:58 Real greaterThan(Real r);
+	native:59 Real lessThan(Real r);
+	native:60 Real not();
+	native:61 Real minus();
+	native:62 Real operator + (Real r);
+	native:63 Real operator - (Real r);
+	native:64 Real operator * (Real r);
+	native:65 Real operator / (Real r);
+	native:66 Real operator > (Real r);
+	native:67 Real operator < (Real r);
+	native:68 Real operator ! ();
+	native:69 Real operator - ();
+	native:70 Integer equals(Object obj);
+	native:71 Integer hashCode();
+	native:72 String toString();
+}

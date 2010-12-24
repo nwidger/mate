@@ -2,7 +2,7 @@
 
 // Niels Widger
 // CS 712
-// Time-stamp: <16 Nov 2010 at 21:06:23 by nwidger on macros.local>
+// Time-stamp: <23 Dec 2010 at 20:52:52 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -22,6 +22,7 @@ void yyerror(const char *s);
 
 %union {
         unsigned long value;
+	float float_value;
 	char *str;
 };
 
@@ -31,6 +32,7 @@ void yyerror(const char *s);
 %token <str> MAINBLOCKLABEL
 %token <str> STRING_LITERAL
 %token <value> INTEGER_LITERAL
+%token <float_value> FLOAT_LITERAL
 
 %token ACONST_NULL
 %token ALOAD
@@ -51,6 +53,7 @@ void yyerror(const char *s);
 %token MONITOREXIT
 %token NEW
 %token NEWINT
+%token NEWREAL
 %token NEWSTR
 %token OUT
 %token POP
@@ -242,6 +245,9 @@ Instruction
 	{
 	}
 	| NEWINT INTEGER_LITERAL
+	{
+	}
+	| NEWREAL FLOAT_LITERAL
 	{
 	}
 	| NEWSTR STRING_LITERAL

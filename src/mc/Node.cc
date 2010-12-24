@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <02 Dec 2010 at 13:28:38 by nwidger on macros.local>
+// Time-stamp: <23 Dec 2010 at 20:26:04 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -1268,6 +1268,39 @@ Node * IntegerLiteralNode::analyze(void *param) {
 	}
 
 	type = types->classTable()->find("Integer");
+
+	return (Node *)this;
+}
+
+// -----------------------------------------------------------------------------
+// RealLiteralNode
+// -----------------------------------------------------------------------------
+
+RealLiteralNode::RealLiteralNode(unsigned long v) {
+	value = v;
+	type = types->classTable()->find("Real");
+	nodeName = "RealLiteralNode";
+}
+
+void RealLiteralNode::dump() {
+	if (type != 0) {
+		cerr << *(Node::toString())
+		     << " [" << value << "] [" << *(type->toString()) << "]\n";
+	} else {
+		cerr << *(Node::toString()) << " [" << value << "]\n";
+	}
+}
+
+Node * RealLiteralNode::analyze(void *param) {
+	// if ((parentIsNegate == false || isParenthesized == true) &&
+	//     value == 2147483648UL) {
+	// 	cerr << line << ": integer literal value 2147483648 may only appear"
+	// 	     << " as the operand of the unary negation operator '-'\n";
+	// 	err = true;
+	// 	value = 0;
+	// }
+
+	type = types->classTable()->find("Real");
 
 	return (Node *)this;
 }

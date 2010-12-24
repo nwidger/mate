@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Nov 2010 at 21:52:30 by nwidger on macros.local>
+ * Time-stamp: <23 Dec 2010 at 21:18:40 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -336,6 +336,8 @@ struct class_table * method_area_generate_class_table(struct method_area *m) {
 			type = table_type;
 		else if (strcmp(class_name, THREAD_PREDEFINED_CLASS_NAME) == 0)
 			type = thread_type;
+		else if (strcmp(class_name, REAL_PREDEFINED_CLASS_NAME) == 0)
+			type = real_type;
 		else
 			type = user_type;
 

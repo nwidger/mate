@@ -1,7 +1,7 @@
 %{
 
 // Niels Widger
-// Time-stamp: <16 Nov 2010 at 20:23:29 by nwidger on macros.local>
+// Time-stamp: <23 Dec 2010 at 20:48:48 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -25,6 +25,7 @@ using namespace std;
 
 // local prototypes
 static unsigned long a2int(char *);
+static float a2float(char *tptr);
 static string * stashIdentifier(char *);
 static string * stashStringLiteral(char *);
 
@@ -85,6 +86,17 @@ native[:]({digit})+      {
 			   return token(NATIVE);
 			 }
 
+\.			 {
+			   return token('.');
+			 }			 			 			 
+
+(([0-9])+)?\.(([0-9])+)? |
+([0-9])+\.([0-9])+([eE][-+]?([0-9])+)? |
+([0-9])+[eE][-+]?([0-9])+ {
+                           yylval.float_value = a2float(yytext);
+                           return token(FLOAT_LITERAL);
+                         }
+			 
 ({digit})+               {
                            yylval.value = a2int(yytext);
                            return token(INTEGER_LITERAL);
@@ -245,10 +257,6 @@ in			 {
 			   yylval.str = stringPool->getOpString(yytext);
 			   return token('!');
 			 }
-
-\.			 {
-			   return token('.');
-			 }			 			 			 
 			 
 .                        {
                            return token(BAD);
@@ -303,6 +311,34 @@ static unsigned long a2int(char *tptr)
   }
 
   return uint32_t_tmp;
+}
+
+/*
+ * Convert from ascii hex to a float.
+ */
+static float a2float(char *tptr)
+{
+  float float_tmp;
+
+  // errno used to detect overflow/underflow of float
+  errno = 0;
+  float_tmp = strtof(tptr, NULL);
+  if (errno)
+  {
+    if (errno == ERANGE)
+    {
+      cerr << sourceLineNumber << ": float literal out of range\n";
+    }
+
+    if (errno == EINVAL)
+    {
+      cerr << sourceLineNumber << ": float literal is invalid\n";
+    }
+    
+    return 0;
+  }
+
+  return float_tmp;
 }
 
 // identifier is now in yytext, which will soon be re-used

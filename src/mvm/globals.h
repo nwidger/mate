@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Nov 2010 at 22:18:27 by nwidger on macros.local>
+ * Time-stamp: <20 Dec 2010 at 12:37:25 by nwidger on macros.local>
  */
 
 #ifndef _MVM_GLOBALS_H
@@ -67,6 +67,7 @@ extern FILE *output;
 extern char *class_file;
 /** currently loaded symbol file, or NULL if none */
 extern char *symbol_file;
+extern struct barrier *barrier;
 extern struct class_table *class_table;
 extern struct garbage_collector *garbage_collector;
 extern struct heap *heap;

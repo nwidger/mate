@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <16 Nov 2010 at 21:10:03 by nwidger on macros.local>
+ * Time-stamp: <23 Dec 2010 at 21:13:41 by nwidger on macros.local>
  */
 
 #include <inttypes.h>
@@ -32,6 +32,7 @@ int monitorenter_instruction(uint32_t o);
 int monitorexit_instruction(uint32_t o);
 int new_instruction(uint32_t o);
 int newint_instruction(uint32_t o);
+int newreal_instruction(uint32_t o);
 int newstr_instruction(uint32_t o);
 int out_instruction(uint32_t o);
 int pop_instruction(uint32_t a);
@@ -63,6 +64,7 @@ int monitorenter_decode(uint32_t o);
 int monitorexit_decode(uint32_t o);
 int new_decode(uint32_t a);
 int newint_decode(uint32_t a);
+int newreal_decode(uint32_t a);
 int newstr_decode(uint32_t a);
 int out_decode(uint32_t a);
 int pop_decode(uint32_t a);
@@ -94,6 +96,7 @@ int monitorenter_decode_size(uint32_t o);
 int monitorexit_decode_size(uint32_t o);
 int new_decode_size(uint32_t a);
 int newint_decode_size(uint32_t a);
+int newreal_decode_size(uint32_t a);
 int newstr_decode_size(uint32_t a);
 int out_decode_size(uint32_t a);
 int pop_decode_size(uint32_t a);

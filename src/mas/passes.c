@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <16 Nov 2010 at 21:05:04 by nwidger on macros.local>
+ * Time-stamp: <23 Dec 2010 at 21:12:40 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -70,7 +70,8 @@ int second_pass_init() {
 	instruction_table_add(instruction_table, DUP_X1_NAME, DUP_X1_OPCODE);
 	instruction_table_add(instruction_table, MONITORENTER_NAME, MONITORENTER_OPCODE);
 	instruction_table_add(instruction_table, MONITOREXIT_NAME, MONITOREXIT_OPCODE);
-
+	instruction_table_add(instruction_table, NEWREAL_NAME, NEWREAL_OPCODE);
+	
 	return 0;
 }
 
@@ -133,6 +134,10 @@ int second_pass_process_integer(int line, char *integer) {
 	return 0;
 }
 
+int second_pass_process_real(int line, char *real) {
+	return second_pass_process_string(line, real);
+}
+
 int second_pass_process_string(int line, char *string) {
 	uint8_t *c;
 
@@ -167,6 +172,10 @@ int first_pass_process_integer(int line, char *integer) {
 	return 0;
 }
 
+int first_pass_process_real(int line, char *real) {
+	pc += (strlen(real)+1)*4;
+	return 0;
+}
 int first_pass_process_string(int line, char *string) {
 	pc += (strlen(string)+1)*4;
 	return 0;
