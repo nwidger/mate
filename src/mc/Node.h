@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <23 Dec 2010 at 20:26:12 by nwidger on macros.local>
+// Time-stamp: <23 Dec 2010 at 21:50:41 by nwidger on macros.local>
 
 #ifndef _NODE_H
 #define _NODE_H
@@ -409,7 +409,7 @@ protected:
 
 class RealLiteralNode : public ExpressionNode {
 public:
-	RealLiteralNode(unsigned long v);
+	RealLiteralNode(float v);
 	void dump();
 	void encode();
 	Node * analyze(void *param);

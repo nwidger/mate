@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <23 Dec 2010 at 20:26:04 by nwidger on macros.local>
+// Time-stamp: <23 Dec 2010 at 21:50:29 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -1276,7 +1276,7 @@ Node * IntegerLiteralNode::analyze(void *param) {
 // RealLiteralNode
 // -----------------------------------------------------------------------------
 
-RealLiteralNode::RealLiteralNode(unsigned long v) {
+RealLiteralNode::RealLiteralNode(float v) {
 	value = v;
 	type = types->classTable()->find("Real");
 	nodeName = "RealLiteralNode";

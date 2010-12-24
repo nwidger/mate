@@ -282,17 +282,17 @@ static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 	*yy_cp = '\0'; \
 	yy_c_buf_p = yy_cp;
 
-#define YY_NUM_RULES 50
-#define YY_END_OF_BUFFER 51
+#define YY_NUM_RULES 51
+#define YY_END_OF_BUFFER 52
 static yyconst short int yy_accept[147] =
     {   0,
-        0,    0,   51,   49,    2,    4,   49,   48,   49,   35,
-       36,   46,   44,   43,   45,    6,   47,   10,   37,   40,
+        0,    0,   52,   50,    2,    4,   50,   48,   50,   35,
+       36,   46,   44,   43,   45,   49,   47,   10,   37,   40,
        41,   39,   32,   32,   32,   32,   32,   32,   32,   32,
        32,   32,   32,   32,   33,   34,   42,    3,    0,   25,
-        7,    1,    7,   10,    0,   38,   32,   32,   32,   32,
+        6,    1,    7,   10,    0,   38,   32,   32,   32,   32,
        32,   32,   19,   31,   32,   32,   32,   32,   32,   32,
-       32,   32,   32,   32,   32,   32,    1,    7,    0,    9,
+       32,   32,   32,   32,   32,   32,    1,    6,    0,    9,
        32,   32,   32,   32,   32,   32,   32,   32,   26,   32,
        32,   28,   32,   32,   32,   24,   32,   32,    0,   32,
        32,   32,   20,   32,   32,   13,   32,   32,   12,   32,
@@ -459,7 +459,7 @@ char *yytext;
 #line 2 "scan.ll"
 
 // Niels Widger
-// Time-stamp: <23 Dec 2010 at 20:48:48 by nwidger on macros.local>
+// Time-stamp: <23 Dec 2010 at 21:52:11 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -788,19 +788,14 @@ YY_RULE_SETUP
 			 }
 	YY_BREAK
 case 6:
-YY_RULE_SETUP
-#line 89 "scan.ll"
-{
-			   return token('.');
-			 }			 			 			 
-	YY_BREAK
+#line 90 "scan.ll"
 case 7:
-#line 94 "scan.ll"
+#line 91 "scan.ll"
 case 8:
-#line 95 "scan.ll"
+#line 92 "scan.ll"
 case 9:
 YY_RULE_SETUP
-#line 95 "scan.ll"
+#line 92 "scan.ll"
 {
                            yylval.float_value = a2float(yytext);
                            return token(FLOAT_LITERAL);
@@ -808,7 +803,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 100 "scan.ll"
+#line 97 "scan.ll"
 {
                            yylval.value = a2int(yytext);
                            return token(INTEGER_LITERAL);
@@ -816,95 +811,95 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 105 "scan.ll"
+#line 102 "scan.ll"
 {
                            return token(SYNCHRONIZED);
                          }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 109 "scan.ll"
+#line 106 "scan.ll"
 {
                            return token(NULL_LITERAL);
                          }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 113 "scan.ll"
+#line 110 "scan.ll"
 {
                            return token(MAIN);
                          }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 117 "scan.ll"
+#line 114 "scan.ll"
 {
                            return token(CLASS);
                          }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 121 "scan.ll"
+#line 118 "scan.ll"
 {
 			   return token(OPERATOR);
 			 }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 125 "scan.ll"
+#line 122 "scan.ll"
 {
                            return token(EXTENDS);
                          }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 129 "scan.ll"
+#line 126 "scan.ll"
 {
                            return token(THIS);
                          }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 133 "scan.ll"
+#line 130 "scan.ll"
 {
                            return token(SUPER);
                          }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 137 "scan.ll"
+#line 134 "scan.ll"
 {
                            return token(IF);
                          }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 141 "scan.ll"
+#line 138 "scan.ll"
 {
                            return token(ELSE);
                          }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 145 "scan.ll"
+#line 142 "scan.ll"
 {
                            return token(WHILE);
                          }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 149 "scan.ll"
+#line 146 "scan.ll"
 {
                            return token(INSTANCEOF_OP);
                          }
 	YY_BREAK
 case 23:
-#line 154 "scan.ll"
+#line 151 "scan.ll"
 case 24:
-#line 155 "scan.ll"
+#line 152 "scan.ll"
 case 25:
 YY_RULE_SETUP
-#line 155 "scan.ll"
+#line 152 "scan.ll"
 {
 			   yylval.str = stashStringLiteral(yytext);
 			   return token(STRING_LITERAL);
@@ -912,49 +907,49 @@ YY_RULE_SETUP
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 160 "scan.ll"
+#line 157 "scan.ll"
 {
                            return token(NEW);
                          }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 164 "scan.ll"
+#line 161 "scan.ll"
 {
                            return token(RETURN);
                          }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 168 "scan.ll"
+#line 165 "scan.ll"
 {
                            return token(OUT);
                          }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 172 "scan.ll"
+#line 169 "scan.ll"
 {
                            return token(BREAK);
                          }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 176 "scan.ll"
+#line 173 "scan.ll"
 {
                            return token(CONTINUE);
                          }			 			 
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 180 "scan.ll"
+#line 177 "scan.ll"
 {
 			   return token(IN);
 			 }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 184 "scan.ll"
+#line 181 "scan.ll"
 {
                            yylval.str = stashIdentifier(yytext);
                            return token(IDENTIFIER);
@@ -962,42 +957,42 @@ YY_RULE_SETUP
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 189 "scan.ll"
+#line 186 "scan.ll"
 {
                            return token('{');
                          }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 193 "scan.ll"
+#line 190 "scan.ll"
 {
                            return token('}');
                          }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 197 "scan.ll"
+#line 194 "scan.ll"
 {
                            return token('(');
                          }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 201 "scan.ll"
+#line 198 "scan.ll"
 {
                            return token(')');
                          }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 205 "scan.ll"
+#line 202 "scan.ll"
 {
                            return token(';');
                          }			 
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 209 "scan.ll"
+#line 206 "scan.ll"
 {
 			   yylval.str = stringPool->getOpString(yytext);
                            return token(EQ_OP);
@@ -1005,7 +1000,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 214 "scan.ll"
+#line 211 "scan.ll"
 {
 			   yylval.str = stringPool->getOpString(yytext);
 			   return token('>');
@@ -1013,7 +1008,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 219 "scan.ll"
+#line 216 "scan.ll"
 {
 			   yylval.str = stringPool->getOpString(yytext);
 			   return token('<');
@@ -1021,28 +1016,28 @@ YY_RULE_SETUP
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 224 "scan.ll"
+#line 221 "scan.ll"
 {
 			   return token('=');
 			 }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 228 "scan.ll"
+#line 225 "scan.ll"
 {
                            return token('~');
                          }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 232 "scan.ll"
+#line 229 "scan.ll"
 {
                            return token(',');
                          }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 236 "scan.ll"
+#line 233 "scan.ll"
 {
 			   yylval.str = stringPool->getOpString(yytext);
 			   return token('+');
@@ -1050,7 +1045,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 241 "scan.ll"
+#line 238 "scan.ll"
 {
 			   yylval.str = stringPool->getOpString(yytext);
 			   return token('-');
@@ -1058,7 +1053,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 246 "scan.ll"
+#line 243 "scan.ll"
 {
 			   yylval.str = stringPool->getOpString(yytext);
 			   return token('*');
@@ -1066,7 +1061,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 251 "scan.ll"
+#line 248 "scan.ll"
 {
 			   yylval.str = stringPool->getOpString(yytext);
 			   return token('/');
@@ -1074,7 +1069,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 256 "scan.ll"
+#line 253 "scan.ll"
 {
 			   yylval.str = stringPool->getOpString(yytext);
 			   return token('!');
@@ -1082,17 +1077,24 @@ YY_RULE_SETUP
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 261 "scan.ll"
+#line 258 "scan.ll"
+{
+			   return token('.');
+			 }			 			 			 
+	YY_BREAK
+case 50:
+YY_RULE_SETUP
+#line 262 "scan.ll"
 {
                            return token(BAD);
                          }
 	YY_BREAK
-case 50:
+case 51:
 YY_RULE_SETUP
-#line 265 "scan.ll"
+#line 266 "scan.ll"
 ECHO;
 	YY_BREAK
-#line 1096 "scan.cc"
+#line 1098 "scan.cc"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1978,7 +1980,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 265 "scan.ll"
+#line 266 "scan.ll"
 
 
 int yywrap(void) {

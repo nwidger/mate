@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <23 Dec 2010 at 21:09:42 by nwidger on macros.local>
+// Time-stamp: <23 Dec 2010 at 21:49:54 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>

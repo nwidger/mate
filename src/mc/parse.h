@@ -133,7 +133,7 @@ typedef union YYSTYPE
 
 	BlockStatementNode *blockStmnt;
 }
-/* Line 1529 of yacc.c.  */
+/* Line 1489 of yacc.c.  */
 #line 138 "parse.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
