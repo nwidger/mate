@@ -1,7 +1,7 @@
 %{
 
 /* Niels Widger
- * Time-stamp: <23 Dec 2010 at 21:46:32 by nwidger on macros.local>
+ * Time-stamp: <23 Dec 2010 at 21:58:37 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -191,11 +191,10 @@ return			 {
 			   return token(STRING_LITERAL);
 			 }			 
 
-
-(([0-9])+)?\.(([0-9])+) |
-(([0-9])+)\.(([0-9])+)? |
-([0-9])+\.([0-9])+([eE][-+]?([0-9])+)? |
-([0-9])+[eE][-+]?([0-9])+ {
+(([0-9])+)?\.([0-9])+ |
+([0-9])+\.(([0-9])+)? |
+(([0-9])+)?\.([0-9])+([eE][-+]?([0-9])+)? |
+([0-9])+\.?[eE][-+]?([0-9])+ {
                            yylval.float_value = a2float(yytext);
                            return token(FLOAT_LITERAL);
                          }

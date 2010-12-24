@@ -1,7 +1,7 @@
 %{
 
 // Niels Widger
-// Time-stamp: <23 Dec 2010 at 21:52:11 by nwidger on macros.local>
+// Time-stamp: <23 Dec 2010 at 21:56:10 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -86,10 +86,10 @@ native[:]({digit})+      {
 			   return token(NATIVE);
 			 }
 
-(([0-9])+)?\.(([0-9])+) |
-(([0-9])+)\.(([0-9])+)? |
-([0-9])+\.([0-9])+([eE][-+]?([0-9])+)? |
-([0-9])+[eE][-+]?([0-9])+ {
+(([0-9])+)?\.([0-9])+ |
+([0-9])+\.(([0-9])+)? |
+(([0-9])+)?\.([0-9])+([eE][-+]?([0-9])+)? |
+([0-9])+\.?[eE][-+]?([0-9])+ {
                            yylval.float_value = a2float(yytext);
                            return token(FLOAT_LITERAL);
                          }
