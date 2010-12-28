@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Dec 2010 at 17:44:58 by nwidger on macros.local>
+ * Time-stamp: <28 Dec 2010 at 12:36:52 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -350,7 +350,7 @@ int object_set_thread(struct object *o, struct thread *t) {
 	return 0;
 }
 
-int object_set_real(struct object *o, struct real *f) {
+int object_set_real(struct object *o, struct real *r) {
 	if (o == NULL) {
 		fprintf(stderr, "mvm: object has not been initialized!\n");
 		mvm_halt();
@@ -360,7 +360,7 @@ int object_set_real(struct object *o, struct real *f) {
 		mvm_halt();
 
 	o->predefined_type = real_type;
-	(o->predefined).real = f;
+	(o->predefined).real = r;
 
 	return 0;
 }
@@ -454,6 +454,12 @@ int object_destroy_predefined_type(struct object *o) {
 		if (o->predefined.thread != NULL) {
 			thread_destroy(o->predefined.thread);
 			o->predefined.thread = NULL;
+		}
+		break;
+	case real_type:
+		if (o->predefined.real != NULL) {
+			real_destroy(o->predefined.real);
+			o->predefined.real = NULL;
 		}
 		break;
 	}

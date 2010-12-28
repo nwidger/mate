@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Dec 2010 at 12:29:20 by nwidger on macros.local>
+ * Time-stamp: <28 Dec 2010 at 12:35:40 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -142,7 +142,7 @@ int real_divide(struct object *o, struct object *p) {
 
 int real_greater_than(struct object *o, struct object *p) {
 	int ref;
-	float value;
+	int32_t value;
 	struct real *r, *j;
 	
 	r = object_get_real(o);
@@ -154,7 +154,7 @@ int real_greater_than(struct object *o, struct object *p) {
 	}
 
 	value = (r->value > j->value) ? 1 : 0;
-	if ((ref = class_table_new_real(class_table, value, NULL)) == 0)
+	if ((ref = class_table_new_integer(class_table, value, NULL)) == 0)
 		mvm_halt();
 
 	return ref;
@@ -162,7 +162,7 @@ int real_greater_than(struct object *o, struct object *p) {
 
 int real_less_than(struct object *o, struct object *p) {
 	int ref;
-	float value;
+	int32_t value;
 	struct real *r, *j;
 
 	r = object_get_real(o);
@@ -174,7 +174,7 @@ int real_less_than(struct object *o, struct object *p) {
 	}
 
 	value = (r->value < j->value) ? 1 : 0;
-	if ((ref = class_table_new_real(class_table, value, NULL)) == 0)
+	if ((ref = class_table_new_integer(class_table, value, NULL)) == 0)
 		mvm_halt();
 
 	return ref;
@@ -182,7 +182,7 @@ int real_less_than(struct object *o, struct object *p) {
 
 int real_not(struct object *o) {
 	int ref;
-	float value;
+	int32_t value;
 	struct real *r;
 
 	r = object_get_real(o);
@@ -192,8 +192,8 @@ int real_not(struct object *o) {
 		mvm_halt();
 	}
 
-	value = (r->value == 0) ? 1 : 0;
-	if ((ref = class_table_new_real(class_table, value, NULL)) == 0)
+	value = (r->value == 0.0) ? 1 : 0;
+	if ((ref = class_table_new_integer(class_table, value, NULL)) == 0)
 		mvm_halt();
 
 	return ref;
@@ -220,7 +220,7 @@ int real_minus(struct object *o) {
 
 int real_equals(struct object *o, struct object *p) {
 	int ref;
-	float value;
+	int32_t value;
 	struct class *real_class;
 	struct real *r, *j;
 
@@ -240,7 +240,7 @@ int real_equals(struct object *o, struct object *p) {
 		value = (r->value == j->value) ? 1 : 0;
 	}
 	
-	if ((ref = class_table_new_real(class_table, value, NULL)) == 0)	
+	if ((ref = class_table_new_integer(class_table, value, NULL)) == 0)	
 		mvm_halt();
 
 	return ref;
@@ -248,7 +248,7 @@ int real_equals(struct object *o, struct object *p) {
 
 int real_hash_code(struct object *o) {
 	int ref;
-	float value;
+	int32_t value;
 	struct real *r;
 
 	r = object_get_real(o);
@@ -258,8 +258,8 @@ int real_hash_code(struct object *o) {
 		mvm_halt();
 	}
 
-	value = r->value;
-	if ((ref = class_table_new_real(class_table, value, NULL)) == 0)	
+	value = (int)r->value;
+	if ((ref = class_table_new_integer(class_table, value, NULL)) == 0)	
 		mvm_halt();
 
 	return ref;
