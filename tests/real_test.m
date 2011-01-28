@@ -9,6 +9,12 @@ Integer main() {
 
   out s.toString() + newline;
 
+  if (r < s) {
+    out r.toString() + " is less than " + s.toString() + newline;
+  } else {
+    out "error!" + newline;
+  }
+
   r = r + s;
 
   out r.toString() + newline;

@@ -9,7 +9,7 @@ class MonitorTest {
 
   Integer getX() {
     synchronized (x) {
-      while (1) {
+      while (0) {
 	synchronized (y) {
 	  synchronized (z) {
 	    if (0) {
@@ -20,6 +20,8 @@ class MonitorTest {
 	  }
 	}
       }
+
+      return x;
     }
 
     return x;

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Dec 2010 at 12:36:52 by nwidger on macros.local>
+ * Time-stamp: <27 Jan 2011 at 19:36:24 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -20,6 +20,7 @@
 #include "nlock.h"
 #include "object.h"
 #include "operand_stack.h"
+#include "real.h"
 #include "ref_set.h"
 #include "string.h"
 #include "table.h"
@@ -46,8 +47,6 @@ struct object {
 	struct nlock *monitor;
 
 	int owner;
-	int ownership_status;
-	int shared_status;
 };
 
 /* forward declarations */
@@ -74,8 +73,6 @@ int object_create(struct class *c, uint32_t n, struct object **o) {
 		mvm_halt();
 
 	object->owner = 0;
-	object->ownership_status = unowned_status;
-	object->shared_status = private_status;
 
 	if (o != NULL)
 		*o = object;
@@ -482,57 +479,10 @@ int object_set_owner(struct object *o, int r) {
 		mvm_halt();
 	}
 
-	if (r != 0)
-		o->ownership_status = owned_status;		
-	else
-		o->ownership_status = unowned_status;
-
 	o->owner = r;
 	return 0;
 }
 
-int object_get_ownership_status(struct object *o) {
-	if (o == NULL) {
-		fprintf(stderr, "mvm: object instance not initialized!\n");
-		mvm_halt();
-	}
-
-	return o->ownership_status;
-}
-
-int object_set_ownership_status(struct object *o, enum ownership_status s, int r) {
-	if (o == NULL) {
-		fprintf(stderr, "mvm: object instance not initialized!\n");
-		mvm_halt();
-	}
-
-	if (s == owned_status)
-		o->owner = r;
-	else if (s == unowned_status)
-		o->owner = 0;
-	
-	o->ownership_status = s;
-	return 0;
-}
-
-int object_get_shared_status(struct object *o) {
-	if (o == NULL) {
-		fprintf(stderr, "mvm: object instance not initialized!\n");
-		mvm_halt();
-	}
-
-	return o->shared_status;
-}
-
-int object_set_shared_status(struct object *o, enum shared_status s) {
-	if (o == NULL) {
-		fprintf(stderr, "mvm: object instance not initialized!\n");
-		mvm_halt();
-	}
-
-	o->shared_status = s;
-	return 0;
-}
 
 int object_dump(struct object *o, int f) {
 	uint32_t i;

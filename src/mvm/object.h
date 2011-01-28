@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Dec 2010 at 17:44:59 by nwidger on macros.local>
+ * Time-stamp: <27 Jan 2011 at 19:36:35 by nwidger on macros.local>
  */
 
 #ifndef _MVM_OBJECT_H
@@ -14,17 +14,6 @@ struct ref_set;
 struct string;
 struct table;
 struct thread;
-
-/* enum */
-enum ownership_status {
-	owned_status   = 0,
-	unowned_status = 1,
-};
-
-enum shared_status {
-	private_status = 0,
-	shared_status  = 1
-};
 
 /** creates a new object from class c with n fields. Memory for the new
  * object shall be allocated from the heap.  Returns a reference to

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <20 Dec 2010 at 12:54:19 by nwidger on macros.local>
+ * Time-stamp: <27 Jan 2011 at 19:45:00 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -198,7 +198,7 @@ int execute_method(char *e, uint32_t a, uint32_t b, uint32_t n, uint32_t m, uint
 		thread_increment_instruction_counter();
 
 		if ((thread_get_instruction_counter() % 40) == 0)
-			barrier_await(barrier);
+			barrier_await(pbarrier);
 
 		if (debug != 0 && restart != 0)
 			return 0;

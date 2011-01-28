@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <23 Dec 2010 at 21:50:29 by nwidger on macros.local>
+// Time-stamp: <27 Jan 2011 at 20:30:27 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -1575,7 +1575,6 @@ Node * SynchronizedStatementNode::analyze(void *param) {
 
 	expression = (ExpressionNode *)expression->analyze(param);
 
-	monitorStack->push(position);
 	localVariableStack->enterBlock();
 
 	nameO << "synchronized$." << synchronizedCounter++;
@@ -1585,6 +1584,8 @@ Node * SynchronizedStatementNode::analyze(void *param) {
 	varNode->setParentIsDeref(true);
 	localVariableStack->push(varNode);
 	position = varNode->getPosition();
+	monitorStack->push(position);
+	
 	labelStack->addMonitor(position);
 
 	statements = statements->analyze(param);
