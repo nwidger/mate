@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <20 Dec 2010 at 12:26:11 by nwidger on macros.local>
+ * Time-stamp: <02 Feb 2011 at 17:15:28 by nwidger on macros.local>
  */
 
 #ifndef _MVM_THREAD_H
@@ -50,14 +50,6 @@ uint32_t thread_get_pc();
 uint32_t _thread_get_pc(struct thread *t);
 
 uint32_t thread_set_pc(uint32_t p);
-
-uint64_t thread_get_instruction_counter();
-
-uint64_t _thread_get_instruction_counter(struct thread *t);
-
-uint64_t thread_increment_instruction_counter();
-
-uint64_t _thread_increment_instruction_counter(struct thread *t);
 
 int thread_start(struct object *o);
 

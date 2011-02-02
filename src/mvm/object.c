@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <27 Jan 2011 at 19:36:24 by nwidger on macros.local>
+ * Time-stamp: <02 Feb 2011 at 13:03:05 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -12,6 +12,7 @@
 
 #include "class.h"
 #include "class_table.h"
+#include "dmp.h"
 #include "globals.h"
 #include "frame.h"
 #include "heap.h"
@@ -46,7 +47,7 @@ struct object {
 
 	struct nlock *monitor;
 
-	int owner;
+	struct object_dmp *dmp;
 };
 
 /* forward declarations */
@@ -72,7 +73,8 @@ int object_create(struct class *c, uint32_t n, struct object **o) {
 	if ((object->monitor = nlock_create()) == NULL)
 		mvm_halt();
 
-	object->owner = 0;
+	if (dmp != NULL)
+		object->dmp = dmp_create_object_dmp(dmp, object);
 
 	if (o != NULL)
 		*o = object;
@@ -463,26 +465,6 @@ int object_destroy_predefined_type(struct object *o) {
 
 	return 0;
 }
-
-int object_get_owner(struct object *o) {
-	if (o == NULL) {
-		fprintf(stderr, "mvm: object instance not initialized!\n");
-		mvm_halt();
-	}
-
-	return o->owner;
-}
-
-int object_set_owner(struct object *o, int r) {
-	if (o == NULL) {
-		fprintf(stderr, "mvm: object instance not initialized!\n");
-		mvm_halt();
-	}
-
-	o->owner = r;
-	return 0;
-}
-
 
 int object_dump(struct object *o, int f) {
 	uint32_t i;

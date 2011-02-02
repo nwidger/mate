@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <20 Dec 2010 at 12:24:50 by nwidger on macros.local>
+ * Time-stamp: <02 Feb 2011 at 17:15:19 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -23,6 +23,7 @@
 #include "object.h"
 #include "operand_stack.h"
 #include "thread.h"
+#include "thread_dmp.h"
 #include "vm_stack.h"
 
 /* struct definitions */
@@ -34,7 +35,7 @@ struct thread {
 	uint32_t pc;
 	struct vm_stack *vm_stack;
 
-	uint64_t instruction_counter;
+	struct thread_dmp *dmp;
 };
 
 /* globals */
@@ -59,10 +60,11 @@ struct thread * thread_create() {
 	t->state = new_state;
 	t->pc = 0;
 
-	t->instruction_counter = 0;
-
 	if ((t->vm_stack = vm_stack_create()) == NULL)
 		mvm_halt();
+
+	if (dmp != NULL)
+		t->dmp = dmp_create_thread_dmp(dmp, t);
 
 	return t;
 }
@@ -92,8 +94,6 @@ void thread_clear(struct thread *t) {
 	t->ref = 0;
 	t->state = new_state;
 	t->pc = 0;
-
-	t->instruction_counter = 0;
 
 	vm_stack_clear(t->vm_stack);
 }
@@ -202,40 +202,6 @@ uint32_t thread_set_pc(uint32_t p) {
 
 	t->pc = p;
 	return p;
-}
-
-uint64_t thread_get_instruction_counter() {
-	struct thread *t;
-
-	t = thread_get_current();
-
-	return t->instruction_counter;
-}
-
-uint64_t _thread_get_instruction_counter(struct thread *t) {
-	if (t == NULL) {
-		fprintf(stderr, "mvm: thread not initialized!\n");
-		mvm_halt();
-	}
-
-	return t->instruction_counter;
-}
-
-uint64_t thread_increment_instruction_counter() {
-	struct thread *t;
-
-	t = thread_get_current();
-
-	return ++t->instruction_counter;
-}
-
-uint64_t _thread_increment_instruction_counter(struct thread *t) {
-	if (t == NULL) {
-		fprintf(stderr, "mvm: thread not initialized!\n");
-		mvm_halt();
-	}
-
-	return ++t->instruction_counter;
 }
 
 int thread_start(struct object *o) {

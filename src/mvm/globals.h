@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <27 Jan 2011 at 19:45:15 by nwidger on macros.local>
+ * Time-stamp: <01 Feb 2011 at 21:34:21 by nwidger on macros.local>
  */
 
 #ifndef _MVM_GLOBALS_H
@@ -10,6 +10,7 @@
 #include <stdarg.h>
 
 /* forward declarations */
+struct dmp;
 struct class_table;
 struct garbage_collector;
 struct heap;
@@ -18,6 +19,12 @@ struct method_area;
 struct native_method_array;
 struct symbol_table;
 struct vm_stack;
+
+/** returns current mode of virtual machine.
+ *
+ * @return one of parallel_mode or serial_mode
+ */
+int mvm_mode();
 
 /** called when mvm encounters a serious error.  If debugging, enter
  * debugger prompt.  If not debugger, terminate the program, possibly
@@ -91,5 +98,8 @@ extern int verbose;
 extern int debug;
 /* set by debugger to signal a program restart */
 extern int restart;
+
+/* dmp globas */
+extern struct dmp *dmp;
 
 #endif

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <11 Feb 2010 at 12:23:21 by nwidger on macros.local>
+ * Time-stamp: <01 Feb 2011 at 21:25:57 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -18,6 +18,9 @@
 struct ref_set_record {
 	int ref;
 	struct ref_set_record *next;
+
+	struct ref_set_record *list_next;
+	struct ref_set_record *list_prev;
 };
 
 struct ref_set {
@@ -25,10 +28,12 @@ struct ref_set {
 	float load_factor;
 	int current_capacity;
 
-	int iterator_bucket;
 	struct ref_set_record *iterator_record;
-	
+
 	struct ref_set_record **buckets;
+
+	struct ref_set_record *list_head;
+	struct ref_set_record *list_tail;
 };
 
 /* forward declarations */
@@ -52,16 +57,18 @@ struct ref_set * ref_set_create_n(int n) {
 	h->current_capacity = n;
 	h->load_factor = REF_SET_DEFAULT_LOAD_FACTOR;
 	h->size = 0;
-	
+
 	if ((h->buckets = (struct ref_set_record **)
 	     calloc(h->current_capacity, sizeof(struct ref_set_record *))) == NULL) {
 		perror("mvm: malloc");
 		mvm_halt();
 	}
 
-	h->iterator_bucket = 0;
 	h->iterator_record = NULL;
-	
+
+	h->list_head = NULL;
+	h->list_tail = NULL;
+
 	return h;
 }
 
@@ -91,6 +98,9 @@ void ref_set_clear(struct ref_set *h) {
 		}
 
 	        h->size = 0;
+
+		h->list_head = NULL;
+		h->list_tail = NULL;
 	}
 }
 
@@ -123,10 +133,24 @@ int ref_set_add(struct ref_set *h, int r) {
 		q->next = s;
 	}
 
+	/* add to list */
+	if (h->size == 0) {
+		s->list_next = NULL;
+		s->list_prev = NULL;
+		h->list_head = s;
+		h->list_tail = s;
+	} else {
+		s->list_next = NULL;
+		s->list_prev = h->list_tail;
+		h->list_tail->list_next = s;
+		h->list_tail = s;
+	}
+
 	h->size++;
 	if ((h->size * h->load_factor) > h->current_capacity)
 		ref_set_resize(h, h->current_capacity*2);
-	
+
+
 	return 0;
 }
 
@@ -144,11 +168,24 @@ int ref_set_remove(struct ref_set *h, int r) {
 
 	if (p == NULL || p->ref != r)
 		return 1;
-	
+
 	if (p == h->buckets[n])
 		h->buckets[n] = p->next;
 	else
 		q->next = p->next;
+
+	/* remove from list */
+	if (h->size == 1) {
+		h->list_head = NULL;
+		h->list_tail = NULL;
+	} else if (h->list_head == p) {
+		h->list_head = p->list_next;
+	} else if (h->list_tail == p) {
+		h->list_tail = p->list_prev;
+	} else {
+		p->list_prev->list_next = p->list_next;
+		p->list_next->list_prev = p->list_prev;
+	}
 
 	ref_set_record_destroy(p);
 
@@ -179,31 +216,26 @@ int ref_set_contains(struct ref_set *h, int r) {
 
 	if (p == NULL || p->ref != r)
 		return 0;
-	
+
 	return 1;
 }
 
 int ref_set_iterator_init(struct ref_set *h) {
-	int n;
-	
 	if (h == NULL) {
 		fprintf(stderr, "mvm: ref set not initialized!\n");
 		mvm_halt();
 	}
 
-	for (n = 0; n < h->current_capacity; n++) {
-		if (h->buckets[n] != NULL) {
-			h->iterator_bucket = n;
-			h->iterator_record = h->buckets[n];
-			return 0;
-		}
+	if (h->list_head != NULL) {
+		h->iterator_record = h->list_head;
+		return 0;
 	}
 
 	return 1;
 }
 
 int ref_set_iterator_next(struct ref_set *h) {
-	int ref, n;
+	int ref;
 	
 	if (h == NULL) {
 		fprintf(stderr, "mvm: ref set not initialized!\n");
@@ -214,23 +246,7 @@ int ref_set_iterator_next(struct ref_set *h) {
 		return 0;
 
 	ref = h->iterator_record->ref;
-
-	h->iterator_record = h->iterator_record->next;
-	if (h->iterator_record != NULL)
-		return ref;
-
-	for (n = h->iterator_bucket+1; n < h->current_capacity; n++) {
-		if (h->buckets[n] != NULL) {
-			h->iterator_bucket = n;
-			h->iterator_record = h->buckets[n];
-			break;
-		}
-	}
-
-	if (n >= h->current_capacity) {
-		h->iterator_bucket = 0;
-		h->iterator_record = NULL;
-	}
+	h->iterator_record = h->iterator_record->list_next;
 
 	return ref;
 }
@@ -239,7 +255,7 @@ int ref_set_resize(struct ref_set *h, int n) {
 	int i;
 	struct ref_set_record *p;
 	struct ref_set *new_set;
-	
+
 	if (h == NULL) {
 		fprintf(stderr, "mvm: ref set not initialized!\n");
 		mvm_halt();
@@ -265,7 +281,7 @@ int ref_set_resize(struct ref_set *h, int n) {
 int ref_set_dump(struct ref_set *h) {
 	int n;
 	struct ref_set_record *p;
-	
+
 	if (h == NULL) {
 		fprintf(stderr, "mvm: ref set not initialized!\n");
 		mvm_halt();
@@ -275,8 +291,7 @@ int ref_set_dump(struct ref_set *h) {
 	fprintf(stderr, "  size = %d\n", h->size);
 	fprintf(stderr, "  load_factor = %f\n", h->load_factor);
 	fprintf(stderr, "  current_capacity = %d\n", h->current_capacity);
-	fprintf(stderr, "\n");	
-	fprintf(stderr, "  iterator_bucket = %d\n", h->iterator_bucket);
+	fprintf(stderr, "\n");
 	fprintf(stderr, "  iterator_record = %p\n", h->iterator_record);
 	fprintf(stderr, "\n");
 
@@ -284,7 +299,7 @@ int ref_set_dump(struct ref_set *h) {
 		fprintf(stderr, "  bucket[%d]: ", n);
 		for (p = h->buckets[n]; p != NULL; p = p->next)
 			fprintf(stderr, "%d ", p->ref);
-		fprintf(stderr, "\n");		
+		fprintf(stderr, "\n");
 	}
 
 	return 0;

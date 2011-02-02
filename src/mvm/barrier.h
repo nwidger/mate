@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Dec 2010 at 21:20:22 by nwidger on macros.local>
+ * Time-stamp: <29 Jan 2011 at 22:53:09 by nwidger on macros.local>
  */
 
 #ifndef _MVM_BARRIER_H
@@ -17,6 +17,10 @@ int barrier_await(struct barrier *b);
 
 void barrier_reset(struct barrier *b);
 
+void barrier_reset_parties(struct barrier *b, int p);
+
 int barrier_get_waiting(struct barrier *b);
+
+int barrier_get_parties(struct barrier *b);
 
 #endif

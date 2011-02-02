@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Dec 2010 at 21:59:55 by nwidger on macros.local>
+ * Time-stamp: <01 Feb 2011 at 21:30:01 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -101,8 +101,18 @@ void barrier_reset(struct barrier *b) {
 		fprintf(stderr, "mvm: barrier not initialized!\n");
 		mvm_halt();
 	}
+	
+	barrier_reset_parties(b, b->parties);
+}
+
+void barrier_reset_parties(struct barrier *b, int p) {
+	if (b == NULL) {
+		fprintf(stderr, "mvm: barrier not initialized!\n");
+		mvm_halt();
+	}
 
 	b->waiting = 0;
+	b->parties = p;
 }
 
 int barrier_get_waiting(struct barrier *b) {
@@ -112,4 +122,13 @@ int barrier_get_waiting(struct barrier *b) {
 	}
 
 	return b->waiting;
+}
+
+int barrier_get_parties(struct barrier *b) {
+	if (b == NULL) {
+		fprintf(stderr, "mvm: barrier not initialized!\n");
+		mvm_halt();
+	}
+
+	return b->parties;
 }
