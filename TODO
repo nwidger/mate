@@ -3,16 +3,49 @@
 #+STARTUP: hidestars
 #
 # Niels Widger
-# Time-stamp: <27 Jan 2011 at 19:55:22 by nwidger on macros.local>
+# Time-stamp: <27 Jan 2011 at 21:26:59 by nwidger on macros.local>
 
 * mc
-** return statement inside synchronized block causes deadlock if block
-   not inside while loop
 * mas
 * mvm
 ** thread set in heap must be sorted by creation time
 ** thread creation/destruction deferred until serial mode
 ** threads woken up serially using thread set in heap
+** thread
+*** add thread_dmp * pointer to thread
+*** store instruction count there
+*** jump table for operations
+**** start/end of parallel mode
+**** start/end of serial mode
+**** start/end of round
+**** thread creation
+**** thread destruction
+**** instruction execution
+** object
+*** add object_dmp * pointer to object
+*** store ownership info there
+*** jump table for operations
+**** object read
+**** object write
+**** ownership change
+***** shared/private
+***** new owner
+**** recursive depth setting
+** nlock
+*** jump table for operations
+**** lock
+**** unlock
+*** when running DMP, these must be CAS (don't let control go to the
+    OS scheduler)
+** garbage_collector
+*** run at end of serial mode
+** dmp
+*** global dmp * pointer
+*** store current mode - parallel/serial
+*** current quantum size
+*** store deterministic ordering for serial mode
+** invoke_method
+*** call instruction execution op in thread_dmp
 * mdb
 * spec
 * general
