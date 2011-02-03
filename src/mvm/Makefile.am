@@ -11,12 +11,12 @@ mvm_SOURCES = barrier.c breakpoint.c class.c class_table.c disassemble.c \
 dmp.c frame.c garbage_collector.c heap.c instruction_table.c \
 instructions.c integer.c invoke_method.c local_variable_array.c \
 main.c mdb.c method_area.c native_method_array.c native_methods.c \
-nlock.c object.c object_dmp.c operand_stack.c real.c ref_set.c string.c \
+nlock.c nlock_dmp.c object.c object_dmp.c operand_stack.c real.c ref_set.c string.c \
 symbol_table.c table.c thread.c thread_dmp.c vm_stack.c
 
 noinst_HEADERS = barrier.h breakpoint.h class.h class_table.h disassemble.h \
 dmp.h frame.h garbage_collector.h globals.h heap.h instruction_table.h \
 instructions.h integer.h invoke_method.h local_variable_array.h \
 mdb.h mdb_help.h method_area.h native_method_array.h native_methods.h \
-nlock.h object.h object_dmp.h operand_stack.h real.h ref_set.h string.h \
+nlock.h nlock_dmp.h object.h object_dmp.h operand_stack.h real.h ref_set.h string.h \
 symbol_table.h table.h thread.h thread_dmp.h vm_stack.h mvm.1

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Dec 2010 at 21:11:19 by nwidger on macros.local>
+ * Time-stamp: <02 Feb 2011 at 19:08:12 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -12,8 +12,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "dmp.h"
 #include "globals.h"
 #include "nlock.h"
+#include "nlock_dmp.h"
 
 /* struct definitions */
 struct nlock {
@@ -22,6 +24,8 @@ struct nlock {
 	pthread_mutex_t mutex;
 	pthread_cond_t cond;
 	uint64_t notifies;
+
+	struct nlock_dmp *dmp;
 };
 
 struct nlock * nlock_create() {
@@ -61,6 +65,9 @@ struct nlock * nlock_create() {
 	}
 
 	n->notifies = 0UL;
+
+	if (dmp != NULL)
+		n->dmp = dmp_create_nlock_dmp(dmp, n);
 
 	return n;
 }

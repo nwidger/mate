@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <02 Feb 2011 at 17:18:16 by nwidger on macros.local>
+ * Time-stamp: <02 Feb 2011 at 19:07:09 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -13,6 +13,7 @@
 #include "barrier.h"
 #include "dmp.h"
 #include "globals.h"
+#include "nlock_dmp.h"
 #include "object_dmp.h"
 #include "ref_set.h"
 #include "thread_dmp.h"
@@ -31,9 +32,13 @@ struct dmp {
 
 	/* thread_dmp defaults */
 	struct thread_dmp_attr *td_attr;
+
+	/* nlock_dmp defaults */
+	struct nlock_dmp_attr *nd_attr;
 };
 
-struct dmp * dmp_create(struct object *o, struct object_dmp_attr *a, struct thread_dmp_attr *t) {
+struct dmp * dmp_create(struct object *o, struct object_dmp_attr *a,
+			struct thread_dmp_attr *t, struct nlock_dmp_attr *n) {
 	struct dmp *dmp;
 
 	if ((dmp = (struct dmp *)malloc(sizeof(struct dmp))) == NULL) {
@@ -50,6 +55,7 @@ struct dmp * dmp_create(struct object *o, struct object_dmp_attr *a, struct thre
 
 	dmp->od_attr = a;
 	dmp->td_attr = t;
+	dmp->nd_attr = n;
 
 	return dmp;
 }
@@ -113,6 +119,18 @@ struct thread_dmp * dmp_create_thread_dmp(struct dmp *d, struct thread *t) {
 
 	td = thread_dmp_create(t, d->td_attr);
 	return td;
+}
+
+struct nlock_dmp * dmp_create_nlock_dmp(struct dmp *d, struct nlock *n) {
+	struct nlock_dmp *nd;
+
+	if (d == NULL) {
+		fprintf(stderr, "mvm: dmp not initialized!\n");
+		mvm_halt();
+	}
+
+	nd = nlock_dmp_create(n, d->nd_attr);
+	return nd;
 }
 
 int dmp_start_watchdog(struct dmp *d) {
