@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <02 Feb 2011 at 19:04:22 by nwidger on macros.local>
+ * Time-stamp: <18 Feb 2011 at 20:08:08 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -97,6 +97,28 @@ void thread_clear(struct thread *t) {
 	t->pc = 0;
 
 	vm_stack_clear(t->vm_stack);
+}
+
+struct thread_dmp * thread_get_dmp() {
+	struct thread *t;
+
+	t = (struct thread *)pthread_getspecific(key);
+	
+	if (t == NULL) {
+		fprintf(stderr, "mvm: thread not initialized!\n");
+		mvm_halt();
+	}
+
+	return t->dmp;
+}
+
+struct thread_dmp * _thread_get_dmp(struct thread *t) {
+	if (t == NULL) {
+		fprintf(stderr, "mvm: thread not initialized!\n");
+		mvm_halt();
+	}
+
+	return t->dmp;
 }
 
 void thread_make_key() {
@@ -221,6 +243,9 @@ int thread_start(struct object *o) {
 
 	t->ref = object_get_ref(o);
 
+	if (t->dmp != NULL)
+		thread_dmp_thread_creation(t->dmp);
+
 	vm_stack_push(vm_stack, "thread_start", 0, 0, 0, 0, 0);
 	frame = vm_stack_peek(vm_stack);
 	operand_stack = frame_get_operand_stack(frame);
@@ -243,6 +268,9 @@ int thread_start_main(struct object *o) {
 	}
 
 	t->ref = object_get_ref(o);
+
+	if (t->dmp != NULL)
+		thread_dmp_thread_creation(t->dmp);
 
 	if (thread_pthread_create(t, thread_run0_main) != 0)
 		mvm_halt();
@@ -344,10 +372,16 @@ void * thread_run0(void *p) {
 	if (thread_set_current(t) != 0)
 		mvm_halt();
 
+	if (t->dmp != NULL)
+		thread_dmp_thread_start(t->dmp);
+
 	t->state = runnable_state;
 
 	if (invoke_virtual_method_by_name(t->ref, t->pc, "run", 0) != 0)
 		mvm_halt();
+
+	if (t->dmp != NULL)
+		thread_dmp_thread_destruction(t->dmp);
 
 	t->state = terminated_state;
 	/* run method has terminated, thread instance can now be collected */
@@ -364,12 +398,13 @@ void * thread_run0_main(void *p) {
 	if (thread_set_current(t) != 0)
 		mvm_halt();
 
+	if (t->dmp != NULL)
+		thread_dmp_thread_start(t->dmp);
+	
 	t->state = runnable_state;
-
 
 	if (debug != 0)
 		mdb_hook(startup_hook);
-	
 
 	main_block_return_value = 0;
 	if (invoke_method("mainBlock", main_block_address, main_block_end,
@@ -377,6 +412,9 @@ void * thread_run0_main(void *p) {
 		mvm_halt();
 	}
 
+	if (t->dmp != NULL)
+		thread_dmp_thread_destruction(t->dmp);	
+	
 	t->state = terminated_state;
 	/* run method has terminated, thread instance can now be collected */
 	heap_include_ref(heap, t->ref);

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <02 Feb 2011 at 17:15:34 by nwidger on macros.local>
+ * Time-stamp: <03 Feb 2011 at 21:15:55 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -29,6 +29,7 @@
 #include "operand_stack.h"
 #include "symbol_table.h"
 #include "thread.h"
+#include "thread_dmp.h"
 #include "vm_stack.h"
 
 /* forward declarations */
@@ -161,9 +162,11 @@ int execute_method(char *e, uint32_t a, uint32_t b, uint32_t n, uint32_t m, uint
 	int old_size;
 	uint32_t pc, opcode;
 	struct frame *frame;
+	struct thread_dmp *td;
 	struct vm_stack *vm_stack;
 
-	vm_stack = thread_get_vm_stack();	
+	td = thread_get_dmp();
+	vm_stack = thread_get_vm_stack();
 
 	/* lock */
 	garbage_collector_lock(garbage_collector);
@@ -179,7 +182,7 @@ int execute_method(char *e, uint32_t a, uint32_t b, uint32_t n, uint32_t m, uint
 	while (vm_stack_empty(vm_stack) == 0 &&
 	       vm_stack_size(vm_stack) > old_size) {
 		pc = thread_get_pc();
-		
+
 		frame_set_current_address(frame, pc);
 		opcode = method_area_fetch(method_area, pc);
 
@@ -192,13 +195,11 @@ int execute_method(char *e, uint32_t a, uint32_t b, uint32_t n, uint32_t m, uint
 				return 0;
 		}
 
+		if (td != NULL)
+			thread_dmp_execute_instruction(td, opcode);
+
 		if (instruction_table_execute(instruction_table, opcode) != 0)
 			mvm_halt();
-
-		/* thread_increment_instruction_counter(); */
-
-		/* if ((thread_get_instruction_counter() % 40) == 0) */
-		/* 	barrier_await(pbarrier); */
 
 		if (debug != 0 && restart != 0)
 			return 0;

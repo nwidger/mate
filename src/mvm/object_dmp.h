@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <02 Feb 2011 at 13:09:55 by nwidger on macros.local>
+ * Time-stamp: <04 Feb 2011 at 20:55:48 by nwidger on macros.local>
  */
 
 #ifndef _MVM_OBJECT_DMP_H
@@ -8,18 +8,20 @@
 struct object;
 struct object_dmp;
 struct object_dmp_ops;
-struct thread;
 
 /* constants */
+#define OBJECT_DMP_DEFAULT_OWNER -1 /* -1 == allocating thread */
+#define OBJECT_DMP_DEFAULT_DEPTH 0
+
 /** for accessing owner field */
 #define SHARED(x) (x == 0)
 #define PRIVATE(x) (x != 0)
 
 /* struct definitions */
 struct object_dmp_ops {
-	int  (*load)(struct object_dmp *od, struct thread *t, int i);
-	int (*store)(struct object_dmp *od, struct thread *t, int i);
-	int (*chown)(struct object_dmp *od, struct thread *t, int n);	
+	int  (*load)(struct object_dmp *od, int i);
+	int (*store)(struct object_dmp *od, int i, int r);
+	int (*chown)(struct object_dmp *od, int n);	
 };
 
 struct object_dmp_attr {
@@ -41,15 +43,19 @@ int object_dmp_get_depth(struct object_dmp *od);
 int object_dmp_set_depth(struct object_dmp *od, int d);
 struct object_dmp_ops * object_dmp_get_ops(struct object_dmp *od);
 int object_dmp_set_ops(struct object_dmp *od, struct object_dmp_ops *p);
-int object_dmp_load(struct object_dmp *od, struct thread *t, int i);
-int object_dmp_store(struct object_dmp *od, struct thread *t, int i);
-int object_dmp_chown(struct object_dmp *od, struct thread *t, int i);
+int object_dmp_load(struct object_dmp *od, int i);
+int object_dmp_store(struct object_dmp *od, int i, int r);
+int object_dmp_chown(struct object_dmp *od, int i);
 
 /* default ops */
 extern struct object_dmp_ops object_dmp_default_ops;
 
-int object_dmp_default_load(struct object_dmp *od, struct thread *t, int i);
-int object_dmp_default_store(struct object_dmp *od, struct thread *t, int i);
-int object_dmp_default_chown(struct object_dmp *od, struct thread *t, int n);
+/* default attr */
+extern struct object_dmp_attr object_dmp_default_attr;
+
+/* default functions */
+int object_dmp_default_load(struct object_dmp *od, int i);
+int object_dmp_default_store(struct object_dmp *od, int i, int r);
+int object_dmp_default_chown(struct object_dmp *od, int n);
 
 #endif

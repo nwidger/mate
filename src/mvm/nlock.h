@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <17 Nov 2010 at 11:00:59 by nwidger on macros.local>
+ * Time-stamp: <03 Feb 2011 at 19:26:01 by nwidger on macros.local>
  */
 
 #ifndef _MVM_NLOCK_H
@@ -53,6 +53,14 @@ void nlock_clear(struct nlock *n);
  */
 
 int nlock_lock(struct nlock *n);
+
+/** non-blocking attempt to lock the given nlock
+ *
+ * @param n - the nlock to try to lock
+ *
+ * @return 0 on success, non-zero on failure
+ */
+int nlock_trylock(struct nlock *n);
 
 /** unlocks the given nlock.
  *

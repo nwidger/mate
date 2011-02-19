@@ -1,9 +1,13 @@
 /* Niels Widger
- * Time-stamp: <02 Feb 2011 at 17:15:28 by nwidger on macros.local>
+ * Time-stamp: <03 Feb 2011 at 20:41:29 by nwidger on macros.local>
  */
 
 #ifndef _MVM_THREAD_H
 #define _MVM_THREAD_H
+
+struct object;
+struct thread;
+struct thread_dmp;
 
 /* enum */
 /** specifies current state of the thread */
@@ -30,6 +34,10 @@ struct thread * thread_create();
 void thread_destroy(struct thread *t);
 
 void thread_clear(struct thread *t);
+
+struct thread_dmp * thread_get_dmp();
+
+struct thread_dmp * _thread_get_dmp(struct thread *t);
 
 struct thread * thread_get_current();
 

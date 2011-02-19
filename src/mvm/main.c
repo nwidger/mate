@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <01 Feb 2011 at 21:37:07 by nwidger on macros.local>
+ * Time-stamp: <02 Feb 2011 at 19:25:27 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -29,9 +29,13 @@
 #include "method_area.h"
 #include "native_method_array.h"
 #include "native_methods.h"
+#include "nlock.h"
+#include "nlock_dmp.h"
 #include "object.h"
+#include "object_dmp.h"
 #include "symbol_table.h"
 #include "thread.h"
+#include "thread_dmp.h"
 #include "vm_stack.h"
 
 #define OPTARGS ":m:s:i:daqcvh"
@@ -158,6 +162,13 @@ int mvm_initialize(int h) {
 		return 1;
 	}
 
+	if ((dmp = dmp_create(&object_dmp_default_attr,
+			      &thread_dmp_default_attr,
+			      &nlock_dmp_default_attr)) == NULL) {
+		fprintf(stderr, "mvm: error initializing DMP!\n");
+		return 1;
+	}
+	
 	garbage_collector_start(garbage_collector,
 				garbage_collector_type,
 				garbage_collector_interval);

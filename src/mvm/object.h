@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <27 Jan 2011 at 19:36:35 by nwidger on macros.local>
+ * Time-stamp: <03 Feb 2011 at 21:13:52 by nwidger on macros.local>
  */
 
 #ifndef _MVM_OBJECT_H
@@ -10,6 +10,7 @@
 struct class;
 struct integer;
 struct object;
+struct object_dmp;
 struct ref_set;
 struct string;
 struct table;
@@ -42,6 +43,15 @@ void object_destroy(struct object *o);
  */
 
 void object_clear(struct object *o);
+
+/** returns the object_dmp attached to this object or NULL.
+ *
+ * @param o - the object whose object_dmp will return returnd
+ *
+ * @return object_dmp pointer or NULL
+ */
+
+struct object_dmp * object_get_dmp(struct object *o);
 
 /** causes the calling thread to acquire the monitor of the given
  * object.  If another thread currently owns it, the thread will block

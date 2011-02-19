@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <02 Feb 2011 at 13:35:49 by nwidger on macros.local>
+ * Time-stamp: <18 Feb 2011 at 19:55:54 by nwidger on macros.local>
  */
 
 #ifndef _MVM_THREAD_DMP_H
@@ -13,17 +13,24 @@
 
 struct thread_dmp;
 
+/* constants */
+#define THREAD_DMP_DEFAULT_QUANTUM_SIZE        1000
+#define THREAD_DMP_DEFAULT_INSTRUCTION_COUNTER 0
+
+/* enums */
+enum thread_dmp_state {
+	created_state   = 0,
+	running_state   = 1,
+	blocking_state  = 2,
+	destroyed_state = 3
+};
+
 /* struct definitions */
 struct thread_dmp_ops {
-	int  (*round_start)(struct thread_dmp *td);
-	int  (*pmode_start)(struct thread_dmp *td);
-	int  (*pmode_end)(struct thread_dmp *td);
-	int  (*smode_start)(struct thread_dmp *td);
-	int  (*smode_end)(struct thread_dmp *td);
-	int  (*round_end)(struct thread_dmp *td);
 	int  (*thread_creation)(struct thread_dmp *td);
+	int  (*thread_start)(struct thread_dmp *td);
 	int  (*thread_destruction)(struct thread_dmp *td);
-	int  (*execute_instruction)(struct thread_dmp *td, uint32_t p, uint32_t o);
+	int  (*execute_instruction)(struct thread_dmp *td, uint32_t o);
 };
 
 struct thread_dmp_attr {
@@ -35,30 +42,28 @@ struct thread_dmp_attr {
 struct thread_dmp * thread_dmp_create(struct thread *t, struct thread_dmp_attr *a);
 void thread_dmp_destroy(struct thread_dmp *td);
 void thread_dmp_clear(struct thread_dmp *td);
+int thread_dmp_get_state(struct thread_dmp *td);
+int thread_dmp_get_state_nonblock(struct thread_dmp *td);
+int thread_dmp_wait(struct thread_dmp *td);
+int thread_dmp_signal(struct thread_dmp *td);
 struct thread * thread_dmp_get_thread(struct thread_dmp *td);
 int thread_dmp_set_thread(struct thread_dmp *td, struct thread *t);
 int thread_dmp_get_quantum_size(struct thread_dmp *td);
 int thread_dmp_set_quantum_size(struct thread_dmp *td, int q);
-int thread_dmp_round_start(struct thread_dmp *td);
-int thread_dmp_pmode_start(struct thread_dmp *td);
-int thread_dmp_pmode_end(struct thread_dmp *td);
-int thread_dmp_smode_start(struct thread_dmp *td);
-int thread_dmp_smode_end(struct thread_dmp *td);
-int thread_dmp_round_end(struct thread_dmp *td);
 int thread_dmp_thread_creation(struct thread_dmp *td);
+int thread_dmp_thread_start(struct thread_dmp *td);
 int thread_dmp_thread_destruction(struct thread_dmp *td);
-int thread_dmp_execute_instruction(struct thread_dmp *td, uint32_t p, uint32_t o);
+int thread_dmp_execute_instruction(struct thread_dmp *td, uint32_t o);
 
 /* default ops */
 extern struct thread_dmp_ops thread_dmp_default_ops;
 
-int thread_dmp_default_round_start(struct thread_dmp *td);
-int thread_dmp_default_pmode_start(struct thread_dmp *td);
-int thread_dmp_default_pmode_end(struct thread_dmp *td);
-int thread_dmp_default_smode_start(struct thread_dmp *td);
-int thread_dmp_default_smode_end(struct thread_dmp *td);
-int thread_dmp_default_round_end(struct thread_dmp *td);
+/* default attr */
+extern struct thread_dmp_attr thread_dmp_default_attr;
+
+/* default functions */
 int thread_dmp_default_thread_creation(struct thread_dmp *td);
+int thread_dmp_default_thread_start(struct thread_dmp *td);
 int thread_dmp_default_thread_destruction(struct thread_dmp *td);
-int thread_dmp_default_execute_instruction(struct thread_dmp *td, uint32_t p, uint32_t o);
+int thread_dmp_default_execute_instruction(struct thread_dmp *td, uint32_t o);
 #endif

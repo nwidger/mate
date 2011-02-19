@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Dec 2010 at 21:16:45 by nwidger on macros.local>
+ * Time-stamp: <03 Feb 2011 at 21:30:01 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -299,7 +299,7 @@ int dup_x1_instruction(uint32_t o) {
 
 	operand_stack_push(operand_stack, ref1);
 	operand_stack_push(operand_stack, ref2);
-	operand_stack_push(operand_stack, ref1);	
+	operand_stack_push(operand_stack, ref1);
 
 	/* unlock */
 	garbage_collector_unlock(garbage_collector);
@@ -622,13 +622,13 @@ int monitorenter_instruction(uint32_t o) {
 	ref = operand_stack_pop(operand_stack);
 
 	if (ref == 0) {
-		fprintf(stderr, "mvm: cannot acquire monitor on null reference!\n");		
+		fprintf(stderr, "mvm: cannot acquire monitor on null reference!\n");
 		mvm_halt();
 	}
-	
+
 	object = heap_fetch_object(heap, ref);
 	object_acquire_monitor(object);
-	
+
 	thread_set_pc(increment_pc(1));
 	return 0;
 }
@@ -651,13 +651,13 @@ int monitorexit_instruction(uint32_t o) {
 	ref = operand_stack_pop(operand_stack);
 
 	if (ref == 0) {
-		fprintf(stderr, "mvm: cannot release monitor of null reference!\n");		
+		fprintf(stderr, "mvm: cannot release monitor of null reference!\n");
 		mvm_halt();
 	}
-	
+
 	object = heap_fetch_object(heap, ref);
 	object_release_monitor(object);
-	
+
 	thread_set_pc(increment_pc(1));
 	return 0;
 }
@@ -724,7 +724,7 @@ int newint_instruction(uint32_t o) {
 		fprintf(stderr, "mvm: integer literal is too small!");
 		mvm_halt();
 	}
-	
+
 	if (value > INTEGER_MAX_INTEGER) {
 		fprintf(stderr, "mvm: integer literal is too large!");
 		mvm_halt();

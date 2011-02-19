@@ -3,7 +3,7 @@
 #+STARTUP: hidestars
 #
 # Niels Widger
-# Time-stamp: <27 Jan 2011 at 21:26:59 by nwidger on macros.local>
+# Time-stamp: <06 Feb 2011 at 22:25:05 by nwidger on macros.local>
 
 * mc
 * mas
@@ -46,6 +46,7 @@
 *** store deterministic ordering for serial mode
 ** invoke_method
 *** call instruction execution op in thread_dmp
+** thread join, sleep, wait methods cannot block
 * mdb
 * spec
 * general

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <02 Feb 2011 at 19:07:09 by nwidger on macros.local>
+ * Time-stamp: <12 Feb 2011 at 21:13:36 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -13,6 +13,7 @@
 #include "barrier.h"
 #include "dmp.h"
 #include "globals.h"
+#include "heap.h"
 #include "nlock_dmp.h"
 #include "object_dmp.h"
 #include "ref_set.h"
@@ -24,8 +25,7 @@ struct dmp {
 
 	struct ref_set *thread_set;
 
-	struct barrier *pbarrier;
-	struct barrier *sbarrier;
+	struct barrier *barrier;
 
 	/* object_dmp defaults */
 	struct object_dmp_attr *od_attr;
@@ -37,8 +37,12 @@ struct dmp {
 	struct nlock_dmp_attr *nd_attr;
 };
 
-struct dmp * dmp_create(struct object *o, struct object_dmp_attr *a,
-			struct thread_dmp_attr *t, struct nlock_dmp_attr *n) {
+/* forward declarations */
+void * dmp_watchdog(void *arg);
+
+struct dmp * dmp_create(struct object_dmp_attr *a,
+			struct thread_dmp_attr *t,
+			struct nlock_dmp_attr *n) {
 	struct dmp *dmp;
 
 	if ((dmp = (struct dmp *)malloc(sizeof(struct dmp))) == NULL) {
@@ -46,12 +50,11 @@ struct dmp * dmp_create(struct object *o, struct object_dmp_attr *a,
 		mvm_halt();
 	}
 
-	dmp->mode = round_start_mode;
+	dmp->mode = parallel_mode;
 
 	dmp->thread_set = ref_set_create();
 
-	dmp->pbarrier = barrier_create(1);
-	dmp->sbarrier = barrier_create(1);
+	dmp->barrier = barrier_create(1);
 
 	dmp->od_attr = a;
 	dmp->td_attr = t;
@@ -63,18 +66,25 @@ struct dmp * dmp_create(struct object *o, struct object_dmp_attr *a,
 void dmp_destroy(struct dmp *d) {
 	if (d != NULL) {
 		ref_set_destroy(d->thread_set);
-		barrier_destroy(d->pbarrier);
-		barrier_destroy(d->sbarrier);
+		barrier_destroy(d->barrier);
 		free(d);
 	}
 }
 
 void dmp_clear(struct dmp *d) {
 	if (d != NULL) {
-		barrier_clear(d->pbarrier);
-		barrier_clear(d->sbarrier);
+		barrier_clear(d->barrier);
 		d->od_attr = NULL;
 	}
+}
+
+int dmp_get_mode(struct dmp *d) {
+	if (d == NULL) {
+		fprintf(stderr, "mvm: dmp not initialized!\n");
+		mvm_halt();
+	}
+
+	return d->mode;
 }
 
 int dmp_add_thread(struct dmp *d, int r) {
@@ -133,39 +143,98 @@ struct nlock_dmp * dmp_create_nlock_dmp(struct dmp *d, struct nlock *n) {
 	return nd;
 }
 
-int dmp_start_watchdog(struct dmp *d) {
-	return 0;
-}
+int dmp_thread_block(struct dmp *d, struct thread_dmp *td) {
+	struct object *o;
+	struct thread *t;
+	int me, ref, retval, blocking, nthreads;
+	struct thread_dmp *ud;
 
-int dmp_stop_watchdog(struct dmp *d) {
-	return 0;
-}
-
-void dmp_watchdog(void *arg) {
-	while (1) {		/* while nthreads > 0 */
-		/* set mode to round_start */
-
-		/* initialize pbarrier to nthreads */
-
-		/* set mode to parallel_start_mode */
-
-		/* wakeup all nthreads, go to sleep */
-
-		/* last thread to hit pbarrier wakes us up */
-
-		/* set mode to parallel_end_mode */
-
-		/* set mode to serial_start_mode */
-
-		/* for (thread t : thread_list)
-		 *     wakeup thread, go to sleep
-		 *     wakeup when thread hits sbarrier
-		 */
-
-		/* set mode to serial_end_mode */
-
-		/* run garbage collector */
-
-		/* set mode to round_end_mode */
+	if (d == NULL) {
+		fprintf(stderr, "mvm: dmp not initialized!\n");
+		mvm_halt();
 	}
+
+	me = thread_get_ref();
+
+	if (d->mode == parallel_mode) {
+		/* block until all threads finished */
+		retval = barrier_await(d->barrier);
+
+		if (retval != 0) { /* 0 == last to block */
+			/* sleep until turn */
+			thread_dmp_wait(td);
+		} else {
+			d->mode = serial_mode;
+
+			/* ensure all threads are sleeping */
+			nthreads = ref_set_size(d->thread_set) - 1;
+
+			if (nthreads != 0) {
+				blocking = 0;
+				ref_set_iterator_init(d->thread_set);
+				
+				while (blocking != nthreads) {
+					if (ref == me) {
+						continue;
+					} else if ((ref = ref_set_iterator_next(d->thread_set)) == 0) {
+						ref_set_iterator_init(d->thread_set);
+					} else {
+						o = heap_fetch_object(heap, ref);
+						t = object_get_thread(o);
+						ud = _thread_get_dmp(t);
+
+						if (thread_dmp_get_state_nonblock(ud) == blocking_state)
+							blocking++;
+					}
+				}
+			}
+
+			ref_set_iterator_init(d->thread_set);
+			ref = ref_set_iterator_next(d->thread_set);
+
+			if (ref == me) {
+				/* execute turn */
+			} else {
+				/* wake first thread */
+				o = heap_fetch_object(heap, ref);
+				t = object_get_thread(o);
+				ud = _thread_get_dmp(t);
+				thread_dmp_signal(ud);
+
+				/* sleep until turn */
+				thread_dmp_wait(td);
+			}
+		}
+	} else {		/* serial_mode */
+		ref = ref_set_iterator_next(d->thread_set);
+
+		if (ref != 0) {
+			/* wake next thread */
+			o = heap_fetch_object(heap, ref);
+			t = object_get_thread(o);
+			ud = _thread_get_dmp(t);			
+			thread_dmp_signal(ud);
+
+			/* block until all threads finished */
+			barrier_await(d->barrier);
+		} else {
+			d->mode = parallel_mode;
+			
+			/* wake all threads */
+			ref_set_iterator_init(d->thread_set);
+			
+			while ((ref = ref_set_iterator_next(d->thread_set)) != 0) {
+				if (ref == me) {
+					continue;
+				} else {
+					o = heap_fetch_object(heap, ref);
+					t = object_get_thread(o);
+					ud = _thread_get_dmp(t);			
+					thread_dmp_signal(ud);
+				}
+			}
+		}
+	}
+
+	return 0;
 }

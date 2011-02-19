@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <02 Feb 2011 at 17:15:03 by nwidger on macros.local>
+ * Time-stamp: <11 Feb 2011 at 22:28:04 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -10,10 +10,13 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "dmp.h"
 #include "globals.h"
 #include "heap.h"
 #include "object.h"
 #include "object_dmp.h"
+#include "ref_set.h"
+#include "thread.h"
 
 /* struct definitions */
 struct object_dmp {
@@ -21,7 +24,11 @@ struct object_dmp {
 	struct object_dmp_attr attr;
 };
 
+/* forward declarations */
+int object_dmp_default_chown_aux(struct object_dmp *od, int n, int d);
+
 struct object_dmp * object_dmp_create(struct object *o, struct object_dmp_attr *a) {
+	struct thread *t;
 	struct object_dmp *od;
 
 	if ((od = (struct object_dmp *)heap_malloc(heap, sizeof(struct object_dmp))) == NULL)
@@ -29,6 +36,12 @@ struct object_dmp * object_dmp_create(struct object *o, struct object_dmp_attr *
 
 	od->object = o;
 	memcpy(&od->attr, a, sizeof(struct object_dmp_attr));
+
+	if (od->attr.owner == -1) {
+		t = thread_get_current();
+		od->attr.owner = thread_get_ref(t);
+	}
+
 	return od;
 }
 
@@ -138,7 +151,7 @@ int object_dmp_set_ops(struct object_dmp *od, struct object_dmp_ops *p) {
 	return 0;
 }
 
-int object_dmp_load(struct object_dmp *od, struct thread *t, int i) {
+int object_dmp_load(struct object_dmp *od, int i) {
 	if (od == NULL) {
 		fprintf(stderr, "mvm: object_dmp not initialized!\n");
 		mvm_halt();
@@ -147,10 +160,10 @@ int object_dmp_load(struct object_dmp *od, struct thread *t, int i) {
 	if (od->attr.ops->load == NULL)
 		return 0;
 
-	return (*od->attr.ops->load)(od, t, i);
+	return (*od->attr.ops->load)(od, i);
 }
 
-int object_dmp_store(struct object_dmp *od, struct thread *t, int i) {
+int object_dmp_store(struct object_dmp *od, int i, int r) {
 	if (od == NULL) {
 		fprintf(stderr, "mvm: object_dmp not initialized!\n");
 		mvm_halt();
@@ -159,10 +172,10 @@ int object_dmp_store(struct object_dmp *od, struct thread *t, int i) {
 	if (od->attr.ops->store == NULL)
 		return 0;
 
-	return (*od->attr.ops->store)(od, t, i);
+	return (*od->attr.ops->store)(od, i, r);
 }
 
-int object_dmp_chown(struct object_dmp *od, struct thread *t, int i) {
+int object_dmp_chown(struct object_dmp *od, int i) {
 	if (od == NULL) {
 		fprintf(stderr, "mvm: object_dmp not initialized!\n");
 		mvm_halt();
@@ -171,7 +184,7 @@ int object_dmp_chown(struct object_dmp *od, struct thread *t, int i) {
 	if (od->attr.ops->chown == NULL)
 		return 0;
 
-	return (*od->attr.ops->chown)(od, t, i);
+	return (*od->attr.ops->chown)(od, i);
 }
 
 /* default ops */
@@ -181,18 +194,112 @@ struct object_dmp_ops object_dmp_default_ops = {
 	.chown = object_dmp_default_chown
 };
 
-int object_dmp_default_load(struct object_dmp *od, struct thread *t, int i) {
+/* default attr */
+struct object_dmp_attr object_dmp_default_attr = {
+	.owner = OBJECT_DMP_DEFAULT_OWNER,
+	.depth = OBJECT_DMP_DEFAULT_DEPTH,
+	.ops = &object_dmp_default_ops
+};
+
+/* default functions */
+int object_dmp_default_load(struct object_dmp *od, int i) {
+	int me, current;
+	struct thread_dmp *td;
+
 	fprintf(stderr, "in object_dmp_default_load\n");
+
+	current = object_dmp_get_owner(od);
+	me = thread_get_ref();
+	td = thread_get_dmp();
+
+	if (current == 0) {
+		fprintf(stderr, "    shared: proceed!\n");
+	} else if (current != me) {
+		fprintf(stderr, "    private not owned by me: block, set shared, proceed!\n");
+
+		if (dmp_get_mode(dmp) == parallel_mode) {
+			/* block */
+			dmp_thread_block(dmp, td);
+		}
+
+		/* set shared */
+		object_dmp_chown(od, 0);
+	} else {
+		fprintf(stderr, "    private owned by me: proceed!\n");
+	}
+
+	/* proceed */
+
 	return 0;
 }
 
-int object_dmp_default_store(struct object_dmp *od, struct thread *t, int i) {
+int object_dmp_default_store(struct object_dmp *od, int i, int r) {
+	int me, current;
+	struct thread_dmp *td;
+
 	fprintf(stderr, "in object_dmp_default_store\n");
 
+	current = object_dmp_get_owner(od);
+	me = thread_get_ref();
+	td = thread_get_dmp();
+
+	if (current == 0) {
+		fprintf(stderr, "    shared: block, set private owned by me, proceed!\n");
+
+		if (dmp_get_mode(dmp) == parallel_mode) {
+			/* block */
+			dmp_thread_block(dmp, td);
+		}
+
+		/* set private owned by me */
+		object_dmp_chown(od, me);
+	} else if (current != me) {
+		fprintf(stderr, "    private not owned by me: block, set shared, proceed!\n");
+
+		if (dmp_get_mode(dmp) == parallel_mode) {
+			/* block */
+			dmp_thread_block(dmp, td);
+		}
+
+		/* set shared */
+		object_dmp_chown(od, me);
+	} else {
+		fprintf(stderr, "    private owned by me: proceed!\n");
+	}
+
+	/* proceed */
+
 	return 0;
 }
 
-int object_dmp_default_chown(struct object_dmp *od, struct thread *t, int n) {
+int object_dmp_default_chown(struct object_dmp *od, int n) {
 	fprintf(stderr, "in object_dmp_default_chown\n");
+	return object_dmp_default_chown_aux(od, n, od->attr.depth);
+}
+
+int object_dmp_default_chown_aux(struct object_dmp *od, int n, int d) {
+	int ref;
+	struct ref_set *fields;
+	struct object_dmp *field_od;
+	struct object *object, *field;
+
+	if (d == 0)
+		return 0;
+
+	od->attr.owner = n;
+
+	object = od->object;
+	fields = ref_set_create();
+	object_populate_ref_set(object, fields);
+
+	ref_set_iterator_init(fields);
+
+	while ((ref = ref_set_iterator_next(fields)) != 0) {
+		field = heap_fetch_object(heap, ref);
+		field_od = object_get_dmp(field);
+
+		object_dmp_default_chown_aux(field_od, n, d-1);
+	}
+
 	return 0;
 }

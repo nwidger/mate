@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <02 Feb 2011 at 13:03:05 by nwidger on macros.local>
+ * Time-stamp: <04 Feb 2011 at 22:19:48 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -20,6 +20,7 @@
 #include "invoke_method.h"
 #include "nlock.h"
 #include "object.h"
+#include "object_dmp.h"
 #include "operand_stack.h"
 #include "real.h"
 #include "ref_set.h"
@@ -96,6 +97,15 @@ void object_clear(struct object *o) {
 		o->class = NULL;
 		memset(o->fields, 0, sizeof(uint32_t)*o->num_fields);
 	}
+}
+
+struct object_dmp * object_get_dmp(struct object *o) {
+	if (o == NULL) {
+		fprintf(stderr, "mvm: object has not been initialized!\n");
+		mvm_halt();
+	}
+
+	return o->dmp;
 }
 
 int object_acquire_monitor(struct object *o) {
@@ -179,6 +189,9 @@ int object_load_field(struct object *o, int i) {
 		mvm_halt();
 	}
 
+	if (o->dmp != NULL)
+		object_dmp_load(o->dmp, i);
+
 	return o->fields[i];
 }
 
@@ -194,6 +207,9 @@ int object_store_field(struct object *o, int i, int r) {
 		fprintf(stderr, "mvm: invalid field index!\n");
 		mvm_halt();
 	}
+
+	if (o->dmp != NULL)
+		object_dmp_store(o->dmp, i, r);
 
 	tmp = o->fields[i];
 	o->fields[i] = r;

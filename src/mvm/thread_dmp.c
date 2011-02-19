@@ -1,16 +1,18 @@
 /* Niels Widger
- * Time-stamp: <02 Feb 2011 at 17:15:41 by nwidger on macros.local>
+ * Time-stamp: <18 Feb 2011 at 20:10:32 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
 
+#include <pthread.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "constants.h"
+#include "dmp.h"
 #include "globals.h"
 #include "heap.h"
 #include "thread.h"
@@ -19,6 +21,9 @@
 /* struct definitions */
 struct thread_dmp {
 	struct thread *thread;
+	enum thread_dmp_state state;
+	pthread_mutex_t mutex;
+	pthread_cond_t cond;
 	struct thread_dmp_attr attr;
 };
 
@@ -30,11 +35,24 @@ struct thread_dmp * thread_dmp_create(struct thread *t, struct thread_dmp_attr *
 
 	td->thread = t;
 	memcpy(&td->attr, a, sizeof(struct thread_dmp_attr));
+
+	if (pthread_mutex_init(&td->mutex, NULL) != 0) {
+		perror("mvm: pthread_mutex_init");
+		mvm_halt();
+	}
+
+	if (pthread_cond_init(&td->cond, NULL) != 0) {
+		perror("mvm: pthread_cond_init");
+		mvm_halt();
+	}
+
 	return td;
 }
 
 void thread_dmp_destroy(struct thread_dmp *td) {
 	if (td != NULL) {
+		pthread_mutex_destroy(&td->mutex);
+		pthread_cond_destroy(&td->cond);
 		heap_free(heap, td);
 	}
 }
@@ -43,6 +61,69 @@ void thread_dmp_clear(struct thread_dmp *td) {
 	if (td != NULL) {
 		memset(&td->attr, 0, sizeof(struct thread_dmp_attr));
 	}
+}
+
+int thread_dmp_get_state(struct thread_dmp *td) {
+	int state;
+
+	if (td == NULL) {
+		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
+		mvm_halt();
+	}
+
+	pthread_mutex_lock(&td->mutex);
+	state = td->state;
+	pthread_mutex_unlock(&td->mutex);
+
+	return state;
+}
+
+int thread_dmp_get_state_nonblock(struct thread_dmp *td) {
+	if (td == NULL) {
+		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
+		mvm_halt();
+	}
+
+	return td->state;
+}
+
+int thread_dmp_wait(struct thread_dmp *td) {
+	if (td == NULL) {
+		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
+		mvm_halt();
+	}
+
+	pthread_mutex_lock(&td->mutex);
+
+	if (td->state != running_state)
+		return 0;
+
+	td->state = blocking_state;
+
+	while (td->state == blocking_state)
+		pthread_cond_wait(&td->cond, &td->mutex);
+
+	pthread_mutex_unlock(&td->mutex);
+
+	return 0;
+}
+
+int thread_dmp_signal(struct thread_dmp *td) {
+	if (td == NULL) {
+		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
+		mvm_halt();
+	}
+
+	pthread_mutex_lock(&td->mutex);
+
+	if (td->state != blocking_state)
+		return 0;
+
+	td->state = running_state;
+	pthread_cond_signal(&td->cond);
+
+	pthread_mutex_unlock(&td->mutex);
+	return 0;
 }
 
 struct thread * thread_dmp_get_thread(struct thread_dmp *td) {
@@ -83,78 +164,6 @@ int thread_dmp_set_quantum_size(struct thread_dmp *td, int q) {
 	return 0;
 }
 
-int thread_dmp_round_start(struct thread_dmp *td) {
-	if (td == NULL) {
-		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
-		mvm_halt();
-	}
-
-	if (td->attr.ops->round_start == NULL)
-		return 0;
-
-	return (*td->attr.ops->round_start)(td);
-}
-
-int thread_dmp_pmode_start(struct thread_dmp *td) {
-	if (td == NULL) {
-		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
-		mvm_halt();
-	}
-
-	if (td->attr.ops->pmode_start == NULL)
-		return 0;
-
-	return (*td->attr.ops->pmode_start)(td);
-}
-
-int thread_dmp_pmode_end(struct thread_dmp *td) {
-	if (td == NULL) {
-		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
-		mvm_halt();
-	}
-
-	if (td->attr.ops->pmode_end == NULL)
-		return 0;
-
-	return (*td->attr.ops->pmode_end)(td);
-}
-
-int thread_dmp_smode_start(struct thread_dmp *td) {
-	if (td == NULL) {
-		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
-		mvm_halt();
-	}
-
-	if (td->attr.ops->smode_start == NULL)
-		return 0;
-
-	return (*td->attr.ops->smode_start)(td);
-}
-
-int thread_dmp_smode_end(struct thread_dmp *td) {
-	if (td == NULL) {
-		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
-		mvm_halt();
-	}
-
-	if (td->attr.ops->smode_end == NULL)
-		return 0;
-
-	return (*td->attr.ops->smode_end)(td);
-}
-
-int thread_dmp_round_end(struct thread_dmp *td) {
-	if (td == NULL) {
-		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
-		mvm_halt();
-	}
-
-	if (td->attr.ops->round_end == NULL)
-		return 0;
-
-	return (*td->attr.ops->round_end)(td);
-}
-
 int thread_dmp_thread_creation(struct thread_dmp *td) {
 	if (td == NULL) {
 		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
@@ -165,6 +174,18 @@ int thread_dmp_thread_creation(struct thread_dmp *td) {
 		return 0;
 
 	return (*td->attr.ops->thread_creation)(td);
+}
+
+int thread_dmp_thread_start(struct thread_dmp *td) {
+	if (td == NULL) {
+		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
+		mvm_halt();
+	}
+
+	if (td->attr.ops->thread_start == NULL)
+		return 0;
+
+	return (*td->attr.ops->thread_start)(td);
 }
 
 int thread_dmp_thread_destruction(struct thread_dmp *td) {
@@ -179,7 +200,7 @@ int thread_dmp_thread_destruction(struct thread_dmp *td) {
 	return (*td->attr.ops->thread_destruction)(td);
 }
 
-int thread_dmp_execute_instruction(struct thread_dmp *td, uint32_t p, uint32_t o) {
+int thread_dmp_execute_instruction(struct thread_dmp *td, uint32_t o) {
 	if (td == NULL) {
 		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
 		mvm_halt();
@@ -188,63 +209,90 @@ int thread_dmp_execute_instruction(struct thread_dmp *td, uint32_t p, uint32_t o
 	if (td->attr.ops->execute_instruction == NULL)
 		return 0;
 
-	return (*td->attr.ops->execute_instruction)(td, p, o);
+	return (*td->attr.ops->execute_instruction)(td, o);
 }
 
 /* default ops */
 struct thread_dmp_ops thread_dmp_default_ops = {
-	.round_start = thread_dmp_default_round_start,
-	.pmode_start = thread_dmp_default_pmode_start,
-	.pmode_end = thread_dmp_default_pmode_end,
-	.smode_start = thread_dmp_default_smode_start,
-	.smode_end = thread_dmp_default_smode_end,
-	.round_end = thread_dmp_default_round_end,
 	.thread_creation = thread_dmp_default_thread_creation,
+	.thread_start = thread_dmp_default_thread_start,
 	.thread_destruction = thread_dmp_default_thread_destruction,
 	.execute_instruction = thread_dmp_default_execute_instruction
 };
 
-int thread_dmp_default_round_start(struct thread_dmp *td) {
-	fprintf(stderr, "in thread_dmp_default_round_start\n");
-	return 0;
-}
-
-int thread_dmp_default_pmode_start(struct thread_dmp *td) {
-	fprintf(stderr, "in thread_dmp_default_pmode_start\n");
-	return 0;
-}
-
-int thread_dmp_default_pmode_end(struct thread_dmp *td) {
-	fprintf(stderr, "in thread_dmp_default_pmode_end\n");
-	return 0;
-}
-
-int thread_dmp_default_smode_start(struct thread_dmp *td) {
-	fprintf(stderr, "in thread_dmp_default_smode_start\n");
-	return 0;
-}
-
-int thread_dmp_default_smode_end(struct thread_dmp *td) {
-	fprintf(stderr, "in thread_dmp_default_smode_end\n");
-	return 0;
-}
-
-int thread_dmp_default_round_end(struct thread_dmp *td) {
-	fprintf(stderr, "in thread_dmp_default_round_end\n");
-	return 0;
-}
+/* default attr */
+struct thread_dmp_attr thread_dmp_default_attr = {
+	.quantum_size = THREAD_DMP_DEFAULT_QUANTUM_SIZE,
+	.instruction_counter = THREAD_DMP_DEFAULT_INSTRUCTION_COUNTER,
+	.ops = &thread_dmp_default_ops
+};
 
 int thread_dmp_default_thread_creation(struct thread_dmp *td) {
+	int ref;
+	struct thread *thread;
+
 	fprintf(stderr, "in thread_dmp_default_thread_creation\n");
+
+	thread = td->thread;
+	ref = thread_get_ref(thread);
+
+	if (dmp_get_mode(dmp) == parallel_mode) {
+		/* block until serial mode */
+		dmp_thread_block(dmp, td);
+	}
+
+	/* add to thread set */
+	dmp_add_thread(dmp, ref);
+
+	return 0;
+}
+
+int thread_dmp_default_thread_start(struct thread_dmp *td) {
+	int ref;
+	struct thread *thread;
+
+	fprintf(stderr, "in thread_dmp_default_thread_start\n");
+
+	thread = td->thread;
+	ref = thread_get_ref(thread);
+
+	/* block until parallel mode */
+	dmp_thread_block(dmp, td);
+
 	return 0;
 }
 
 int thread_dmp_default_thread_destruction(struct thread_dmp *td) {
+	int ref;
+	struct thread *thread;
+
 	fprintf(stderr, "in thread_dmp_default_thread_destruction\n");
+
+	thread = td->thread;
+	ref = thread_get_ref(thread);
+
+	if (dmp_get_mode(dmp) == parallel_mode) {
+		/* block until parallel mode */
+		dmp_thread_block(dmp, td);
+	}
+
+	td->state = destroyed_state;
+
+	/* remove from thread set */
+	dmp_remove_thread(dmp, ref);
+
 	return 0;
 }
 
-int thread_dmp_default_execute_instruction(struct thread_dmp *td, uint32_t p, uint32_t o) {
-	fprintf(stderr, "in thread_dmp_default_execute instruction\n");	
+int thread_dmp_default_execute_instruction(struct thread_dmp *td, uint32_t o) {
+	fprintf(stderr, "in thread_dmp_default_execute_instruction\n");
+
+	td->attr.instruction_counter++;
+
+	if (td->attr.instruction_counter > td->attr.quantum_size) {
+		td->attr.instruction_counter = 0;
+		dmp_thread_block(dmp, td);
+	}
+
 	return 0;
 }
