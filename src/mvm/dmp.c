@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <12 Feb 2011 at 21:13:36 by nwidger on macros.local>
+ * Time-stamp: <19 Feb 2011 at 23:06:31 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -38,7 +38,9 @@ struct dmp {
 };
 
 /* forward declarations */
-void * dmp_watchdog(void *arg);
+int dmp_toggle_mode(struct dmp *d);
+int dmp_thread_block_parallel(struct dmp *d, struct thread_dmp *td);
+int dmp_thread_block_serial(struct dmp *d, struct thread_dmp *td);
 
 struct dmp * dmp_create(struct object_dmp_attr *a,
 			struct thread_dmp_attr *t,
@@ -85,6 +87,27 @@ int dmp_get_mode(struct dmp *d) {
 	}
 
 	return d->mode;
+}
+
+int dmp_toggle_mode(struct dmp *d) {
+	int mode;
+	
+	if (d == NULL) {
+		fprintf(stderr, "mvm: dmp not initialized!\n");
+		mvm_halt();
+	}
+
+	mode = d->mode;
+
+	if (mode == parallel_mode) {
+		fprintf(stderr, "entering serial mode\n");
+		d->mode = serial_mode;
+	} else {
+		fprintf(stderr, "entering parallel mode\n");
+		d->mode = parallel_mode;
+	}
+
+	return 0;
 }
 
 int dmp_add_thread(struct dmp *d, int r) {
@@ -144,9 +167,85 @@ struct nlock_dmp * dmp_create_nlock_dmp(struct dmp *d, struct nlock *n) {
 }
 
 int dmp_thread_block(struct dmp *d, struct thread_dmp *td) {
+	if (d == NULL) {
+		fprintf(stderr, "mvm: dmp not initialized!\n");
+		mvm_halt();
+	}
+
+	return (d->mode == parallel_mode) ?
+		dmp_thread_block_parallel(d, td) :
+		dmp_thread_block_serial(d, td);		
+}
+
+int dmp_thread_block_parallel(struct dmp *d, struct thread_dmp *td) {
 	struct object *o;
 	struct thread *t;
+	struct thread_dmp *ud;
 	int me, ref, retval, blocking, nthreads;
+
+	if (d == NULL) {
+		fprintf(stderr, "mvm: dmp not initialized!\n");
+		mvm_halt();
+	}
+
+	me = thread_get_ref();
+
+	/* block until all threads finished */
+	retval = barrier_await(d->barrier);
+
+	if (retval != 0) { /* 0 == last to block */
+		/* sleep until turn */
+		thread_dmp_wait(td);
+	} else {
+		dmp_toggle_mode(d);
+
+		/* ensure all threads are sleeping */
+		nthreads = ref_set_size(d->thread_set) - 1;
+
+		if (nthreads > 0) {
+			blocking = 0;
+			ref_set_iterator_init(d->thread_set);
+
+			while (blocking != nthreads) {
+				if (ref == me) {
+					continue;
+				} else if ((ref = ref_set_iterator_next(d->thread_set)) == 0) {
+					ref_set_iterator_init(d->thread_set);
+				} else {
+					o = heap_fetch_object(heap, ref);
+					t = object_get_thread(o);
+					ud = _thread_get_dmp(t);
+
+					if (thread_dmp_get_state_nonblock(ud) == blocking_state)
+						blocking++;
+				}
+			}
+		}
+
+		ref_set_iterator_init(d->thread_set);
+		ref = ref_set_iterator_next(d->thread_set);
+
+		if (ref == 0 || ref == me) {
+			/* execute turn */
+		} else {
+			/* wake first thread */
+			o = heap_fetch_object(heap, ref);
+			t = object_get_thread(o);
+			ud = _thread_get_dmp(t);
+			thread_dmp_signal(ud);
+
+			/* sleep until turn */
+			thread_dmp_wait(td);
+		}
+	}
+
+	return 0;
+}
+
+int dmp_thread_block_serial(struct dmp *d, struct thread_dmp *td) {
+	int me, ref;
+	struct object *o;
+	struct thread *t;
 	struct thread_dmp *ud;
 
 	if (d == NULL) {
@@ -156,82 +255,31 @@ int dmp_thread_block(struct dmp *d, struct thread_dmp *td) {
 
 	me = thread_get_ref();
 
-	if (d->mode == parallel_mode) {
+	ref = ref_set_iterator_next(d->thread_set);
+
+	if (ref != 0) {
+		/* wake next thread */
+		o = heap_fetch_object(heap, ref);
+		t = object_get_thread(o);
+		ud = _thread_get_dmp(t);
+		thread_dmp_signal(ud);
+
 		/* block until all threads finished */
-		retval = barrier_await(d->barrier);
+		barrier_await(d->barrier);
+	} else {
+		dmp_toggle_mode(d);
 
-		if (retval != 0) { /* 0 == last to block */
-			/* sleep until turn */
-			thread_dmp_wait(td);
-		} else {
-			d->mode = serial_mode;
+		/* wake all threads */
+		ref_set_iterator_init(d->thread_set);
 
-			/* ensure all threads are sleeping */
-			nthreads = ref_set_size(d->thread_set) - 1;
-
-			if (nthreads != 0) {
-				blocking = 0;
-				ref_set_iterator_init(d->thread_set);
-				
-				while (blocking != nthreads) {
-					if (ref == me) {
-						continue;
-					} else if ((ref = ref_set_iterator_next(d->thread_set)) == 0) {
-						ref_set_iterator_init(d->thread_set);
-					} else {
-						o = heap_fetch_object(heap, ref);
-						t = object_get_thread(o);
-						ud = _thread_get_dmp(t);
-
-						if (thread_dmp_get_state_nonblock(ud) == blocking_state)
-							blocking++;
-					}
-				}
-			}
-
-			ref_set_iterator_init(d->thread_set);
-			ref = ref_set_iterator_next(d->thread_set);
-
+		while ((ref = ref_set_iterator_next(d->thread_set)) != 0) {
 			if (ref == me) {
-				/* execute turn */
+				continue;
 			} else {
-				/* wake first thread */
 				o = heap_fetch_object(heap, ref);
 				t = object_get_thread(o);
 				ud = _thread_get_dmp(t);
 				thread_dmp_signal(ud);
-
-				/* sleep until turn */
-				thread_dmp_wait(td);
-			}
-		}
-	} else {		/* serial_mode */
-		ref = ref_set_iterator_next(d->thread_set);
-
-		if (ref != 0) {
-			/* wake next thread */
-			o = heap_fetch_object(heap, ref);
-			t = object_get_thread(o);
-			ud = _thread_get_dmp(t);			
-			thread_dmp_signal(ud);
-
-			/* block until all threads finished */
-			barrier_await(d->barrier);
-		} else {
-			d->mode = parallel_mode;
-			
-			/* wake all threads */
-			ref_set_iterator_init(d->thread_set);
-			
-			while ((ref = ref_set_iterator_next(d->thread_set)) != 0) {
-				if (ref == me) {
-					continue;
-				} else {
-					o = heap_fetch_object(heap, ref);
-					t = object_get_thread(o);
-					ud = _thread_get_dmp(t);			
-					thread_dmp_signal(ud);
-				}
 			}
 		}
 	}

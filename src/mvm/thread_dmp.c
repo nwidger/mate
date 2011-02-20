@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Feb 2011 at 20:10:32 by nwidger on macros.local>
+ * Time-stamp: <19 Feb 2011 at 22:55:18 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -234,7 +234,7 @@ int thread_dmp_default_thread_creation(struct thread_dmp *td) {
 	fprintf(stderr, "in thread_dmp_default_thread_creation\n");
 
 	thread = td->thread;
-	ref = thread_get_ref(thread);
+	ref = _thread_get_ref(thread);
 
 	if (dmp_get_mode(dmp) == parallel_mode) {
 		/* block until serial mode */
@@ -290,6 +290,7 @@ int thread_dmp_default_execute_instruction(struct thread_dmp *td, uint32_t o) {
 	td->attr.instruction_counter++;
 
 	if (td->attr.instruction_counter > td->attr.quantum_size) {
+		fprintf(stderr, "    quantum reached, blocking!\n");
 		td->attr.instruction_counter = 0;
 		dmp_thread_block(dmp, td);
 	}

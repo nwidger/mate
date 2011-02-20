@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Feb 2011 at 20:08:08 by nwidger on macros.local>
+ * Time-stamp: <19 Feb 2011 at 22:53:36 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -64,7 +64,9 @@ struct thread * thread_create() {
 	if ((t->vm_stack = vm_stack_create()) == NULL)
 		mvm_halt();
 
-	if (dmp != NULL)
+	if (dmp == NULL)
+		t->dmp = NULL;
+	else
 		t->dmp = dmp_create_thread_dmp(dmp, t);
 
 	return t;
@@ -269,8 +271,8 @@ int thread_start_main(struct object *o) {
 
 	t->ref = object_get_ref(o);
 
-	if (t->dmp != NULL)
-		thread_dmp_thread_creation(t->dmp);
+	/* if (t->dmp != NULL) */
+	/* 	thread_dmp_thread_creation(t->dmp); */
 
 	if (thread_pthread_create(t, thread_run0_main) != 0)
 		mvm_halt();
@@ -398,8 +400,8 @@ void * thread_run0_main(void *p) {
 	if (thread_set_current(t) != 0)
 		mvm_halt();
 
-	if (t->dmp != NULL)
-		thread_dmp_thread_start(t->dmp);
+	/* if (t->dmp != NULL) */
+	/* 	thread_dmp_thread_start(t->dmp); */
 	
 	t->state = runnable_state;
 

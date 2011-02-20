@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Feb 2011 at 22:19:51 by nwidger on macros.local>
+ * Time-stamp: <19 Feb 2011 at 22:53:22 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -28,7 +28,18 @@ struct nlock {
 	struct nlock_dmp *dmp;
 };
 
+/* forward declarations */
+struct nlock * nlock_create0(int m);
+
 struct nlock * nlock_create() {
+	return nlock_create0(0);
+}
+
+struct nlock * nlock_create_monitor() {
+	return nlock_create0(1);
+}
+
+struct nlock * nlock_create0(int m) {
 	struct nlock *n;
 	pthread_mutexattr_t attr;
 
@@ -66,10 +77,12 @@ struct nlock * nlock_create() {
 
 	n->notifies = 0UL;
 
-	if (dmp != NULL)
+	if (m == 0 || dmp == NULL)
+		n->dmp = NULL;
+	else
 		n->dmp = dmp_create_nlock_dmp(dmp, n);
 
-	return n;
+	return n;	
 }
 
 void nlock_destroy(struct nlock *n) {
@@ -93,28 +106,36 @@ int nlock_lock(struct nlock *n) {
 		mvm_halt();
 	}
 
-	/* lock */
-	if ((err = pthread_mutex_lock(&n->mutex)) != 0) {
-		fprintf(stderr, "mvm: pthread_mutex_lock: %s\n", strerror(err));
-		mvm_halt();
+	if (n->dmp != NULL) {
+		return nlock_dmp_lock(n->dmp);
+	} else {
+		/* lock */
+		if ((err = pthread_mutex_lock(&n->mutex)) != 0) {
+			fprintf(stderr, "mvm: pthread_mutex_lock: %s\n", strerror(err));
+			mvm_halt();
+		}
+
+		if (n->locks == 0)
+			n->owner = pthread_self();
+
+		n->locks++;
+		return 0;
 	}
-
-	if (n->locks == 0)
-		n->owner = pthread_self();
-
-	n->locks++;
-	return 0;
 }
 
 int nlock_trylock(struct nlock *n) {
+	int err = 0;
+	
 	if (n == NULL) {
 		fprintf(stderr, "mvm: nlock has not been initialized!\n");
 		mvm_halt();
 	}
 
 	/* lock */
-	if (pthread_mutex_trylock(&n->mutex) != 0)
-		return 1;
+	if ((err = pthread_mutex_trylock(&n->mutex)) != 0) {
+		fprintf(stderr, "mvm: pthread_mutex_trylock: %s\n", strerror(err));
+		mvm_halt();
+	}
 
 	if (n->locks == 0)
 		n->owner = pthread_self();
@@ -131,14 +152,18 @@ int nlock_unlock(struct nlock *n) {
 		mvm_halt();
 	}
 
-	/* unlock */
-	if ((err = pthread_mutex_unlock(&n->mutex)) != 0) {
-		fprintf(stderr, "mvm: pthread_mutex_unlock: %s\n", strerror(err));
-		mvm_halt();
-	}
+	if (n->dmp != NULL) {
+		return nlock_dmp_unlock(n->dmp);
+	} else {
+		/* unlock */
+		if ((err = pthread_mutex_unlock(&n->mutex)) != 0) {
+			fprintf(stderr, "mvm: pthread_mutex_unlock: %s\n", strerror(err));
+			mvm_halt();
+		}
 
-	n->locks--;
-	return 0;
+		n->locks--;
+		return 0;
+	}
 }
 
 int nlock_release(struct nlock *n) {

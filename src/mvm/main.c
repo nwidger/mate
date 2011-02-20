@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <02 Feb 2011 at 19:25:27 by nwidger on macros.local>
+ * Time-stamp: <19 Feb 2011 at 21:59:12 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -421,9 +421,6 @@ int main(int argc, char *argv[]) {
 	do {
 		mvm_clear();
 		restart = 0;
-
-		/* pbarrier = barrier_create(1); */
-		/* sbarrier = barrier_create(1);		 */
 		
 		class_table_new_thread(class_table, &object);
 		thread_start_main(object);

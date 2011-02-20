@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <03 Feb 2011 at 19:26:01 by nwidger on macros.local>
+ * Time-stamp: <19 Feb 2011 at 21:55:24 by nwidger on macros.local>
  */
 
 #ifndef _MVM_NLOCK_H
@@ -34,6 +34,14 @@ struct nlock;
  */
 
 struct nlock * nlock_create();
+
+/** same nlock_create but creates an nlock for use as an object's
+ * monitor.
+ *
+ * @return pointer to new nlock, or NULL on failure
+ */
+
+struct nlock * nlock_create_monitor();
 
 /** destroys the given nlock.
  */

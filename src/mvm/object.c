@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Feb 2011 at 22:19:48 by nwidger on macros.local>
+ * Time-stamp: <19 Feb 2011 at 22:53:53 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -71,10 +71,12 @@ int object_create(struct class *c, uint32_t n, struct object **o) {
 
 	memset(object->fields, 0, sizeof(uint32_t)*object->num_fields);
 
-	if ((object->monitor = nlock_create()) == NULL)
+	if ((object->monitor = nlock_create_monitor()) == NULL)
 		mvm_halt();
 
-	if (dmp != NULL)
+	if (dmp == NULL)
+		object->dmp = NULL;
+	else
 		object->dmp = dmp_create_object_dmp(dmp, object);
 
 	if (o != NULL)
