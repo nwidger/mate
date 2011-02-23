@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Feb 2011 at 22:53:36 by nwidger on macros.local>
+ * Time-stamp: <22 Feb 2011 at 22:07:40 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -271,8 +271,8 @@ int thread_start_main(struct object *o) {
 
 	t->ref = object_get_ref(o);
 
-	/* if (t->dmp != NULL) */
-	/* 	thread_dmp_thread_creation(t->dmp); */
+	if (t->dmp != NULL)
+		dmp_add_thread(dmp, t->ref);
 
 	if (thread_pthread_create(t, thread_run0_main) != 0)
 		mvm_halt();

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Feb 2011 at 22:55:18 by nwidger on macros.local>
+ * Time-stamp: <22 Feb 2011 at 22:06:37 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -231,7 +231,7 @@ int thread_dmp_default_thread_creation(struct thread_dmp *td) {
 	int ref;
 	struct thread *thread;
 
-	fprintf(stderr, "in thread_dmp_default_thread_creation\n");
+	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_creation\n", thread_get_ref());
 
 	thread = td->thread;
 	ref = _thread_get_ref(thread);
@@ -251,7 +251,7 @@ int thread_dmp_default_thread_start(struct thread_dmp *td) {
 	int ref;
 	struct thread *thread;
 
-	fprintf(stderr, "in thread_dmp_default_thread_start\n");
+	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_start\n", thread_get_ref());
 
 	thread = td->thread;
 	ref = thread_get_ref(thread);
@@ -266,7 +266,7 @@ int thread_dmp_default_thread_destruction(struct thread_dmp *td) {
 	int ref;
 	struct thread *thread;
 
-	fprintf(stderr, "in thread_dmp_default_thread_destruction\n");
+	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_destruction\n", thread_get_ref());
 
 	thread = td->thread;
 	ref = thread_get_ref(thread);
@@ -285,14 +285,20 @@ int thread_dmp_default_thread_destruction(struct thread_dmp *td) {
 }
 
 int thread_dmp_default_execute_instruction(struct thread_dmp *td, uint32_t o) {
-	fprintf(stderr, "in thread_dmp_default_execute_instruction\n");
+	mvm_print("thread %" PRIu32 ": in thread_dmp_default_execute_instruction\n", thread_get_ref());
 
 	td->attr.instruction_counter++;
 
 	if (td->attr.instruction_counter > td->attr.quantum_size) {
-		fprintf(stderr, "    quantum reached, blocking!\n");
-		td->attr.instruction_counter = 0;
+		mvm_print("thread %" PRIu32 ":     quantum reached, blocking!\n", thread_get_ref());
+
 		dmp_thread_block(dmp, td);
+		if (dmp_get_mode(dmp) == serial_mode) {
+			mvm_print("thread %" PRIu32 ":     quantum finished, blocking!\n", thread_get_ref());
+			dmp_thread_block(dmp, td);
+		}
+
+		td->attr.instruction_counter = 0;
 	}
 
 	return 0;

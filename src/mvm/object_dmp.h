@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Feb 2011 at 23:10:16 by nwidger on macros.local>
+ * Time-stamp: <22 Feb 2011 at 18:31:43 by nwidger on macros.local>
  */
 
 #ifndef _MVM_OBJECT_DMP_H
@@ -10,7 +10,7 @@ struct object_dmp;
 struct object_dmp_ops;
 
 /* constants */
-#define OBJECT_DMP_DEFAULT_OWNER 0 /* -1 == allocating thread */
+#define OBJECT_DMP_DEFAULT_OWNER -1 /* -1 == allocating thread */
 #define OBJECT_DMP_DEFAULT_DEPTH 1
 
 /** for accessing owner field */
