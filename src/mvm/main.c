@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <22 Feb 2011 at 20:34:28 by nwidger on macros.local>
+ * Time-stamp: <02 Mar 2011 at 21:07:01 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -442,7 +442,7 @@ int main(int argc, char *argv[]) {
 		
 		class_table_new_thread(class_table, &object);
 		thread_start_main(object);
-		thread_join(object);
+		thread_join_main(object);
 	} while (restart != 0);
 	
 	mvm_cleanup();

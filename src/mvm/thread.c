@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <22 Feb 2011 at 22:07:40 by nwidger on macros.local>
+ * Time-stamp: <07 Mar 2011 at 17:20:24 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -45,6 +45,7 @@ pthread_once_t key_once = PTHREAD_ONCE_INIT;
 
 /* forward declarations */
 void thread_make_key();
+int thread_join0(struct object *o, int d);
 int thread_pthread_create(struct thread *t, void * (*s)(void *));
 void * thread_run0(void *p);
 void * thread_run0_main(void *p);
@@ -300,7 +301,7 @@ int thread_pthread_create(struct thread *t, void * (*s)(void *)) {
 		if (err == 0) {
 			break;
 		} else if (err == EAGAIN) {
-			sleep(500);
+			usleep(50000);
 			continue;
 		} else {
 			perror("mvm: pthread_create");
@@ -312,6 +313,14 @@ int thread_pthread_create(struct thread *t, void * (*s)(void *)) {
 }
 
 int thread_join(struct object *o) {
+	return thread_join0(o, 1);
+}
+
+int thread_join_main(struct object *o) {
+	return thread_join0(o, 0);
+}
+
+int thread_join0(struct object *o, int d) {
 	void *value;
 	struct thread *t;
 
@@ -321,6 +330,9 @@ int thread_join(struct object *o) {
 		fprintf(stderr, "mvm: thread not initialized!\n");
 		mvm_halt();
 	}
+
+	if (d != 0 && t->dmp != NULL)
+		thread_dmp_thread_join(t->dmp);
 
 	if (pthread_join(t->id, &value) != 0) {
 		perror("mvm: pthread_join");

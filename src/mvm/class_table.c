@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Dec 2010 at 17:48:56 by nwidger on macros.local>
+ * Time-stamp: <07 Mar 2011 at 13:52:49 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -32,6 +32,8 @@ struct class_table {
 	struct class **classes;
 	struct class *predefined_classes[NUM_PREDEFINED_CLASSES];
 	struct nlock *nlock;
+
+	int integer_cache[CLASS_TABLE_INTEGER_CACHE_SIZE];
 };
 
 /* forwared declarations */
@@ -57,7 +59,9 @@ struct class_table * class_table_create(int n) {
 
 	if ((c->nlock = nlock_create()) == NULL)
 		mvm_halt();
-	
+
+	memset(c->integer_cache, 0, sizeof(int) * CLASS_TABLE_INTEGER_CACHE_SIZE);
+
 	return c;
 }
 
@@ -94,6 +98,8 @@ void class_table_clear(struct class_table *c) {
 		c->num_classes = 0;
 
 		memset(c->predefined_classes, 0, sizeof(struct class *)*NUM_PREDEFINED_CLASSES);
+
+		memset(c->integer_cache, 0, sizeof(int) * CLASS_TABLE_INTEGER_CACHE_SIZE);
 
 		/* unlock */
 		class_table_unlock(c);
@@ -250,21 +256,26 @@ int class_table_new_integer(struct class_table *c, int32_t v, struct object **o)
 	/* lock */
 	class_table_lock(c);
 
-	integer_class = c->predefined_classes[integer_type];
-	vmt = class_get_vmt(integer_class);
+	if (v <= CLASS_TABLE_INTEGER_CACHE_SIZE && c->integer_cache[(int)v] != 0) {
+		ref = c->integer_cache[(int)v];
+	} else {
+		integer_class = c->predefined_classes[integer_type];
+		vmt = class_get_vmt(integer_class);
 
-	/* lock */
-	garbage_collector_lock(garbage_collector);
+		/* lock */
+		garbage_collector_lock(garbage_collector);
 
-	ref = class_table_new(class_table, vmt, &object);
-	heap_exclude_ref(heap, ref);
+		ref = class_table_new(class_table, vmt, &object);
+		heap_exclude_ref(heap, ref);
 
-	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+		/* unlock */
+		garbage_collector_unlock(garbage_collector);
 
-	integer = integer_create(v);
-	heap_include_ref(heap, ref);
-	object_set_integer(object, integer);
+		integer = integer_create(v);
+		if (v > CLASS_TABLE_INTEGER_CACHE_SIZE) heap_include_ref(heap, ref);
+		object_set_integer(object, integer);
+		if (v <= CLASS_TABLE_INTEGER_CACHE_SIZE) c->integer_cache[(int)v] = ref;
+	}
 
 	if (o != NULL)
 		*o = object;
@@ -532,7 +543,7 @@ void class_table_dump(struct class_table *c) {
 				fprintf(stderr, "        native_index: %" PRIu32 "\n", native_index);
 			} else {
 				fprintf(stderr, "        address: %" PRIu32 "\n", address);
-				fprintf(stderr, "        end: %" PRIu32 "\n", end);				
+				fprintf(stderr, "        end: %" PRIu32 "\n", end);
 				fprintf(stderr, "        max_locals: %" PRIu32 "\n", max_locals);
 			}
 		}
@@ -592,7 +603,7 @@ void class_table_decode(struct class_table *c) {
 char ** class_table_classes_array(struct class_table *c) {
 	int i;
 	char **buf;
-	
+
 	if (c == NULL) {
 		fprintf(stderr, "mvm: class table not initialized!\n");
 		mvm_halt();
@@ -615,8 +626,8 @@ char ** class_table_classes_array(struct class_table *c) {
 
 	buf[c->num_classes] = NULL;
 
-	qsort(buf, c->num_classes, sizeof(char *), class_table_compare_strings);	
-	
+	qsort(buf, c->num_classes, sizeof(char *), class_table_compare_strings);
+
 	/* unlock */
 	class_table_unlock(c);
 
@@ -627,7 +638,7 @@ char ** class_table_methods_array(struct class_table *c) {
 	int size, i, j, k;
 	char **buf;
 	struct class *class;
-	
+
 	if (c == NULL) {
 		fprintf(stderr, "mvm: class table not initialized!\n");
 		mvm_halt();
@@ -659,7 +670,7 @@ char ** class_table_methods_array(struct class_table *c) {
 	buf[k] = NULL;
 
 	qsort(buf, size, sizeof(char *), class_table_compare_strings);
-	
+
 	/* unlock */
 	class_table_unlock(c);
 

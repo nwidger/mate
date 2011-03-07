@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Nov 2010 at 18:14:41 by nwidger on macros.local>
+ * Time-stamp: <07 Mar 2011 at 12:54:13 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -66,7 +66,7 @@ struct garbage_collector * garbage_collector_create() {
 
 	if ((g->nlock = nlock_create()) == NULL)
 		mvm_halt();
-	
+
 	g->is_running = 0;
 
 	if (pthread_cond_init(&g->running_cond, NULL) != 0) {
@@ -103,7 +103,7 @@ void garbage_collector_destroy(struct garbage_collector *g) {
 		garbage_collector_clear(g);
 
 		nlock_destroy(g->nlock);
-		
+
 		if (pthread_cond_destroy(&g->running_cond) != 0) {
 			perror("mvm: pthread_cond_destroy");
 			mvm_halt();
@@ -310,6 +310,8 @@ int tricolor_garbage_collector(struct garbage_collector *g) {
 
 	while ((thread_ref = ref_set_iterator_next(threads)) != 0) {
 		object = heap_fetch_object(heap, thread_ref);
+		if (object == NULL) continue;
+
 		thread = object_get_thread(object);
 
 		if (thread_get_state(thread) == terminated_state)
@@ -358,13 +360,19 @@ int tricolor_garbage_collector(struct garbage_collector *g) {
 	garbage_collector_unlock(g);
 
 	/* blacken grey references until grey set is empty */
+	tmp = ref_set_create();
+
 	while (ref_set_size(g->grey) > 0) {
 		ref_set_iterator_init(g->grey);
 		ref = ref_set_iterator_next(g->grey);
 		object = heap_fetch_object(heap, ref);
+		if (object == NULL) {
+			ref_set_remove(g->grey, ref);
+			continue;
+		}
 
 		/* grey all references inside object */
-		tmp = ref_set_create();
+		ref_set_clear(tmp);
 		object_populate_ref_set(object, tmp);
 
 		ref_set_iterator_init(tmp);
@@ -373,9 +381,10 @@ int tricolor_garbage_collector(struct garbage_collector *g) {
 				move_ref_to(g, g->grey, object_ref);
 		}
 
-		ref_set_destroy(tmp);
 		move_ref_to(g, g->black, ref);
 	}
+
+	ref_set_destroy(tmp);
 
 	ref_set_iterator_init(g->white);
 	while ((ref = ref_set_iterator_next(g->white)) != 0) {
@@ -393,14 +402,22 @@ int tricolor_garbage_collector(struct garbage_collector *g) {
 }
 
 int move_ref_to(struct garbage_collector *g, struct ref_set *s, int r) {
-	if (s != g->white)
-		ref_set_remove(g->white, r);
-	if (s != g->grey)
-		ref_set_remove(g->grey, r);
-	if (s != g->black)
-		ref_set_remove(g->black, r);
+	/* white -> grey -> black */
 
-	ref_set_add(s, r);
+	if (s == g->white) {
+		ref_set_add(g->white, r);
+	} else if (s == g->grey) {
+		if (ref_set_contains(g->black, r) == 0) {
+			ref_set_remove(g->white, r);
+			ref_set_add(g->grey, r);
+		}
+	} else if (s == g->black) {
+		if (ref_set_contains(g->grey, r) == 1) {
+			ref_set_remove(g->grey, r);
+			ref_set_add(g->black, r);
+		}
+	}
+
 	return 0;
 }
 

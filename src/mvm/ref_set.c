@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <01 Feb 2011 at 21:25:57 by nwidger on macros.local>
+ * Time-stamp: <07 Mar 2011 at 12:17:39 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -98,6 +98,8 @@ void ref_set_clear(struct ref_set *h) {
 		}
 
 	        h->size = 0;
+
+		h->iterator_record = NULL;		
 
 		h->list_head = NULL;
 		h->list_tail = NULL;

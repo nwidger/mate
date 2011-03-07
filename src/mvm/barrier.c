@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <01 Feb 2011 at 21:30:01 by nwidger on macros.local>
+ * Time-stamp: <07 Mar 2011 at 17:25:48 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -21,6 +21,9 @@ struct barrier {
 	int waiting;
 	pthread_mutex_t mutex;
 	pthread_cond_t cond;
+
+	void * (*hook)(int, void *);
+	void *hook_arg;
 };
 
 struct barrier * barrier_create(int p) {
@@ -45,6 +48,9 @@ struct barrier * barrier_create(int p) {
 		mvm_halt();
 	}
 
+	b->hook = NULL;
+	b->hook_arg = NULL;
+
 	return b;
 }
 
@@ -54,10 +60,8 @@ void barrier_destroy(struct barrier *b) {
 			perror("mvm: pthread_cond_destroy");
 			mvm_halt();
 		}
-		if (pthread_mutex_destroy(&b->mutex) != 0) {
-			perror("mvm: pthread_mutex_destroy");
-			mvm_halt();
-		}
+
+		pthread_mutex_destroy(&b->mutex);
 	}
 }
 
@@ -66,6 +70,30 @@ void barrier_clear(struct barrier *b) {
 		b->generation = 0;
 		b->waiting = 0;
 	}
+}
+
+int barrier_set_hook(struct barrier *b, void * (*h)(int, void *), void *a) {
+	if (b == NULL) {
+		fprintf(stderr, "mvm: barrier not initialized!\n");
+		mvm_halt();
+	}
+
+	b->hook = h;
+	b->hook_arg = a;
+
+	return 0;
+}
+
+int barrier_clear_hook(struct barrier *b) {
+	if (b == NULL) {
+		fprintf(stderr, "mvm: barrier not initialized!\n");
+		mvm_halt();
+	}
+
+	b->hook = NULL;
+	b->hook_arg = NULL;
+
+	return 0;
 }
 
 int barrier_await(struct barrier *b) {
@@ -81,13 +109,16 @@ int barrier_await(struct barrier *b) {
 
 	i = b->parties - ++b->waiting;
 
+	if (b->hook != NULL)
+		(*b->hook)(i, b->hook_arg);
+
 	if (i == 0) {
 		b->generation++;
 		b->waiting = 0;
 		pthread_cond_broadcast(&b->cond);
 	} else {
 		g = b->generation;
-		while (g == b->generation);
+		while (g == b->generation)
 			pthread_cond_wait(&b->cond, &b->mutex);
 	}
 
@@ -101,7 +132,7 @@ void barrier_reset(struct barrier *b) {
 		fprintf(stderr, "mvm: barrier not initialized!\n");
 		mvm_halt();
 	}
-	
+
 	barrier_reset_parties(b, b->parties);
 }
 
@@ -131,4 +162,30 @@ int barrier_get_parties(struct barrier *b) {
 	}
 
 	return b->parties;
+}
+
+int barrier_inc_parties(struct barrier *b) {
+	if (b == NULL) {
+		fprintf(stderr, "mvm: barrier not initialized!\n");
+		mvm_halt();
+	}
+
+	pthread_mutex_lock(&b->mutex);	
+	b->parties++;
+	pthread_mutex_unlock(&b->mutex);	
+
+	return 0;
+}
+
+int barrier_dec_parties(struct barrier *b) {
+	if (b == NULL) {
+		fprintf(stderr, "mvm: barrier not initialized!\n");
+		mvm_halt();
+	}
+
+	pthread_mutex_lock(&b->mutex);	
+	b->parties--;
+	pthread_mutex_unlock(&b->mutex);	
+
+	return 0;
 }

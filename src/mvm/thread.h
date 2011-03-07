@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <03 Feb 2011 at 20:41:29 by nwidger on macros.local>
+ * Time-stamp: <07 Mar 2011 at 11:57:27 by nwidger on macros.local>
  */
 
 #ifndef _MVM_THREAD_H
@@ -18,11 +18,6 @@ enum thread_state {
 	runnable_state		= 1,
 	/** the thread is blocked waiting for a monitor */
 	blocked_state		= 2,
-	/** the thread is blocked waiting on another thread */
-	waiting_state		= 3,
-	/** the thread is blocked waiting on another thread
-	 * with a timeout */
-	timed_waiting_state	= 4,
 	/** the thread has exited */
 	terminated_state	= 5
 };
@@ -64,6 +59,8 @@ int thread_start(struct object *o);
 int thread_start_main(struct object *o);
 
 int thread_join(struct object *o);
+
+int thread_join_main(struct object *o);
 
 int thread_sleep(struct object *o, struct object *p);
 
