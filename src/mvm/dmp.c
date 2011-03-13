@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <07 Mar 2011 at 17:29:56 by nwidger on macros.local>
+ * Time-stamp: <09 Mar 2011 at 19:56:30 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -66,7 +66,7 @@ struct dmp * dmp_create(struct object_dmp_attr *a,
 	dmp->thread_set = ref_set_create();
 
 	dmp->first = 0;
-	dmp->barrier = barrier_create(1);
+	dmp->barrier = barrier_create(0);
 	barrier_set_hook(dmp->barrier, dmp_barrier_parallel_hook, dmp);
 
 	dmp->od_attr = a;
@@ -142,8 +142,7 @@ int dmp_remove_thread(struct dmp *d, int r) {
 	}
 
 	ref_set_remove(d->thread_set, r);
-	barrier_dec_parties(d->barrier);
-
+	barrier_dec_parties(d->barrier);	
 	return 0;
 }
 
@@ -213,6 +212,8 @@ int dmp_thread_block(struct dmp *d, struct thread_dmp *td) {
 
 	mvm_print("thread %" PRIu32 ": in dmp_thread_block\n", thread_get_ref());
 
+	thread_dmp_set_state(td, blocking_state);
+
 	if (d->mode == serial_mode) {
 		ref = ref_set_iterator_next(d->thread_set);
 
@@ -231,6 +232,8 @@ int dmp_thread_block(struct dmp *d, struct thread_dmp *td) {
 		me = thread_get_ref();
 		if (me != d->first) thread_dmp_wait(td);
 	}
+
+	thread_dmp_set_state(td, running_state);	
 
 	return 0;
 }

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <07 Mar 2011 at 17:32:10 by nwidger on macros.local>
+ * Time-stamp: <09 Mar 2011 at 19:16:00 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -34,6 +34,7 @@ struct thread_dmp * thread_dmp_create(struct thread *t, struct thread_dmp_attr *
 		mvm_halt();
 
 	td->thread = t;
+	td->state = created_state;
 	memcpy(&td->attr, a, sizeof(struct thread_dmp_attr));
 
 	if (pthread_mutex_init(&td->mutex, NULL) != 0) {
@@ -263,34 +264,31 @@ struct thread_dmp_attr thread_dmp_default_attr = {
 int thread_dmp_default_thread_creation(struct thread_dmp *td) {
 	int ref;
 	struct thread *thread;
+	struct thread_dmp *ud;
 
 	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_creation\n", thread_get_ref());
 
-	thread = td->thread;
-	ref = _thread_get_ref(thread);
-
 	if (dmp_get_mode(dmp) == parallel_mode) {
 		/* block until serial mode */
-		dmp_thread_block(dmp, td);
+		ud = thread_get_dmp();
+		dmp_thread_block(dmp, ud);
 	}
 
 	/* add to thread set */
+	thread = td->thread;
+	ref = _thread_get_ref(thread);
 	dmp_add_thread(dmp, ref);
 
 	return 0;
 }
 
 int thread_dmp_default_thread_start(struct thread_dmp *td) {
-	int ref;
-	struct thread *thread;
-
 	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_start\n", thread_get_ref());
-
-	thread = td->thread;
-	ref = thread_get_ref(thread);
 
 	/* block until parallel mode */
 	dmp_thread_block(dmp, td);
+
+	td->state = running_state;
 
 	return 0;
 }
@@ -301,9 +299,6 @@ int thread_dmp_default_thread_destruction(struct thread_dmp *td) {
 
 	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_destruction\n", thread_get_ref());
 
-	thread = td->thread;
-	ref = thread_get_ref(thread);
-
 	if (dmp_get_mode(dmp) == parallel_mode) {
 		/* block until parallel mode */
 		dmp_thread_block(dmp, td);
@@ -312,16 +307,22 @@ int thread_dmp_default_thread_destruction(struct thread_dmp *td) {
 	td->state = destroyed_state;
 
 	/* remove from thread set */
+	thread = td->thread;
+	ref = thread_get_ref(thread);
 	dmp_remove_thread(dmp, ref);
 
 	return 0;
 }
 
 int thread_dmp_default_thread_join(struct thread_dmp *td) {
+	struct thread_dmp *ud;
+	
 	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_join\n", thread_get_ref());
 
+	ud = thread_get_dmp();
+
 	while (td->state != destroyed_state)
-		dmp_thread_block(dmp, td);
+		dmp_thread_block(dmp, ud);
 
 	return 0;
 }
