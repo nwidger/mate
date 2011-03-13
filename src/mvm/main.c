@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <02 Mar 2011 at 21:07:01 by nwidger on macros.local>
+ * Time-stamp: <13 Mar 2011 at 14:22:33 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include "class_table.h"

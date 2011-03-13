@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <07 Mar 2011 at 17:20:24 by nwidger on macros.local>
+ * Time-stamp: <13 Mar 2011 at 14:21:41 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -8,6 +8,7 @@
 
 #include <errno.h>
 #include <pthread.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

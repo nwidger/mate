@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Dec 2010 at 21:18:40 by nwidger on macros.local>
+ * Time-stamp: <13 Mar 2011 at 14:22:58 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -9,11 +9,13 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <netinet/in.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include "class.h"

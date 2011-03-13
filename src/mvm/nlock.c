@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <07 Mar 2011 at 12:30:10 by nwidger on macros.local>
+ * Time-stamp: <13 Mar 2011 at 14:22:20 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "dmp.h"
 #include "globals.h"
