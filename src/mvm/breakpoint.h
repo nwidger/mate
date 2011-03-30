@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Feb 2010 at 13:39:46 by nwidger on macros.local>
+ * Time-stamp: <13 Mar 2011 at 14:31:24 by nwidger on macros.local>
  */
 
 #ifndef _MVM_BREAKPOINT_H
@@ -49,7 +49,7 @@ enum bp_mark {
 	/** has been hit */
 	bp_hit		= 0x001,
 	/** need to print hit */
-	bp_print_hit	= 0x002,
+	bp_print_hit	= 0x002
 };
 
 /* struct definitions */

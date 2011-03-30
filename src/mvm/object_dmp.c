@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <22 Feb 2011 at 20:50:48 by nwidger on macros.local>
+ * Time-stamp: <13 Mar 2011 at 14:35:23 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -189,16 +189,16 @@ int object_dmp_chown(struct object_dmp *od, int i) {
 
 /* default ops */
 struct object_dmp_ops object_dmp_default_ops = {
-	.load  = object_dmp_default_load,
-	.store = object_dmp_default_store,
-	.chown = object_dmp_default_chown
+	object_dmp_default_load,
+	object_dmp_default_store,
+	object_dmp_default_chown
 };
 
 /* default attr */
 struct object_dmp_attr object_dmp_default_attr = {
-	.owner = OBJECT_DMP_DEFAULT_OWNER,
-	.depth = OBJECT_DMP_DEFAULT_DEPTH,
-	.ops = &object_dmp_default_ops
+	OBJECT_DMP_DEFAULT_OWNER,
+	OBJECT_DMP_DEFAULT_DEPTH,
+	&object_dmp_default_ops
 };
 
 /* default functions */

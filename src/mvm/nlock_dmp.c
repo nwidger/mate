@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <13 Mar 2011 at 14:20:24 by nwidger on macros.local>
+ * Time-stamp: <14 Mar 2011 at 18:25:40 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -92,13 +92,13 @@ int nlock_dmp_unlock(struct nlock_dmp *nd) {
 
 /* default ops */
 struct nlock_dmp_ops nlock_dmp_default_ops = {
-	.lock = nlock_dmp_default_lock,
-	.lock = nlock_dmp_default_unlock
+	nlock_dmp_default_lock,
+	NULL
 };
 
 /* default attr */
 struct nlock_dmp_attr nlock_dmp_default_attr = {
-	.ops = &nlock_dmp_default_ops
+	&nlock_dmp_default_ops
 };
 
 /* default functions */

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <13 Mar 2011 at 14:22:20 by nwidger on macros.local>
+ * Time-stamp: <14 Mar 2011 at 18:28:17 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -134,8 +134,10 @@ int nlock_trylock(struct nlock *n) {
 
 	/* lock */
 	if ((err = pthread_mutex_trylock(&n->mutex)) != 0) {
-		fprintf(stderr, "mvm: pthread_mutex_trylock: %s\n", strerror(err));
-		mvm_halt();
+		if (err != EBUSY) {
+			fprintf(stderr, "mvm: pthread_mutex_trylock: %s\n", strerror(err));
+			mvm_halt();
+		}
 	}
 
 	if (n->locks == 0)

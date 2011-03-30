@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <07 Mar 2011 at 12:54:13 by nwidger on macros.local>
+ * Time-stamp: <13 Mar 2011 at 19:55:57 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -402,23 +402,32 @@ int tricolor_garbage_collector(struct garbage_collector *g) {
 }
 
 int move_ref_to(struct garbage_collector *g, struct ref_set *s, int r) {
+	int retval;
+
+	if (ref_set_contains(s, r) == 1)
+		return 0;
+	
 	/* white -> grey -> black */
+	retval = 0;
 
 	if (s == g->white) {
+		retval = 1;
 		ref_set_add(g->white, r);
 	} else if (s == g->grey) {
 		if (ref_set_contains(g->black, r) == 0) {
+			retval = 1;			
 			ref_set_remove(g->white, r);
 			ref_set_add(g->grey, r);
 		}
 	} else if (s == g->black) {
 		if (ref_set_contains(g->grey, r) == 1) {
+			retval = 1;			
 			ref_set_remove(g->grey, r);
 			ref_set_add(g->black, r);
 		}
 	}
 
-	return 0;
+	return retval;
 }
 
 int garbage_collector_dump(struct garbage_collector *g) {

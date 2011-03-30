@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <07 Mar 2011 at 17:25:52 by nwidger on macros.local>
+ * Time-stamp: <13 Mar 2011 at 22:54:13 by nwidger on macros.local>
  */
 
 #ifndef _MVM_BARRIER_H

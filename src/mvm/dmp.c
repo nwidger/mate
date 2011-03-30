@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <09 Mar 2011 at 19:56:30 by nwidger on macros.local>
+ * Time-stamp: <29 Mar 2011 at 20:41:26 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -43,13 +43,9 @@ struct dmp {
 
 /* forward declarations */
 int dmp_acquiesce(struct dmp *d, int r, enum thread_dmp_state s);
-int dmp_acquiesce_all(struct dmp *d, enum thread_dmp_state s);
-int dmp_wake_all(struct dmp *d);
 int dmp_toggle_mode(struct dmp *d);
 void * dmp_barrier_parallel_hook(int i, void *a);
 void * dmp_barrier_serial_hook(int i, void *a);
-int dmp_thread_block_parallel(struct dmp *d, struct thread_dmp *td);
-int dmp_thread_block_serial(struct dmp *d, struct thread_dmp *td);
 
 struct dmp * dmp_create(struct object_dmp_attr *a,
 			struct thread_dmp_attr *t,
@@ -86,6 +82,7 @@ void dmp_destroy(struct dmp *d) {
 
 void dmp_clear(struct dmp *d) {
 	if (d != NULL) {
+		ref_set_clear(d->thread_set);
 		barrier_clear(d->barrier);
 		d->od_attr = NULL;
 	}
@@ -113,12 +110,12 @@ int dmp_toggle_mode(struct dmp *d) {
 		hook = dmp_barrier_serial_hook;
 	} else {
 		mvm_print("thread %" PRIu32 ": entering parallel mode\n", thread_get_ref());
-		hook = dmp_barrier_parallel_hook;		
+		hook = dmp_barrier_parallel_hook;
 
 	}
 
 	d->mode = (d->mode + 1) % 2;
-	barrier_set_hook(d->barrier, hook, (void *)d);	
+	barrier_set_hook(d->barrier, hook, (void *)d);
 	barrier_reset(d->barrier);
 
 	return 0;
@@ -129,6 +126,8 @@ int dmp_add_thread(struct dmp *d, int r) {
 		fprintf(stderr, "mvm: dmp not initialized!\n");
 		mvm_halt();
 	}
+
+	mvm_print("adding thread %d to thread_set!\n", r);
 
 	ref_set_add(d->thread_set, r);
 	barrier_inc_parties(d->barrier);
@@ -141,8 +140,10 @@ int dmp_remove_thread(struct dmp *d, int r) {
 		mvm_halt();
 	}
 
+	mvm_print("removing thread %d from thread_set!\n", r);
+
 	ref_set_remove(d->thread_set, r);
-	barrier_dec_parties(d->barrier);	
+	barrier_dec_parties(d->barrier);
 	return 0;
 }
 
@@ -188,6 +189,13 @@ int dmp_acquiesce(struct dmp *d, int r, enum thread_dmp_state s) {
 	struct thread *t;
 	struct thread_dmp *ud;
 
+	if (d == NULL) {
+		fprintf(stderr, "mvm: dmp not initialized!\n");
+		mvm_halt();
+	}
+
+	if (r == thread_get_ref()) return 0;
+
 	mvm_print("thread %" PRIu32 ": blocking until thread %" PRIu32 " is in state %d\n", thread_get_ref(), r, s);
 
 	o = heap_fetch_object(heap, ref);
@@ -205,12 +213,20 @@ int dmp_thread_block(struct dmp *d, struct thread_dmp *td) {
 	struct thread *t;
 	struct thread_dmp *ud;
 
+	ref = me = -1;
+	o = t = ud = NULL;
+
 	if (d == NULL) {
 		fprintf(stderr, "mvm: dmp not initialized!\n");
 		mvm_halt();
 	}
 
 	mvm_print("thread %" PRIu32 ": in dmp_thread_block\n", thread_get_ref());
+
+	if (ref_set_contains(d->thread_set, thread_get_ref()) == 0) {
+		mvm_print("thread %" PRIu32 ": in dmp_thread_block but not in thread set!\n", thread_get_ref());
+		mvm_halt();
+	}
 
 	thread_dmp_set_state(td, blocking_state);
 
@@ -233,7 +249,7 @@ int dmp_thread_block(struct dmp *d, struct thread_dmp *td) {
 		if (me != d->first) thread_dmp_wait(td);
 	}
 
-	thread_dmp_set_state(td, running_state);	
+	thread_dmp_set_state(td, running_state);
 
 	return 0;
 }

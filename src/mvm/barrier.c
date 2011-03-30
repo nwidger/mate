@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <07 Mar 2011 at 17:25:48 by nwidger on macros.local>
+ * Time-stamp: <25 Mar 2011 at 15:44:25 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -25,6 +25,9 @@ struct barrier {
 	void * (*hook)(int, void *);
 	void *hook_arg;
 };
+
+/* forward declarations */
+int barrier_broadcast(struct barrier *b);
 
 struct barrier * barrier_create(int p) {
 	struct barrier *b;
@@ -107,15 +110,15 @@ int barrier_await(struct barrier *b) {
 
 	pthread_mutex_lock(&b->mutex);
 
+	if (b->parties == 0)
+		return 0;
+
 	i = b->parties - ++b->waiting;
 
-	if (b->hook != NULL)
-		(*b->hook)(i, b->hook_arg);
+	if (b->hook != NULL) (*b->hook)(i, b->hook_arg);
 
 	if (i == 0) {
-		b->generation++;
-		b->waiting = 0;
-		pthread_cond_broadcast(&b->cond);
+		barrier_broadcast(b);
 	} else {
 		g = b->generation;
 		while (g == b->generation)
@@ -170,22 +173,46 @@ int barrier_inc_parties(struct barrier *b) {
 		mvm_halt();
 	}
 
-	pthread_mutex_lock(&b->mutex);	
+	pthread_mutex_lock(&b->mutex);
 	b->parties++;
-	pthread_mutex_unlock(&b->mutex);	
+	pthread_mutex_unlock(&b->mutex);
 
 	return 0;
 }
 
 int barrier_dec_parties(struct barrier *b) {
+	int i;
+
 	if (b == NULL) {
 		fprintf(stderr, "mvm: barrier not initialized!\n");
 		mvm_halt();
 	}
 
-	pthread_mutex_lock(&b->mutex);	
-	b->parties--;
-	pthread_mutex_unlock(&b->mutex);	
+	pthread_mutex_lock(&b->mutex);
+
+	i = --b->parties - b->waiting;
+	
+	if (i == 0) {
+		mvm_print("removing thread caused barrier to broadcast!\n");
+		if (b->hook != NULL) (*b->hook)(0, b->hook_arg);
+		barrier_broadcast(b);
+	}
+
+	pthread_mutex_unlock(&b->mutex);
+
+	return 0;
+}
+
+/* caller must have acquired b->mutex! */
+int barrier_broadcast(struct barrier *b) {
+	if (b == NULL) {
+		fprintf(stderr, "mvm: barrier not initialized!\n");
+		mvm_halt();
+	}
+
+	b->generation++;
+	b->waiting = 0;
+	pthread_cond_broadcast(&b->cond);
 
 	return 0;
 }

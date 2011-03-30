@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <13 Mar 2011 at 14:22:33 by nwidger on macros.local>
+ * Time-stamp: <13 Mar 2011 at 19:57:51 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -265,6 +265,9 @@ void mvm_halt() {
 	uint32_t pc, opcode;
 	struct vm_stack *vm_stack;
 	char *class_file, *instruction_name;
+
+	if (dmp != NULL)
+		exit(1);
 
 	pc = thread_get_pc();
 	vm_stack = thread_get_vm_stack();

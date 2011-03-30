@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Feb 2010 at 14:08:10 by nwidger on macros.local>
+ * Time-stamp: <22 Mar 2011 at 21:48:48 by nwidger on macros.local>
  */
 
 #ifndef _MVM_REFSET_H
@@ -37,6 +37,16 @@ void ref_set_clear(struct ref_set *h);
  */
 
 int ref_set_add(struct ref_set *h, int r);
+
+/** adds all references in i to h.
+ *
+ * @param h - the ref_set to add to
+ * @param i - the ref_set to add from
+ *
+ * @return 0 on success, non-zero on failure
+ */
+
+int ref_set_add_all(struct ref_set *h, struct ref_set *i);
 
 /** removes the reference r from the given ref_set.
  *
@@ -97,5 +107,13 @@ int ref_set_iterator_next(struct ref_set *h);
  */
 
 int ref_set_dump(struct ref_set *h);
+
+/** dumps the given ref_set iterator for debugging purposes.  Dump
+ * format is implementation dependent.
+ *
+ * @param h - the ref_set to dump
+ */
+
+int ref_set_dump_iterator(struct ref_set *h);
 
 #endif

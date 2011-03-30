@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <09 Mar 2011 at 19:16:00 by nwidger on macros.local>
+ * Time-stamp: <29 Mar 2011 at 20:43:05 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -127,10 +127,13 @@ int thread_dmp_wait(struct thread_dmp *td) {
 }
 
 int thread_dmp_signal(struct thread_dmp *td) {
+	
 	if (td == NULL) {
 		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
 		mvm_halt();
 	}
+
+	if (td == thread_get_dmp()) return 0;
 
 	pthread_mutex_lock(&td->mutex);
 
@@ -247,18 +250,18 @@ int thread_dmp_execute_instruction(struct thread_dmp *td, uint32_t o) {
 
 /* default ops */
 struct thread_dmp_ops thread_dmp_default_ops = {
-	.thread_creation = thread_dmp_default_thread_creation,
-	.thread_start = thread_dmp_default_thread_start,
-	.thread_destruction = thread_dmp_default_thread_destruction,
-	.thread_join = thread_dmp_default_thread_join,
-	.execute_instruction = thread_dmp_default_execute_instruction
+	thread_dmp_default_thread_creation,
+	thread_dmp_default_thread_start,
+	thread_dmp_default_thread_destruction,
+	thread_dmp_default_thread_join,
+	thread_dmp_default_execute_instruction
 };
 
 /* default attr */
 struct thread_dmp_attr thread_dmp_default_attr = {
-	.quantum_size = THREAD_DMP_DEFAULT_QUANTUM_SIZE,
-	.instruction_counter = THREAD_DMP_DEFAULT_INSTRUCTION_COUNTER,
-	.ops = &thread_dmp_default_ops
+	THREAD_DMP_DEFAULT_QUANTUM_SIZE,
+	THREAD_DMP_DEFAULT_INSTRUCTION_COUNTER,
+	&thread_dmp_default_ops
 };
 
 int thread_dmp_default_thread_creation(struct thread_dmp *td) {
@@ -285,8 +288,8 @@ int thread_dmp_default_thread_creation(struct thread_dmp *td) {
 int thread_dmp_default_thread_start(struct thread_dmp *td) {
 	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_start\n", thread_get_ref());
 
-	/* block until parallel mode */
-	dmp_thread_block(dmp, td);
+	/* wait until its our turn */
+	thread_dmp_wait(td);
 
 	td->state = running_state;
 
@@ -300,9 +303,14 @@ int thread_dmp_default_thread_destruction(struct thread_dmp *td) {
 	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_destruction\n", thread_get_ref());
 
 	if (dmp_get_mode(dmp) == parallel_mode) {
-		/* block until parallel mode */
+		/* block until serial mode */
 		dmp_thread_block(dmp, td);
 	}
+
+	td->state = destroyed_state;
+
+	/* block until parallel mode */
+	dmp_thread_block(dmp, td);
 
 	td->state = destroyed_state;
 
@@ -336,6 +344,7 @@ int thread_dmp_default_execute_instruction(struct thread_dmp *td, uint32_t o) {
 		mvm_print("thread %" PRIu32 ":     quantum reached, blocking!\n", thread_get_ref());
 
 		dmp_thread_block(dmp, td);
+		
 		if (dmp_get_mode(dmp) == serial_mode) {
 			mvm_print("thread %" PRIu32 ":     quantum finished, blocking!\n", thread_get_ref());
 			dmp_thread_block(dmp, td);
