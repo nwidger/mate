@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <29 Mar 2011 at 20:41:26 by nwidger on macros.local>
+ * Time-stamp: <29 Mar 2011 at 21:24:38 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -13,6 +13,7 @@
 #include <unistd.h>
 
 #include "barrier.h"
+#include "constants.h"
 #include "dmp.h"
 #include "garbage_collector.h"
 #include "globals.h"
@@ -214,7 +215,6 @@ int dmp_thread_block(struct dmp *d, struct thread_dmp *td) {
 	struct thread_dmp *ud;
 
 	ref = me = -1;
-	o = t = ud = NULL;
 
 	if (d == NULL) {
 		fprintf(stderr, "mvm: dmp not initialized!\n");
@@ -278,6 +278,7 @@ void * dmp_barrier_parallel_hook(int i, void *a) {
 void * dmp_barrier_serial_hook(int i, void *a) {
 	int nthreads;
 	struct dmp *d;
+	float load, size, free;
 
 	d = (struct dmp *)a;
 
@@ -287,13 +288,20 @@ void * dmp_barrier_serial_hook(int i, void *a) {
 	}
 
 	if (i == 0) {
-		/* run garbage collector */
-		mvm_print("thread %" PRIu32 ": calling garbage collector\n", thread_get_ref());
+		size = heap_get_size(heap);
+		free = heap_get_free(heap);
 
-		if (garbage_collector_collect_now(garbage_collector) != 0)
-			mvm_halt();
+		load = (size - free) / size;
 
-		mvm_print("thread %" PRIu32 ": returned from garbage collector\n", thread_get_ref());
+		if (load > DMP_GARBAGE_COLLECTOR_LOAD_FACTOR) {
+			/* run garbage collector */
+			mvm_print("thread %" PRIu32 ": calling garbage collector\n", thread_get_ref());
+
+			if (garbage_collector_collect_now(garbage_collector) != 0)
+				mvm_halt();
+
+			mvm_print("thread %" PRIu32 ": returned from garbage collector\n", thread_get_ref());
+		}
 
 		d->first = 0;
 		/* update barrier */

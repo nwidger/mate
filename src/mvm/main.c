@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <13 Mar 2011 at 19:57:51 by nwidger on macros.local>
+ * Time-stamp: <01 Apr 2011 at 14:53:49 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -75,6 +75,7 @@ void mvm_halt();
 int mvm_cleanup();
 void mvm_clear();
 void mvm_print(const char *f, ...);
+int parse_heap_size(char *s);
 
 /** prints usage text to stderr. */
 
@@ -320,6 +321,33 @@ char * mvm_strdup(const char *s) {
 	return retval;
 }
 
+int parse_heap_size(char *s) {
+	char m;
+	int len, factor, size;
+
+	len = strlen(s);
+	m = s[len-1];
+
+	switch (m) {
+	case 'k': case 'K':
+		factor = 1024;
+		break;
+	case 'm': case 'M':
+		factor = 1048576;
+		break;
+	case 'g': case 'G':
+		factor = 1073741824;
+		break;
+	default:
+		factor = 1;
+	}
+
+	if (factor != 1) s[len-1] = '\0';
+	size = atoi(s);
+
+	return size * factor;
+}
+
 int main(int argc, char *argv[]) {
 	struct object *object;
 	int err, c, heap_size, disassemble;
@@ -380,7 +408,7 @@ int main(int argc, char *argv[]) {
 			}
 			break;
 		case 'm':
-			heap_size = atoi(optarg);
+			heap_size = parse_heap_size(optarg);
 			if (heap_size <= 0) {
 				fprintf(stderr, "-m must be a positive integer.\n");
 				err = 1;

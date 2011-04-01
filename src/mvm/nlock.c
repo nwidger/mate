@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <14 Mar 2011 at 18:28:17 by nwidger on macros.local>
+ * Time-stamp: <01 Apr 2011 at 14:39:37 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -50,6 +50,7 @@ struct nlock * nlock_create0(int m) {
 	}
 
 	n->locks = 0;
+	memset(&n->owner, 0, sizeof(pthread_t));
 
 	if (pthread_mutexattr_init(&attr) != 0) {
 		perror("mvm: pthread_mutexattr_init");
@@ -83,7 +84,7 @@ struct nlock * nlock_create0(int m) {
 	else
 		n->dmp = dmp_create_nlock_dmp(dmp, n);
 
-	return n;	
+	return n;
 }
 
 void nlock_destroy(struct nlock *n) {
@@ -107,26 +108,24 @@ int nlock_lock(struct nlock *n) {
 		mvm_halt();
 	}
 
-	if (n->dmp != NULL) {
+	if (n->dmp != NULL)
 		return nlock_dmp_lock(n->dmp);
-	} else {
-		/* lock */
-		if ((err = pthread_mutex_lock(&n->mutex)) != 0) {
-			fprintf(stderr, "mvm: pthread_mutex_lock: %s\n", strerror(err));
-			mvm_halt();
-		}
 
-		if (n->locks == 0)
-			n->owner = pthread_self();
-
-		n->locks++;
-		return 0;
+	/* lock */
+	if ((err = pthread_mutex_lock(&n->mutex)) != 0) {
+		fprintf(stderr, "mvm: pthread_mutex_lock: %s\n", strerror(err));
+		mvm_halt();
 	}
+
+	if (n->locks == 0) n->owner = pthread_self();
+	n->locks++;
+
+	return 0;
 }
 
 int nlock_trylock(struct nlock *n) {
 	int err = 0;
-	
+
 	if (n == NULL) {
 		fprintf(stderr, "mvm: nlock has not been initialized!\n");
 		mvm_halt();
@@ -140,10 +139,11 @@ int nlock_trylock(struct nlock *n) {
 		}
 	}
 
-	if (n->locks == 0)
-		n->owner = pthread_self();
+	if (err == 0) {
+		if (n->locks == 0) n->owner = pthread_self();
+		n->locks++;
+	}
 
-	n->locks++;
 	return 0;
 }
 
@@ -155,18 +155,25 @@ int nlock_unlock(struct nlock *n) {
 		mvm_halt();
 	}
 
-	if (n->dmp != NULL) {
+	if (n->dmp != NULL)
 		return nlock_dmp_unlock(n->dmp);
-	} else {
-		/* unlock */
-		if ((err = pthread_mutex_unlock(&n->mutex)) != 0) {
-			fprintf(stderr, "mvm: pthread_mutex_unlock: %s\n", strerror(err));
-			mvm_halt();
-		}
-
-		n->locks--;
-		return 0;
+	
+	if (n->locks == 0 || pthread_equal(pthread_self(), n->owner) == 0) {
+		fprintf(stderr, "mvm: nlock_unlock called but thread does not own mutex!\n");
+		mvm_halt();
 	}
+
+	n->locks--;
+	if (n->locks == 0) memset(&n->owner, 0, sizeof(pthread_t));
+
+	/* unlock */
+	if ((err = pthread_mutex_unlock(&n->mutex)) != 0) {
+		fprintf(stderr, "mvm: pthread_mutex_unlock: %s\n", strerror(err));
+		mvm_halt();
+	}
+
+
+	return 0;
 }
 
 int nlock_release(struct nlock *n) {
@@ -202,7 +209,7 @@ int nlock_wait(struct nlock *n) {
 		fprintf(stderr, "mvm: nlock_wait called but thread does not own mutex!\n");
 		mvm_halt();
 	}
-	
+
 	return nlock_timedwait(n, 0L);
 }
 
@@ -219,19 +226,20 @@ int nlock_timedwait(struct nlock *n, long t) {
 		abstime.tv_sec = time(NULL);
 		abstime.tv_nsec = t * 1000000;
 	}
-	
+
 	notifies = n->notifies;
-	
+
 	while (notifies == n->notifies) {
 		/* unlock */
 		n->locks--;
-		
+
 		if (t == 0L)
 			pthread_cond_wait(&n->cond, &n->mutex);
 		else
 			pthread_cond_timedwait(&n->cond, &n->mutex, &abstime);
-		
+
 		/* lock */
+		if (n->locks == 0) n->owner = pthread_self();
 		n->locks++;
 	}
 
@@ -243,7 +251,7 @@ int nlock_notify(struct nlock *n) {
 		fprintf(stderr, "mvm: nlock_notify called but thread does not own mutex!\n");
 		mvm_halt();
 	}
-	
+
 	pthread_cond_signal(&n->cond);
 	n->notifies++;
 
@@ -255,9 +263,9 @@ int nlock_notify_all(struct nlock *n) {
 		fprintf(stderr, "mvm: nlock_notify_all called but thread does not own mutex!\n");
 		mvm_halt();
 	}
-	
+
 	pthread_cond_broadcast(&n->cond);
-	n->notifies++;	
+	n->notifies++;
 
 	return 0;
 }

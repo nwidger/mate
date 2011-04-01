@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <13 Mar 2011 at 19:55:57 by nwidger on macros.local>
+ * Time-stamp: <30 Mar 2011 at 19:44:01 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -257,6 +257,12 @@ int garbage_collector_collect_now(struct garbage_collector *g) {
 	}
 
 	pthread_mutex_lock(&g->collecting_mutex);
+
+	if (g->is_collecting == 1) {
+		pthread_mutex_unlock(&g->collecting_mutex);
+		return 0;
+	}
+	
 	g->is_collecting = 1;
 	pthread_mutex_unlock(&g->collecting_mutex);
 
@@ -274,6 +280,10 @@ int garbage_collector_collect_now(struct garbage_collector *g) {
 		}
 		pthread_mutex_unlock(&g->collecting_mutex);
 	}
+
+	pthread_mutex_lock(&g->collecting_mutex);
+	g->is_collecting = 0;
+	pthread_mutex_unlock(&g->collecting_mutex);
 
 	return 0;
 }
@@ -316,8 +326,6 @@ int tricolor_garbage_collector(struct garbage_collector *g) {
 
 		if (thread_get_state(thread) == terminated_state)
 			continue;
-
-		fprintf(stderr, "***GC***: adding thread's root set...\n");
 
 		vm_stack = _thread_get_vm_stack(thread);
 		vm_stack_lock(vm_stack);

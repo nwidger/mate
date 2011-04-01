@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Nov 2010 at 18:05:08 by nwidger on macros.local>
+ * Time-stamp: <29 Mar 2011 at 21:19:41 by nwidger on macros.local>
  */
 
 #ifndef _MVM_HEAP_H
@@ -31,6 +31,24 @@ void heap_destroy(struct heap *h);
  */
 
 void heap_clear(struct heap *h);
+
+/** returns the current size of the given heap in bytes.
+ *
+ * @param h - the heap access
+ *
+ * @return the current size of the heap in bytes
+ */ 
+
+int heap_get_size(struct heap *h);
+
+/** returns the current free space in the given heap in bytes.
+ *
+ * @param h - the heap access
+ *
+ * @return the current free space in the heap in bytes
+ */
+
+int heap_get_free(struct heap *h);
 
 /** allocates b bytes of memory from the given heap and returns a
  * pointer to the allocated space.
@@ -121,6 +139,17 @@ int heap_resize(struct heap *h, int m);
 
 int heap_populate_ref_set(struct heap *h, struct ref_set *r);
 
+
+/** adds all thread references currently active in the given heap to
+ * the ref_set r.  Care must be taken in this function to ensure that
+ * the heap is not altered while this function is running.
+ *
+ * @param h - the heap to scan
+ * @param r - the ref_set to populate
+ *
+ * @return 0 on success, non-zero on failure
+ */
+
 int heap_populate_thread_set(struct heap *h, struct ref_set *r);
 
 /** adds the given reference to the set of references which are
@@ -147,7 +176,24 @@ int heap_exclude_ref(struct heap *h, int r);
 
 int heap_include_ref(struct heap *h, int r);
 
+/** adds the given reference to the set of currently active threads.
+ *
+ * @param h - the heap to access
+ * @param r - the thread reference to add
+ *
+ * @return 0 on success, non-zero on failure
+ */
+
 int heap_add_thread_ref(struct heap *h, int r);
+
+/** removes the given reference from the set of currently active
+ * threads.
+ *
+ * @param h - the heap to access
+ * @param r - the thread reference to remove
+ *
+ * @return 0 on success, non-zero on failure
+ */
 
 int heap_remove_thread_ref(struct heap *h, int r);
 

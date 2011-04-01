@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Dec 2010 at 20:15:50 by nwidger on macros.local>
+ * Time-stamp: <01 Apr 2011 at 14:39:54 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -175,12 +175,32 @@ void heap_clear(struct heap *h) {
 	}
 }
 
+int heap_get_size(struct heap *h) {
+	if (h == NULL) {
+		fprintf(stderr, "mvm: heap has not been initialized!\n");
+		mvm_halt();
+	}
+
+	return h->mem_size;
+}
+
+int heap_get_free(struct heap *h) {
+	if (h == NULL) {
+		fprintf(stderr, "mvm: heap has not been initialized!\n");
+		mvm_halt();
+	}
+
+	return h->mem_free;
+}
+
 int heap_resize(struct heap *h, int m) {
 	/* lock */
 	heap_lock(h);
 
 	if (h == NULL) {
 		fprintf(stderr, "mvm: heap has not been initialized!\n");
+		/* unlock */
+		heap_unlock(h);
 		mvm_halt();
 	}
 
