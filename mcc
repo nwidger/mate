@@ -90,7 +90,7 @@ fi
 
 # dump compiler output to TEMP
 
-TEMP=`tempfile`
+TEMP=/tmp/mate-$RANDOM
 
 if [ ! -r $PREDEFINED ];
 then
