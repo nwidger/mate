@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <25 Mar 2011 at 20:09:25 by nwidger on macros.local>
+ * Time-stamp: <03 Apr 2011 at 15:42:44 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -81,21 +81,17 @@ void ref_set_destroy(struct ref_set *h) {
 }
 
 void ref_set_clear(struct ref_set *h) {
-	int n;
 	struct ref_set_record *p, *q;
 
 	if (h != NULL) {
-		for (n = 0; n < h->current_capacity; n++) {
-			p = h->buckets[n];
-			while (p != NULL) {
-				q = p;
-				p = p->next;
-				if (q != NULL)
-					free(q);
-			}
-
-			h->buckets[n] = NULL;
+		p = h->list_head;
+		while (p != NULL) {
+			q = p;
+			p = p->list_next;
+			ref_set_record_destroy(q);
 		}
+
+		memset(h->buckets, 0, sizeof(struct ref_set_record *)*h->current_capacity);
 
 	        h->size = 0;
 
