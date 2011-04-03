@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <29 Mar 2011 at 21:24:38 by nwidger on macros.local>
+ * Time-stamp: <03 Apr 2011 at 14:59:06 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -185,7 +185,6 @@ struct nlock_dmp * dmp_create_nlock_dmp(struct dmp *d, struct nlock *n) {
 }
 
 int dmp_acquiesce(struct dmp *d, int r, enum thread_dmp_state s) {
-	int ref;
 	struct object *o;
 	struct thread *t;
 	struct thread_dmp *ud;
@@ -199,7 +198,7 @@ int dmp_acquiesce(struct dmp *d, int r, enum thread_dmp_state s) {
 
 	mvm_print("thread %" PRIu32 ": blocking until thread %" PRIu32 " is in state %d\n", thread_get_ref(), r, s);
 
-	o = heap_fetch_object(heap, ref);
+	o = heap_fetch_object(heap, r);
 	t = object_get_thread(o);
 	ud = _thread_get_dmp(t);
 
