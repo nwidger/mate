@@ -170,7 +170,6 @@ class Main {
     i = 0;
     while (i < NumProcs) {
       thread = (RaceyThread)threads.get(i);
-      if (thread == null) out "thread == null!" + newline;
       thread.start();
       i = i + 1;
     }
@@ -194,7 +193,7 @@ class Main {
     // PHASE_MARKER;
 
     // print results
-    out newline + newline + "Short signature: " + mix_sig.toString();
+    out "Short signature: " + mix_sig.toString() + newline;
 
     // PHASE_MARKER;
 
