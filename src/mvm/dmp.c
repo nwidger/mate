@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <03 Apr 2011 at 14:59:06 by nwidger on macros.local>
+ * Time-stamp: <03 Apr 2011 at 16:09:24 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -7,6 +7,7 @@
 #endif
 
 #include <pthread.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -275,9 +276,10 @@ void * dmp_barrier_parallel_hook(int i, void *a) {
 }
 
 void * dmp_barrier_serial_hook(int i, void *a) {
+	double load;	
 	int nthreads;
 	struct dmp *d;
-	float load, size, free;
+	uint64_t size, free;
 
 	d = (struct dmp *)a;
 

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <29 Mar 2011 at 21:24:01 by nwidger on macros.local>
+ * Time-stamp: <03 Apr 2011 at 16:01:23 by nwidger on macros.local>
  */
 
 #ifndef _MVM_CONSTANTS_H
@@ -281,6 +281,6 @@
 #define CLASS_TABLE_INTEGER_CACHE_SIZE 128
 
 /* dmp constants */
-#define DMP_GARBAGE_COLLECTOR_LOAD_FACTOR 0.75
+#define DMP_GARBAGE_COLLECTOR_LOAD_FACTOR 0.90
 
 #endif
