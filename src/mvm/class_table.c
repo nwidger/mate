@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <07 Mar 2011 at 13:52:49 by nwidger on macros.local>
+ * Time-stamp: <02 Apr 2011 at 20:45:11 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -256,7 +256,7 @@ int class_table_new_integer(struct class_table *c, int32_t v, struct object **o)
 	/* lock */
 	class_table_lock(c);
 
-	if (v <= CLASS_TABLE_INTEGER_CACHE_SIZE && c->integer_cache[(int)v] != 0) {
+	if (v >= 0 && v <= CLASS_TABLE_INTEGER_CACHE_SIZE && c->integer_cache[(int)v] != 0) {
 		ref = c->integer_cache[(int)v];
 	} else {
 		integer_class = c->predefined_classes[integer_type];
@@ -272,9 +272,9 @@ int class_table_new_integer(struct class_table *c, int32_t v, struct object **o)
 		garbage_collector_unlock(garbage_collector);
 
 		integer = integer_create(v);
-		if (v > CLASS_TABLE_INTEGER_CACHE_SIZE) heap_include_ref(heap, ref);
+		if (v < 0 || v > CLASS_TABLE_INTEGER_CACHE_SIZE) heap_include_ref(heap, ref);
 		object_set_integer(object, integer);
-		if (v <= CLASS_TABLE_INTEGER_CACHE_SIZE) c->integer_cache[(int)v] = ref;
+		if (v >= 0 && v <= CLASS_TABLE_INTEGER_CACHE_SIZE) c->integer_cache[(int)v] = ref;
 	}
 
 	if (o != NULL)

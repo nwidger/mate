@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <13 Mar 2011 at 14:22:58 by nwidger on macros.local>
+ * Time-stamp: <01 Apr 2011 at 15:09:09 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -79,7 +79,7 @@ void method_area_clear(struct method_area *m) {
 
 		m->class_file = NULL;
 
-		if (munmap(m->code, m->size) != 0) {
+		if (m->code != NULL && munmap(m->code, m->size) != 0) {
 			perror("mvm: munmap");
 			mvm_halt();
 		}
