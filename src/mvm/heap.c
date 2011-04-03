@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <01 Apr 2011 at 14:39:54 by nwidger on macros.local>
+ * Time-stamp: <03 Apr 2011 at 15:06:15 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -35,8 +35,8 @@ struct heap_ref {
 };
 
 struct heap {
-	int mem_size;
-	int mem_free;
+	uint64_t mem_size;
+	uint64_t mem_free;
 
 	int num_buckets;
 	struct heap_ref **ref_buckets;
@@ -65,7 +65,7 @@ void free_ref_destroy(struct free_ref *f);
 int heap_release(struct heap *h);
 int heap_reacquire(struct heap *h, int l);
 
-struct heap * heap_create(int m) {
+struct heap * heap_create(uint64_t m) {
 	struct heap *h;
 
 	if (m <= 0) {
@@ -193,7 +193,7 @@ int heap_get_free(struct heap *h) {
 	return h->mem_free;
 }
 
-int heap_resize(struct heap *h, int m) {
+int heap_resize(struct heap *h, uint64_t m) {
 	/* lock */
 	heap_lock(h);
 
@@ -761,8 +761,8 @@ int heap_dump(struct heap *h) {
 		}
 	}
 
-	fprintf(stderr, "mem_size = %d\n", h->mem_size);
-	fprintf(stderr, "mem_free = %d\n", h->mem_free);	
+	fprintf(stderr, "mem_size = %" PRIu64 "\n", h->mem_size);
+	fprintf(stderr, "mem_free = %" PRIu64 "\n", h->mem_free);	
 
 /* 	fprintf(stderr, "dumping heap excluded set...\n"); */
 /* 	ref_set_dump(h->excluded_set); */

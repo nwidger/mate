@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <03 Apr 2011 at 14:48:41 by nwidger on macros.local>
+ * Time-stamp: <03 Apr 2011 at 15:05:40 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -70,12 +70,12 @@ int restart;
 
 /* forward declarations */
 void usage();
-int mvm_initialize(int h);
+int mvm_initialize(uint64_t h);
 void mvm_halt();
 int mvm_cleanup();
 void mvm_clear();
 void mvm_print(const char *f, ...);
-int parse_heap_size(char *s);
+uint64_t parse_heap_size(char *s);
 
 /** prints usage text to stderr. */
 
@@ -106,7 +106,7 @@ void usage() {
  * @return 0 on success, non-zero on failure
  */
 
-int mvm_initialize(int h) {
+int mvm_initialize(uint64_t h) {
 	input = stdin;
 	output = stdout;
 
@@ -321,9 +321,9 @@ char * mvm_strdup(const char *s) {
 	return retval;
 }
 
-int parse_heap_size(char *s) {
+uint64_t parse_heap_size(char *s) {
 	char m;
-	int len, factor, size;
+	uint64_t len, factor, size;
 
 	len = strlen(s);
 	m = s[len-1];
@@ -350,7 +350,8 @@ int parse_heap_size(char *s) {
 
 int main(int argc, char *argv[]) {
 	struct object *object;
-	int err, c, heap_size, disassemble;
+	uint64_t heap_size;
+	int err, c, disassemble;
 
 	dmp = NULL;
 	class_table = NULL;

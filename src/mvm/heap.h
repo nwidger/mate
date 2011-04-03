@@ -1,9 +1,11 @@
 /* Niels Widger
- * Time-stamp: <29 Mar 2011 at 21:19:41 by nwidger on macros.local>
+ * Time-stamp: <03 Apr 2011 at 15:03:53 by nwidger on macros.local>
  */
 
 #ifndef _MVM_HEAP_H
 #define _MVM_HEAP_H
+
+#include <stdint.h>
 
 struct object;
 struct heap;
@@ -16,7 +18,7 @@ struct ref_set;
  * @return pointer to new heap, or NULL on failure
  */
 
-struct heap * heap_create(int m);
+struct heap * heap_create(uint64_t m);
 
 /** destroys the given heap
  *
@@ -124,7 +126,7 @@ int heap_compact(struct heap *h);
  * @return 0 on success, non-zero on failure
  */
 
-int heap_resize(struct heap *h, int m);
+int heap_resize(struct heap *h, uint64_t m);
 
 /** adds all references currently active in the given heap (but which
  * have not been excluded by a call to heap_exclude_ref) to the
