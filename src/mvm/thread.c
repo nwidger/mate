@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <30 Mar 2011 at 20:56:59 by nwidger on macros.local>
+ * Time-stamp: <03 Apr 2011 at 11:10:11 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -136,11 +136,6 @@ struct thread * thread_get_current() {
 	struct thread *t;
 
 	t = (struct thread *)pthread_getspecific(key);
-
-	if (t == NULL) {
-		fprintf(stderr, "mvm: thread not initialized!\n");
-		mvm_halt();
-	}
 
 	return t;
 }

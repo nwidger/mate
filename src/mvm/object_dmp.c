@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <13 Mar 2011 at 14:35:23 by nwidger on macros.local>
+ * Time-stamp: <03 Apr 2011 at 11:10:49 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -39,7 +39,7 @@ struct object_dmp * object_dmp_create(struct object *o, struct object_dmp_attr *
 
 	if (od->attr.owner == -1) {
 		t = thread_get_current();
-		od->attr.owner = thread_get_ref(t);
+		od->attr.owner = (t == NULL) ? 0 : thread_get_ref(t);
 	}
 
 	return od;
