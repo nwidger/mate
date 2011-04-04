@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <03 Apr 2011 at 11:10:49 by nwidger on macros.local>
+ * Time-stamp: <04 Apr 2011 at 15:22:42 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -57,25 +57,6 @@ void object_dmp_clear(struct object_dmp *od) {
 	}
 }
 
-struct object * object_dmp_get_object(struct object_dmp *od) {
-	if (od == NULL) {
-		fprintf(stderr, "mvm: object_dmp not initialized!\n");
-		mvm_halt();
-	}
-
-	return od->object;
-}
-
-int object_dmp_set_object(struct object_dmp *od, struct object *o) {
-	if (od == NULL) {
-		fprintf(stderr, "mvm: object_dmp not initialized!\n");
-		mvm_halt();
-	}
-
-	od->object = o;
-	return 0;
-}
-
 int object_dmp_get_owner(struct object_dmp *od) {
 	if (od == NULL) {
 		fprintf(stderr, "mvm: object_dmp not initialized!\n");
@@ -83,72 +64,6 @@ int object_dmp_get_owner(struct object_dmp *od) {
 	}
 
 	return od->attr.owner;
-}
-
-int object_dmp_set_owner(struct object_dmp *od, int n) {
-	if (od == NULL) {
-		fprintf(stderr, "mvm: object_dmp not initialized!\n");
-		mvm_halt();
-	}
-
-	od->attr.owner = n;
-	return 0;
-}
-
-int object_dmp_is_shared(struct object_dmp *od) {
-	if (od == NULL) {
-		fprintf(stderr, "mvm: object_dmp not initialized!\n");
-		mvm_halt();
-	}
-
-	return SHARED(od->attr.owner);
-}
-
-int object_dmp_is_private(struct object_dmp *od) {
-	if (od == NULL) {
-		fprintf(stderr, "mvm: object_dmp not initialized!\n");
-		mvm_halt();
-	}
-
-	return PRIVATE(od->attr.owner);
-}
-
-int object_dmp_get_depth(struct object_dmp *od) {
-	if (od == NULL) {
-		fprintf(stderr, "mvm: object_dmp not initialized!\n");
-		mvm_halt();
-	}
-
-	return od->attr.depth;
-}
-
-int object_dmp_set_depth(struct object_dmp *od, int d) {
-	if (od == NULL) {
-		fprintf(stderr, "mvm: object_dmp not initialized!\n");
-		mvm_halt();
-	}
-
-	od->attr.depth = d;
-	return 0;
-}
-
-struct object_dmp_ops * object_dmp_get_ops(struct object_dmp *od) {
-	if (od == NULL) {
-		fprintf(stderr, "mvm: object_dmp not initialized!\n");
-		mvm_halt();
-	}
-
-	return od->attr.ops;
-}
-
-int object_dmp_set_ops(struct object_dmp *od, struct object_dmp_ops *p) {
-	if (od == NULL) {
-		fprintf(stderr, "mvm: object_dmp not initialized!\n");
-		mvm_halt();
-	}
-
-	od->attr.ops = p;
-	return 0;
 }
 
 int object_dmp_load(struct object_dmp *od, int i) {
@@ -212,7 +127,7 @@ int object_dmp_default_load(struct object_dmp *od, int i) {
 	me = thread_get_ref();
 	td = thread_get_dmp();
 
-	if (current == 0) {
+	if (SHARED(current)) {
 		mvm_print("thread %" PRIu32 ":     shared: proceed!\n", thread_get_ref());
 	} else if (current != me) {
 		mvm_print("thread %" PRIu32 ":     private not owned by me: block, set shared, proceed!\n", thread_get_ref());
@@ -243,7 +158,7 @@ int object_dmp_default_store(struct object_dmp *od, int i, int r) {
 	me = thread_get_ref();
 	td = thread_get_dmp();
 
-	if (current == 0) {
+	if (SHARED(current)) {
 		mvm_print("thread %" PRIu32 ":     shared: block, set private owned by me, proceed!\n", thread_get_ref());
 
 		if (dmp_get_mode(dmp) == parallel_mode) {

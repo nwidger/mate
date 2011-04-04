@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <03 Apr 2011 at 16:09:24 by nwidger on macros.local>
+ * Time-stamp: <04 Apr 2011 at 16:36:44 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -203,7 +203,7 @@ int dmp_acquiesce(struct dmp *d, int r, enum thread_dmp_state s) {
 	t = object_get_thread(o);
 	ud = _thread_get_dmp(t);
 
-	while (thread_dmp_get_state_nonblock(ud) != s) usleep(50000);
+	while (thread_dmp_get_state_nonblock(ud) != s);
 
 	return 0;
 }

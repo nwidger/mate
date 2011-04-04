@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <07 Mar 2011 at 11:57:27 by nwidger on macros.local>
+ * Time-stamp: <04 Apr 2011 at 16:35:26 by nwidger on macros.local>
  */
 
 #ifndef _MVM_THREAD_H
@@ -35,6 +35,8 @@ struct thread_dmp * thread_get_dmp();
 struct thread_dmp * _thread_get_dmp(struct thread *t);
 
 struct thread * thread_get_current();
+
+int thread_set_current(struct thread *t);
 
 int thread_get_ref();
 

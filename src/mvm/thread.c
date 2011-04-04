@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <03 Apr 2011 at 11:10:11 by nwidger on macros.local>
+ * Time-stamp: <04 Apr 2011 at 16:34:37 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -76,6 +76,7 @@ struct thread * thread_create() {
 
 void thread_destroy(struct thread *t) {
 	if (t != NULL) {
+		thread_set_current(NULL);
 		thread_clear(t);
 		vm_stack_destroy(t->vm_stack);
 		heap_free(heap, t);

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <22 Feb 2011 at 18:31:43 by nwidger on macros.local>
+ * Time-stamp: <04 Apr 2011 at 14:12:32 by nwidger on macros.local>
  */
 
 #ifndef _MVM_OBJECT_DMP_H
@@ -33,16 +33,7 @@ struct object_dmp_attr {
 struct object_dmp * object_dmp_create(struct object *o, struct object_dmp_attr *a);
 void object_dmp_destroy(struct object_dmp *od);
 void object_dmp_clear(struct object_dmp *od);
-struct object * object_dmp_get_object(struct object_dmp *od);
-int object_dmp_set_object(struct object_dmp *od, struct object *o);
 int object_dmp_get_owner(struct object_dmp *od);
-int object_dmp_set_owner(struct object_dmp *od, int n);
-int object_dmp_is_shared(struct object_dmp *od);
-int object_dmp_is_private(struct object_dmp *od);
-int object_dmp_get_depth(struct object_dmp *od);
-int object_dmp_set_depth(struct object_dmp *od, int d);
-struct object_dmp_ops * object_dmp_get_ops(struct object_dmp *od);
-int object_dmp_set_ops(struct object_dmp *od, struct object_dmp_ops *p);
 int object_dmp_load(struct object_dmp *od, int i);
 int object_dmp_store(struct object_dmp *od, int i, int r);
 int object_dmp_chown(struct object_dmp *od, int i);
