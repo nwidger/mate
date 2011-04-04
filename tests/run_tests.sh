@@ -23,10 +23,10 @@ for e in *.m; do
     # generate class file
     mcc $e
 
-    if [[ $? -eq 0 ]];
-    then
-	mvm ${e%%.m}.class < input
-    fi
+    #if [[ $? -eq 0 ]];
+    #then
+    #    mvm ${e%%.m}.class < input
+    #fi
 
     i=$(($i+1));
 done

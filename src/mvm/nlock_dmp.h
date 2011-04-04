@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <12 Feb 2011 at 22:23:08 by nwidger on macros.local>
+ * Time-stamp: <04 Apr 2011 at 18:55:56 by nwidger on macros.local>
  */
 
 #ifndef _MVM_NLOCK_DMP_H
@@ -8,8 +8,6 @@
 struct nlock;
 struct nlock_dmp;
 struct nlock_dmp_ops;
-
-/* constants */
 
 /* struct definitions */
 struct nlock_dmp_ops {

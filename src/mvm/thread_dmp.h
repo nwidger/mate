@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <07 Mar 2011 at 17:32:16 by nwidger on macros.local>
+ * Time-stamp: <04 Apr 2011 at 18:55:49 by nwidger on macros.local>
  */
 
 #ifndef _MVM_THREAD_DMP_H
@@ -12,10 +12,6 @@
 #include "thread.h"
 
 struct thread_dmp;
-
-/* constants */
-#define THREAD_DMP_DEFAULT_QUANTUM_SIZE        10
-#define THREAD_DMP_DEFAULT_INSTRUCTION_COUNTER 0
 
 /* enums */
 enum thread_dmp_state {

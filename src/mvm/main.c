@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <03 Apr 2011 at 15:17:13 by nwidger on macros.local>
+ * Time-stamp: <04 Apr 2011 at 18:53:17 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -39,7 +39,7 @@
 #include "thread_dmp.h"
 #include "vm_stack.h"
 
-#define OPTARGS ":m:s:i:daqcvhp"
+#define OPTARGS ":m:s:i:daqcvhpg:"
 
 /* globals */
 FILE *input;
@@ -58,6 +58,9 @@ struct symbol_table *symbol_table;
 int garbage_collector_interval;
 enum garbage_collector_type garbage_collector_type;
 struct dmp *dmp;
+struct object_dmp_attr object_dmp_attr;
+struct thread_dmp_attr thread_dmp_attr;
+struct nlock_dmp_attr nlock_dmp_attr;
 
 uint32_t main_block_address;
 uint32_t main_block_end;
@@ -97,6 +100,7 @@ void usage() {
 	fprintf(stderr, "           passing the -s switch to the assembler.\n");
 	fprintf(stderr, "  -m NUM   Use a heap with a size of NUM bytes.\n");
 	fprintf(stderr, "  -p       Enable DMP (cannot be used with -c).\n");
+	fprintf(stderr, "  -g NUM   With -p, specify ownership table granularity.\n");
 }
 
 /** initializes mvm components.
@@ -166,13 +170,13 @@ int mvm_initialize(uint64_t h) {
 	}
 
 	if (dmp != NULL &&
-	    (dmp = dmp_create(&object_dmp_default_attr,
-			      &thread_dmp_default_attr,
-			      &nlock_dmp_default_attr)) == NULL) {
+	    (dmp = dmp_create(&object_dmp_attr,
+			      &thread_dmp_attr,
+			      &nlock_dmp_attr)) == NULL) {
 		fprintf(stderr, "mvm: error initializing DMP!\n");
 		return 1;
 	}
-	
+
 	garbage_collector_start(garbage_collector,
 				garbage_collector_type,
 				garbage_collector_interval);
@@ -185,22 +189,25 @@ int mvm_cleanup() {
 		perror("fclose");
 		exit(1);
 	}
-	
+
 	if (output != NULL && fflush(output) == EOF) {
 		perror("fflush");
 		exit(1);
 	}
-	
+
 	if (output != NULL && fclose(output) == EOF) {
 		perror("fclose");
 		exit(1);
 	}
-	
+
+	if (dmp != NULL)
+		dmp_destroy(dmp);
+
 	if (garbage_collector != NULL) {
-		garbage_collector_stop(garbage_collector);		
+		garbage_collector_stop(garbage_collector);
 		garbage_collector_destroy(garbage_collector);
 	}
-	
+
 	if (heap != NULL)
 		heap_destroy(heap);
 	if (symbol_table != NULL)
@@ -232,7 +239,7 @@ void mvm_clear() {
 		perror("mvm: fstat");
 		exit(1);
 	}
-	
+
 	if (S_ISREG(buf.st_mode) && fseek(input, 0L, SEEK_SET) != 0) {
 		perror("mvm: fseek");
 		exit(1);
@@ -247,14 +254,14 @@ void mvm_clear() {
 		perror("mvm: fstat");
 		exit(1);
 	}
-	
+
 	if (S_ISREG(buf.st_mode) && ftruncate(fd, 0) != 0) {
 		perror("mvm: ftruncate");
 		exit(1);
 	}
-	
+
 	garbage_collector_stop(garbage_collector);
-	
+
 	heap_clear(heap);
 
 	garbage_collector_start(garbage_collector,
@@ -296,7 +303,7 @@ void mvm_halt() {
 		vm_stack_dump(vm_stack, 1, 1);
 	else
 		vm_stack_dump(vm_stack, 0, 0);
-	
+
 	exit(1);
 }
 
@@ -354,6 +361,14 @@ int main(int argc, char *argv[]) {
 	int err, c, disassemble;
 
 	dmp = NULL;
+
+	memcpy(&object_dmp_attr, &object_dmp_default_attr,
+	       sizeof(struct object_dmp_attr));
+	memcpy(&thread_dmp_attr, &thread_dmp_default_attr,
+	       sizeof(struct thread_dmp_attr));
+	memcpy(&nlock_dmp_attr, &nlock_dmp_default_attr,
+	       sizeof(struct nlock_dmp_attr));
+
 	class_table = NULL;
 	garbage_collector = NULL;
 	heap = NULL;
@@ -418,6 +433,9 @@ int main(int argc, char *argv[]) {
 		case 'p':
 			dmp = (struct dmp *)1;
 			break;
+		case 'g':
+			object_dmp_attr.depth = atoi(optarg);
+			break;
 		case 'q':
 			print_trace = 0;
 			break;
@@ -450,7 +468,7 @@ int main(int argc, char *argv[]) {
 		usage();
 		return 1;
 	}
-	
+
 	class_file = argv[optind];
 
 	if (mvm_initialize(heap_size) != 0) {
@@ -472,12 +490,12 @@ int main(int argc, char *argv[]) {
 	do {
 		mvm_clear();
 		restart = 0;
-		
+
 		class_table_new_thread(class_table, &object);
 		thread_start_main(object);
 		thread_join_main(object);
 	} while (restart != 0);
-	
+
 	mvm_cleanup();
 	return main_block_return_value;
 }

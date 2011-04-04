@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <03 Apr 2011 at 16:01:23 by nwidger on macros.local>
+ * Time-stamp: <04 Apr 2011 at 18:58:50 by nwidger on macros.local>
  */
 
 #ifndef _MVM_CONSTANTS_H
@@ -271,7 +271,9 @@
 #define INTEGER_MAX_INTEGER 2147483648U
 #define INTEGER_MIN_INTEGER 0
 #define INTEGER_TO_STRING_BUFFER_SIZE 12 /* strlen("-2147483648") == 11 */
-#define REAL_TO_STRING_BUFFER_SIZE 100
+
+/* predefined real constants */
+#define REAL_TO_STRING_BUFFER_SIZE 500
 
 /* predefined table constants */
 #define TABLE_DEFAULT_INITIAL_CAPACITY 16
@@ -282,5 +284,11 @@
 
 /* dmp constants */
 #define DMP_GARBAGE_COLLECTOR_LOAD_FACTOR 0.90
+
+#define OBJECT_DMP_DEFAULT_OWNER -1 /* -1 == allocating thread */
+#define OBJECT_DMP_DEFAULT_DEPTH 1
+
+#define THREAD_DMP_DEFAULT_QUANTUM_SIZE        10
+#define THREAD_DMP_DEFAULT_INSTRUCTION_COUNTER 0
 
 #endif

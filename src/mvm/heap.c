@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <03 Apr 2011 at 16:08:18 by nwidger on macros.local>
+ * Time-stamp: <04 Apr 2011 at 18:32:40 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -145,7 +145,7 @@ void heap_clear(struct heap *h) {
 			while (r != NULL) {
 				s = r;
 				r = r->ptr_next;
-				heap_ref_destroy(s);
+				free(s);
 			}
 		}
 

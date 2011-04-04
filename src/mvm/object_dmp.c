@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Apr 2011 at 15:22:42 by nwidger on macros.local>
+ * Time-stamp: <04 Apr 2011 at 18:56:19 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "constants.h"
 #include "dmp.h"
 #include "globals.h"
 #include "heap.h"
@@ -215,6 +216,8 @@ int object_dmp_default_chown_aux(struct object_dmp *od, int n, int d) {
 
 		object_dmp_default_chown_aux(field_od, n, d-1);
 	}
+
+	ref_set_destroy(fields);
 
 	return 0;
 }
