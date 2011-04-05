@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <14 Mar 2011 at 18:25:40 by nwidger on macros.local>
+ * Time-stamp: <04 Apr 2011 at 19:56:31 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -93,7 +93,7 @@ int nlock_dmp_unlock(struct nlock_dmp *nd) {
 /* default ops */
 struct nlock_dmp_ops nlock_dmp_default_ops = {
 	nlock_dmp_default_lock,
-	NULL
+	nlock_dmp_default_unlock
 };
 
 /* default attr */
@@ -103,14 +103,15 @@ struct nlock_dmp_attr nlock_dmp_default_attr = {
 
 /* default functions */
 int nlock_dmp_default_lock(struct nlock_dmp *nd) {
-	int err;
 	struct thread_dmp *td;
 
 	td = thread_get_dmp();
 
 	while (1) {
-		if ((err = nlock_trylock(nd->nlock)) == 0)
+		if (nlock_trylock(nd->nlock) == 0) {
+			thread_dmp_incr_lock_count(td);
 			break;
+		}
 
 		thread_dmp_execute_instruction(td, MONITORENTER_OPCODE);
 
@@ -125,6 +126,19 @@ int nlock_dmp_default_lock(struct nlock_dmp *nd) {
 }
 
 int nlock_dmp_default_unlock(struct nlock_dmp *nd) {
-	nlock_unlock(nd->nlock);
+	int lock_count;
+	struct thread_dmp *td;
+	enum thread_dmp_serial_mode mode;
+
+	td = thread_get_dmp();
+	lock_count = thread_dmp_decr_lock_count(td);
+	mode = thread_dmp_get_serial_mode(td);
+
+	if (mode == reduced_mode && lock_count == 0 &&
+	    dmp_get_mode(dmp) == serial_mode) {
+			mvm_print("thread %" PRIu32 ": unlocked last monitor in reduced serial mode, blocking\n", thread_get_ref());		
+		dmp_thread_block(dmp, td);
+	}
+	
 	return 0;
 }

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <29 Mar 2011 at 20:43:05 by nwidger on macros.local>
+ * Time-stamp: <04 Apr 2011 at 19:56:05 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -169,6 +169,43 @@ int thread_dmp_set_thread(struct thread_dmp *td, struct thread *t) {
 	return 0;
 }
 
+enum thread_dmp_serial_mode thread_dmp_get_serial_mode(struct thread_dmp *td) {
+	if (td == NULL) {
+		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
+		mvm_halt();
+	}
+
+	return td->attr.serial_mode;
+}
+
+int thread_dmp_incr_lock_count(struct thread_dmp *td) {
+	if (td == NULL) {
+		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
+		mvm_halt();
+	}
+
+	return ++(td->attr.lock_count);
+}
+
+int thread_dmp_decr_lock_count(struct thread_dmp *td) {
+	if (td == NULL) {
+		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
+		mvm_halt();
+	}
+
+	return --(td->attr.lock_count);
+}
+
+int thread_dmp_get_lock_count(struct thread_dmp *td) {
+	if (td == NULL) {
+		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
+		mvm_halt();
+	}
+
+	return td->attr.lock_count;
+}
+
+
 int thread_dmp_get_quantum_size(struct thread_dmp *td) {
 	if (td == NULL) {
 		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
@@ -259,6 +296,8 @@ struct thread_dmp_ops thread_dmp_default_ops = {
 
 /* default attr */
 struct thread_dmp_attr thread_dmp_default_attr = {
+	THREAD_DMP_DEFAULT_REDUCED_SERIAL_MODE,
+	THREAD_DMP_DEFAULT_LOCK_COUNT,
 	THREAD_DMP_DEFAULT_QUANTUM_SIZE,
 	THREAD_DMP_DEFAULT_INSTRUCTION_COUNTER,
 	&thread_dmp_default_ops

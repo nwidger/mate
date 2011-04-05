@@ -3,7 +3,7 @@
 mvm \- A virtual machine for the maTe programming language.
 .SH SYNOPSIS
 .B mvm
-[\-h] [\-v] [\-q] [\-c] [\-d] [\-a] [\-i NUM] [\-s FILE] [\-m NUM] FILE
+[\-h] [\-v] [\-q] [\-c] [\-d] [\-a] [\-i NUM] [\-s FILE] [\-m NUM] [\-p] [\-Q NUM] [\-g NUM] [\-r] FILE
 .SH DESCRIPTION
 Executes the specified maTe class file FILE.
 .SH OPTIONS
@@ -41,8 +41,14 @@ letter g or G to indicate gigabytes.
 \-p
 Enable Deterministic Shared Memory Multiprocessing (DMP).
 .TP
+\-Q
+With -p, specify quantum size.
+.TP
 \-g
 With -p, specify ownership table granularity.
+.TP
+\-r
+With -p, enable reduced serial mode.
 .SH EXIT STATUS
 Returns a zero exist status if it was successful, and returns non-zero
 if it encountered an error while processing input.

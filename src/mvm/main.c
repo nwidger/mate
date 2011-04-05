@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Apr 2011 at 18:53:17 by nwidger on macros.local>
+ * Time-stamp: <04 Apr 2011 at 20:05:16 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -39,7 +39,7 @@
 #include "thread_dmp.h"
 #include "vm_stack.h"
 
-#define OPTARGS ":m:s:i:daqcvhpg:"
+#define OPTARGS ":m:s:i:daqcvhpQ:g:r"
 
 /* globals */
 FILE *input;
@@ -83,7 +83,7 @@ uint64_t parse_heap_size(char *s);
 /** prints usage text to stderr. */
 
 void usage() {
-	fprintf(stderr, "usage: mvm [-h] [-v] [-q] [-c] [-d] [-a] [-i NUM] [-s FILE] [-m NUM] FILE\n");
+	fprintf(stderr, "usage: mvm [-h] [-v] [-q] [-c] [-d] [-a] [-i NUM] [-s FILE] [-m NUM] [-p] [-Q NUM] [-g NUM] [-r] FILE\n");
 	fprintf(stderr, "Executes the specified maTe class file.\n");
 	fprintf(stderr, "  -h       Print this help message and exit.\n");
 	fprintf(stderr, "  -v       Verbose output.  Decodes each executed instruction to stderr.\n");
@@ -100,7 +100,9 @@ void usage() {
 	fprintf(stderr, "           passing the -s switch to the assembler.\n");
 	fprintf(stderr, "  -m NUM   Use a heap with a size of NUM bytes.\n");
 	fprintf(stderr, "  -p       Enable DMP (cannot be used with -c).\n");
+	fprintf(stderr, "  -Q NUM   With -p, specify quantum size.\n");
 	fprintf(stderr, "  -g NUM   With -p, specify ownership table granularity.\n");
+	fprintf(stderr, "  -r       With -p, enable reduced serial mode.\n");
 }
 
 /** initializes mvm components.
@@ -433,8 +435,14 @@ int main(int argc, char *argv[]) {
 		case 'p':
 			dmp = (struct dmp *)1;
 			break;
+		case 'Q':
+			thread_dmp_attr.quantum_size = atoi(optarg);
+			break;
 		case 'g':
 			object_dmp_attr.depth = atoi(optarg);
+			break;
+		case 'r':
+			thread_dmp_attr.serial_mode = reduced_mode;
 			break;
 		case 'q':
 			print_trace = 0;

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Apr 2011 at 18:58:50 by nwidger on macros.local>
+ * Time-stamp: <04 Apr 2011 at 20:03:12 by nwidger on macros.local>
  */
 
 #ifndef _MVM_CONSTANTS_H
@@ -288,6 +288,8 @@
 #define OBJECT_DMP_DEFAULT_OWNER -1 /* -1 == allocating thread */
 #define OBJECT_DMP_DEFAULT_DEPTH 1
 
+#define THREAD_DMP_DEFAULT_REDUCED_SERIAL_MODE full_mode
+#define THREAD_DMP_DEFAULT_LOCK_COUNT          0
 #define THREAD_DMP_DEFAULT_QUANTUM_SIZE        10
 #define THREAD_DMP_DEFAULT_INSTRUCTION_COUNTER 0
 

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Apr 2011 at 18:55:49 by nwidger on macros.local>
+ * Time-stamp: <04 Apr 2011 at 19:54:50 by nwidger on macros.local>
  */
 
 #ifndef _MVM_THREAD_DMP_H
@@ -22,6 +22,11 @@ enum thread_dmp_state {
 	destroyed_state = 4
 };
 
+enum thread_dmp_serial_mode {
+	full_mode    = 0,
+	reduced_mode = 1
+};
+
 /* struct definitions */
 struct thread_dmp_ops {
 	int  (*thread_creation)(struct thread_dmp *td);
@@ -32,6 +37,8 @@ struct thread_dmp_ops {
 };
 
 struct thread_dmp_attr {
+	enum thread_dmp_serial_mode serial_mode;
+	int lock_count;
 	int quantum_size;
 	uint64_t instruction_counter;
 	struct thread_dmp_ops *ops;
@@ -47,6 +54,10 @@ int thread_dmp_wait(struct thread_dmp *td);
 int thread_dmp_signal(struct thread_dmp *td);
 struct thread * thread_dmp_get_thread(struct thread_dmp *td);
 int thread_dmp_set_thread(struct thread_dmp *td, struct thread *t);
+enum thread_dmp_serial_mode thread_dmp_get_serial_mode(struct thread_dmp *td);
+int thread_dmp_incr_lock_count(struct thread_dmp *td);
+int thread_dmp_decr_lock_count(struct thread_dmp *td);
+int thread_dmp_get_lock_count(struct thread_dmp *td);
 int thread_dmp_get_quantum_size(struct thread_dmp *td);
 int thread_dmp_set_quantum_size(struct thread_dmp *td, int q);
 int thread_dmp_thread_creation(struct thread_dmp *td);

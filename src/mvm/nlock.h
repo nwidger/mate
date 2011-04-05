@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Feb 2011 at 21:55:24 by nwidger on macros.local>
+ * Time-stamp: <04 Apr 2011 at 19:17:47 by nwidger on macros.local>
  */
 
 #ifndef _MVM_NLOCK_H

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Apr 2011 at 16:34:37 by nwidger on macros.local>
+ * Time-stamp: <04 Apr 2011 at 19:01:27 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -409,9 +409,6 @@ void * thread_run0_main(void *p) {
 	if (thread_set_current(t) != 0)
 		mvm_halt();
 
-	/* if (t->dmp != NULL) */
-	/* 	thread_dmp_thread_start(t->dmp); */
-	
 	t->state = runnable_state;
 
 	if (debug != 0)

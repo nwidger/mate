@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <01 Apr 2011 at 14:39:37 by nwidger on macros.local>
+ * Time-stamp: <04 Apr 2011 at 19:44:20 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -139,10 +139,11 @@ int nlock_trylock(struct nlock *n) {
 		}
 	}
 
-	if (err == 0) {
-		if (n->locks == 0) n->owner = pthread_self();
-		n->locks++;
-	}
+	if (err != 0)
+		return 1;
+
+	if (n->locks == 0) n->owner = pthread_self();
+	n->locks++;
 
 	return 0;
 }
@@ -154,14 +155,14 @@ int nlock_unlock(struct nlock *n) {
 		fprintf(stderr, "mvm: nlock has not been initialized!\n");
 		mvm_halt();
 	}
-
-	if (n->dmp != NULL)
-		return nlock_dmp_unlock(n->dmp);
 	
 	if (n->locks == 0 || pthread_equal(pthread_self(), n->owner) == 0) {
 		fprintf(stderr, "mvm: nlock_unlock called but thread does not own mutex!\n");
 		mvm_halt();
 	}
+
+	if (n->dmp != NULL)
+		nlock_dmp_unlock(n->dmp);
 
 	n->locks--;
 	if (n->locks == 0) memset(&n->owner, 0, sizeof(pthread_t));
