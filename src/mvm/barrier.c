@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <25 Mar 2011 at 15:44:25 by nwidger on macros.local>
+ * Time-stamp: <06 Apr 2011 at 20:50:29 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -115,8 +115,6 @@ int barrier_await(struct barrier *b) {
 
 	i = b->parties - ++b->waiting;
 
-	if (b->hook != NULL) (*b->hook)(i, b->hook_arg);
-
 	if (i == 0) {
 		barrier_broadcast(b);
 	} else {
@@ -194,7 +192,6 @@ int barrier_dec_parties(struct barrier *b) {
 	
 	if (i == 0) {
 		mvm_print("removing thread caused barrier to broadcast!\n");
-		if (b->hook != NULL) (*b->hook)(0, b->hook_arg);
 		barrier_broadcast(b);
 	}
 
@@ -209,6 +206,8 @@ int barrier_broadcast(struct barrier *b) {
 		fprintf(stderr, "mvm: barrier not initialized!\n");
 		mvm_halt();
 	}
+
+	if (b->hook != NULL) (*b->hook)(0, b->hook_arg);
 
 	b->generation++;
 	b->waiting = 0;

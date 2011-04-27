@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Apr 2011 at 16:36:44 by nwidger on macros.local>
+ * Time-stamp: <10 Apr 2011 at 15:19:23 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -222,11 +222,6 @@ int dmp_thread_block(struct dmp *d, struct thread_dmp *td) {
 	}
 
 	mvm_print("thread %" PRIu32 ": in dmp_thread_block\n", thread_get_ref());
-
-	if (ref_set_contains(d->thread_set, thread_get_ref()) == 0) {
-		mvm_print("thread %" PRIu32 ": in dmp_thread_block but not in thread set!\n", thread_get_ref());
-		mvm_halt();
-	}
 
 	thread_dmp_set_state(td, blocking_state);
 

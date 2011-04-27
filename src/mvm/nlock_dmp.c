@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Apr 2011 at 19:56:31 by nwidger on macros.local>
+ * Time-stamp: <05 Apr 2011 at 20:10:22 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -118,7 +118,6 @@ int nlock_dmp_default_lock(struct nlock_dmp *nd) {
 		if (dmp_get_mode(dmp) == serial_mode) {
 			mvm_print("thread %" PRIu32 ": cannot get monitor in serial mode, blocking\n", thread_get_ref());
 			dmp_thread_block(dmp, td);
-			break;
 		}
 	}
 
