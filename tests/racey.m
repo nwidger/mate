@@ -1,3 +1,21 @@
+// RACEY: a program print a result which is very sensitive to the
+// ordering between processors (races).
+// 
+// It is important to "align" the short parallel executions in the
+// simulated environment. First, a simple barrier is used to make sure
+// thread on different processors are starting at roughly the same time.
+// Second, each thread is bound to a physical cpu. Third, before the main
+// loop starts, each thread use a tight loop to gain the long time slice
+// from the OS scheduler.
+// 
+// NOTE: This program need to be customized for your own OS/Simulator 
+// environment. See TODO places in the code.
+
+// TODO: replace PHASE_MARKER with your own function that marks a
+// program phase.  Example being a simic "magic" instruction, or
+// VMware backdoor call. Printf should be avoided since it may cause
+// app/OS interaction, even de-scheduling.
+
 class RaceyThread extends Thread {
   Main maine;
   Integer threadId;
@@ -28,6 +46,16 @@ class RaceyThread extends Thread {
   // The function which is called once the thread is created
   Object run() {
     Integer i;
+
+    // Thread Initialization:
+    // 
+    // Bind the thread to a processor.  This will make sure that each of
+    // threads are on a different processor.  ProcessorIds[threadId]
+    // specifies the processor ID which the thread is binding to.
+
+    // TODO:
+    // Bind this thread to ProcessorIds[threadId]
+    // use processor_bind(), for example on solaris.
 
     // seize the cpu, roughly 0.5-1 second on ironsides
     // i = 0;

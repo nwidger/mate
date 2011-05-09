@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Apr 2011 at 18:56:19 by nwidger on macros.local>
+ * Time-stamp: <09 May 2011 at 16:20:31 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -170,14 +170,14 @@ int object_dmp_default_store(struct object_dmp *od, int i, int r) {
 		/* set private owned by me */
 		object_dmp_chown(od, me);
 	} else if (current != me) {
-		mvm_print("thread %" PRIu32 ":     private not owned by me: block, set shared, proceed!\n", thread_get_ref());
+		mvm_print("thread %" PRIu32 ":     private not owned by me: block, set private owned by me, proceed!\n", thread_get_ref());
 
 		if (dmp_get_mode(dmp) == parallel_mode) {
 			/* block */
 			dmp_thread_block(dmp, td);
 		}
 
-		/* set shared */
+		/* set private owned by me */
 		object_dmp_chown(od, me);
 	} else {
 		mvm_print("thread %" PRIu32 ":     private owned by me: proceed!\n", thread_get_ref());
