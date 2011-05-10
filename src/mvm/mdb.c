@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <03 Dec 2010 at 20:54:34 by nwidger on macros.local>
+ * Time-stamp: <09 May 2011 at 16:22:34 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -924,7 +924,7 @@ int delete_function(char **t, int n) {
 	repeat = 0;
 
 	if (n == 1) {
-		while (1) {
+		for (;;) {
 			fprintf(stderr, "Delete all breakpoints? (y or n) ");
 
 			fgets(buf, BUFFER_SIZE, stdin);
@@ -1495,7 +1495,7 @@ int run_function(char **t, int n) {
 		resume = 1;
 		do_restart = 1;
 	} else {
-		while (1) {
+		for (;;) {
 			fprintf(stderr, "The program being debugged has been started already.\n");
 			fprintf(stderr, "Start it from the beginning? (y or n) ");
 
@@ -1662,7 +1662,7 @@ int quit_function(char **t, int n) {
 	if (mode == startup_mode || mode == terminated_mode) {
 		quit = 1;
 	} else {
-		while (1) {
+		for (;;) {
 			fprintf(stderr, "The program is running.  Exit anyway? (y or n) ");
 
 			fgets(buf, BUFFER_SIZE, stdin);

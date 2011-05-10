@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <05 Apr 2011 at 20:10:22 by nwidger on macros.local>
+ * Time-stamp: <09 May 2011 at 16:22:04 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -107,7 +107,7 @@ int nlock_dmp_default_lock(struct nlock_dmp *nd) {
 
 	td = thread_get_dmp();
 
-	while (1) {
+	for (;;) {
 		if (nlock_trylock(nd->nlock) == 0) {
 			thread_dmp_incr_lock_count(td);
 			break;

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Apr 2011 at 19:01:27 by nwidger on macros.local>
+ * Time-stamp: <09 May 2011 at 16:22:39 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -292,7 +292,7 @@ int thread_pthread_create(struct thread *t, void * (*s)(void *)) {
 		mvm_halt();
 	}
 
-	while (1) {
+	for (;;) {
 		err = pthread_create(&t->id, &attr, s, (void *)t);
 
 		if (err == 0) {
