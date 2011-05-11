@@ -1,6 +1,9 @@
 Integer main() {
   Integer a, b, c;
 
+  a = 1;
+  b = 2;
+
   if (a == a && b == b && c == c) {
     out "yay!" + newline;
   } else {
@@ -17,5 +20,11 @@ Integer main() {
     out "yay!" + newline;    
   } else {
     out "boo!" + newline;    
+  }
+
+  if (a.greaterThan(b) && b.greaterThan(a)) {
+    out "boo!" + newline;
+  } else {
+    out "yay!" + newline;
   }
 }
