@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Dec 2010 at 21:22:27 by nwidger on macros.local>
+ * Time-stamp: <10 May 2011 at 20:50:34 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -391,6 +391,56 @@ int native_integer_less_than(uint32_t i) {
 	garbage_collector_lock(garbage_collector);
 
 	ref = integer_less_than(this, object);
+	operand_stack_push(calling_frame_operand_stack, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	return 0;
+}
+
+int native_integer_greater_than_equal(uint32_t i) {
+	int ref, n;
+	struct object *this, *object;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	object = heap_fetch_object(heap, ref);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = integer_greater_than_equal(this, object);
+	operand_stack_push(calling_frame_operand_stack, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	return 0;
+}
+
+int native_integer_less_than_equal(uint32_t i) {
+	int ref, n;
+	struct object *this, *object;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	object = heap_fetch_object(heap, ref);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = integer_less_than_equal(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
@@ -1199,6 +1249,56 @@ int native_real_less_than(uint32_t i) {
 	return 0;
 }
 
+int native_real_greater_than_equal(uint32_t i) {
+	int ref, n;
+	struct object *this, *object;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	object = heap_fetch_object(heap, ref);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = real_greater_than_equal(this, object);
+	operand_stack_push(calling_frame_operand_stack, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	return 0;
+}
+
+int native_real_less_than_equal(uint32_t i) {
+	int ref, n;
+	struct object *this, *object;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	object = heap_fetch_object(heap, ref);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = real_less_than_equal(this, object);
+	operand_stack_push(calling_frame_operand_stack, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	return 0;
+}
+
 int native_real_not(uint32_t i) {
 	int ref, n;
 	struct object *this;
@@ -1362,6 +1462,12 @@ int add_native_methods(struct native_method_array *n) {
 	native_method_array_set(n, INTEGER_LESS_THAN_NATIVE_INDEX,
 				INTEGER_LESS_THAN_NATIVE_NAME,
 				native_integer_less_than);
+	native_method_array_set(n, INTEGER_GREATER_THAN_EQUAL_NATIVE_INDEX,
+				INTEGER_GREATER_THAN_EQUAL_NATIVE_NAME,
+				native_integer_greater_than);
+	native_method_array_set(n, INTEGER_LESS_THAN_EQUAL_NATIVE_INDEX,
+				INTEGER_LESS_THAN_EQUAL_NATIVE_NAME,
+				native_integer_less_than);
 	native_method_array_set(n, INTEGER_NOT_NATIVE_INDEX,
 				INTEGER_NOT_NATIVE_NAME,
 				native_integer_not);
@@ -1386,6 +1492,12 @@ int add_native_methods(struct native_method_array *n) {
 	native_method_array_set(n, INTEGER_LESS_THAN_OP_NATIVE_INDEX,
 				INTEGER_LESS_THAN_OP_NATIVE_NAME,
 				native_integer_less_than);
+	native_method_array_set(n, INTEGER_GREATER_THAN_EQUAL_OP_NATIVE_INDEX,
+				INTEGER_GREATER_THAN_EQUAL_OP_NATIVE_NAME,
+				native_integer_greater_than_equal);
+	native_method_array_set(n, INTEGER_LESS_THAN_EQUAL_OP_NATIVE_INDEX,
+				INTEGER_LESS_THAN_EQUAL_OP_NATIVE_NAME,
+				native_integer_less_than_equal);
 	native_method_array_set(n, INTEGER_NOT_OP_NATIVE_INDEX,
 				INTEGER_NOT_OP_NATIVE_NAME,
 				native_integer_not);
@@ -1499,6 +1611,12 @@ int add_native_methods(struct native_method_array *n) {
 	native_method_array_set(n, REAL_LESS_THAN_NATIVE_INDEX,
 				REAL_LESS_THAN_NATIVE_NAME,
 				native_real_less_than);
+	native_method_array_set(n, REAL_GREATER_THAN_EQUAL_NATIVE_INDEX,
+				REAL_GREATER_THAN_EQUAL_NATIVE_NAME,
+				native_real_greater_than);
+	native_method_array_set(n, REAL_LESS_THAN_EQUAL_NATIVE_INDEX,
+				REAL_LESS_THAN_EQUAL_NATIVE_NAME,
+				native_real_less_than);
 	native_method_array_set(n, REAL_NOT_NATIVE_INDEX,
 				REAL_NOT_NATIVE_NAME,
 				native_real_not);
@@ -1523,6 +1641,12 @@ int add_native_methods(struct native_method_array *n) {
 	native_method_array_set(n, REAL_LESS_THAN_OP_NATIVE_INDEX,
 				REAL_LESS_THAN_OP_NATIVE_NAME,
 				native_real_less_than);
+	native_method_array_set(n, REAL_GREATER_THAN_EQUAL_OP_NATIVE_INDEX,
+				REAL_GREATER_THAN_EQUAL_OP_NATIVE_NAME,
+				native_real_greater_than_equal);
+	native_method_array_set(n, REAL_LESS_THAN_EQUAL_OP_NATIVE_INDEX,
+				REAL_LESS_THAN_EQUAL_OP_NATIVE_NAME,
+				native_real_less_than_equal);	
 	native_method_array_set(n, REAL_NOT_OP_NATIVE_INDEX,
 				REAL_NOT_OP_NATIVE_NAME,
 				native_real_not);

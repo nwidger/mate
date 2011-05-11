@@ -49,23 +49,28 @@
      NULL_LITERAL = 265,
      OPERATOR = 266,
      EQ_OP = 267,
-     INSTANCEOF_OP = 268,
-     MAIN = 269,
-     CLASS = 270,
-     EXTENDS = 271,
-     THIS = 272,
-     SUPER = 273,
-     SYNCHRONIZED = 274,
-     IF = 275,
-     ELSE = 276,
-     WHILE = 277,
-     NEW = 278,
-     RETURN = 279,
-     OUT = 280,
-     IN = 281,
-     BREAK = 282,
-     CONTINUE = 283,
-     BAD = 284
+     NE_OP = 268,
+     INSTANCEOF_OP = 269,
+     GE_OP = 270,
+     LE_OP = 271,
+     BOOL_AND = 272,
+     BOOL_OR = 273,
+     MAIN = 274,
+     CLASS = 275,
+     EXTENDS = 276,
+     THIS = 277,
+     SUPER = 278,
+     SYNCHRONIZED = 279,
+     IF = 280,
+     ELSE = 281,
+     WHILE = 282,
+     NEW = 283,
+     RETURN = 284,
+     OUT = 285,
+     IN = 286,
+     BREAK = 287,
+     CONTINUE = 288,
+     BAD = 289
    };
 #endif
 /* Tokens.  */
@@ -79,23 +84,28 @@
 #define NULL_LITERAL 265
 #define OPERATOR 266
 #define EQ_OP 267
-#define INSTANCEOF_OP 268
-#define MAIN 269
-#define CLASS 270
-#define EXTENDS 271
-#define THIS 272
-#define SUPER 273
-#define SYNCHRONIZED 274
-#define IF 275
-#define ELSE 276
-#define WHILE 277
-#define NEW 278
-#define RETURN 279
-#define OUT 280
-#define IN 281
-#define BREAK 282
-#define CONTINUE 283
-#define BAD 284
+#define NE_OP 268
+#define INSTANCEOF_OP 269
+#define GE_OP 270
+#define LE_OP 271
+#define BOOL_AND 272
+#define BOOL_OR 273
+#define MAIN 274
+#define CLASS 275
+#define EXTENDS 276
+#define THIS 277
+#define SUPER 278
+#define SYNCHRONIZED 279
+#define IF 280
+#define ELSE 281
+#define WHILE 282
+#define NEW 283
+#define RETURN 284
+#define OUT 285
+#define IN 286
+#define BREAK 287
+#define CONTINUE 288
+#define BAD 289
 
 
 
@@ -108,7 +118,7 @@ typedef union YYSTYPE
 
         unsigned long value;
         float float_value;
-	
+
 	string *str;
 	char c;
 
@@ -133,8 +143,8 @@ typedef union YYSTYPE
 
 	BlockStatementNode *blockStmnt;
 }
-/* Line 1489 of yacc.c.  */
-#line 138 "parse.h"
+/* Line 1529 of yacc.c.  */
+#line 148 "parse.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

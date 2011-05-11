@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <30 Nov 2009 at 19:23:15 by nwidger on macros.local>
+// Time-stamp: <10 May 2011 at 21:15:15 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -32,11 +32,12 @@ string * StringPoolRecord::getString() {
 
 StringPool::StringPool() {
 	head = 0;
-	equalsOp = string("equals");
 	plusOp = string("operator+");
 	minusOp = string("operator-");
 	lessThanOp = string("operator<");
+	lessThanEqualOp = string("operator<=");	
 	greaterThanOp = string("operator>");
+	greaterThanEqualOp = string("operator>=");
 	timesOp = string("operator*");
 	divideOp = string("operator/");
 	negateOp = string("operator!");
@@ -107,19 +108,27 @@ string * StringPool::getOpString(string *s) {
 }
 
 string * StringPool::getOpString(const char *s) {
+	int len;
+	char second;
+
+	len = strlen(s);
+	second = len == 2 ? s[1] : '\0';
+
 	switch (s[0]) {
-	case '=':
-		if (s[1] == '=')
-			return &equalsOp;
-		break;
 	case '+':
 		return &plusOp;
 	case '-':
 		return &minusOp;
 	case '<':
-		return &lessThanOp;
+		if (len == 1)
+			return &lessThanOp;
+		else if (second == '=')
+			return &lessThanEqualOp;
 	case '>':
-		return &greaterThanOp;
+		if (len == 1)
+			return &greaterThanOp;
+		else if (second == '=')
+			return &greaterThanEqualOp;
 	case '*':
 		return &timesOp;
 	case '/':

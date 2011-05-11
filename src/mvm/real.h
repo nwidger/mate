@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Dec 2010 at 17:50:18 by nwidger on macros.local>
+ * Time-stamp: <10 May 2011 at 20:52:28 by nwidger on macros.local>
  */
 
 #ifndef _MVM_REAL_H
@@ -111,6 +111,30 @@ int real_greater_than(struct object *o, struct object *p);
  */
 
 int real_less_than(struct object *o, struct object *p);
+
+/** returns a reference to a new Real object whose value is 1 if the
+ * value of o is greater than or equal to the value of p, and 0
+ * otherwise.  o and p must be pointers to Real objects.
+ *
+ * @param o - first Real object
+ * @param p - second Real object
+ *
+ * @return reference to new Real object, or 0 on failure
+ */
+
+int real_greater_than_equal(struct object *o, struct object *p);
+
+/** returns a reference to a new Real object whose value is 1 if the
+ * value of o is less than or equal to the value of p, and 0
+ * otherwise.  o and p must be pointers to Real objects.
+ *
+ * @param o - first Real object
+ * @param p - second Real object
+ *
+ * @return reference to new Real object, or 0 on failure
+ */
+
+int real_less_than_equal(struct object *o, struct object *p);
 
 /** returns a reference to a new Real object whose value is 1 if the
  * value of o is 0, and 0 otherwise.  o must be a pointer to an

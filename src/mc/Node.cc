@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <27 Jan 2011 at 20:32:14 by nwidger on macros.local>
+// Time-stamp: <10 May 2011 at 22:31:35 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -200,7 +200,7 @@ VarNode::VarNode(string *n) {
 	type = 0;
 	position = 0;
 	isLocal = false;
-	nodeName = "VarNode";
+	nodeName = "VarNode " + *n;;
 }
 
 void VarNode::setPosition(int p) {
@@ -297,7 +297,7 @@ Node * MainVarNode::analyze(void *param) {
 		cerr << line << ": variable " << *name
 		     << " has not been declared in main block!\n";
 		err = true;
-		
+
 		// DELETE
 		delete this;
 		return (Node *)new IntegerLiteralNode(0);
@@ -1052,7 +1052,7 @@ Node * ClassInstanceCreationExpressionNode::analyze(void *param) {
 		cerr << line << ": class " << *name << " in class instance "
 		     << "creation expression has not been declared!\n";
 		err = true;
-		
+
 		classType = types->classTable()->getObject();
 		type = classType;
 
@@ -1420,7 +1420,7 @@ Node * FieldAccessOperatorNode::analyze(void *param) {
 		offset = cfn->getOffset();
 		type = cfn->getType();
 	}
-	
+
 	return (Node *)this;
 }
 
@@ -1478,6 +1478,76 @@ Node * EqualityOperatorNode::analyze(void *param) {
 }
 
 // -----------------------------------------------------------------------------
+// BooleanAndOperatorNode
+// -----------------------------------------------------------------------------
+
+BooleanAndOperatorNode::BooleanAndOperatorNode(ExpressionNode *l, ExpressionNode *r) : BinaryOperatorNode(l, r) {
+	nodeName = "BooleanAndOperatorNode";
+	trueLabel = 0;
+	falseLabel = 0;
+	endLabel = 0;
+}
+
+Node * BooleanAndOperatorNode::analyze(void *param) {
+	ClassType *integerClass;
+
+	labelCounter += 3;
+	trueLabel = labelCounter-3;
+	falseLabel = labelCounter-2;
+	endLabel = labelCounter-1;
+
+	lhs = (ExpressionNode *)lhs->analyze(param);
+	rhs = (ExpressionNode *)rhs->analyze(param);
+
+	integerClass = types->classTable()->find("Integer");
+	type = integerClass;
+
+	if (lhs->getType() != integerClass || rhs->getType() != integerClass) {
+		cerr << line << ": expressions of boolean AND operator must be of"
+		     << " Integer type!\n";
+		err = true;
+	}
+
+	return (Node *)this;
+}
+
+// -----------------------------------------------------------------------------
+// BooleanOrOperatorNode
+// -----------------------------------------------------------------------------
+
+BooleanOrOperatorNode::BooleanOrOperatorNode(ExpressionNode *l, ExpressionNode *r) : BinaryOperatorNode(l, r) {
+	nodeName = "BooleanOrOperatorNode";
+	falseLabel1 = 0;
+	falseLabel2 = 0;	
+	trueLabel = 0;
+	endLabel = 0;
+}
+
+Node * BooleanOrOperatorNode::analyze(void *param) {
+	ClassType *integerClass;
+
+	labelCounter += 4;
+	falseLabel1 = labelCounter-4;	
+	falseLabel2 = labelCounter-3;
+	trueLabel = labelCounter-2;
+	endLabel = labelCounter-1;
+
+	lhs = (ExpressionNode *)lhs->analyze(param);
+	rhs = (ExpressionNode *)rhs->analyze(param);
+
+	integerClass = types->classTable()->find("Integer");
+	type = integerClass;
+
+	if (lhs->getType() != integerClass || rhs->getType() != integerClass) {
+		cerr << line << ": expressions of boolean OR operator must be of"
+		     << " Integer type!\n";
+		err = true;
+	}
+
+	return (Node *)this;
+}
+
+// -----------------------------------------------------------------------------
 // AssignmentOperatorNode
 // -----------------------------------------------------------------------------
 
@@ -1531,7 +1601,7 @@ Node * AssignmentOperatorNode::analyze(void *param) {
 		storeO << "putfield " << faon->getOffset();
 		str = storeO.str();
 		storeInstruction = stringPool->newString(str);
-		usingPutfield = true;		
+		usingPutfield = true;
 	}
 
 	return (Node *)this;
@@ -1564,7 +1634,7 @@ SynchronizedStatementNode::~SynchronizedStatementNode() {
 }
 
 void SynchronizedStatementNode::dump() {
-	StatementNode::dump();	
+	StatementNode::dump();
 	expression->dump();
 	statements->dump();
 }
@@ -1591,7 +1661,7 @@ Node * SynchronizedStatementNode::analyze(void *param) {
 
 	localVariableStack->leaveBlock();
 	monitorStack->pop();
-	
+
 	return (Node *)this;
 }
 
@@ -1976,8 +2046,8 @@ Node * ContinueStatementNode::analyze(void *param) {
 
 
 	entryLabel = lsr->getEntryLabel();
-	monitors = labelStack->getMonitors();	
-	
+	monitors = labelStack->getMonitors();
+
 	return (Node *)this;
 }
 
@@ -2081,7 +2151,7 @@ Node * ConstructorInvocationStatementNode::analyze(void *param) {
 
 		mungedName = constructor->getMungedName();
 	}
-	
+
 	return (Node *)this;
 }
 

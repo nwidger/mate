@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Feb 2010 at 13:45:15 by nwidger on macros.local>
+ * Time-stamp: <10 May 2011 at 20:51:37 by nwidger on macros.local>
  */
 
 #ifndef _MVM_INTEGER_H
@@ -113,6 +113,30 @@ int integer_greater_than(struct object *o, struct object *p);
  */
 
 int integer_less_than(struct object *o, struct object *p);
+
+/** returns a reference to a new Integer object whose value is 1 if
+ * the value of o is greater than or equal to the value of p, and 0
+ * otherwise.  o and p must be pointers to Integer objects.
+ *
+ * @param o - first Integer object
+ * @param p - second Integer object
+ *
+ * @return reference to new Integer object, or 0 on failure
+ */
+
+int integer_greater_than_equal(struct object *o, struct object *p);
+
+/** returns a reference to a new Integer object whose value is 1 if
+ * the value of o is less than or equal to the value of p, and 0
+ * otherwise.  o and p must be pointers to Integer objects.
+ *
+ * @param o - first Integer object
+ * @param p - second Integer object
+ *
+ * @return reference to new Integer object, or 0 on failure
+ */
+
+int integer_less_than_equal(struct object *o, struct object *p);
 
 /** returns a reference to a new Integer object whose value is 1 if the
  * value of o is 0, and 0 otherwise.  o must be a pointer to an

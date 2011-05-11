@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <23 Dec 2010 at 21:50:41 by nwidger on macros.local>
+// Time-stamp: <10 May 2011 at 22:26:50 by nwidger on macros.local>
 
 #ifndef _NODE_H
 #define _NODE_H
@@ -109,8 +109,8 @@ public:
 	ClassConstructorNode(string *n, Seq *p);
 	~ClassConstructorNode();
 	void setBody(BlockStatementNode *b);
-	BlockStatementNode * getBody();	
-	ClassType * getClassType();	
+	BlockStatementNode * getBody();
+	ClassType * getClassType();
 	void dump();
 	void encode();
 	string * toString();
@@ -122,7 +122,7 @@ public:
 	string * getMungedName();
 	void generateMungedName();
 	string * getName();
-	void setNativeIndex(int i);	
+	void setNativeIndex(int i);
 	bool getIsNative();
 	int getNativeIndex();
 protected:
@@ -132,14 +132,14 @@ protected:
 	Seq *parameters;
 	BlockStatementNode *body;
 	bool isNative;
-	int nativeIndex;	
+	int nativeIndex;
 };
 
 class ClassMethodNode : public Node {
 public:
 	ClassMethodNode(string *n, Seq *p);
 	~ClassMethodNode();
-	BlockStatementNode * getBody();	
+	BlockStatementNode * getBody();
 	void setClassType(ClassType *c);
 	ClassType * getClassType();
 	void setType(Type *t);
@@ -190,7 +190,7 @@ public:
 	virtual void dump();
 	virtual void setParentIsNegate(bool p);
 	virtual void setParentIsDeref(bool p);
-	virtual void setIsParenthesized(bool i);		
+	virtual void setIsParenthesized(bool i);
 	virtual bool equalType(ExpressionNode *e);
 	void setType(Type *t);
 	Type * getType();
@@ -386,7 +386,7 @@ class SuperExpressionNode : public ThisExpressionNode {
 public:
 	SuperExpressionNode();
 	Node * analyze(void *param);
-	string * toString();	
+	string * toString();
 };
 
 // -----------------------------------------------------------------------------
@@ -425,7 +425,7 @@ class NullLiteralNode : public ExpressionNode {
 public:
 	NullLiteralNode();
 	void dump();
-	void encode();	
+	void encode();
 protected:
 };
 
@@ -500,6 +500,38 @@ public:
 	void encode();
 	Node * analyze(void *param);
 protected:
+};
+
+
+// -----------------------------------------------------------------------------
+// BooleanAndOperatorNode
+// -----------------------------------------------------------------------------
+
+class BooleanAndOperatorNode : public BinaryOperatorNode {
+public:
+	BooleanAndOperatorNode(ExpressionNode *l, ExpressionNode *r);
+	void encode();
+	Node * analyze(void *param);
+protected:
+	int trueLabel;
+	int falseLabel;
+	int endLabel;
+};
+
+// -----------------------------------------------------------------------------
+// BooleanOrOperatorNode
+// -----------------------------------------------------------------------------
+
+class BooleanOrOperatorNode : public BinaryOperatorNode {
+public:
+	BooleanOrOperatorNode(ExpressionNode *l, ExpressionNode *r);
+	void encode();
+	Node * analyze(void *param);
+protected:
+	int falseLabel1;
+	int falseLabel2;
+	int trueLabel;
+	int endLabel;
 };
 
 // -----------------------------------------------------------------------------
@@ -583,7 +615,7 @@ protected:
 
 class IfThenElseStatementNode : public StatementNode {
 public:
-	IfThenElseStatementNode(ExpressionNode *c, StatementNode *t, 
+	IfThenElseStatementNode(ExpressionNode *c, StatementNode *t,
 				StatementNode *e);
 	~IfThenElseStatementNode();
 	void dump();
@@ -618,7 +650,7 @@ public:
 	~ReturnStatementNode();
 	void dump();
 	void encode();
-	Node * analyze(void *param);	
+	Node * analyze(void *param);
 protected:
 	ExpressionNode *expression;
 	string *label;
@@ -631,11 +663,11 @@ public:
 	~OutStatementNode();
 	void dump();
 	void encode();
-	Node * analyze(void *param);	
+	Node * analyze(void *param);
 protected:
 	ExpressionNode *expression;
 	bool callToString;
-	MethodInvocationExpressionNode *toStringInvocation;	
+	MethodInvocationExpressionNode *toStringInvocation;
 };
 
 class BreakStatementNode : public StatementNode {
@@ -643,7 +675,7 @@ public:
 	BreakStatementNode();
 	~BreakStatementNode();
 	void encode();
-	Node * analyze(void *param);	
+	Node * analyze(void *param);
 protected:
 	string *exitLabel;
 	int *monitors;
@@ -652,9 +684,9 @@ protected:
 class ContinueStatementNode : public StatementNode {
 public:
 	ContinueStatementNode();
-	~ContinueStatementNode();	
+	~ContinueStatementNode();
 	void encode();
-	Node * analyze(void *param);	
+	Node * analyze(void *param);
 protected:
 	string *entryLabel;
 	int *monitors;

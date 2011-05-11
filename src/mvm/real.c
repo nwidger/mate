@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Dec 2010 at 12:35:40 by nwidger on macros.local>
+ * Time-stamp: <10 May 2011 at 20:52:49 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -174,6 +174,46 @@ int real_less_than(struct object *o, struct object *p) {
 	}
 
 	value = (r->value < j->value) ? 1 : 0;
+	if ((ref = class_table_new_integer(class_table, value, NULL)) == 0)
+		mvm_halt();
+
+	return ref;
+}
+
+int real_greater_than_equal(struct object *o, struct object *p) {
+	int ref;
+	int32_t value;
+	struct real *r, *j;
+	
+	r = object_get_real(o);
+	j = object_get_real(p);
+
+	if (r == NULL || j == NULL) {
+		fprintf(stderr, "mvm: real not initialized!\n");
+		mvm_halt();
+	}
+
+	value = (r->value >= j->value) ? 1 : 0;
+	if ((ref = class_table_new_integer(class_table, value, NULL)) == 0)
+		mvm_halt();
+
+	return ref;
+}
+
+int real_less_than_equal(struct object *o, struct object *p) {
+	int ref;
+	int32_t value;
+	struct real *r, *j;
+
+	r = object_get_real(o);
+	j = object_get_real(p);
+
+	if (r == NULL || j == NULL) {
+		fprintf(stderr, "mvm: real not initialized!\n");
+		mvm_halt();
+	}
+
+	value = (r->value <= j->value) ? 1 : 0;
 	if ((ref = class_table_new_integer(class_table, value, NULL)) == 0)
 		mvm_halt();
 

@@ -2,7 +2,7 @@
 
 // Niels Widger
 // CS 712
-// Time-stamp: <23 Dec 2010 at 21:50:20 by nwidger on macros.local>
+// Time-stamp: <10 May 2011 at 22:20:19 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -35,7 +35,7 @@ extern TypeModule *types;
 
         unsigned long value;
         float float_value;
-	
+
 	string *str;
 	char c;
 
@@ -74,7 +74,12 @@ extern TypeModule *types;
 %token OPERATOR
 
 %token <str> EQ_OP
+%token <str> NE_OP
 %token <str> INSTANCEOF_OP
+%token <str> GE_OP
+%token <str> LE_OP
+%token <str> BOOL_AND
+%token <str> BOOL_OR
 %token <str> '+'
 %token <str> '>'
 %token <str> '-'
@@ -153,6 +158,7 @@ extern TypeModule *types;
 %type <expr> LeftHandSide
 
 %type <expr> EqualityExpression
+%type <expr> BooleanExpression
 %type <expr> RelationalExpression
 
 %type <expr> InstanceOfExpression
@@ -389,7 +395,7 @@ OperatorBody
 ConstructorDeclaration
 	: NATIVE ConstructorDeclarator ';'
 	{
-	  $2->setNativeIndex($1);	
+	  $2->setNativeIndex($1);
 	  $2->setBody(new BlockStatementNode());
 	  $$ = $2;
 	}
@@ -512,7 +518,7 @@ SynchronizedStatement
 	  $$ = new SynchronizedStatementNode($3, new Seq(0, 0));
 	}
 	;
-	
+
 Statement
 	: Block
 	{
@@ -700,7 +706,7 @@ AssignmentExpression
 	{
 	  $$ = $1;
 	}
-	| EqualityExpression
+	| BooleanExpression
 	{
 	  $$ = $1;
 	}
@@ -724,10 +730,30 @@ LeftHandSide
 	}
 	;
 
+BooleanExpression
+	: EqualityExpression BOOL_AND BooleanExpression
+	{
+	  $$ = new BooleanAndOperatorNode($1, $3);
+	}
+	| EqualityExpression BOOL_OR BooleanExpression
+	{
+	  $$ = new BooleanOrOperatorNode($1, $3);	
+	}
+	| EqualityExpression
+	{
+	  $$ = $1;
+	}
+	;
+	
 EqualityExpression
 	: EqualityExpression EQ_OP InstanceOfExpression
 	{
 	  $$ = new EqualityOperatorNode($1, $3);
+	}
+	| EqualityExpression NE_OP InstanceOfExpression
+	{
+	  $$ = new MethodInvocationExpressionNode(new EqualityOperatorNode($1, $3),
+	           $2, new Seq(0, 0));
 	}
 	| InstanceOfExpression
 	{
@@ -745,13 +771,21 @@ InstanceOfExpression
 	  $$ = $1;
 	}
 	;
-	
+
 RelationalExpression
 	: RelationalExpression '<' AdditiveExpression
 	{
 	  $$ = new MethodInvocationExpressionNode($1, $2, new Seq(0, $3));
 	}
 	| RelationalExpression '>' AdditiveExpression
+	{
+	  $$ = new MethodInvocationExpressionNode($1, $2, new Seq(0, $3));
+	}
+	| RelationalExpression GE_OP AdditiveExpression
+	{
+	  $$ = new MethodInvocationExpressionNode($1, $2, new Seq(0, $3));
+	}
+	| RelationalExpression LE_OP AdditiveExpression
 	{
 	  $$ = new MethodInvocationExpressionNode($1, $2, new Seq(0, $3));
 	}
@@ -977,19 +1011,27 @@ BinaryClassOperator
 	}
 	| '*'
 	{
-	  $$ = $1;	
+	  $$ = $1;
 	}
 	| '/'
 	{
-	  $$ = $1;	
+	  $$ = $1;
 	}
 	| '>'
 	{
-	  $$ = $1;	
+	  $$ = $1;
 	}
 	| '<'
 	{
-	  $$ = $1;	
+	  $$ = $1;
+	}
+	| GE_OP
+	{
+	  $$ = $1;
+	}
+	| LE_OP
+	{
+	  $$ = $1;
 	}
 	;
 

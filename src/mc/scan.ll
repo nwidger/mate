@@ -1,7 +1,7 @@
 %{
 
 // Niels Widger
-// Time-stamp: <23 Dec 2010 at 21:56:10 by nwidger on macros.local>
+// Time-stamp: <10 May 2011 at 22:20:03 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -203,11 +203,33 @@ in			 {
                            return token(';');
                          }			 
 
+[&][&]                   {
+                           return token(BOOL_AND);
+                         }
+
+[|][|]                   {
+                           return token(BOOL_OR);
+                         }
+			 
 [=][=]                   {
-			   yylval.str = stringPool->getOpString(yytext);
                            return token(EQ_OP);
                          }
 
+[!][=]                   {
+			   yylval.str = stringPool->getOpString("!");
+                           return token(NE_OP);
+                         }
+			 
+[>][=]			 {
+			   yylval.str = stringPool->getOpString(yytext);
+			   return token(GE_OP);
+			 }
+
+[<][=]			 {
+			   yylval.str = stringPool->getOpString(yytext);
+			   return token(LE_OP);
+			 }			 
+			 
 [>]			 {
 			   yylval.str = stringPool->getOpString(yytext);
 			   return token('>');

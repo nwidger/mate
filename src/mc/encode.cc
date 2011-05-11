@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <23 Dec 2010 at 21:49:54 by nwidger on macros.local>
+// Time-stamp: <10 May 2011 at 22:27:48 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -33,7 +33,7 @@ void SynchronizedStatementNode::encode() {
 	statements->encode();
 
 	cout << "  aload " << position << '\n'
-	     << "  monitorexit\n";	
+	     << "  monitorexit\n";
 }
 
 void BlockStatementNode::encode() {
@@ -50,12 +50,12 @@ void ExpressionStatementNode::encode() {
 void MainBlockNode::encode() {
 	Node::encode();
 
-	cout << "$" << mainEntryLabel << " " << locals << " " << '\n';	
+	cout << "$" << mainEntryLabel << " " << locals << " " << '\n';
 
 	types->classTable()->encodeVMTs();
 
 	cout << mainEntryLabel << ":\n";
-	
+
 	body->encode();
 
 	cout << "  newint 0\n"
@@ -104,7 +104,7 @@ void ClassInstanceCreationExpressionNode::encode() {
 
 	cout << "  new $" << *(classType->getName()) << '\n'
 	     << "  dup\n";
-	
+
 	if (arguments != 0)
 		arguments->encode();
 
@@ -160,7 +160,7 @@ void RealLiteralNode::encode() {
 
 void NullLiteralNode::encode() {
 	Node::encode();
-	
+
 	cout << "  aconst_null\n";
 }
 
@@ -180,6 +180,52 @@ void EqualityOperatorNode::encode() {
 	BinaryOperatorNode::encode();
 
 	cout << "  refcmp\n";
+}
+
+void BooleanAndOperatorNode::encode() {
+	Node::encode();
+
+	lhs->encode();
+
+	cout << "  ifeq $" << label << falseLabel << "\n";
+
+	rhs->encode();
+
+	cout << "  ifeq $" << label << falseLabel << "\n";
+
+	cout << label << trueLabel << ":\n"
+	     << "  newint 1\n"
+	     << "  goto $" << label << endLabel << "\n";
+
+	cout << label << falseLabel << ":\n"
+	     << "  newint 0\n";
+
+	cout << label << endLabel << ":\n";
+}
+
+void BooleanOrOperatorNode::encode() {
+	Node::encode();
+
+	lhs->encode();
+
+	cout << "  ifeq $" << label << falseLabel1 << "\n"
+	     << "  goto $" << label << trueLabel << "\n";
+	
+	cout << label << falseLabel1 << ":\n";
+
+	rhs->encode();
+
+	cout << "  ifeq $" << label << falseLabel2 << "\n"
+	     << "  goto $" << label << trueLabel << "\n";
+
+	cout << label << falseLabel2 << ":\n"
+	     << "  newint 0\n"
+	     << "  goto $" << label << endLabel << "\n";
+
+	cout << label << trueLabel << ":\n"
+	     << "  newint 1\n";
+
+	cout << label << endLabel << ":\n";
 }
 
 void AssignmentOperatorNode::encode() {
@@ -204,7 +250,7 @@ void InExpressionNode::encode() {
 
 void FieldAccessOperatorNode::encode() {
 	UnaryOperatorNode::encode();
-	
+
 	if (parentIsDeref == true)
 		cout << "  getfield " << offset << '\n';
 }
@@ -222,7 +268,7 @@ void OutStatementNode::encode() {
 
 void IfThenStatementNode::encode() {
 	Node::encode();
-	
+
 	condition->encode();
 
 	cout << "  ifeq $" << label << endLabel << '\n';
@@ -232,7 +278,7 @@ void IfThenStatementNode::encode() {
 
 void IfThenElseStatementNode::encode() {
 	Node::encode();
-	
+
 	condition->encode();
 	cout << "  ifeq $" << label << elseLabel << '\n';
 	thenStatement->encode();
@@ -275,7 +321,7 @@ void ContinueStatementNode::encode() {
 			     << "  monitorexit\n";
 		}
 	}
-	
+
 	cout << "  goto $" << *entryLabel << "\n";
 }
 
@@ -284,7 +330,7 @@ void ReturnStatementNode::encode() {
 
 	if (expression != 0)
 		expression->encode();
-	
+
 	if (monitors != 0) {
 		for (int i = 0; monitors[i] != -1; i++) {
 			cout << "  aload " << monitors[i] << '\n'
@@ -292,7 +338,7 @@ void ReturnStatementNode::encode() {
 		}
 	}
 
-	cout << "  goto $" << *label << '\n';			
+	cout << "  goto $" << *label << '\n';
 }
 
 void Seq::encode() {
@@ -310,7 +356,7 @@ void DerefNode::encode() {
 
 void ClassType::encodeVMT() {
 	cout << *name << ":\n";
-	
+
 	if (extendType == 0)
 		cout << "  0\n";
 	else
@@ -333,10 +379,10 @@ void ClassType::encodeVMT() {
 void ClassType::encodeBody() {
 	ClassConstructorNode *noArgConstructor;
 	Seq noArgs = Seq(0,0);
-	
+
 	if (useDefaultConstructor == true) {
 		cout << *name << "_constructor:\n";
-		
+
 		if (extendType != 0) {
 			cout << "  aload 0\n";
 
@@ -349,7 +395,7 @@ void ClassType::encodeBody() {
 					cout << "  invokespecial $" << *(extendType->name) << "_constructor 1 "
 					     << noArgConstructor->getLocals() << '\n';
 				} else {
-					cout << "  invokenative " << noArgConstructor->getNativeIndex() << '\n';					
+					cout << "  invokenative " << noArgConstructor->getNativeIndex() << '\n';
 				}
 			}
 		}
@@ -387,7 +433,7 @@ void ConstructorInvocationStatementNode::encode() {
 void ClassMethodNode::encode() {
 	if (getIsNative() == true)
 		return;
-	
+
 	Node::encode();
 
 	cout << *mungedName << ":\n";
@@ -403,7 +449,7 @@ void ClassMethodNode::encode() {
 void ClassConstructorNode::encode() {
 	if (getIsNative() == true)
 		return;
-	
+
 	Node::encode();
 
 	cout << *mungedName << ":\n";

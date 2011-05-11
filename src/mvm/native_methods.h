@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Dec 2010 at 21:22:00 by nwidger on macros.local>
+ * Time-stamp: <10 May 2011 at 20:43:56 by nwidger on macros.local>
  */
 
 #ifndef _MVM_NATIVEMETHODS_H
@@ -26,6 +26,8 @@ int native_integer_multiply(uint32_t i);
 int native_integer_divide(uint32_t i);
 int native_integer_greater_than(uint32_t i);
 int native_integer_less_than(uint32_t i);
+int native_integer_greater_than_equal(uint32_t i);
+int native_integer_less_than_equal(uint32_t i);
 int native_integer_not(uint32_t i);
 int native_integer_minus(uint32_t i);
 int native_integer_equals(uint32_t i);
@@ -65,6 +67,8 @@ int native_real_multiply(uint32_t i);
 int native_real_divide(uint32_t i);
 int native_real_greater_than(uint32_t i);
 int native_real_less_than(uint32_t i);
+int native_real_greater_than_equal(uint32_t i);
+int native_real_less_than_equal(uint32_t i);
 int native_real_not(uint32_t i);
 int native_real_minus(uint32_t i);
 int native_real_equals(uint32_t i);

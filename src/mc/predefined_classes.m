@@ -18,73 +18,81 @@ class Integer extends Object {
 	native:13 Integer divide(Integer i);
 	native:14 Integer greaterThan(Integer i);
 	native:15 Integer lessThan(Integer i);
-	native:16 Integer not();
-	native:17 Integer minus();
-	native:18 Integer operator + (Integer i);
-	native:19 Integer operator - (Integer i);
-	native:20 Integer operator * (Integer i);
-	native:21 Integer operator / (Integer i);
-	native:22 Integer operator > (Integer i);
-	native:23 Integer operator < (Integer i);
-	native:24 Integer operator ! ();
-	native:25 Integer operator - ();
-	native:26 Integer equals(Object obj);
-	native:27 Integer hashCode();
-	native:28 String toString();
+	native:16 Integer greaterThanEqual(Integer i);
+	native:17 Integer lessThanEqual(Integer i);
+	native:18 Integer not();
+	native:19 Integer minus();
+	native:20 Integer operator + (Integer i);
+	native:21 Integer operator - (Integer i);
+	native:22 Integer operator * (Integer i);
+	native:23 Integer operator / (Integer i);
+	native:24 Integer operator > (Integer i);
+	native:25 Integer operator < (Integer i);
+	native:26 Integer operator >= (Integer i);  
+	native:27 Integer operator <= (Integer i);  
+	native:28 Integer operator ! ();
+	native:29 Integer operator - ();
+	native:30 Integer equals(Object obj);
+	native:31 Integer hashCode();
+	native:32 String toString();
 }
 
 class String extends Object {
-	native:29 String(String s);
-	native:30 Integer length();
-	native:31 String substr(Integer beg, Integer end);
-	native:32 Integer toInteger();
-	native:33 String concat(String s);
-	native:34 String operator + (String s);
-	native:35 Integer operator > (String s);
-	native:36 Integer operator < (String s);
-	native:37 Integer hashCode();
-	native:38 Integer equals(Object obj);
-	native:39 String toString();
+	native:33 String(String s);
+	native:34 Integer length();
+	native:35 String substr(Integer beg, Integer end);
+	native:36 Integer toInteger();
+	native:37 String concat(String s);
+	native:38 String operator + (String s);
+	native:39 Integer operator > (String s);
+	native:40 Integer operator < (String s);
+	native:41 Integer hashCode();
+	native:42 Integer equals(Object obj);
+	native:43 String toString();
 }
 
 class Table extends Object {
-	native:40 Table();
-	native:41 Table(Integer n);
-	native:42 Object get(Object key);
-	native:43 Object put(Object key, Object value);
-	native:44 Object remove(Object key);
-	native:45 Integer firstKey();
-	native:46 Object nextKey();
+	native:44 Table();
+	native:45 Table(Integer n);
+	native:46 Object get(Object key);
+	native:47 Object put(Object key, Object value);
+	native:48 Object remove(Object key);
+	native:49 Integer firstKey();
+	native:50 Object nextKey();
 }
 
 class Thread extends Object {
-        native:47 Thread();
-        native:48 Object start();
-        native:49 Object run();
-        native:50 Object join();
-        native:51 Object sleep(Integer millisec);  
+        native:51 Thread();
+        native:52 Object start();
+        native:53 Object run();
+        native:54 Object join();
+        native:55 Object sleep(Integer millisec);  
 }
 
 class Real extends Object {
-	native:52 Real();
-	native:53 Real(Real r);
-	native:54 Real add(Real r);
-	native:55 Real subtract(Real r);
-	native:56 Real multiply(Real r);
-	native:57 Real divide(Real r);
-	native:58 Real greaterThan(Real r);
-	native:59 Real lessThan(Real r);
-	native:60 Integer not();
-	native:61 Real minus();
-	native:62 Real operator + (Real r);
-	native:63 Real operator - (Real r);
-	native:64 Real operator * (Real r);
-	native:65 Real operator / (Real r);
-	native:66 Integer operator > (Real r);
-	native:67 Integer operator < (Real r);
-	native:68 Integer operator ! ();
-	native:69 Real operator - ();
-	native:70 Integer equals(Object obj);
-	native:71 Integer hashCode();
-	native:72 String toString();
+	native:56 Real();
+	native:57 Real(Real r);
+	native:58 Real add(Real r);
+	native:59 Real subtract(Real r);
+	native:60 Real multiply(Real r);
+	native:61 Real divide(Real r);
+	native:62 Real greaterThan(Real r);
+	native:63 Real lessThan(Real r);
+	native:64 Real greaterThanEqual(Real r);
+	native:65 Real lessThanEqual(Real r);
+	native:66 Integer not();
+	native:67 Real minus();
+	native:68 Real operator + (Real r);
+	native:69 Real operator - (Real r);
+	native:70 Real operator * (Real r);
+	native:71 Real operator / (Real r);
+	native:72 Integer operator > (Real r);
+	native:73 Integer operator < (Real r);
+	native:74 Integer operator >= (Real r);  
+	native:75 Integer operator <= (Real r);  
+	native:76 Integer operator ! ();
+	native:77 Real operator - ();
+	native:78 Integer equals(Object obj);
+	native:79 Integer hashCode();
+	native:80 String toString();
 }

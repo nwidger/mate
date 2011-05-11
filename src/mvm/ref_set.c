@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <09 May 2011 at 23:16:10 by nwidger on macros.local>
+ * Time-stamp: <10 May 2011 at 17:04:24 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -41,7 +41,6 @@ struct ref_set {
 
 /* forward declarations */
 struct ref_set * ref_set_create_n(int n);
-struct ref_set_record * ref_set_add_aux(struct ref_set *h, int r);
 int ref_set_resize(struct ref_set *h, int n);
 struct ref_set_record * ref_set_record_create(int r);
 void ref_set_record_destroy(struct ref_set_record *r);
@@ -124,25 +123,6 @@ void ref_set_clear(struct ref_set *h) {
 }
 
 int ref_set_add(struct ref_set *h, int r) {
-	struct ref_set_record *s;
-
-	if (h == NULL) {
-		fprintf(stderr, "mvm: ref set not initialized!\n");
-		mvm_halt();
-	}
-
-	/* lock */
-	ref_set_lock(h);
-
-	s = ref_set_add_aux(h, r);
-
-	/* unlock */
-	ref_set_unlock(h);
-
-	return s != NULL ? 0 : 1;
-}
-
-struct ref_set_record * ref_set_add_aux(struct ref_set *h, int r) {
 	int n;
 	struct ref_set_record *p, *q, *s;
 
@@ -169,7 +149,7 @@ struct ref_set_record * ref_set_add_aux(struct ref_set *h, int r) {
 			ref_set_record_destroy(s);
 			/* unlock */
 			ref_set_unlock(h);
-			return NULL;
+			return 1;
 		}
 
 		s->next = q->next;
@@ -177,17 +157,15 @@ struct ref_set_record * ref_set_add_aux(struct ref_set *h, int r) {
 	}
 
 	/* add to list */
-	if (h->size == 0) {
-		s->list_next = NULL;
-		s->list_prev = NULL;
+	s->list_next = NULL;
+	s->list_prev = h->list_tail;
+	
+	if (h->size == 0)
 		h->list_head = s;
-		h->list_tail = s;
-	} else {
-		s->list_next = NULL;
-		s->list_prev = h->list_tail;
+	else
 		h->list_tail->list_next = s;
-		h->list_tail = s;
-	}
+
+	h->list_tail = s;	
 
 	/* clean up iterator */
 	if (h->iterator_next == NULL)
@@ -200,7 +178,7 @@ struct ref_set_record * ref_set_add_aux(struct ref_set *h, int r) {
 	/* unlock */
 	ref_set_unlock(h);
 
-	return s;
+	return 0;
 }
 
 int ref_set_remove(struct ref_set *h, int r) {
@@ -355,7 +333,7 @@ int ref_set_iterator_next(struct ref_set *h) {
 
 int ref_set_resize(struct ref_set *h, int n) {
 	struct ref_set *new_set;
-	struct ref_set_record *p, *q;
+	struct ref_set_record *p;
 
 	if (h == NULL) {
 		fprintf(stderr, "mvm: ref set not initialized!\n");
@@ -372,16 +350,10 @@ int ref_set_resize(struct ref_set *h, int n) {
 	}
 
 	for (p = h->list_head; p != NULL; p = p->list_next) {
-		q = ref_set_add_aux(new_set, p->ref);
-
-		if (q == NULL) {
-			/* unlock */
-			ref_set_unlock(h);
-			mvm_halt();
-		}
+		ref_set_add(new_set, p->ref);
 
 		if (p == h->iterator_next)
-			new_set->iterator_next = q;
+			new_set->iterator_next = new_set->list_tail;
 	}
 
 	ref_set_clear(h);
