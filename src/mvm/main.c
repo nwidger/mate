@@ -1,11 +1,12 @@
 /* Niels Widger
- * Time-stamp: <04 Apr 2011 at 20:05:16 by nwidger on macros.local>
+ * Time-stamp: <12 May 2011 at 19:34:54 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
 
+#include <errno.h>
 #include <inttypes.h>
 #include <pthread.h>
 #include <stdarg.h>
@@ -113,6 +114,9 @@ void usage() {
  */
 
 int mvm_initialize(uint64_t h) {
+	int len;
+	char *buf;
+
 	input = stdin;
 	output = stdout;
 
@@ -159,6 +163,26 @@ int mvm_initialize(uint64_t h) {
 	if (symbol_file != NULL &&
 	    symbol_table_load_dump(symbol_table, symbol_file) != 0)
 		return 1;
+
+	if (access(class_file, F_OK) != 0) {
+		len = strlen(class_file);
+		if ((buf = (char *)malloc(len + 1 + strlen(".class"))) == NULL) {
+			perror("malloc");
+			return 1;
+		}
+
+		buf[0] = '\0';
+		strcat(buf, class_file);
+		strcat(buf, ".class");
+
+		if (access(buf, F_OK) != 0) {
+			fprintf(stderr, "mvm: %s: %s\n", class_file, strerror(errno));
+			free(buf);
+			return 1;
+		}
+
+		class_file = buf;
+	}
 
 	if (method_area_load_class_file(method_area, class_file) != 0)
 		return 1;
