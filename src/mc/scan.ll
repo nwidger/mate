@@ -1,7 +1,7 @@
 %{
 
 // Niels Widger
-// Time-stamp: <10 May 2011 at 22:20:03 by nwidger on macros.local>
+// Time-stamp: <12 May 2011 at 15:45:13 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -139,6 +139,10 @@ else                     {
                            return token(ELSE);
                          }
 
+for                      {
+                           return token(FOR);
+                         }
+			 
 while                    {
                            return token(WHILE);
                          }

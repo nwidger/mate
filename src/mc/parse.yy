@@ -2,7 +2,7 @@
 
 // Niels Widger
 // CS 712
-// Time-stamp: <10 May 2011 at 22:20:19 by nwidger on macros.local>
+// Time-stamp: <12 May 2011 at 16:06:47 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -91,7 +91,7 @@ extern TypeModule *types;
 %token MAIN CLASS EXTENDS
 %token THIS SUPER
 %token SYNCHRONIZED
-%token IF ELSE WHILE NEW RETURN
+%token IF ELSE FOR WHILE NEW RETURN
 %token OUT
 %token IN
 %token BREAK CONTINUE
@@ -142,6 +142,10 @@ extern TypeModule *types;
 %type <stmnt> IfThenStatement
 %type <stmnt> IfThenElseStatement
 %type <stmnt> WhileStatement
+%type <stmnt> ForStatement
+%type <node> ForInit
+%type <expr> ForExpression
+%type <node> ForUpdate
 %type <stmnt> ReturnStatement
 %type <stmnt> OutputStatement
 %type <stmnt> BreakStatement
@@ -553,6 +557,10 @@ Statement
 	{
 	  $$ = $1;
 	}
+	| ForStatement
+	{
+	  $$ = $1;
+	}
 	| ReturnStatement
 	{
 	  $$ = $1;
@@ -618,6 +626,55 @@ IfThenElseStatement
 	{
 	  $$ = new IfThenElseStatementNode($2, $3, $5);
 	  $$->setLineNumber(@$.first_line);
+	}
+	;
+
+ForStatement
+	: FOR '(' ForInit ';' ForExpression ';' ForUpdate ')' Statement
+	{
+
+          $$ = new BlockStatementNode();
+	  ((BlockStatementNode *)$$)->add($3);
+
+	  BlockStatementNode *bsn = new BlockStatementNode();
+	  bsn->add(new WhileStatementNode($5, bsn));
+	  bsn->add($7);
+
+	  ((BlockStatementNode *)$$)->add(bsn);
+	  ((BlockStatementNode *)$$)->setLineNumber(@$.first_line);
+	}
+	;
+
+ForInit
+        : StatementExpression
+	{
+	  $$ = $1;
+	}
+	| /* null */
+	{
+          $$ = new BlockStatementNode(new Seq(0, 0));
+	}
+	;
+
+ForExpression
+	: Expression
+	{
+	  $$ = $1;
+	}
+	| /* null */
+	{
+          $$ = new IntegerLiteralNode(1);
+	}
+	;
+
+ForUpdate
+        : StatementExpression
+	{
+	  $$ = $1;
+	}
+	| /* null */
+	{
+          $$ = new BlockStatementNode(new Seq(0, 0));
 	}
 	;
 
@@ -737,14 +794,14 @@ BooleanExpression
 	}
 	| EqualityExpression BOOL_OR BooleanExpression
 	{
-	  $$ = new BooleanOrOperatorNode($1, $3);	
+	  $$ = new BooleanOrOperatorNode($1, $3);
 	}
 	| EqualityExpression
 	{
 	  $$ = $1;
 	}
 	;
-	
+
 EqualityExpression
 	: EqualityExpression EQ_OP InstanceOfExpression
 	{
