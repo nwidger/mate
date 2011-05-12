@@ -513,7 +513,6 @@ public:
 	void encode();
 	Node * analyze(void *param);
 protected:
-	int trueLabel;
 	int falseLabel;
 	int endLabel;
 };

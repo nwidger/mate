@@ -1483,7 +1483,6 @@ Node * EqualityOperatorNode::analyze(void *param) {
 
 BooleanAndOperatorNode::BooleanAndOperatorNode(ExpressionNode *l, ExpressionNode *r) : BinaryOperatorNode(l, r) {
 	nodeName = "BooleanAndOperatorNode";
-	trueLabel = 0;
 	falseLabel = 0;
 	endLabel = 0;
 }
@@ -1491,8 +1490,7 @@ BooleanAndOperatorNode::BooleanAndOperatorNode(ExpressionNode *l, ExpressionNode
 Node * BooleanAndOperatorNode::analyze(void *param) {
 	ClassType *integerClass;
 
-	labelCounter += 3;
-	trueLabel = labelCounter-3;
+	labelCounter += 2;
 	falseLabel = labelCounter-2;
 	endLabel = labelCounter-1;
 

@@ -193,8 +193,7 @@ void BooleanAndOperatorNode::encode() {
 
 	cout << "  ifeq $" << label << falseLabel << "\n";
 
-	cout << label << trueLabel << ":\n"
-	     << "  newint 1\n"
+	cout << "  newint 1\n"
 	     << "  goto $" << label << endLabel << "\n";
 
 	cout << label << falseLabel << ":\n"
