@@ -2,7 +2,7 @@
 
 // Niels Widger
 // CS 712
-// Time-stamp: <12 May 2011 at 16:06:47 by nwidger on macros.local>
+// Time-stamp: <12 May 2011 at 19:25:47 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -632,16 +632,19 @@ IfThenElseStatement
 ForStatement
 	: FOR '(' ForInit ';' ForExpression ';' ForUpdate ')' Statement
 	{
+	  BlockStatementNode *retval, *body;
 
-          $$ = new BlockStatementNode();
-	  ((BlockStatementNode *)$$)->add($3);
+	  body = new BlockStatementNode();
+	  body->add($7);
+	  body->add($9);
 
-	  BlockStatementNode *bsn = new BlockStatementNode();
-	  bsn->add(new WhileStatementNode($5, bsn));
-	  bsn->add($7);
+	  retval = new BlockStatementNode();
+	  retval->add(new WhileStatementNode($5, body));
+	  retval->add($3);
 
-	  ((BlockStatementNode *)$$)->add(bsn);
-	  ((BlockStatementNode *)$$)->setLineNumber(@$.first_line);
+	  retval->setLineNumber(@$.first_line);
+
+	  $$ = retval;
 	}
 	;
 
@@ -649,6 +652,7 @@ ForInit
         : StatementExpression
 	{
 	  $$ = $1;
+	  ((ExpressionNode *)$1)->setIsStatement(true);
 	}
 	| /* null */
 	{
@@ -671,6 +675,7 @@ ForUpdate
         : StatementExpression
 	{
 	  $$ = $1;
+	  ((ExpressionNode *)$1)->setIsStatement(true);
 	}
 	| /* null */
 	{
