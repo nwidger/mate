@@ -64,6 +64,7 @@ class RaceyThread extends Thread {
 
     // simple barrier, pass only once
     synchronized (threadLock) {
+      out "thread " + this.threadId.toString() + " at lock" + newline;
       maine.startCounter = maine.startCounter - 1;
       if (maine.startCounter.equals(0)) {
 	// start of parallel phase
@@ -71,6 +72,8 @@ class RaceyThread extends Thread {
       }
     }
     while (!maine.startCounter.equals(0));
+
+    out "thread " + this.threadId.toString() + " out of lock" + newline;    
 
     //
     // main loop:
