@@ -58,13 +58,10 @@ class RaceyThread extends Thread {
     // use processor_bind(), for example on solaris.
 
     // seize the cpu, roughly 0.5-1 second on ironsides
-    // i = 0;
-    // while (i < 134217727)
-    //   i = i + 1;
+    // for (i = 0; i < 134217727; i = i + 1);
 
     // simple barrier, pass only once
     synchronized (threadLock) {
-      out "thread " + this.threadId.toString() + " at lock" + newline;
       maine.startCounter = maine.startCounter - 1;
       if (maine.startCounter.equals(0)) {
 	// start of parallel phase
@@ -72,8 +69,6 @@ class RaceyThread extends Thread {
       }
     }
     while (!maine.startCounter.equals(0));
-
-    out "thread " + this.threadId.toString() + " out of lock" + newline;    
 
     //
     // main loop:
@@ -154,13 +149,15 @@ class Main {
     RaceyThread thread;
     Integer i, mix_sig;
 
-    // Parse arguments
-    if ((str = in) != null) {
-      NumProcs = str.toInteger();
+    // Parse arguments    
+    if ((str = in) == null) {
+      usage();
+      return 1;
+    }
 
-      if (NumProcs < 0 || NumProcs > 16)
-	usage();
-    } else {
+    NumProcs = str.toInteger();
+
+    if (NumProcs < 0 || NumProcs > 16) {
       usage();
       return 1;
     }
@@ -190,12 +187,14 @@ class Main {
     }
 
     // Wait for each of the threads to terminate
-    for (i = 0; i < NumProcs; i = i + 1)
-      ((RaceyThread)(threads.get(i))).join();
+    for (i = 0; i < NumProcs; i = i + 1) {
+      thread = (RaceyThread)threads.get(i);
+      thread.join();
+    }
 
     // compute the result
     mix_sig = (Integer)sig.get(0);
-    for (i = 0; i < NumProcs; i = i + 1)    
+    for (i = 1; i < NumProcs; i = i + 1)    
       mix_sig = mix((Integer)sig.get(i), mix_sig);
 
     // end of parallel phase
