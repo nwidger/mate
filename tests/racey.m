@@ -73,7 +73,7 @@ class RaceyThread extends Thread {
     //
     // main loop:
     //
-    // repeatedly using function "mux" to obtain two array indices, read two
+    // repeatedly using function "mix" to obtain two array indices, read two
     // array elements, mix and store into the 2nd
     //
     // If mix() is good, any race (except read-read, which can tell by software)
@@ -83,6 +83,7 @@ class RaceyThread extends Thread {
       Integer num, index1, index2;
       num = (Integer)sig.get(threadId);
       index1 = maine.mod(num, MAX_ELEM);
+      
       num = maine.mix(num, (Integer)m.get(index1));
       index2 = maine.mod(num, MAX_ELEM);
       num = maine.mix(num, (Integer)m.get(index2));
