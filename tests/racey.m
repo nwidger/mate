@@ -59,6 +59,7 @@ class RaceyThread extends Thread {
 
     // seize the cpu, roughly 0.5-1 second on ironsides
     // for (i = 0; i < 134217727; i = i + 1);
+    for (i = 0; i < 10000; i = i + 1);    
 
     // simple barrier, pass only once
     synchronized (threadLock) {
