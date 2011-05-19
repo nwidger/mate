@@ -57,13 +57,9 @@ class RaceyThread extends Thread {
     // Bind this thread to ProcessorIds[threadId]
     // use processor_bind(), for example on solaris.
 
-    out "thread " + threadId.toString() + ": starting seize-loop" + newline;
-
     // seize the cpu, roughly 0.5-1 second on ironsides
     // for (i = 0; i < 134217727; i = i + 1);
     for (i = 0; i < 10500; i = i + 1);
-
-    out "thread " + threadId.toString() + ": out of seize-loop" + newline;    
 
     // simple barrier, pass only once
     synchronized (threadLock) {
