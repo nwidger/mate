@@ -1,24 +1,23 @@
-/* A Bison parser, made by GNU Bison 2.3.  */
+
+/* A Bison parser, made by GNU Bison 2.4.1.  */
 
 /* Skeleton implementation for Bison's Yacc-like parsers in C
-
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   
+      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
-
-   This program is free software; you can redistribute it and/or modify
+   
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+   
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301, USA.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -29,7 +28,7 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-
+   
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
@@ -47,7 +46,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "2.3"
+#define YYBISON_VERSION "2.4.1"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -55,9 +54,73 @@
 /* Pure parsers.  */
 #define YYPURE 0
 
+/* Push parsers.  */
+#define YYPUSH 0
+
+/* Pull parsers.  */
+#define YYPULL 1
+
 /* Using locations.  */
 #define YYLSP_NEEDED 1
 
+
+
+/* Copy the first part of user declarations.  */
+
+/* Line 189 of yacc.c  */
+#line 1 "parse.yy"
+
+
+// Niels Widger
+// CS 712
+// Time-stamp: <12 May 2011 at 19:25:47 by nwidger on macros.local>
+
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
+#include <string>
+#include <iostream>
+using namespace std;
+
+#define YYERROR_VERBOSE 1
+
+#include "TypeModule.h"
+#include "Type.h"
+#include "Seq.h"
+#include "Node.h"
+
+// function declarations
+extern int yyparse();
+extern int getCurrentSourceLineNumber();
+extern int yylex();
+void yyerror(const char *s);
+
+extern Seq *ast;
+extern TypeModule *types;
+
+
+
+/* Line 189 of yacc.c  */
+#line 106 "parse.cc"
+
+/* Enabling traces.  */
+#ifndef YYDEBUG
+# define YYDEBUG 0
+#endif
+
+/* Enabling verbose error messages.  */
+#ifdef YYERROR_VERBOSE
+# undef YYERROR_VERBOSE
+# define YYERROR_VERBOSE 1
+#else
+# define YYERROR_VERBOSE 0
+#endif
+
+/* Enabling the token table.  */
+#ifndef YYTOKEN_TABLE
+# define YYTOKEN_TABLE 0
+#endif
 
 
 /* Tokens.  */
@@ -139,62 +202,13 @@
 
 
 
-/* Copy the first part of user declarations.  */
-#line 1 "parse.yy"
-
-
-// Niels Widger
-// CS 712
-// Time-stamp: <12 May 2011 at 19:25:47 by nwidger on macros.local>
-
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-#include <string>
-#include <iostream>
-using namespace std;
-
-#define YYERROR_VERBOSE 1
-
-#include "TypeModule.h"
-#include "Type.h"
-#include "Seq.h"
-#include "Node.h"
-
-// function declarations
-extern int yyparse();
-extern int getCurrentSourceLineNumber();
-extern int yylex();
-void yyerror(const char *s);
-
-extern Seq *ast;
-extern TypeModule *types;
-
-
-
-/* Enabling traces.  */
-#ifndef YYDEBUG
-# define YYDEBUG 0
-#endif
-
-/* Enabling verbose error messages.  */
-#ifdef YYERROR_VERBOSE
-# undef YYERROR_VERBOSE
-# define YYERROR_VERBOSE 1
-#else
-# define YYERROR_VERBOSE 0
-#endif
-
-/* Enabling the token table.  */
-#ifndef YYTOKEN_TABLE
-# define YYTOKEN_TABLE 0
-#endif
-
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 33 "parse.yy"
 {
+
+/* Line 214 of yacc.c  */
+#line 33 "parse.yy"
+
 	Seq *seq;
 
         unsigned long value;
@@ -223,13 +237,15 @@ typedef union YYSTYPE
 	StatementNode *stmnt;
 
 	BlockStatementNode *blockStmnt;
-}
-/* Line 187 of yacc.c.  */
-#line 229 "parse.cc"
-	YYSTYPE;
+
+
+
+/* Line 214 of yacc.c  */
+#line 245 "parse.cc"
+} YYSTYPE;
+# define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
-# define YYSTYPE_IS_TRIVIAL 1
 #endif
 
 #if ! defined YYLTYPE && ! defined YYLTYPE_IS_DECLARED
@@ -249,8 +265,8 @@ typedef struct YYLTYPE
 /* Copy the second part of user declarations.  */
 
 
-/* Line 216 of yacc.c.  */
-#line 254 "parse.cc"
+/* Line 264 of yacc.c  */
+#line 270 "parse.cc"
 
 #ifdef short
 # undef short
@@ -325,14 +341,14 @@ typedef short int yytype_int16;
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static int
-YYID (int i)
+YYID (int yyi)
 #else
 static int
-YYID (i)
-    int i;
+YYID (yyi)
+    int yyi;
 #endif
 {
-  return i;
+  return yyi;
 }
 #endif
 
@@ -414,9 +430,9 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 /* A type that is properly aligned for any stack member.  */
 union yyalloc
 {
-  yytype_int16 yyss;
-  YYSTYPE yyvs;
-    YYLTYPE yyls;
+  yytype_int16 yyss_alloc;
+  YYSTYPE yyvs_alloc;
+  YYLTYPE yyls_alloc;
 };
 
 /* The size of the maximum gap between one aligned stack and the next.  */
@@ -451,12 +467,12 @@ union yyalloc
    elements in the stack, and YYPTR gives the new location of the
    stack.  Advance YYPTR to a properly aligned location for the next
    stack.  */
-# define YYSTACK_RELOCATE(Stack)					\
+# define YYSTACK_RELOCATE(Stack_alloc, Stack)				\
     do									\
       {									\
 	YYSIZE_T yynewbytes;						\
-	YYCOPY (&yyptr->Stack, Stack, yysize);				\
-	Stack = &yyptr->Stack;						\
+	YYCOPY (&yyptr->Stack_alloc, Stack, yysize);			\
+	Stack = &yyptr->Stack_alloc;					\
 	yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
 	yyptr += yynewbytes / sizeof (*yyptr);				\
       }									\
@@ -1185,17 +1201,20 @@ yy_symbol_print (yyoutput, yytype, yyvaluep, yylocationp)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_stack_print (yytype_int16 *bottom, yytype_int16 *top)
+yy_stack_print (yytype_int16 *yybottom, yytype_int16 *yytop)
 #else
 static void
-yy_stack_print (bottom, top)
-    yytype_int16 *bottom;
-    yytype_int16 *top;
+yy_stack_print (yybottom, yytop)
+    yytype_int16 *yybottom;
+    yytype_int16 *yytop;
 #endif
 {
   YYFPRINTF (stderr, "Stack now");
-  for (; bottom <= top; ++bottom)
-    YYFPRINTF (stderr, " %d", *bottom);
+  for (; yybottom <= yytop; yybottom++)
+    {
+      int yybot = *yybottom;
+      YYFPRINTF (stderr, " %d", yybot);
+    }
   YYFPRINTF (stderr, "\n");
 }
 
@@ -1230,11 +1249,11 @@ yy_reduce_print (yyvsp, yylsp, yyrule)
   /* The symbols being reduced.  */
   for (yyi = 0; yyi < yynrhs; yyi++)
     {
-      fprintf (stderr, "   $%d = ", yyi + 1);
+      YYFPRINTF (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr, yyrhs[yyprhs[yyrule] + yyi],
 		       &(yyvsp[(yyi + 1) - (yynrhs)])
 		       , &(yylsp[(yyi + 1) - (yynrhs)])		       );
-      fprintf (stderr, "\n");
+      YYFPRINTF (stderr, "\n");
     }
 }
 
@@ -1516,10 +1535,8 @@ yydestruct (yymsg, yytype, yyvaluep, yylocationp)
 	break;
     }
 }
-
 
 /* Prevent warnings from -Wmissing-prototypes.  */
-
 #ifdef YYPARSE_PARAM
 #if defined __STDC__ || defined __cplusplus
 int yyparse (void *YYPARSE_PARAM);
@@ -1535,23 +1552,23 @@ int yyparse ();
 #endif /* ! YYPARSE_PARAM */
 
 
-
-/* The look-ahead symbol.  */
+/* The lookahead symbol.  */
 int yychar;
 
-/* The semantic value of the look-ahead symbol.  */
+/* The semantic value of the lookahead symbol.  */
 YYSTYPE yylval;
+
+/* Location data for the lookahead symbol.  */
+YYLTYPE yylloc;
 
 /* Number of syntax errors so far.  */
 int yynerrs;
-/* Location data for the look-ahead symbol.  */
-YYLTYPE yylloc;
 
 
 
-/*----------.
-| yyparse.  |
-`----------*/
+/*-------------------------.
+| yyparse or yypush_parse.  |
+`-------------------------*/
 
 #ifdef YYPARSE_PARAM
 #if (defined __STDC__ || defined __C99__FUNC__ \
@@ -1575,14 +1592,49 @@ yyparse ()
 #endif
 #endif
 {
-  
-  int yystate;
+
+
+    int yystate;
+    /* Number of tokens to shift before error messages enabled.  */
+    int yyerrstatus;
+
+    /* The stacks and their tools:
+       `yyss': related to states.
+       `yyvs': related to semantic values.
+       `yyls': related to locations.
+
+       Refer to the stacks thru separate pointers, to allow yyoverflow
+       to reallocate them elsewhere.  */
+
+    /* The state stack.  */
+    yytype_int16 yyssa[YYINITDEPTH];
+    yytype_int16 *yyss;
+    yytype_int16 *yyssp;
+
+    /* The semantic value stack.  */
+    YYSTYPE yyvsa[YYINITDEPTH];
+    YYSTYPE *yyvs;
+    YYSTYPE *yyvsp;
+
+    /* The location stack.  */
+    YYLTYPE yylsa[YYINITDEPTH];
+    YYLTYPE *yyls;
+    YYLTYPE *yylsp;
+
+    /* The locations where the error started and ended.  */
+    YYLTYPE yyerror_range[2];
+
+    YYSIZE_T yystacksize;
+
   int yyn;
   int yyresult;
-  /* Number of tokens to shift before error messages enabled.  */
-  int yyerrstatus;
-  /* Look-ahead token as an internal (translated) token number.  */
-  int yytoken = 0;
+  /* Lookahead token as an internal (translated) token number.  */
+  int yytoken;
+  /* The variables used to return semantic value and location from the
+     action routines.  */
+  YYSTYPE yyval;
+  YYLTYPE yyloc;
+
 #if YYERROR_VERBOSE
   /* Buffer for error messages, and its allocated size.  */
   char yymsgbuf[128];
@@ -1590,63 +1642,37 @@ yyparse ()
   YYSIZE_T yymsg_alloc = sizeof yymsgbuf;
 #endif
 
-  /* Three stacks and their tools:
-     `yyss': related to states,
-     `yyvs': related to semantic values,
-     `yyls': related to locations.
-
-     Refer to the stacks thru separate pointers, to allow yyoverflow
-     to reallocate them elsewhere.  */
-
-  /* The state stack.  */
-  yytype_int16 yyssa[YYINITDEPTH];
-  yytype_int16 *yyss = yyssa;
-  yytype_int16 *yyssp;
-
-  /* The semantic value stack.  */
-  YYSTYPE yyvsa[YYINITDEPTH];
-  YYSTYPE *yyvs = yyvsa;
-  YYSTYPE *yyvsp;
-
-  /* The location stack.  */
-  YYLTYPE yylsa[YYINITDEPTH];
-  YYLTYPE *yyls = yylsa;
-  YYLTYPE *yylsp;
-  /* The locations where the error started and ended.  */
-  YYLTYPE yyerror_range[2];
-
 #define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N), yylsp -= (N))
-
-  YYSIZE_T yystacksize = YYINITDEPTH;
-
-  /* The variables used to return semantic value and location from the
-     action routines.  */
-  YYSTYPE yyval;
-  YYLTYPE yyloc;
 
   /* The number of symbols on the RHS of the reduced rule.
      Keep to zero when no symbol should be popped.  */
   int yylen = 0;
+
+  yytoken = 0;
+  yyss = yyssa;
+  yyvs = yyvsa;
+  yyls = yylsa;
+  yystacksize = YYINITDEPTH;
 
   YYDPRINTF ((stderr, "Starting parse\n"));
 
   yystate = 0;
   yyerrstatus = 0;
   yynerrs = 0;
-  yychar = YYEMPTY;		/* Cause a token to be read.  */
+  yychar = YYEMPTY; /* Cause a token to be read.  */
 
   /* Initialize stack pointers.
      Waste one element of value and location stack
      so that they stay on the same level as the state stack.
      The wasted elements are never initialized.  */
-
   yyssp = yyss;
   yyvsp = yyvs;
   yylsp = yyls;
+
 #if YYLTYPE_IS_TRIVIAL
   /* Initialize the default location before parsing starts.  */
   yylloc.first_line   = yylloc.last_line   = 1;
-  yylloc.first_column = yylloc.last_column = 0;
+  yylloc.first_column = yylloc.last_column = 1;
 #endif
 
   goto yysetstate;
@@ -1685,6 +1711,7 @@ yyparse ()
 		    &yyvs1, yysize * sizeof (*yyvsp),
 		    &yyls1, yysize * sizeof (*yylsp),
 		    &yystacksize);
+
 	yyls = yyls1;
 	yyss = yyss1;
 	yyvs = yyvs1;
@@ -1706,9 +1733,9 @@ yyparse ()
 	  (union yyalloc *) YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));
 	if (! yyptr)
 	  goto yyexhaustedlab;
-	YYSTACK_RELOCATE (yyss);
-	YYSTACK_RELOCATE (yyvs);
-	YYSTACK_RELOCATE (yyls);
+	YYSTACK_RELOCATE (yyss_alloc, yyss);
+	YYSTACK_RELOCATE (yyvs_alloc, yyvs);
+	YYSTACK_RELOCATE (yyls_alloc, yyls);
 #  undef YYSTACK_RELOCATE
 	if (yyss1 != yyssa)
 	  YYSTACK_FREE (yyss1);
@@ -1729,6 +1756,9 @@ yyparse ()
 
   YYDPRINTF ((stderr, "Entering state %d\n", yystate));
 
+  if (yystate == YYFINAL)
+    YYACCEPT;
+
   goto yybackup;
 
 /*-----------.
@@ -1737,16 +1767,16 @@ yyparse ()
 yybackup:
 
   /* Do appropriate processing given the current state.  Read a
-     look-ahead token if we need one and don't already have one.  */
+     lookahead token if we need one and don't already have one.  */
 
-  /* First try to decide what to do without reference to look-ahead token.  */
+  /* First try to decide what to do without reference to lookahead token.  */
   yyn = yypact[yystate];
   if (yyn == YYPACT_NINF)
     goto yydefault;
 
-  /* Not known => get a look-ahead token if don't already have one.  */
+  /* Not known => get a lookahead token if don't already have one.  */
 
-  /* YYCHAR is either YYEMPTY or YYEOF or a valid look-ahead symbol.  */
+  /* YYCHAR is either YYEMPTY or YYEOF or a valid lookahead symbol.  */
   if (yychar == YYEMPTY)
     {
       YYDPRINTF ((stderr, "Reading a token: "));
@@ -1778,20 +1808,16 @@ yybackup:
       goto yyreduce;
     }
 
-  if (yyn == YYFINAL)
-    YYACCEPT;
-
   /* Count tokens shifted since error; after three, turn off error
      status.  */
   if (yyerrstatus)
     yyerrstatus--;
 
-  /* Shift the look-ahead token.  */
+  /* Shift the lookahead token.  */
   YY_SYMBOL_PRINT ("Shifting", yytoken, &yylval, &yylloc);
 
-  /* Discard the shifted token unless it is eof.  */
-  if (yychar != YYEOF)
-    yychar = YYEMPTY;
+  /* Discard the shifted token.  */
+  yychar = YYEMPTY;
 
   yystate = yyn;
   *++yyvsp = yylval;
@@ -1832,6 +1858,8 @@ yyreduce:
   switch (yyn)
     {
         case 2:
+
+/* Line 1455 of yacc.c  */
 #line 208 "parse.yy"
     {
 	  (yyval.seq) = new Seq(0, (yyvsp[(1) - (1)].mainBlock));
@@ -1840,6 +1868,8 @@ yyreduce:
     break;
 
   case 3:
+
+/* Line 1455 of yacc.c  */
 #line 213 "parse.yy"
     {
 	  (yyval.seq) = (yyvsp[(2) - (2)].seq)->add((yyvsp[(1) - (2)].mainBlock));
@@ -1848,6 +1878,8 @@ yyreduce:
     break;
 
   case 4:
+
+/* Line 1455 of yacc.c  */
 #line 218 "parse.yy"
     {
 	  (yyval.seq) = new Seq(0, (yyvsp[(2) - (2)].mainBlock));
@@ -1857,6 +1889,8 @@ yyreduce:
     break;
 
   case 5:
+
+/* Line 1455 of yacc.c  */
 #line 224 "parse.yy"
     {
 	  (yyval.seq) = (yyvsp[(3) - (3)].seq)->add((yyvsp[(2) - (3)].mainBlock))->add((yyvsp[(1) - (3)].seq));
@@ -1865,6 +1899,8 @@ yyreduce:
     break;
 
   case 6:
+
+/* Line 1455 of yacc.c  */
 #line 232 "parse.yy"
     {
 	  if (*((yyvsp[(1) - (5)].type)->getName()) != "Integer") {
@@ -1877,6 +1913,8 @@ yyreduce:
     break;
 
   case 7:
+
+/* Line 1455 of yacc.c  */
 #line 244 "parse.yy"
     {
 	  (yyval.seq) = new Seq((yyvsp[(1) - (2)].seq), (yyvsp[(2) - (2)].classDec));
@@ -1884,6 +1922,8 @@ yyreduce:
     break;
 
   case 8:
+
+/* Line 1455 of yacc.c  */
 #line 248 "parse.yy"
     {
 	  (yyval.seq) = new Seq(0, (yyvsp[(1) - (1)].classDec));
@@ -1891,6 +1931,8 @@ yyreduce:
     break;
 
   case 9:
+
+/* Line 1455 of yacc.c  */
 #line 255 "parse.yy"
     {
 	  (yyval.classDec) = new ClassDecNode((yyvsp[(2) - (3)].str), (yyvsp[(3) - (3)].seq));
@@ -1899,6 +1941,8 @@ yyreduce:
     break;
 
   case 10:
+
+/* Line 1455 of yacc.c  */
 #line 260 "parse.yy"
     {
 	  (yyval.classDec) = new ClassDecNode((yyvsp[(2) - (5)].str), ((ClassType *)(yyvsp[(4) - (5)].type))->getName(), (yyvsp[(5) - (5)].seq));
@@ -1908,6 +1952,8 @@ yyreduce:
     break;
 
   case 11:
+
+/* Line 1455 of yacc.c  */
 #line 269 "parse.yy"
     {
 	  (yyval.seq) = (yyvsp[(2) - (3)].seq);
@@ -1915,6 +1961,8 @@ yyreduce:
     break;
 
   case 12:
+
+/* Line 1455 of yacc.c  */
 #line 273 "parse.yy"
     {
 	  (yyval.seq) = new Seq(0, 0);
@@ -1922,6 +1970,8 @@ yyreduce:
     break;
 
   case 13:
+
+/* Line 1455 of yacc.c  */
 #line 280 "parse.yy"
     {
 	  (yyval.seq) = new Seq((yyvsp[(1) - (2)].seq), (yyvsp[(2) - (2)].node));
@@ -1929,6 +1979,8 @@ yyreduce:
     break;
 
   case 14:
+
+/* Line 1455 of yacc.c  */
 #line 284 "parse.yy"
     {
 	  (yyval.seq) = new Seq(0, (yyvsp[(1) - (1)].node));
@@ -1936,6 +1988,8 @@ yyreduce:
     break;
 
   case 15:
+
+/* Line 1455 of yacc.c  */
 #line 291 "parse.yy"
     {
 	  (yyval.node) = (yyvsp[(1) - (1)].node);
@@ -1943,6 +1997,8 @@ yyreduce:
     break;
 
   case 16:
+
+/* Line 1455 of yacc.c  */
 #line 295 "parse.yy"
     {
 	  (yyval.node) = (yyvsp[(1) - (1)].classConst);
@@ -1950,6 +2006,8 @@ yyreduce:
     break;
 
   case 17:
+
+/* Line 1455 of yacc.c  */
 #line 302 "parse.yy"
     {
 	  (yyval.node) = (yyvsp[(1) - (1)].classFieldDec);
@@ -1957,6 +2015,8 @@ yyreduce:
     break;
 
   case 18:
+
+/* Line 1455 of yacc.c  */
 #line 306 "parse.yy"
     {
 	  (yyval.node) = (yyvsp[(1) - (1)].classMeth);
@@ -1964,6 +2024,8 @@ yyreduce:
     break;
 
   case 19:
+
+/* Line 1455 of yacc.c  */
 #line 310 "parse.yy"
     {
 	  (yyval.node) = (yyvsp[(1) - (1)].classMeth);
@@ -1971,6 +2033,8 @@ yyreduce:
     break;
 
   case 20:
+
+/* Line 1455 of yacc.c  */
 #line 317 "parse.yy"
     {
 	  (yyval.classFieldDec) = new ClassFieldDecNode((yyvsp[(1) - (3)].type), (yyvsp[(2) - (3)].seq));
@@ -1979,6 +2043,8 @@ yyreduce:
     break;
 
   case 21:
+
+/* Line 1455 of yacc.c  */
 #line 325 "parse.yy"
     {
 	  (yyvsp[(3) - (4)].classMeth)->setNativeIndex((yyvsp[(1) - (4)].value));
@@ -1990,6 +2056,8 @@ yyreduce:
     break;
 
   case 22:
+
+/* Line 1455 of yacc.c  */
 #line 333 "parse.yy"
     {
 	  (yyvsp[(2) - (3)].classMeth)->setType((yyvsp[(1) - (3)].type));
@@ -2000,6 +2068,8 @@ yyreduce:
     break;
 
   case 23:
+
+/* Line 1455 of yacc.c  */
 #line 343 "parse.yy"
     {
 	  (yyval.classMeth) = new ClassMethodNode((yyvsp[(1) - (2)].str), (yyvsp[(2) - (2)].seq));
@@ -2007,6 +2077,8 @@ yyreduce:
     break;
 
   case 24:
+
+/* Line 1455 of yacc.c  */
 #line 350 "parse.yy"
     {
 	  (yyval.blockStmnt) = (yyvsp[(1) - (1)].blockStmnt);
@@ -2014,6 +2086,8 @@ yyreduce:
     break;
 
   case 25:
+
+/* Line 1455 of yacc.c  */
 #line 357 "parse.yy"
     {
 	  (yyvsp[(3) - (4)].classMeth)->setNativeIndex((yyvsp[(1) - (4)].value));
@@ -2025,6 +2099,8 @@ yyreduce:
     break;
 
   case 26:
+
+/* Line 1455 of yacc.c  */
 #line 365 "parse.yy"
     {
 	  (yyvsp[(2) - (3)].classMeth)->setType((yyvsp[(1) - (3)].type));
@@ -2035,6 +2111,8 @@ yyreduce:
     break;
 
   case 27:
+
+/* Line 1455 of yacc.c  */
 #line 375 "parse.yy"
     {
 	  (yyval.classMeth) = new ClassMethodNode((yyvsp[(2) - (5)].str), new Seq(0, (yyvsp[(4) - (5)].varDec)));
@@ -2042,6 +2120,8 @@ yyreduce:
     break;
 
   case 28:
+
+/* Line 1455 of yacc.c  */
 #line 379 "parse.yy"
     {
 	  (yyval.classMeth) = new ClassMethodNode((yyvsp[(2) - (5)].str), new Seq(0, (yyvsp[(4) - (5)].varDec)));
@@ -2049,6 +2129,8 @@ yyreduce:
     break;
 
   case 29:
+
+/* Line 1455 of yacc.c  */
 #line 383 "parse.yy"
     {
 	  (yyval.classMeth) = new ClassMethodNode((yyvsp[(2) - (4)].str), new Seq(0, 0));
@@ -2056,6 +2138,8 @@ yyreduce:
     break;
 
   case 30:
+
+/* Line 1455 of yacc.c  */
 #line 387 "parse.yy"
     {
 	  (yyval.classMeth) = new ClassMethodNode((yyvsp[(2) - (4)].str), new Seq(0, 0));
@@ -2063,6 +2147,8 @@ yyreduce:
     break;
 
   case 31:
+
+/* Line 1455 of yacc.c  */
 #line 394 "parse.yy"
     {
 	  (yyval.blockStmnt) = (yyvsp[(1) - (1)].blockStmnt);
@@ -2070,6 +2156,8 @@ yyreduce:
     break;
 
   case 32:
+
+/* Line 1455 of yacc.c  */
 #line 401 "parse.yy"
     {
 	  (yyvsp[(2) - (3)].classConst)->setNativeIndex((yyvsp[(1) - (3)].value));
@@ -2079,6 +2167,8 @@ yyreduce:
     break;
 
   case 33:
+
+/* Line 1455 of yacc.c  */
 #line 407 "parse.yy"
     {
 	  (yyvsp[(1) - (2)].classConst)->setBody((yyvsp[(2) - (2)].blockStmnt));
@@ -2087,6 +2177,8 @@ yyreduce:
     break;
 
   case 34:
+
+/* Line 1455 of yacc.c  */
 #line 415 "parse.yy"
     {
 	  (yyval.classConst) = new ClassConstructorNode((yyvsp[(1) - (2)].str), (yyvsp[(2) - (2)].seq));
@@ -2095,6 +2187,8 @@ yyreduce:
     break;
 
   case 35:
+
+/* Line 1455 of yacc.c  */
 #line 423 "parse.yy"
     {
 	  (yyval.blockStmnt) = new BlockStatementNode((yyvsp[(3) - (4)].seq)->add((yyvsp[(2) - (4)].stmnt)));
@@ -2102,6 +2196,8 @@ yyreduce:
     break;
 
   case 36:
+
+/* Line 1455 of yacc.c  */
 #line 427 "parse.yy"
     {
 	  (yyval.blockStmnt) = new BlockStatementNode(new Seq(0, (yyvsp[(2) - (3)].stmnt)));
@@ -2109,6 +2205,8 @@ yyreduce:
     break;
 
   case 37:
+
+/* Line 1455 of yacc.c  */
 #line 431 "parse.yy"
     {
 	  (yyvsp[(1) - (1)].blockStmnt)->add(new ConstructorInvocationStatementNode(new SuperExpressionNode(), new Seq(0, 0)));
@@ -2117,6 +2215,8 @@ yyreduce:
     break;
 
   case 38:
+
+/* Line 1455 of yacc.c  */
 #line 439 "parse.yy"
     {
 	  (yyval.stmnt) = new ConstructorInvocationStatementNode(new ThisExpressionNode(), (yyvsp[(2) - (3)].seq));
@@ -2124,6 +2224,8 @@ yyreduce:
     break;
 
   case 39:
+
+/* Line 1455 of yacc.c  */
 #line 443 "parse.yy"
     {
 	  (yyval.stmnt) = new ConstructorInvocationStatementNode(new SuperExpressionNode(), (yyvsp[(2) - (3)].seq));
@@ -2131,6 +2233,8 @@ yyreduce:
     break;
 
   case 40:
+
+/* Line 1455 of yacc.c  */
 #line 450 "parse.yy"
     {
 	  (yyval.seq) = (yyvsp[(2) - (3)].seq);
@@ -2138,6 +2242,8 @@ yyreduce:
     break;
 
   case 41:
+
+/* Line 1455 of yacc.c  */
 #line 454 "parse.yy"
     {
 	  (yyval.seq) = new Seq(0, 0);
@@ -2145,6 +2251,8 @@ yyreduce:
     break;
 
   case 42:
+
+/* Line 1455 of yacc.c  */
 #line 461 "parse.yy"
     {
 	  (yyval.seq) = new Seq((yyvsp[(1) - (3)].seq), (yyvsp[(3) - (3)].varDec));
@@ -2152,6 +2260,8 @@ yyreduce:
     break;
 
   case 43:
+
+/* Line 1455 of yacc.c  */
 #line 465 "parse.yy"
     {
 	  (yyval.seq) = new Seq(0, (yyvsp[(1) - (1)].varDec));
@@ -2159,6 +2269,8 @@ yyreduce:
     break;
 
   case 44:
+
+/* Line 1455 of yacc.c  */
 #line 472 "parse.yy"
     {
 	  (yyval.varDec) = new VarDecNode((yyvsp[(1) - (2)].type), new Seq(0, (yyvsp[(2) - (2)].varNode)));
@@ -2167,6 +2279,8 @@ yyreduce:
     break;
 
   case 45:
+
+/* Line 1455 of yacc.c  */
 #line 480 "parse.yy"
     {
 	  (yyval.varNode) = new VarNode((yyvsp[(1) - (1)].str));
@@ -2175,6 +2289,8 @@ yyreduce:
     break;
 
   case 46:
+
+/* Line 1455 of yacc.c  */
 #line 488 "parse.yy"
     {
 	  (yyval.blockStmnt) = new BlockStatementNode((yyvsp[(2) - (3)].seq));
@@ -2182,6 +2298,8 @@ yyreduce:
     break;
 
   case 47:
+
+/* Line 1455 of yacc.c  */
 #line 492 "parse.yy"
     {
 	  (yyval.blockStmnt) = new BlockStatementNode(new Seq(0, 0));
@@ -2189,6 +2307,8 @@ yyreduce:
     break;
 
   case 48:
+
+/* Line 1455 of yacc.c  */
 #line 499 "parse.yy"
     {
 	  (yyval.stmnt) = (yyvsp[(1) - (1)].stmnt);
@@ -2196,6 +2316,8 @@ yyreduce:
     break;
 
   case 49:
+
+/* Line 1455 of yacc.c  */
 #line 506 "parse.yy"
     {
 	  (yyval.seq) = new Seq((yyvsp[(1) - (2)].seq), (yyvsp[(2) - (2)].stmnt));
@@ -2203,6 +2325,8 @@ yyreduce:
     break;
 
   case 50:
+
+/* Line 1455 of yacc.c  */
 #line 510 "parse.yy"
     {
 	  (yyval.seq) = new Seq(0, (yyvsp[(1) - (1)].stmnt));
@@ -2210,6 +2334,8 @@ yyreduce:
     break;
 
   case 51:
+
+/* Line 1455 of yacc.c  */
 #line 517 "parse.yy"
     {
 	  (yyval.stmnt) = new SynchronizedStatementNode((yyvsp[(3) - (7)].expr), (yyvsp[(6) - (7)].seq));
@@ -2217,6 +2343,8 @@ yyreduce:
     break;
 
   case 52:
+
+/* Line 1455 of yacc.c  */
 #line 521 "parse.yy"
     {
 	  (yyval.stmnt) = new SynchronizedStatementNode((yyvsp[(3) - (6)].expr), new Seq(0, 0));
@@ -2224,6 +2352,8 @@ yyreduce:
     break;
 
   case 53:
+
+/* Line 1455 of yacc.c  */
 #line 528 "parse.yy"
     {
 	  (yyval.stmnt) = (yyvsp[(1) - (1)].blockStmnt);
@@ -2231,6 +2361,8 @@ yyreduce:
     break;
 
   case 54:
+
+/* Line 1455 of yacc.c  */
 #line 532 "parse.yy"
     {
 	  (yyval.stmnt) = (yyvsp[(1) - (1)].stmnt);
@@ -2238,6 +2370,8 @@ yyreduce:
     break;
 
   case 55:
+
+/* Line 1455 of yacc.c  */
 #line 536 "parse.yy"
     {
 	  (yyval.stmnt) = (yyvsp[(1) - (1)].stmnt);
@@ -2245,6 +2379,8 @@ yyreduce:
     break;
 
   case 56:
+
+/* Line 1455 of yacc.c  */
 #line 540 "parse.yy"
     {
 	  (yyval.stmnt) = (yyvsp[(1) - (1)].stmnt);
@@ -2252,6 +2388,8 @@ yyreduce:
     break;
 
   case 57:
+
+/* Line 1455 of yacc.c  */
 #line 544 "parse.yy"
     {
 	  (yyvsp[(1) - (1)].expr)->setIsStatement(true);
@@ -2260,6 +2398,8 @@ yyreduce:
     break;
 
   case 58:
+
+/* Line 1455 of yacc.c  */
 #line 549 "parse.yy"
     {
 	  (yyval.stmnt) = (yyvsp[(1) - (1)].stmnt);
@@ -2267,6 +2407,8 @@ yyreduce:
     break;
 
   case 59:
+
+/* Line 1455 of yacc.c  */
 #line 553 "parse.yy"
     {
 	  (yyval.stmnt) = (yyvsp[(1) - (1)].stmnt);
@@ -2274,6 +2416,8 @@ yyreduce:
     break;
 
   case 60:
+
+/* Line 1455 of yacc.c  */
 #line 557 "parse.yy"
     {
 	  (yyval.stmnt) = (yyvsp[(1) - (1)].stmnt);
@@ -2281,6 +2425,8 @@ yyreduce:
     break;
 
   case 61:
+
+/* Line 1455 of yacc.c  */
 #line 561 "parse.yy"
     {
 	  (yyval.stmnt) = (yyvsp[(1) - (1)].stmnt);
@@ -2288,6 +2434,8 @@ yyreduce:
     break;
 
   case 62:
+
+/* Line 1455 of yacc.c  */
 #line 565 "parse.yy"
     {
 	  (yyval.stmnt) = (yyvsp[(1) - (1)].stmnt);
@@ -2295,6 +2443,8 @@ yyreduce:
     break;
 
   case 63:
+
+/* Line 1455 of yacc.c  */
 #line 569 "parse.yy"
     {
 	  (yyval.stmnt) = (yyvsp[(1) - (1)].stmnt);
@@ -2302,6 +2452,8 @@ yyreduce:
     break;
 
   case 64:
+
+/* Line 1455 of yacc.c  */
 #line 573 "parse.yy"
     {
 	  (yyval.stmnt) = (yyvsp[(1) - (1)].stmnt);
@@ -2309,6 +2461,8 @@ yyreduce:
     break;
 
   case 65:
+
+/* Line 1455 of yacc.c  */
 #line 577 "parse.yy"
     {
 	  (yyval.stmnt) = (yyvsp[(1) - (1)].stmnt);
@@ -2316,6 +2470,8 @@ yyreduce:
     break;
 
   case 66:
+
+/* Line 1455 of yacc.c  */
 #line 584 "parse.yy"
     {
 	  (yyval.stmnt) = new LocalVarDecStatementNode((yyvsp[(1) - (2)].localVarDec));
@@ -2323,6 +2479,8 @@ yyreduce:
     break;
 
   case 67:
+
+/* Line 1455 of yacc.c  */
 #line 591 "parse.yy"
     {
 	  (yyval.localVarDec) = new LocalVarDecNode((yyvsp[(1) - (2)].type), (yyvsp[(2) - (2)].seq));
@@ -2331,6 +2489,8 @@ yyreduce:
     break;
 
   case 68:
+
+/* Line 1455 of yacc.c  */
 #line 599 "parse.yy"
     {
 	  (yyval.seq) = new Seq((yyvsp[(1) - (3)].seq), (yyvsp[(3) - (3)].varNode));
@@ -2338,6 +2498,8 @@ yyreduce:
     break;
 
   case 69:
+
+/* Line 1455 of yacc.c  */
 #line 603 "parse.yy"
     {
 	  (yyval.seq) = new Seq(0, (yyvsp[(1) - (1)].varNode));
@@ -2345,6 +2507,8 @@ yyreduce:
     break;
 
   case 70:
+
+/* Line 1455 of yacc.c  */
 #line 610 "parse.yy"
     {
 	  (yyval.varNode) = new VarNode((yyvsp[(1) - (1)].str));
@@ -2353,6 +2517,8 @@ yyreduce:
     break;
 
   case 71:
+
+/* Line 1455 of yacc.c  */
 #line 618 "parse.yy"
     {
 	  (yyval.stmnt) = new IfThenStatementNode((yyvsp[(2) - (3)].expr), (yyvsp[(3) - (3)].stmnt));
@@ -2361,6 +2527,8 @@ yyreduce:
     break;
 
   case 72:
+
+/* Line 1455 of yacc.c  */
 #line 626 "parse.yy"
     {
 	  (yyval.stmnt) = new IfThenElseStatementNode((yyvsp[(2) - (5)].expr), (yyvsp[(3) - (5)].stmnt), (yyvsp[(5) - (5)].stmnt));
@@ -2369,6 +2537,8 @@ yyreduce:
     break;
 
   case 73:
+
+/* Line 1455 of yacc.c  */
 #line 634 "parse.yy"
     {
 	  BlockStatementNode *retval, *body;
@@ -2388,6 +2558,8 @@ yyreduce:
     break;
 
   case 74:
+
+/* Line 1455 of yacc.c  */
 #line 653 "parse.yy"
     {
 	  (yyval.node) = (yyvsp[(1) - (1)].expr);
@@ -2396,6 +2568,8 @@ yyreduce:
     break;
 
   case 75:
+
+/* Line 1455 of yacc.c  */
 #line 658 "parse.yy"
     {
           (yyval.node) = new BlockStatementNode(new Seq(0, 0));
@@ -2403,6 +2577,8 @@ yyreduce:
     break;
 
   case 76:
+
+/* Line 1455 of yacc.c  */
 #line 665 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
@@ -2410,6 +2586,8 @@ yyreduce:
     break;
 
   case 77:
+
+/* Line 1455 of yacc.c  */
 #line 669 "parse.yy"
     {
           (yyval.expr) = new IntegerLiteralNode(1);
@@ -2417,6 +2595,8 @@ yyreduce:
     break;
 
   case 78:
+
+/* Line 1455 of yacc.c  */
 #line 676 "parse.yy"
     {
 	  (yyval.node) = (yyvsp[(1) - (1)].expr);
@@ -2425,6 +2605,8 @@ yyreduce:
     break;
 
   case 79:
+
+/* Line 1455 of yacc.c  */
 #line 681 "parse.yy"
     {
           (yyval.node) = new BlockStatementNode(new Seq(0, 0));
@@ -2432,6 +2614,8 @@ yyreduce:
     break;
 
   case 80:
+
+/* Line 1455 of yacc.c  */
 #line 688 "parse.yy"
     {
 	  (yyval.stmnt) = new WhileStatementNode((yyvsp[(2) - (3)].expr), (yyvsp[(3) - (3)].stmnt));
@@ -2440,6 +2624,8 @@ yyreduce:
     break;
 
   case 81:
+
+/* Line 1455 of yacc.c  */
 #line 696 "parse.yy"
     {
 	  (yyval.stmnt) = new ReturnStatementNode();
@@ -2447,6 +2633,8 @@ yyreduce:
     break;
 
   case 82:
+
+/* Line 1455 of yacc.c  */
 #line 700 "parse.yy"
     {
 	  (yyval.stmnt) = new ReturnStatementNode((yyvsp[(2) - (3)].expr));
@@ -2454,6 +2642,8 @@ yyreduce:
     break;
 
   case 83:
+
+/* Line 1455 of yacc.c  */
 #line 707 "parse.yy"
     {
 	  (yyval.stmnt) = new OutStatementNode((yyvsp[(2) - (3)].expr));
@@ -2461,6 +2651,8 @@ yyreduce:
     break;
 
   case 84:
+
+/* Line 1455 of yacc.c  */
 #line 714 "parse.yy"
     {
 	  (yyval.stmnt) = new BreakStatementNode();
@@ -2468,6 +2660,8 @@ yyreduce:
     break;
 
   case 85:
+
+/* Line 1455 of yacc.c  */
 #line 721 "parse.yy"
     {
 	  (yyval.stmnt) = new ContinueStatementNode();
@@ -2475,6 +2669,8 @@ yyreduce:
     break;
 
   case 86:
+
+/* Line 1455 of yacc.c  */
 #line 728 "parse.yy"
     {
 	  (yyval.stmnt) = new StatementNode();
@@ -2482,6 +2678,8 @@ yyreduce:
     break;
 
   case 87:
+
+/* Line 1455 of yacc.c  */
 #line 735 "parse.yy"
     {
 	  (yyvsp[(2) - (3)].expr)->setIsParenthesized(true);
@@ -2490,6 +2688,8 @@ yyreduce:
     break;
 
   case 88:
+
+/* Line 1455 of yacc.c  */
 #line 743 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (2)].expr);
@@ -2497,6 +2697,8 @@ yyreduce:
     break;
 
   case 89:
+
+/* Line 1455 of yacc.c  */
 #line 750 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
@@ -2504,6 +2706,8 @@ yyreduce:
     break;
 
   case 90:
+
+/* Line 1455 of yacc.c  */
 #line 754 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
@@ -2511,6 +2715,8 @@ yyreduce:
     break;
 
   case 91:
+
+/* Line 1455 of yacc.c  */
 #line 761 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
@@ -2518,6 +2724,8 @@ yyreduce:
     break;
 
   case 92:
+
+/* Line 1455 of yacc.c  */
 #line 768 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
@@ -2525,6 +2733,8 @@ yyreduce:
     break;
 
   case 93:
+
+/* Line 1455 of yacc.c  */
 #line 772 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
@@ -2532,6 +2742,8 @@ yyreduce:
     break;
 
   case 94:
+
+/* Line 1455 of yacc.c  */
 #line 779 "parse.yy"
     {
 	  (yyval.expr) = new AssignmentOperatorNode((yyvsp[(1) - (3)].expr), (yyvsp[(3) - (3)].expr));
@@ -2539,6 +2751,8 @@ yyreduce:
     break;
 
   case 95:
+
+/* Line 1455 of yacc.c  */
 #line 786 "parse.yy"
     {
 	  (yyval.expr) = new DerefNode(new VarNode((yyvsp[(1) - (1)].str)));
@@ -2546,6 +2760,8 @@ yyreduce:
     break;
 
   case 96:
+
+/* Line 1455 of yacc.c  */
 #line 790 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
@@ -2553,6 +2769,8 @@ yyreduce:
     break;
 
   case 97:
+
+/* Line 1455 of yacc.c  */
 #line 797 "parse.yy"
     {
 	  (yyval.expr) = new BooleanAndOperatorNode((yyvsp[(1) - (3)].expr), (yyvsp[(3) - (3)].expr));
@@ -2560,6 +2778,8 @@ yyreduce:
     break;
 
   case 98:
+
+/* Line 1455 of yacc.c  */
 #line 801 "parse.yy"
     {
 	  (yyval.expr) = new BooleanOrOperatorNode((yyvsp[(1) - (3)].expr), (yyvsp[(3) - (3)].expr));
@@ -2567,6 +2787,8 @@ yyreduce:
     break;
 
   case 99:
+
+/* Line 1455 of yacc.c  */
 #line 805 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
@@ -2574,6 +2796,8 @@ yyreduce:
     break;
 
   case 100:
+
+/* Line 1455 of yacc.c  */
 #line 812 "parse.yy"
     {
 	  (yyval.expr) = new EqualityOperatorNode((yyvsp[(1) - (3)].expr), (yyvsp[(3) - (3)].expr));
@@ -2581,6 +2805,8 @@ yyreduce:
     break;
 
   case 101:
+
+/* Line 1455 of yacc.c  */
 #line 816 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode(new EqualityOperatorNode((yyvsp[(1) - (3)].expr), (yyvsp[(3) - (3)].expr)),
@@ -2589,6 +2815,8 @@ yyreduce:
     break;
 
   case 102:
+
+/* Line 1455 of yacc.c  */
 #line 821 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
@@ -2596,6 +2824,8 @@ yyreduce:
     break;
 
   case 103:
+
+/* Line 1455 of yacc.c  */
 #line 828 "parse.yy"
     {
 	  (yyval.expr) = new InstanceOfExpressionNode((yyvsp[(1) - (3)].expr), (yyvsp[(3) - (3)].type));
@@ -2603,6 +2833,8 @@ yyreduce:
     break;
 
   case 104:
+
+/* Line 1455 of yacc.c  */
 #line 832 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
@@ -2610,6 +2842,8 @@ yyreduce:
     break;
 
   case 105:
+
+/* Line 1455 of yacc.c  */
 #line 839 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode((yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].str), new Seq(0, (yyvsp[(3) - (3)].expr)));
@@ -2617,6 +2851,8 @@ yyreduce:
     break;
 
   case 106:
+
+/* Line 1455 of yacc.c  */
 #line 843 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode((yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].str), new Seq(0, (yyvsp[(3) - (3)].expr)));
@@ -2624,6 +2860,8 @@ yyreduce:
     break;
 
   case 107:
+
+/* Line 1455 of yacc.c  */
 #line 847 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode((yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].str), new Seq(0, (yyvsp[(3) - (3)].expr)));
@@ -2631,6 +2869,8 @@ yyreduce:
     break;
 
   case 108:
+
+/* Line 1455 of yacc.c  */
 #line 851 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode((yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].str), new Seq(0, (yyvsp[(3) - (3)].expr)));
@@ -2638,6 +2878,8 @@ yyreduce:
     break;
 
   case 109:
+
+/* Line 1455 of yacc.c  */
 #line 855 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
@@ -2645,6 +2887,8 @@ yyreduce:
     break;
 
   case 110:
+
+/* Line 1455 of yacc.c  */
 #line 862 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode((yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].str), new Seq(0, (yyvsp[(3) - (3)].expr)));
@@ -2652,6 +2896,8 @@ yyreduce:
     break;
 
   case 111:
+
+/* Line 1455 of yacc.c  */
 #line 866 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode((yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].str), new Seq(0, (yyvsp[(3) - (3)].expr)));
@@ -2659,6 +2905,8 @@ yyreduce:
     break;
 
   case 112:
+
+/* Line 1455 of yacc.c  */
 #line 870 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
@@ -2666,6 +2914,8 @@ yyreduce:
     break;
 
   case 113:
+
+/* Line 1455 of yacc.c  */
 #line 877 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode((yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].str), new Seq(0, (yyvsp[(3) - (3)].expr)));
@@ -2673,6 +2923,8 @@ yyreduce:
     break;
 
   case 114:
+
+/* Line 1455 of yacc.c  */
 #line 881 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode((yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].str), new Seq(0, (yyvsp[(3) - (3)].expr)));
@@ -2680,6 +2932,8 @@ yyreduce:
     break;
 
   case 115:
+
+/* Line 1455 of yacc.c  */
 #line 885 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
@@ -2687,6 +2941,8 @@ yyreduce:
     break;
 
   case 116:
+
+/* Line 1455 of yacc.c  */
 #line 892 "parse.yy"
     {
 	  (yyvsp[(2) - (2)].expr)->setParentIsNegate(true);
@@ -2695,6 +2951,8 @@ yyreduce:
     break;
 
   case 117:
+
+/* Line 1455 of yacc.c  */
 #line 897 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode((yyvsp[(2) - (2)].expr), (yyvsp[(1) - (2)].str), new Seq(0, 0));
@@ -2702,6 +2960,8 @@ yyreduce:
     break;
 
   case 118:
+
+/* Line 1455 of yacc.c  */
 #line 901 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
@@ -2709,6 +2969,8 @@ yyreduce:
     break;
 
   case 119:
+
+/* Line 1455 of yacc.c  */
 #line 908 "parse.yy"
     {
 	  (yyval.expr) = new CastExpressionNode((yyvsp[(1) - (2)].expr), (yyvsp[(2) - (2)].expr));
@@ -2716,6 +2978,8 @@ yyreduce:
     break;
 
   case 120:
+
+/* Line 1455 of yacc.c  */
 #line 912 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
@@ -2723,6 +2987,8 @@ yyreduce:
     break;
 
   case 121:
+
+/* Line 1455 of yacc.c  */
 #line 919 "parse.yy"
     {
 	  (yyval.expr) = new DerefNode(new VarNode((yyvsp[(1) - (1)].str)));
@@ -2730,6 +2996,8 @@ yyreduce:
     break;
 
   case 122:
+
+/* Line 1455 of yacc.c  */
 #line 923 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
@@ -2737,6 +3005,8 @@ yyreduce:
     break;
 
   case 123:
+
+/* Line 1455 of yacc.c  */
 #line 927 "parse.yy"
     {
 	  (yyval.expr) = new ThisExpressionNode();
@@ -2744,6 +3014,8 @@ yyreduce:
     break;
 
   case 124:
+
+/* Line 1455 of yacc.c  */
 #line 931 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
@@ -2751,6 +3023,8 @@ yyreduce:
     break;
 
   case 125:
+
+/* Line 1455 of yacc.c  */
 #line 935 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
@@ -2758,6 +3032,8 @@ yyreduce:
     break;
 
   case 126:
+
+/* Line 1455 of yacc.c  */
 #line 939 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
@@ -2765,6 +3041,8 @@ yyreduce:
     break;
 
   case 127:
+
+/* Line 1455 of yacc.c  */
 #line 943 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
@@ -2772,6 +3050,8 @@ yyreduce:
     break;
 
   case 128:
+
+/* Line 1455 of yacc.c  */
 #line 947 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
@@ -2779,6 +3059,8 @@ yyreduce:
     break;
 
   case 129:
+
+/* Line 1455 of yacc.c  */
 #line 954 "parse.yy"
     {
 	  (yyval.expr) = new InExpressionNode();
@@ -2786,6 +3068,8 @@ yyreduce:
     break;
 
   case 130:
+
+/* Line 1455 of yacc.c  */
 #line 961 "parse.yy"
     {
 	  (yyval.expr) = new ClassInstanceCreationExpressionNode((yyvsp[(2) - (3)].type)->getName(), (yyvsp[(3) - (3)].seq));
@@ -2794,6 +3078,8 @@ yyreduce:
     break;
 
   case 131:
+
+/* Line 1455 of yacc.c  */
 #line 969 "parse.yy"
     {
 	  (yyval.type) = (yyvsp[(1) - (1)].type);
@@ -2801,6 +3087,8 @@ yyreduce:
     break;
 
   case 132:
+
+/* Line 1455 of yacc.c  */
 #line 976 "parse.yy"
     {
 	  (yyval.type) = (yyvsp[(1) - (1)].type);
@@ -2808,6 +3096,8 @@ yyreduce:
     break;
 
   case 133:
+
+/* Line 1455 of yacc.c  */
 #line 983 "parse.yy"
     {
 	  (yyval.type) = new ClassType((yyvsp[(1) - (1)].str));
@@ -2815,6 +3105,8 @@ yyreduce:
     break;
 
   case 134:
+
+/* Line 1455 of yacc.c  */
 #line 990 "parse.yy"
     {
 	  (yyval.expr) = new DerefNode(new FieldAccessOperatorNode((yyvsp[(1) - (3)].expr), (yyvsp[(3) - (3)].str)));
@@ -2822,6 +3114,8 @@ yyreduce:
     break;
 
   case 135:
+
+/* Line 1455 of yacc.c  */
 #line 994 "parse.yy"
     {
 	  (yyval.expr) = new DerefNode(new FieldAccessOperatorNode(new SuperExpressionNode(), (yyvsp[(3) - (3)].str)));
@@ -2829,6 +3123,8 @@ yyreduce:
     break;
 
   case 136:
+
+/* Line 1455 of yacc.c  */
 #line 1001 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode(new ThisExpressionNode(), (yyvsp[(1) - (2)].str), (yyvsp[(2) - (2)].seq));
@@ -2836,6 +3132,8 @@ yyreduce:
     break;
 
   case 137:
+
+/* Line 1455 of yacc.c  */
 #line 1005 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode((yyvsp[(1) - (4)].expr), (yyvsp[(3) - (4)].str), (yyvsp[(4) - (4)].seq));
@@ -2843,6 +3141,8 @@ yyreduce:
     break;
 
   case 138:
+
+/* Line 1455 of yacc.c  */
 #line 1009 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode(new SuperExpressionNode(), (yyvsp[(3) - (4)].str), (yyvsp[(4) - (4)].seq));
@@ -2850,6 +3150,8 @@ yyreduce:
     break;
 
   case 139:
+
+/* Line 1455 of yacc.c  */
 #line 1016 "parse.yy"
     {
 	  (yyval.seq) = (yyvsp[(2) - (3)].seq);
@@ -2857,6 +3159,8 @@ yyreduce:
     break;
 
   case 140:
+
+/* Line 1455 of yacc.c  */
 #line 1020 "parse.yy"
     {
 	  (yyval.seq) = new Seq(0, 0);
@@ -2864,6 +3168,8 @@ yyreduce:
     break;
 
   case 141:
+
+/* Line 1455 of yacc.c  */
 #line 1027 "parse.yy"
     {
 	  (yyval.seq) = new Seq((yyvsp[(1) - (3)].seq), (yyvsp[(3) - (3)].expr));
@@ -2871,6 +3177,8 @@ yyreduce:
     break;
 
   case 142:
+
+/* Line 1455 of yacc.c  */
 #line 1031 "parse.yy"
     {
 	  (yyval.seq) = new Seq(0, (yyvsp[(1) - (1)].expr));
@@ -2878,6 +3186,8 @@ yyreduce:
     break;
 
   case 143:
+
+/* Line 1455 of yacc.c  */
 #line 1038 "parse.yy"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
@@ -2885,6 +3195,8 @@ yyreduce:
     break;
 
   case 144:
+
+/* Line 1455 of yacc.c  */
 #line 1045 "parse.yy"
     {
 	  (yyval.expr) = new IntegerLiteralNode((yyvsp[(1) - (1)].value));
@@ -2892,6 +3204,8 @@ yyreduce:
     break;
 
   case 145:
+
+/* Line 1455 of yacc.c  */
 #line 1049 "parse.yy"
     {
 	  (yyval.expr) = new RealLiteralNode((yyvsp[(1) - (1)].float_value));
@@ -2899,6 +3213,8 @@ yyreduce:
     break;
 
   case 146:
+
+/* Line 1455 of yacc.c  */
 #line 1053 "parse.yy"
     {
 	  (yyval.expr) = new NullLiteralNode();
@@ -2906,6 +3222,8 @@ yyreduce:
     break;
 
   case 147:
+
+/* Line 1455 of yacc.c  */
 #line 1057 "parse.yy"
     {
 	  (yyval.expr) = new StringLiteralNode((yyvsp[(1) - (1)].str));
@@ -2913,6 +3231,8 @@ yyreduce:
     break;
 
   case 148:
+
+/* Line 1455 of yacc.c  */
 #line 1064 "parse.yy"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
@@ -2920,6 +3240,8 @@ yyreduce:
     break;
 
   case 149:
+
+/* Line 1455 of yacc.c  */
 #line 1071 "parse.yy"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
@@ -2927,6 +3249,8 @@ yyreduce:
     break;
 
   case 150:
+
+/* Line 1455 of yacc.c  */
 #line 1075 "parse.yy"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
@@ -2934,6 +3258,8 @@ yyreduce:
     break;
 
   case 151:
+
+/* Line 1455 of yacc.c  */
 #line 1079 "parse.yy"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
@@ -2941,6 +3267,8 @@ yyreduce:
     break;
 
   case 152:
+
+/* Line 1455 of yacc.c  */
 #line 1083 "parse.yy"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
@@ -2948,6 +3276,8 @@ yyreduce:
     break;
 
   case 153:
+
+/* Line 1455 of yacc.c  */
 #line 1087 "parse.yy"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
@@ -2955,6 +3285,8 @@ yyreduce:
     break;
 
   case 154:
+
+/* Line 1455 of yacc.c  */
 #line 1091 "parse.yy"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
@@ -2962,6 +3294,8 @@ yyreduce:
     break;
 
   case 155:
+
+/* Line 1455 of yacc.c  */
 #line 1095 "parse.yy"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
@@ -2969,6 +3303,8 @@ yyreduce:
     break;
 
   case 156:
+
+/* Line 1455 of yacc.c  */
 #line 1102 "parse.yy"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
@@ -2976,8 +3312,9 @@ yyreduce:
     break;
 
 
-/* Line 1267 of yacc.c.  */
-#line 2981 "parse.cc"
+
+/* Line 1455 of yacc.c  */
+#line 3318 "parse.cc"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -3053,7 +3390,7 @@ yyerrlab:
 
   if (yyerrstatus == 3)
     {
-      /* If just tried and failed to reuse look-ahead token after an
+      /* If just tried and failed to reuse lookahead token after an
 	 error, discard it.  */
 
       if (yychar <= YYEOF)
@@ -3070,7 +3407,7 @@ yyerrlab:
 	}
     }
 
-  /* Else will try to reuse look-ahead token after shifting the error
+  /* Else will try to reuse lookahead token after shifting the error
      token.  */
   goto yyerrlab1;
 
@@ -3128,14 +3465,11 @@ yyerrlab1:
       YY_STACK_PRINT (yyss, yyssp);
     }
 
-  if (yyn == YYFINAL)
-    YYACCEPT;
-
   *++yyvsp = yylval;
 
   yyerror_range[1] = yylloc;
   /* Using YYLLOC is tempting, but would change the location of
-     the look-ahead.  YYLOC is available though.  */
+     the lookahead.  YYLOC is available though.  */
   YYLLOC_DEFAULT (yyloc, (yyerror_range - 1), 2);
   *++yylsp = yyloc;
 
@@ -3160,7 +3494,7 @@ yyabortlab:
   yyresult = 1;
   goto yyreturn;
 
-#ifndef yyoverflow
+#if !defined(yyoverflow) || YYERROR_VERBOSE
 /*-------------------------------------------------.
 | yyexhaustedlab -- memory exhaustion comes here.  |
 `-------------------------------------------------*/
@@ -3171,7 +3505,7 @@ yyexhaustedlab:
 #endif
 
 yyreturn:
-  if (yychar != YYEOF && yychar != YYEMPTY)
+  if (yychar != YYEMPTY)
      yydestruct ("Cleanup: discarding lookahead",
 		 yytoken, &yylval, &yylloc);
   /* Do not reclaim the symbols of the rule which action triggered
@@ -3197,6 +3531,8 @@ yyreturn:
 }
 
 
+
+/* Line 1675 of yacc.c  */
 #line 1107 "parse.yy"
 
 

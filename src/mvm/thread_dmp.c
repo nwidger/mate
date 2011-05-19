@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Apr 2011 at 19:56:05 by nwidger on macros.local>
+ * Time-stamp: <19 May 2011 at 11:59:28 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -127,7 +127,7 @@ int thread_dmp_wait(struct thread_dmp *td) {
 }
 
 int thread_dmp_signal(struct thread_dmp *td) {
-	
+
 	if (td == NULL) {
 		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
 		mvm_halt();
@@ -146,7 +146,7 @@ int thread_dmp_signal(struct thread_dmp *td) {
 	pthread_cond_signal(&td->cond);
 
 	pthread_mutex_unlock(&td->mutex);
-	
+
 	return 0;
 }
 
@@ -332,6 +332,35 @@ int thread_dmp_default_thread_start(struct thread_dmp *td) {
 
 	td->state = running_state;
 
+#ifdef __linux
+	cpu_set_t cpuset;
+	pthread_t thread;
+	int i;
+	static int next = 0;
+
+	thread = pthread_self();
+
+	CPU_ZERO(&cpuset);
+	CPU_SET(next++, &cpuset);
+
+	if (pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset) != 0) {
+		perror("mvm: pthread_setaffinity_np");
+		mvm_halt();
+	}
+
+	if (pthread_getaffinity_np(thread, sizeof(cpu_set_t), &cpuset) != 0) {
+		perror("mvm: pthread_setaffinity_np");
+		mvm_halt();
+	}
+
+	fprintf(stderr, "thread %" PRIu32 ": printing bound CPUs:\n", thread_get_ref());
+	
+	for(i = 0; i < CPU_SETSIZE; i++) {
+		if (CPU_ISSET(i, &cpuset))
+			fprintf(stderr, "    CPU %d\n", i);
+	}
+#endif
+
 	return 0;
 }
 
@@ -363,7 +392,7 @@ int thread_dmp_default_thread_destruction(struct thread_dmp *td) {
 
 int thread_dmp_default_thread_join(struct thread_dmp *td) {
 	struct thread_dmp *ud;
-	
+
 	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_join\n", thread_get_ref());
 
 	ud = thread_get_dmp();
@@ -383,7 +412,7 @@ int thread_dmp_default_execute_instruction(struct thread_dmp *td, uint32_t o) {
 		mvm_print("thread %" PRIu32 ":     quantum reached, blocking!\n", thread_get_ref());
 
 		dmp_thread_block(dmp, td);
-		
+
 		if (dmp_get_mode(dmp) == serial_mode) {
 			mvm_print("thread %" PRIu32 ":     quantum finished, blocking!\n", thread_get_ref());
 			dmp_thread_block(dmp, td);
