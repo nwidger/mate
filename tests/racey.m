@@ -81,13 +81,13 @@ class RaceyThread extends Thread {
     //
     for (i = 0; i < MAX_LOOP; i = i + 1) {
       Integer num, index1, index2;
-
       num = (Integer)sig.get(threadId);
+      index1 = maine.mod(num, MAX_ELEM);
+      num = maine.mix(num, (Integer)m.get(index1));
       index2 = maine.mod(num, MAX_ELEM);
       num = maine.mix(num, (Integer)m.get(index2));
       m.put(index2, num);
       sig.put(threadId, num);
-
       // Optionally, yield to other processors (Solaris use sched_yield())
       // pthread_yield();
     }
