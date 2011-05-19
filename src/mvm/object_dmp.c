@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <09 May 2011 at 16:20:31 by nwidger on macros.local>
+ * Time-stamp: <18 May 2011 at 20:14:28 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -122,7 +122,8 @@ int object_dmp_default_load(struct object_dmp *od, int i) {
 	int me, current;
 	struct thread_dmp *td;
 
-	mvm_print("thread %" PRIu32 ": in object_dmp_default_load\n", thread_get_ref());
+	mvm_print("thread %" PRIu32 ": in object_dmp_default_load for object %d\n", thread_get_ref(),
+		  object_get_ref(od->object));
 
 	current = object_dmp_get_owner(od);
 	me = thread_get_ref();
@@ -131,7 +132,8 @@ int object_dmp_default_load(struct object_dmp *od, int i) {
 	if (SHARED(current)) {
 		mvm_print("thread %" PRIu32 ":     shared: proceed!\n", thread_get_ref());
 	} else if (current != me) {
-		mvm_print("thread %" PRIu32 ":     private not owned by me: block, set shared, proceed!\n", thread_get_ref());
+		mvm_print("thread %" PRIu32 ":     private not owned by me (%d): block, set shared, proceed!\n",
+			  current, thread_get_ref());
 
 		if (dmp_get_mode(dmp) == parallel_mode) {
 			/* block */
@@ -153,7 +155,8 @@ int object_dmp_default_store(struct object_dmp *od, int i, int r) {
 	int me, current;
 	struct thread_dmp *td;
 
-	mvm_print("thread %" PRIu32 ": in object_dmp_default_store\n", thread_get_ref());
+	mvm_print("thread %" PRIu32 ": in object_dmp_default_store for object %d\n", thread_get_ref(),
+		  object_get_ref(od->object));
 
 	current = object_dmp_get_owner(od);
 	me = thread_get_ref();
@@ -170,7 +173,8 @@ int object_dmp_default_store(struct object_dmp *od, int i, int r) {
 		/* set private owned by me */
 		object_dmp_chown(od, me);
 	} else if (current != me) {
-		mvm_print("thread %" PRIu32 ":     private not owned by me: block, set private owned by me, proceed!\n", thread_get_ref());
+		mvm_print("thread %" PRIu32 ":     private not owned by me (%d): block, set private owned by me, proceed!\n",
+			  current, thread_get_ref());
 
 		if (dmp_get_mode(dmp) == parallel_mode) {
 			/* block */
