@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <01 Apr 2011 at 15:09:09 by nwidger on macros.local>
+ * Time-stamp: <21 May 2011 at 18:15:44 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -230,7 +230,7 @@ int method_area_address_is_valid(struct method_area *m, uint32_t a) {
 	/* lock */
 	method_area_lock(m);
 
-	retval = (a >= 0 && a <= ((m->size)-sizeof(uint32_t)));
+	retval = (a <= ((m->size)-sizeof(uint32_t)));
 
 	/* unlock */
 	method_area_unlock(m);
