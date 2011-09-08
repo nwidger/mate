@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <10 Apr 2011 at 15:19:23 by nwidger on macros.local>
+ * Time-stamp: <07 Sep 2011 at 19:41:26 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -109,14 +109,15 @@ int dmp_toggle_mode(struct dmp *d) {
 
 	if (d->mode == parallel_mode) {
 		mvm_print("thread %" PRIu32 ": entering serial mode\n", thread_get_ref());
+		d->mode = serial_mode;
 		hook = dmp_barrier_serial_hook;
 	} else {
 		mvm_print("thread %" PRIu32 ": entering parallel mode\n", thread_get_ref());
+		d->mode = parallel_mode;
 		hook = dmp_barrier_parallel_hook;
 
 	}
 
-	d->mode = (d->mode + 1) % 2;
 	barrier_set_hook(d->barrier, hook, (void *)d);
 	barrier_reset(d->barrier);
 
