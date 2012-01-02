@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Apr 2011 at 19:44:20 by nwidger on macros.local>
+ * Time-stamp: <02 Jan 2012 at 10:30:36 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -97,6 +97,7 @@ void nlock_destroy(struct nlock *n) {
 
 void nlock_clear(struct nlock *n) {
 	if (n != NULL) {
+		
 	}
 }
 

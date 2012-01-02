@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Nov 2010 at 21:59:40 by nwidger on macros.local>
+ * Time-stamp: <02 Jan 2012 at 10:20:33 by nwidger on macros.local>
  */
 
 #ifndef _MVM_NATIVEMETHODARRAY_H
@@ -39,7 +39,6 @@ void native_method_array_clear(struct native_method_array *n);
  * @param n - the native_method_array to add to
  * @param i - the index to set
  * @param s - native method name as c-string
- * @param a - the number of arguments of the native method
  * @param m - pointer to native method
  *
  * @return 0 on success, non-zero on failure
