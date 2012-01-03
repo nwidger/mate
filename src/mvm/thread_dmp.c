@@ -1,11 +1,12 @@
 /* Niels Widger
- * Time-stamp: <02 Jan 2012 at 20:48:07 by nwidger on macros.local>
+ * Time-stamp: <02 Jan 2012 at 20:50:36 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
 
+#include <errno.h>
 #include <pthread.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -18,7 +19,7 @@
 #include "thread.h"
 #include "thread_dmp.h"
 
-/* struct definitions */
+/\* struct definitions *\/
 struct thread_dmp {
 	struct thread *thread;
 	enum thread_dmp_state state;
@@ -285,7 +286,7 @@ int thread_dmp_execute_instruction(struct thread_dmp *td, uint32_t o) {
 	return (*td->attr.ops->execute_instruction)(td, o);
 }
 
-/* default ops */
+/\* default ops */
 struct thread_dmp_ops thread_dmp_default_ops = {
 	thread_dmp_default_thread_creation,
 	thread_dmp_default_thread_start,
