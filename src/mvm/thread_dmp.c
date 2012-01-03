@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 May 2011 at 11:59:28 by nwidger on macros.local>
+ * Time-stamp: <02 Jan 2012 at 20:48:07 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -333,26 +333,50 @@ int thread_dmp_default_thread_start(struct thread_dmp *td) {
 	td->state = running_state;
 
 #ifdef __linux
-	cpu_set_t cpuset;
+	cpu_set_t cpuset, retset;
 	pthread_t thread;
-	int i;
+	int i, retval;
+	/* first thread is assigned to cpu 0 */
 	static int next = 0;
+	static int max = -1;
 
 	thread = pthread_self();
 
-	CPU_ZERO(&cpuset);
-	CPU_SET(next++, &cpuset);
+	for (;;) {
+		/* try to assign to next cpu */
+		CPU_ZERO(&cpuset);
+		CPU_SET(next++, &cpuset);
 
-	if (pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset) != 0) {
-		perror("mvm: pthread_setaffinity_np");
-		mvm_halt();
+		if ((retval = pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset)) != 0) {
+			/* if cpu does not exist, start over at 0 */
+			if (retval == EINVAL) {
+				next = 0;
+				continue;
+			}
+
+			errno = retval;
+			perror("mvm: pthread_setaffinity_np");
+			mvm_halt();
+		}
+
+		/* retrieve mask */
+		if ((retval = pthread_getaffinity_np(thread, sizeof(cpu_set_t), &retset)) != 0) {
+			errno = retval;
+			perror("mvm: pthread_setaffinity_np");
+			mvm_halt();
+		}
+
+		/* ensure mask is set correctly, if not start over at 0 */
+		if (!CPU_EQUAL(&cpuset, &retset)) {
+			next = 0;
+			continue;
+		}
+
+		/* mask is set properly, break out */
+		break;
 	}
 
-	if (pthread_getaffinity_np(thread, sizeof(cpu_set_t), &cpuset) != 0) {
-		perror("mvm: pthread_setaffinity_np");
-		mvm_halt();
-	}
-
+	errno = 0;
 	fprintf(stderr, "thread %" PRIu32 ": printing bound CPUs:\n", thread_get_ref());
 	
 	for(i = 0; i < CPU_SETSIZE; i++) {
