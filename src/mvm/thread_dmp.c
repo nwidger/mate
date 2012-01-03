@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <02 Jan 2012 at 20:50:36 by nwidger on macros.local>
+ * Time-stamp: <02 Jan 2012 at 20:51:16 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -19,7 +19,7 @@
 #include "thread.h"
 #include "thread_dmp.h"
 
-/\* struct definitions *\/
+/* struct definitions */
 struct thread_dmp {
 	struct thread *thread;
 	enum thread_dmp_state state;
