@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <02 Jan 2012 at 20:51:16 by nwidger on macros.local>
+ * Time-stamp: <02 Jan 2012 at 20:51:58 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -286,7 +286,7 @@ int thread_dmp_execute_instruction(struct thread_dmp *td, uint32_t o) {
 	return (*td->attr.ops->execute_instruction)(td, o);
 }
 
-/\* default ops */
+/* default ops */
 struct thread_dmp_ops thread_dmp_default_ops = {
 	thread_dmp_default_thread_creation,
 	thread_dmp_default_thread_start,
@@ -339,7 +339,6 @@ int thread_dmp_default_thread_start(struct thread_dmp *td) {
 	int i, retval;
 	/* first thread is assigned to cpu 0 */
 	static int next = 0;
-	static int max = -1;
 
 	thread = pthread_self();
 
