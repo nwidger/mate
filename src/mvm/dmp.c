@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <07 Sep 2011 at 19:41:26 by nwidger on macros.local>
+ * Time-stamp: <07 Jan 2012 at 16:22:41 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -108,11 +108,11 @@ int dmp_toggle_mode(struct dmp *d) {
 	}
 
 	if (d->mode == parallel_mode) {
-		mvm_print("thread %" PRIu32 ": entering serial mode\n", thread_get_ref());
+		mvm_print("thread %" PRIu32 ": entering serial mode\n", thread_get_ref(NULL));
 		d->mode = serial_mode;
 		hook = dmp_barrier_serial_hook;
 	} else {
-		mvm_print("thread %" PRIu32 ": entering parallel mode\n", thread_get_ref());
+		mvm_print("thread %" PRIu32 ": entering parallel mode\n", thread_get_ref(NULL));
 		d->mode = parallel_mode;
 		hook = dmp_barrier_parallel_hook;
 
@@ -196,13 +196,13 @@ int dmp_acquiesce(struct dmp *d, int r, enum thread_dmp_state s) {
 		mvm_halt();
 	}
 
-	if (r == thread_get_ref()) return 0;
+	if (r == thread_get_ref(NULL)) return 0;
 
-	mvm_print("thread %" PRIu32 ": blocking until thread %" PRIu32 " is in state %d\n", thread_get_ref(), r, s);
+	mvm_print("thread %" PRIu32 ": blocking until thread %" PRIu32 " is in state %d\n", thread_get_ref(NULL), r, s);
 
 	o = heap_fetch_object(heap, r);
 	t = object_get_thread(o);
-	ud = _thread_get_dmp(t);
+	ud = thread_get_dmp(t);
 
 	while (thread_dmp_get_state_nonblock(ud) != s);
 
@@ -222,7 +222,7 @@ int dmp_thread_block(struct dmp *d, struct thread_dmp *td) {
 		mvm_halt();
 	}
 
-	mvm_print("thread %" PRIu32 ": in dmp_thread_block\n", thread_get_ref());
+	mvm_print("thread %" PRIu32 ": in dmp_thread_block\n", thread_get_ref(NULL));
 
 	thread_dmp_set_state(td, blocking_state);
 
@@ -233,7 +233,7 @@ int dmp_thread_block(struct dmp *d, struct thread_dmp *td) {
 			dmp_acquiesce(d, ref, waiting_state);
 			o = heap_fetch_object(heap, ref);
 			t = object_get_thread(o);
-			ud = _thread_get_dmp(t);
+			ud = thread_get_dmp(t);
 			thread_dmp_signal(ud);
 		}
 	}
@@ -241,7 +241,7 @@ int dmp_thread_block(struct dmp *d, struct thread_dmp *td) {
 	barrier_await(d->barrier);
 
 	if (d->mode == serial_mode) {
-		me = thread_get_ref();
+		me = thread_get_ref(NULL);
 		if (me != d->first) thread_dmp_wait(td);
 	}
 
@@ -292,12 +292,12 @@ void * dmp_barrier_serial_hook(int i, void *a) {
 
 		if (load > DMP_GARBAGE_COLLECTOR_LOAD_FACTOR) {
 			/* run garbage collector */
-			mvm_print("thread %" PRIu32 ": calling garbage collector\n", thread_get_ref());
+			mvm_print("thread %" PRIu32 ": calling garbage collector\n", thread_get_ref(NULL));
 
 			if (garbage_collector_collect_now(garbage_collector) != 0)
 				mvm_halt();
 
-			mvm_print("thread %" PRIu32 ": returned from garbage collector\n", thread_get_ref());
+			mvm_print("thread %" PRIu32 ": returned from garbage collector\n", thread_get_ref(NULL));
 		}
 
 		d->first = 0;

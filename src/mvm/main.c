@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <07 Sep 2011 at 20:02:57 by nwidger on macros.local>
+ * Time-stamp: <07 Jan 2012 at 16:30:42 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -303,8 +303,8 @@ void mvm_halt() {
 	if (dmp != NULL)
 		exit(1);
 
-	pc = thread_get_pc();
-	vm_stack = thread_get_vm_stack();
+	pc = thread_get_pc(NULL);
+	vm_stack = thread_get_vm_stack(NULL);
 
 	if (debug != 0) {
 		mdb_hook(halt_vm_hook);

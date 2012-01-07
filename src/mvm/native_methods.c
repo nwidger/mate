@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <10 May 2011 at 20:50:34 by nwidger on macros.local>
+ * Time-stamp: <07 Jan 2012 at 16:23:39 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -36,7 +36,7 @@
 	struct frame *calling_frame;					\
 	struct operand_stack *calling_frame_operand_stack;		\
 									\
-        vm_stack = thread_get_vm_stack();				\
+        vm_stack = thread_get_vm_stack(NULL);				\
 									\
 	frame = vm_stack_peek(vm_stack);				\
 	if (frame == NULL) {						\

@@ -3,7 +3,7 @@
 #+STARTUP: hidestars
 #
 # Niels Widger
-# Time-stamp: <22 Mar 2011 at 21:36:06 by nwidger on macros.local>
+# Time-stamp: <07 Jan 2012 at 16:16:32 by nwidger on macros.local>
 
 * mc
 * mas
@@ -17,3 +17,36 @@
 * mdb
 * spec
 * general
+
+* state transitions
+** created_state (START)
+*** GOTO: running_state UPON: turn in serial mode
+** running_state
+*** GOTO: blocking_state UPON: end of current mode
+*** GOTO: destroyed_state UPON: thread done executing
+** blocking_state
+*** 
+** waiting_state
+** destroyed_state (END)
+
+
+* thread creation
+** thread X has been instantiated, thread Y calls 'start' method
+** need to add thread to thread set deterministically to ensure
+   thread order in serial mode is deterministic
+** if in parallel mode
+*** thread Y blocks until its serial turn
+** add thread X to end of thread set
+* thread start
+** 'start' method has been called on thread X by thread Y
+** thread X blocks until start of its serial turn
+* thread destruction
+** thread X has executed all of its instructions and wishes to
+   terminate
+** if in parallel mode
+*** thread X blocks until its serial turn
+** thread X blocks until parallel mode
+** thread X removes itself from the thread set
+* thread join
+** thread X wishes to wait until thread Y has finished executing
+** until thread Y is destroyed, block for next mode

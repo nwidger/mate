@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 May 2011 at 20:14:28 by nwidger on macros.local>
+ * Time-stamp: <07 Jan 2012 at 16:25:22 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -122,18 +122,18 @@ int object_dmp_default_load(struct object_dmp *od, int i) {
 	int me, current;
 	struct thread_dmp *td;
 
-	mvm_print("thread %" PRIu32 ": in object_dmp_default_load for object %d\n", thread_get_ref(),
+	mvm_print("thread %" PRIu32 ": in object_dmp_default_load for object %d\n", thread_get_ref(NULL),
 		  object_get_ref(od->object));
 
 	current = object_dmp_get_owner(od);
-	me = thread_get_ref();
-	td = thread_get_dmp();
+	me = thread_get_ref(NULL);
+	td = thread_get_dmp(NULL);
 
 	if (SHARED(current)) {
-		mvm_print("thread %" PRIu32 ":     shared: proceed!\n", thread_get_ref());
+		mvm_print("thread %" PRIu32 ":     shared: proceed!\n", thread_get_ref(NULL));
 	} else if (current != me) {
 		mvm_print("thread %" PRIu32 ":     private not owned by me (%d): block, set shared, proceed!\n",
-			  current, thread_get_ref());
+			  current, thread_get_ref(NULL));
 
 		if (dmp_get_mode(dmp) == parallel_mode) {
 			/* block */
@@ -143,7 +143,7 @@ int object_dmp_default_load(struct object_dmp *od, int i) {
 		/* set shared */
 		object_dmp_chown(od, 0);
 	} else {
-		mvm_print("thread %" PRIu32 ":     private owned by me: proceed!\n", thread_get_ref());
+		mvm_print("thread %" PRIu32 ":     private owned by me: proceed!\n", thread_get_ref(NULL));
 	}
 
 	/* proceed */
@@ -155,15 +155,15 @@ int object_dmp_default_store(struct object_dmp *od, int i, int r) {
 	int me, current;
 	struct thread_dmp *td;
 
-	mvm_print("thread %" PRIu32 ": in object_dmp_default_store for object %d\n", thread_get_ref(),
+	mvm_print("thread %" PRIu32 ": in object_dmp_default_store for object %d\n", thread_get_ref(NULL),
 		  object_get_ref(od->object));
 
 	current = object_dmp_get_owner(od);
-	me = thread_get_ref();
-	td = thread_get_dmp();
+	me = thread_get_ref(NULL);
+	td = thread_get_dmp(NULL);
 
 	if (SHARED(current)) {
-		mvm_print("thread %" PRIu32 ":     shared: block, set private owned by me, proceed!\n", thread_get_ref());
+		mvm_print("thread %" PRIu32 ":     shared: block, set private owned by me, proceed!\n", thread_get_ref(NULL));
 
 		if (dmp_get_mode(dmp) == parallel_mode) {
 			/* block */
@@ -174,7 +174,7 @@ int object_dmp_default_store(struct object_dmp *od, int i, int r) {
 		object_dmp_chown(od, me);
 	} else if (current != me) {
 		mvm_print("thread %" PRIu32 ":     private not owned by me (%d): block, set private owned by me, proceed!\n",
-			  current, thread_get_ref());
+			  current, thread_get_ref(NULL));
 
 		if (dmp_get_mode(dmp) == parallel_mode) {
 			/* block */
@@ -184,7 +184,7 @@ int object_dmp_default_store(struct object_dmp *od, int i, int r) {
 		/* set private owned by me */
 		object_dmp_chown(od, me);
 	} else {
-		mvm_print("thread %" PRIu32 ":     private owned by me: proceed!\n", thread_get_ref());
+		mvm_print("thread %" PRIu32 ":     private owned by me: proceed!\n", thread_get_ref(NULL));
 	}
 
 	/* proceed */
@@ -193,7 +193,7 @@ int object_dmp_default_store(struct object_dmp *od, int i, int r) {
 }
 
 int object_dmp_default_chown(struct object_dmp *od, int n) {
-	mvm_print("thread %" PRIu32 ": in object_dmp_default_chown\n", thread_get_ref());
+	mvm_print("thread %" PRIu32 ": in object_dmp_default_chown\n", thread_get_ref(NULL));
 	return object_dmp_default_chown_aux(od, n, od->attr.depth);
 }
 

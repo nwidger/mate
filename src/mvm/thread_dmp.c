@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <02 Jan 2012 at 20:51:58 by nwidger on macros.local>
+ * Time-stamp: <07 Jan 2012 at 16:29:19 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -98,6 +98,11 @@ int thread_dmp_set_state(struct thread_dmp *td, enum thread_dmp_state s) {
 	}
 
 	pthread_mutex_lock(&td->mutex);
+
+	mvm_print("thread %" PRIu32 ": transitioning from state %s to %s...\n", thread_get_ref(NULL),
+		  thread_dmp_state_to_string(td->state), 
+		  thread_dmp_state_to_string(s));
+
 	state = td->state;
 	td->state = s;
 	pthread_mutex_unlock(&td->mutex);
@@ -115,12 +120,12 @@ int thread_dmp_wait(struct thread_dmp *td) {
 
 	td->state = waiting_state;
 
-	mvm_print("thread %" PRIu32 ": sleeping until awoken...\n", thread_get_ref());
+	mvm_print("thread %" PRIu32 ": sleeping until awoken...\n", thread_get_ref(NULL));
 
 	while (td->state == waiting_state)
 		pthread_cond_wait(&td->cond, &td->mutex);
 
-	mvm_print("thread %" PRIu32 ": has awoken...\n", thread_get_ref());
+	mvm_print("thread %" PRIu32 ": has awoken...\n", thread_get_ref(NULL));
 
 	pthread_mutex_unlock(&td->mutex);
 
@@ -134,14 +139,14 @@ int thread_dmp_signal(struct thread_dmp *td) {
 		mvm_halt();
 	}
 
-	if (td == thread_get_dmp()) return 0;
+	if (td == thread_get_dmp(NULL)) return 0;
 
 	pthread_mutex_lock(&td->mutex);
 
 	if (td->state != waiting_state)
 		return 0;
 
-	mvm_print("thread %" PRIu32 ": waking thread %" PRIu32 "...\n", thread_get_ref(), _thread_get_ref(td->thread));
+	mvm_print("thread %" PRIu32 ": waking thread %" PRIu32 "...\n", thread_get_ref(NULL), thread_get_ref(td->thread));
 
 	td->state = running_state;
 	pthread_cond_signal(&td->cond);
@@ -309,24 +314,24 @@ int thread_dmp_default_thread_creation(struct thread_dmp *td) {
 	struct thread *thread;
 	struct thread_dmp *ud;
 
-	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_creation\n", thread_get_ref());
+	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_creation\n", thread_get_ref(NULL));
 
 	if (dmp_get_mode(dmp) == parallel_mode) {
 		/* block until serial mode */
-		ud = thread_get_dmp();
+		ud = thread_get_dmp(NULL);
 		dmp_thread_block(dmp, ud);
 	}
 
 	/* add to thread set */
 	thread = td->thread;
-	ref = _thread_get_ref(thread);
+	ref = thread_get_ref(thread);
 	dmp_add_thread(dmp, ref);
 
 	return 0;
 }
 
 int thread_dmp_default_thread_start(struct thread_dmp *td) {
-	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_start\n", thread_get_ref());
+	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_start\n", thread_get_ref(NULL));
 
 	/* wait until its our turn */
 	thread_dmp_wait(td);
@@ -378,7 +383,7 @@ int thread_dmp_default_thread_start(struct thread_dmp *td) {
 
 	errno = 0;
 	fprintf(stderr, "thread %" PRIu32 ": printing bound CPUs:\n", thread_get_ref());
-	
+
 	for(i = 0; i < CPU_SETSIZE; i++) {
 		if (CPU_ISSET(i, &cpuset))
 			fprintf(stderr, "    CPU %d\n", i);
@@ -392,7 +397,7 @@ int thread_dmp_default_thread_destruction(struct thread_dmp *td) {
 	int ref;
 	struct thread *thread;
 
-	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_destruction\n", thread_get_ref());
+	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_destruction\n", thread_get_ref(NULL));
 
 	if (dmp_get_mode(dmp) == parallel_mode) {
 		/* block until serial mode */
@@ -417,9 +422,9 @@ int thread_dmp_default_thread_destruction(struct thread_dmp *td) {
 int thread_dmp_default_thread_join(struct thread_dmp *td) {
 	struct thread_dmp *ud;
 
-	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_join\n", thread_get_ref());
+	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_join\n", thread_get_ref(NULL));
 
-	ud = thread_get_dmp();
+	ud = thread_get_dmp(NULL);
 
 	while (td->state != destroyed_state)
 		dmp_thread_block(dmp, ud);
@@ -428,17 +433,17 @@ int thread_dmp_default_thread_join(struct thread_dmp *td) {
 }
 
 int thread_dmp_default_execute_instruction(struct thread_dmp *td, uint32_t o) {
-	mvm_print("thread %" PRIu32 ": in thread_dmp_default_execute_instruction\n", thread_get_ref());
+	mvm_print("thread %" PRIu32 ": in thread_dmp_default_execute_instruction\n", thread_get_ref(NULL));
 
 	td->attr.instruction_counter++;
 
 	if (td->attr.instruction_counter > td->attr.quantum_size) {
-		mvm_print("thread %" PRIu32 ":     quantum reached, blocking!\n", thread_get_ref());
+		mvm_print("thread %" PRIu32 ":     quantum reached, blocking!\n", thread_get_ref(NULL));
 
 		dmp_thread_block(dmp, td);
 
 		if (dmp_get_mode(dmp) == serial_mode) {
-			mvm_print("thread %" PRIu32 ":     quantum finished, blocking!\n", thread_get_ref());
+			mvm_print("thread %" PRIu32 ":     quantum finished, blocking!\n", thread_get_ref(NULL));
 			dmp_thread_block(dmp, td);
 		}
 

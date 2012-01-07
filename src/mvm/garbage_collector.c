@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <30 Mar 2011 at 19:44:01 by nwidger on macros.local>
+ * Time-stamp: <07 Jan 2012 at 16:26:42 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -327,7 +327,7 @@ int tricolor_garbage_collector(struct garbage_collector *g) {
 		if (thread_get_state(thread) == terminated_state)
 			continue;
 
-		vm_stack = _thread_get_vm_stack(thread);
+		vm_stack = thread_get_vm_stack(thread);
 		vm_stack_lock(vm_stack);
 
 		/* move root set to grey set */

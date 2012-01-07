@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <09 May 2011 at 16:22:34 by nwidger on macros.local>
+ * Time-stamp: <07 Jan 2012 at 16:31:12 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -811,7 +811,7 @@ int add_symbol_file_function(char **t, int n) {
 int backtrace_function(char **t, int n) {
 	struct vm_stack *vm_stack;
 
-	vm_stack = thread_get_vm_stack();
+	vm_stack = thread_get_vm_stack(NULL);
 	
 	repeat = 1;
 
@@ -838,7 +838,7 @@ int break_function(char **t, int n) {
 	struct breakpoint *b, *c;
 	uint32_t pc, address, native_index;
 
-	pc = thread_get_pc();
+	pc = thread_get_pc(NULL);
 
 	repeat = 1;
 	is_native = 0;
@@ -1050,7 +1050,7 @@ int down_function(char **t, int n) {
 	struct frame *tmp;
 	struct vm_stack *vm_stack;
 
-	vm_stack = thread_get_vm_stack();
+	vm_stack = thread_get_vm_stack(NULL);
 
 	repeat = 1;
 
@@ -1115,7 +1115,7 @@ int enable_function(char **t, int n) {
 int finish_function(char **t, int n) {
 	struct vm_stack *vm_stack;
 
-	vm_stack = thread_get_vm_stack();
+	vm_stack = thread_get_vm_stack(NULL);
 	
 	repeat = 1;
 
@@ -1142,7 +1142,7 @@ int frame_function(char **t, int n) {
 	struct frame *tmp;
 	struct vm_stack *vm_stack;
 
-	vm_stack = thread_get_vm_stack();
+	vm_stack = thread_get_vm_stack(NULL);
 
 	repeat = 1;
 
@@ -1221,8 +1221,8 @@ int info_function(char **t, int n) {
 	uint32_t pc;
 	struct vm_stack *vm_stack;
 
-	pc = thread_get_pc();
-	vm_stack = thread_get_vm_stack();
+	pc = thread_get_pc(NULL);
+	vm_stack = thread_get_vm_stack(NULL);
 
 	repeat = 1;
 
@@ -1320,8 +1320,8 @@ void mdb_dump_threads() {
 		object = heap_fetch_object(heap, ref);
 		thread = object_get_thread(object);
 
-		pc = _thread_get_pc(thread);
-		vm_stack = _thread_get_vm_stack(thread);
+		pc = thread_get_pc(thread);
+		vm_stack = thread_get_vm_stack(thread);
 
 		frame = vm_stack_peek(vm_stack);
 
@@ -1337,7 +1337,7 @@ void mdb_dump_threads() {
 int jump_function(char **t, int n) {
 	uint32_t pc, address;
 
-	pc = thread_get_pc();
+	pc = thread_get_pc(NULL);
 	repeat = 1;
 
 	if (mode == startup_mode || mode == terminated_mode) {
@@ -1362,7 +1362,7 @@ int jump_function(char **t, int n) {
 		return 0;
 	}
 
-	thread_set_pc(address);
+	thread_set_pc(NULL, address);
 	fprintf(stderr, "Continuing at %" PRIu32 ".\n", address);
 
 	return 1;
@@ -1371,7 +1371,7 @@ int jump_function(char **t, int n) {
 int nexti_function(char **t, int n) {
 	struct vm_stack *vm_stack;
 
-	vm_stack = thread_get_vm_stack();
+	vm_stack = thread_get_vm_stack(NULL);
 	
 	repeat = 1;
 
@@ -1614,7 +1614,7 @@ int up_function(char **t, int n) {
 	int num;
 	struct vm_stack *vm_stack;
 
-	vm_stack = thread_get_vm_stack();
+	vm_stack = thread_get_vm_stack(NULL);
 
 	repeat = 1;
 
@@ -1870,7 +1870,7 @@ char ** mdb_completion(const char *l, int s, int e) {
 void mdb_sigint_handler(int s) {
 	struct vm_stack *vm_stack;
 
-	vm_stack = thread_get_vm_stack();
+	vm_stack = thread_get_vm_stack(NULL);
 	
 	fprintf(stderr, "\nProgram interrupted.\n");
 	frame = vm_stack_peek(vm_stack);
@@ -2122,8 +2122,8 @@ uint32_t mdb_hook(enum mdb_hook h) {
 	uint32_t pc, retval, opcode;
 	struct vm_stack *vm_stack;
 
-	pc = thread_get_pc();
-	vm_stack = thread_get_vm_stack();
+	pc = thread_get_pc(NULL);
+	vm_stack = thread_get_vm_stack(NULL);
 
 	last_hook = h;
 	enter_cli = 0;

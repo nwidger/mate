@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <03 Feb 2011 at 21:15:55 by nwidger on macros.local>
+ * Time-stamp: <07 Jan 2012 at 16:30:38 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -120,8 +120,8 @@ int invoke_native_method(int i, uint32_t r) {
 	char *name;
 	struct vm_stack *vm_stack;
 
-	pc = thread_get_pc();
-	vm_stack = thread_get_vm_stack();
+	pc = thread_get_pc(NULL);
+	vm_stack = thread_get_vm_stack(NULL);
 
 	name = native_method_array_get_name(native_method_array, i);
 	num_args = native_method_array_get_num_args(native_method_array, i);
@@ -143,7 +143,7 @@ int invoke_native_method(int i, uint32_t r) {
 	if (native_method_array_execute(native_method_array, i) != 0)
 		mvm_halt();
 
-	thread_set_pc(vm_stack_pop(vm_stack));
+	thread_set_pc(NULL, vm_stack_pop(vm_stack));
 
 	if (debug != 0) {
 		mdb_hook(leave_method_hook);
@@ -165,8 +165,8 @@ int execute_method(char *e, uint32_t a, uint32_t b, uint32_t n, uint32_t m, uint
 	struct thread_dmp *td;
 	struct vm_stack *vm_stack;
 
-	td = thread_get_dmp();
-	vm_stack = thread_get_vm_stack();
+	td = thread_get_dmp(NULL);
+	vm_stack = thread_get_vm_stack(NULL);
 
 	/* lock */
 	garbage_collector_lock(garbage_collector);
@@ -177,11 +177,11 @@ int execute_method(char *e, uint32_t a, uint32_t b, uint32_t n, uint32_t m, uint
 	/* unlock */
 	garbage_collector_unlock(garbage_collector);
 
-	thread_set_pc(a);
+	thread_set_pc(NULL, a);
 
 	while (vm_stack_empty(vm_stack) == 0 &&
 	       vm_stack_size(vm_stack) > old_size) {
-		pc = thread_get_pc();
+		pc = thread_get_pc(NULL);
 
 		frame_set_current_address(frame, pc);
 		opcode = method_area_fetch(method_area, pc);

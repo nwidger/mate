@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <09 May 2011 at 16:22:39 by nwidger on macros.local>
+ * Time-stamp: <07 Jan 2012 at 16:26:16 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -104,20 +104,10 @@ void thread_clear(struct thread *t) {
 	vm_stack_clear(t->vm_stack);
 }
 
-struct thread_dmp * thread_get_dmp() {
-	struct thread *t;
-
-	t = (struct thread *)pthread_getspecific(key);
+struct thread_dmp * thread_get_dmp(struct thread *t) {
+	if (t == NULL)
+		t = thread_get_current();
 	
-	if (t == NULL) {
-		fprintf(stderr, "mvm: thread not initialized!\n");
-		mvm_halt();
-	}
-
-	return t->dmp;
-}
-
-struct thread_dmp * _thread_get_dmp(struct thread *t) {
 	if (t == NULL) {
 		fprintf(stderr, "mvm: thread not initialized!\n");
 		mvm_halt();
@@ -150,15 +140,10 @@ int thread_set_current(struct thread *t) {
 	return 0;
 }
 
-int thread_get_ref() {
-	struct thread *t;
+int thread_get_ref(struct thread *t) {
+	if (t == NULL)
+		t = thread_get_current();
 
-	t = thread_get_current();
-
-	return t->ref;
-}
-
-int _thread_get_ref(struct thread *t) {
 	if (t == NULL) {
 		fprintf(stderr, "mvm: thread not initialized!\n");
 		mvm_halt();
@@ -167,15 +152,10 @@ int _thread_get_ref(struct thread *t) {
 	return t->ref;
 }
 
-struct vm_stack * thread_get_vm_stack() {
-	struct thread *t;
-
-	t = thread_get_current();
-
-	return t->vm_stack;
-}
-
-struct vm_stack * _thread_get_vm_stack(struct thread *t) {
+struct vm_stack * thread_get_vm_stack(struct thread *t) {
+	if (t == NULL)
+		t = thread_get_current();
+	
 	if (t == NULL) {
 		fprintf(stderr, "mvm: thread not initialized!\n");
 		mvm_halt();
@@ -184,15 +164,10 @@ struct vm_stack * _thread_get_vm_stack(struct thread *t) {
 	return t->vm_stack;
 }
 
-int thread_get_state() {
-	struct thread *t;
-
-	t = thread_get_current();
-
-	return t->state;
-}
-
-int _thread_get_state(struct thread *t) {
+int thread_get_state(struct thread *t) {
+	if (t == NULL)
+		t = thread_get_current();
+	
 	if (t == NULL) {
 		fprintf(stderr, "mvm: thread not initialized!\n");
 		mvm_halt();
@@ -201,15 +176,10 @@ int _thread_get_state(struct thread *t) {
 	return t->state;
 }
 
-uint32_t thread_get_pc() {
-	struct thread *t;
-
-	t = thread_get_current();
-
-	return t->pc;
-}
-
-uint32_t _thread_get_pc(struct thread *t) {
+uint32_t thread_get_pc(struct thread *t) {
+	if (t == NULL)
+		t = thread_get_current();
+	
 	if (t == NULL) {
 		fprintf(stderr, "mvm: thread not initialized!\n");
 		mvm_halt();
@@ -218,10 +188,14 @@ uint32_t _thread_get_pc(struct thread *t) {
 	return t->pc;
 }
 
-uint32_t thread_set_pc(uint32_t p) {
-	struct thread *t;
+uint32_t thread_set_pc(struct thread *t, uint32_t p) {
+	if (t == NULL)
+		t = thread_get_current();
 
-	t = thread_get_current();
+	if (t == NULL) {
+		fprintf(stderr, "mvm: thread not initialized!\n");
+		mvm_halt();
+	}
 
 	t->pc = p;
 	return p;

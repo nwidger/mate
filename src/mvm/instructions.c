@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <13 Mar 2011 at 14:23:20 by nwidger on macros.local>
+ * Time-stamp: <07 Jan 2012 at 16:30:47 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -45,8 +45,8 @@
 	struct frame *calling_frame;					\
 	struct operand_stack *calling_frame_operand_stack;		\
 									\
-        pc = thread_get_pc();						\
-        vm_stack = thread_get_vm_stack();				\
+        pc = thread_get_pc(NULL);					\
+        vm_stack = thread_get_vm_stack(NULL);				\
 									\
 	frame = vm_stack_peek(vm_stack);				\
 	if (frame == NULL) {						\
@@ -92,7 +92,7 @@ int aconst_null_instruction(uint32_t o) {
 
 	operand_stack_push(operand_stack, 0);
 
-	thread_set_pc(increment_pc(1));
+	thread_set_pc(NULL, increment_pc(1));
 	return 0;
 }
 
@@ -119,7 +119,7 @@ int aload_instruction(uint32_t o) {
 	ref = local_variable_array_load(local_variable_array, index);
 	operand_stack_push(operand_stack, ref);
 
-	thread_set_pc(increment_pc(2));
+	thread_set_pc(NULL, increment_pc(2));
 	return 0;
 }
 
@@ -151,7 +151,7 @@ int areturn_instruction(uint32_t o) {
 	}
 
 	operand_stack_pop_n(operand_stack, n);
-	thread_set_pc(vm_stack_pop(vm_stack));
+	thread_set_pc(NULL, vm_stack_pop(vm_stack));
 
 	return 0;
 }
@@ -181,7 +181,7 @@ int astore_instruction(uint32_t o) {
 	local_variable_array_store(local_variable_array, index, ref);
 	operand_stack_pop_n(operand_stack, n);
 
-	thread_set_pc(increment_pc(2));
+	thread_set_pc(NULL, increment_pc(2));
 	return 0;
 }
 
@@ -251,7 +251,7 @@ int checkcast_instruction(uint32_t o) {
 		garbage_collector_unlock(garbage_collector);
 	}
 
-	thread_set_pc(increment_pc(2));
+	thread_set_pc(NULL, increment_pc(2));
 	return 0;
 }
 
@@ -272,7 +272,7 @@ int dup_instruction(uint32_t o) {
 	ref = operand_stack_peek(operand_stack);
 	operand_stack_push(operand_stack, ref);
 
-	thread_set_pc(increment_pc(1));
+	thread_set_pc(NULL, increment_pc(1));
 	return 0;
 }
 
@@ -305,7 +305,7 @@ int dup_x1_instruction(uint32_t o) {
 	/* unlock */
 	garbage_collector_unlock(garbage_collector);
 
-	thread_set_pc(increment_pc(1));
+	thread_set_pc(NULL, increment_pc(1));
 	return 0;
 }
 
@@ -338,7 +338,7 @@ int getfield_instruction(uint32_t o) {
 	operand_stack_pop_n(operand_stack, n);
 	operand_stack_push(operand_stack, fieldref);
 
-	thread_set_pc(increment_pc(2));
+	thread_set_pc(NULL, increment_pc(2));
 	return 0;
 }
 
@@ -366,7 +366,7 @@ int goto_instruction(uint32_t o) {
 	SETUP_INSTRUCTION();
 	mvm_disassemble_arguments(pc, 1, &address);
 
-	thread_set_pc(address);
+	thread_set_pc(NULL, address);
 
 	return 0;
 }
@@ -408,9 +408,9 @@ int ifeq_instruction(uint32_t o) {
 	operand_stack_pop_n(operand_stack, n);
 
 	if (value == 0)
-		thread_set_pc(address);
+		thread_set_pc(NULL, address);
 	else
-		thread_set_pc(increment_pc(2));
+		thread_set_pc(NULL, increment_pc(2));
 
 	return 0;
 }
@@ -473,7 +473,7 @@ int in_instruction(uint32_t o) {
 		garbage_collector_unlock(garbage_collector);
 	}
 
-	thread_set_pc(increment_pc(1));
+	thread_set_pc(NULL, increment_pc(1));
 	free(buf);
 	return 0;
 }
@@ -630,7 +630,7 @@ int monitorenter_instruction(uint32_t o) {
 	object = heap_fetch_object(heap, ref);
 	object_acquire_monitor(object);
 
-	thread_set_pc(increment_pc(1));
+	thread_set_pc(NULL, increment_pc(1));
 	return 0;
 }
 
@@ -659,7 +659,7 @@ int monitorexit_instruction(uint32_t o) {
 	object = heap_fetch_object(heap, ref);
 	object_release_monitor(object);
 
-	thread_set_pc(increment_pc(1));
+	thread_set_pc(NULL, increment_pc(1));
 	return 0;
 }
 
@@ -697,7 +697,7 @@ int new_instruction(uint32_t o) {
 	/* unlock */
 	garbage_collector_unlock(garbage_collector);
 
-	thread_set_pc(increment_pc(2));
+	thread_set_pc(NULL, increment_pc(2));
 	return 0;
 }
 
@@ -740,7 +740,7 @@ int newint_instruction(uint32_t o) {
 	/* unlock */
 	garbage_collector_unlock(garbage_collector);
 
-	thread_set_pc(increment_pc(2));
+	thread_set_pc(NULL, increment_pc(2));
 	return 0;
 }
 
@@ -780,7 +780,7 @@ int newreal_instruction(uint32_t o) {
 	/* unlock */
 	garbage_collector_unlock(garbage_collector);
 
-	thread_set_pc(increment_pc(strlen(buf)+2));
+	thread_set_pc(NULL, increment_pc(strlen(buf)+2));
 	free(buf);
 	return 0;
 }
@@ -825,7 +825,7 @@ int newstr_instruction(uint32_t o) {
 	/* unlock */
 	garbage_collector_unlock(garbage_collector);
 
-	thread_set_pc(increment_pc(strlen(buf)+2));
+	thread_set_pc(NULL, increment_pc(strlen(buf)+2));
 	free(buf);
 	return 0;
 }
@@ -857,7 +857,7 @@ int out_instruction(uint32_t o) {
 
 	operand_stack_pop_n(operand_stack, n);
 
-	thread_set_pc(increment_pc(1));
+	thread_set_pc(NULL, increment_pc(1));
 	return 0;
 }
 
@@ -875,7 +875,7 @@ int pop_instruction(uint32_t o) {
 
 	operand_stack_pop(operand_stack);
 
-	thread_set_pc(increment_pc(1));
+	thread_set_pc(NULL, increment_pc(1));
 	return 0;
 }
 
@@ -909,7 +909,7 @@ int putfield_instruction(uint32_t o) {
 	object_store_field(object, index, ref);
 	operand_stack_pop_n(operand_stack, n);
 
-	thread_set_pc(increment_pc(2));
+	thread_set_pc(NULL, increment_pc(2));
 	return 0;
 }
 
@@ -942,7 +942,7 @@ int refcmp_instruction(uint32_t o) {
 	/* unlock */
 	garbage_collector_unlock(garbage_collector);
 
-	thread_set_pc(increment_pc(1));
+	thread_set_pc(NULL, increment_pc(1));
 	return 0;
 }
 
@@ -958,7 +958,7 @@ int return_decode(uint32_t a) {
 int return_instruction(uint32_t o) {
 	SETUP_INSTRUCTION();
 
-	thread_set_pc(vm_stack_pop(vm_stack));
+	thread_set_pc(NULL, vm_stack_pop(vm_stack));
 	return 0;
 }
 
@@ -1056,5 +1056,5 @@ int is_whitespace(char c) {
 }
 
 uint32_t increment_pc(int n) {
-	return thread_get_pc() + (sizeof(uint32_t)*n);
+	return thread_get_pc(NULL) + (sizeof(uint32_t)*n);
 }

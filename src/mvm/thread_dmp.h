@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Apr 2011 at 19:54:50 by nwidger on macros.local>
+ * Time-stamp: <06 Jan 2012 at 18:26:05 by nwidger on macros.local>
  */
 
 #ifndef _MVM_THREAD_DMP_H
@@ -15,12 +15,34 @@ struct thread_dmp;
 
 /* enums */
 enum thread_dmp_state {
+	/* thread created but not yet executing byte-code */
 	created_state   = 0,
+	/* currently executing byte-code */
 	running_state   = 1,
+        /* reached end of current mode */
 	blocking_state  = 2,
+	/* waiting to be awoken during serial mode */
 	waiting_state   = 3,
+	/* thread done executing, may be joined */
 	destroyed_state = 4
 };
+
+static inline const char * thread_dmp_state_to_string(enum thread_dmp_state s) {
+	static char *thread_dmp_state_strings[] = {
+		"created_state",
+		"running_state",
+		"blocking_state",
+		"waiting_state",
+		"destroyed_state"
+	};
+	
+	if (s < 0 ||
+	    s > (sizeof(thread_dmp_state_strings)/sizeof(const char *))) {
+		return "unknown_state";
+        }
+
+	return thread_dmp_state_strings[s];
+}
 
 enum thread_dmp_serial_mode {
 	full_mode    = 0,
