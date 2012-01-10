@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <02 Jan 2012 at 10:30:36 by nwidger on macros.local>
+ * Time-stamp: <09 Jan 2012 at 18:24:31 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -102,7 +102,9 @@ void nlock_clear(struct nlock *n) {
 }
 
 int nlock_lock(struct nlock *n) {
-	int err = 0;
+	int err;
+
+	err = 0;
 
 	if (n == NULL) {
 		fprintf(stderr, "mvm: nlock has not been initialized!\n");
@@ -125,7 +127,9 @@ int nlock_lock(struct nlock *n) {
 }
 
 int nlock_trylock(struct nlock *n) {
-	int err = 0;
+	int err;
+
+	err = 0;
 
 	if (n == NULL) {
 		fprintf(stderr, "mvm: nlock has not been initialized!\n");
@@ -150,7 +154,9 @@ int nlock_trylock(struct nlock *n) {
 }
 
 int nlock_unlock(struct nlock *n) {
-	int err = 0;
+	int err;
+
+	err = 0;
 
 	if (n == NULL) {
 		fprintf(stderr, "mvm: nlock has not been initialized!\n");
