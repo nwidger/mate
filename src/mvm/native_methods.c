@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <07 Jan 2012 at 16:23:39 by nwidger on macros.local>
+ * Time-stamp: <09 Jan 2012 at 20:34:05 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -56,13 +56,6 @@
 				frame_get_operand_stack(calling_frame);	\
 		}							\
 	}
-
-/* globals */
-struct frame *frame;
-struct operand_stack *operand_stack;
-struct local_variable_array *local_variable_array;
-struct frame *calling_frame;
-struct operand_stack *calling_frame_operand_stack;
 
 /* forward declarations */
 uint32_t mvm_disassemble_argument(int n);
