@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <07 Jan 2012 at 16:31:12 by nwidger on macros.local>
+ * Time-stamp: <09 Jan 2012 at 21:04:25 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -2047,22 +2047,35 @@ int mdb_cleanup() {
 	if (last_line != NULL)
 		free(last_line);
 
-	for (i = 0; symbols[i] != NULL; i++ )
-		free(symbols[i]);
-	for (i = 0; classes[i] != NULL; i++ )
-		free(classes[i]);
-	for (i = 0; methods[i] != NULL; i++ )
-		free(methods[i]);
-	for (i = 0; native_methods[i] != NULL; i++ )
-		free(native_methods[i]);
-	for (i = 0; addresses[i] != NULL; i++ )
-		free(addresses[i]);
+	if (symbols != NULL) {
+		for (i = 0; symbols[i] != NULL; i++ )
+			free(symbols[i]);
+		free(symbols);
+	}
 
-	free(symbols);
-	free(classes);
-	free(methods);
-	free(native_methods);
-	free(addresses);
+	if (classes != NULL) {
+		for (i = 0; classes[i] != NULL; i++ )
+			free(classes[i]);
+		free(classes);
+	}
+
+	if (methods != NULL) {
+		for (i = 0; methods[i] != NULL; i++ )
+			free(methods[i]);
+		free(methods);
+	}
+
+	if (native_methods != NULL) {
+		for (i = 0; native_methods[i] != NULL; i++ )
+			free(native_methods[i]);
+		free(native_methods);
+	}
+
+	if (addresses != NULL) {
+		for (i = 0; addresses[i] != NULL; i++ )
+			free(addresses[i]);
+		free(addresses);
+	}
 
 	breakpoint_list_destroy(breakpoints);
 	return 0;

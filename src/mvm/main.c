@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <09 Jan 2012 at 20:47:40 by nwidger on macros.local>
+ * Time-stamp: <09 Jan 2012 at 21:14:02 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -164,6 +164,34 @@ int mvm_initialize(uint64_t h) {
 	if (add_instructions(instruction_table) != 0) {
 		fprintf(stderr, "mvm: error adding instructions!\n");
 		return 1;
+	}
+
+	if (symbol_file == NULL) {
+		len = strlen(class_file);
+		if ((buf = (char *)malloc(len + 1 + strlen(".sym"))) == NULL) {
+			perror("malloc");
+			return 1;
+		}
+
+		buf[0] = '\0';
+		strcat(buf, class_file);
+		strcat(buf, ".sym");
+
+		if (access(buf, F_OK) != 0 &&
+		    strlen(class_file) > strlen(".class")) {
+			buf[0] = '\0';
+			strcat(buf, class_file);
+			buf[strlen(class_file)-strlen(".class")] = '\0';
+			strcat(buf, ".sym");
+
+			if (access(buf, F_OK) != 0) {
+				free(buf);
+				buf = NULL;
+			}
+		}
+		
+
+		symbol_file = buf;
 	}
 
 	if (symbol_file != NULL &&
