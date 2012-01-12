@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <09 Jan 2012 at 21:14:02 by nwidger on macros.local>
+ * Time-stamp: <12 Jan 2012 at 16:46:04 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -168,7 +168,7 @@ int mvm_initialize(uint64_t h) {
 
 	if (symbol_file == NULL) {
 		len = strlen(class_file);
-		if ((buf = (char *)malloc(len + 1 + strlen(".sym"))) == NULL) {
+		if ((buf = (char *)malloc(len + strlen(".sym") + 1)) == NULL) {
 			perror("malloc");
 			return 1;
 		}
@@ -177,16 +177,20 @@ int mvm_initialize(uint64_t h) {
 		strcat(buf, class_file);
 		strcat(buf, ".sym");
 
-		if (access(buf, F_OK) != 0 &&
-		    strlen(class_file) > strlen(".class")) {
-			buf[0] = '\0';
-			strcat(buf, class_file);
-			buf[strlen(class_file)-strlen(".class")] = '\0';
-			strcat(buf, ".sym");
-
-			if (access(buf, F_OK) != 0) {
+		if (access(buf, F_OK) != 0) {
+			if (strlen(class_file) <= strlen(".class")) {
 				free(buf);
 				buf = NULL;
+			} else {
+				buf[0] = '\0';
+				strcat(buf, class_file);
+				buf[strlen(class_file)-strlen(".class")] = '\0';
+				strcat(buf, ".sym");
+
+				if (access(buf, F_OK) != 0) {
+					free(buf);
+					buf = NULL;
+				}
 			}
 		}
 		
@@ -200,7 +204,7 @@ int mvm_initialize(uint64_t h) {
 
 	if (access(class_file, F_OK) != 0) {
 		len = strlen(class_file);
-		if ((buf = (char *)malloc(len + 1 + strlen(".class"))) == NULL) {
+		if ((buf = (char *)malloc(len + strlen(".class") + 1)) == NULL) {
 			perror("malloc");
 			return 1;
 		}
