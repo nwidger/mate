@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <09 Jan 2012 at 20:51:31 by nwidger on macros.local>
+ * Time-stamp: <12 Jan 2012 at 15:47:18 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -196,7 +196,10 @@ int dmp_acquiesce(struct dmp *d, int r, enum thread_dmp_state s) {
 		mvm_halt();
 	}
 
-	if (r == thread_get_ref(NULL)) return 0;
+	if (r == thread_get_ref(NULL)) {
+		mvm_print("thread %" PRIu32 ": tried to acquiesce on ourselves!\n", thread_get_ref(NULL));
+		mvm_halt();
+	}
 
 	mvm_print("thread %" PRIu32 ": blocking until thread %" PRIu32 " is in state %s\n", thread_get_ref(NULL), r,
 		  thread_dmp_state_to_string(s));

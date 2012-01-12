@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <07 Jan 2012 at 16:38:26 by nwidger on macros.local>
+ * Time-stamp: <12 Jan 2012 at 15:46:11 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -143,8 +143,10 @@ int thread_dmp_signal(struct thread_dmp *td) {
 
 	pthread_mutex_lock(&td->mutex);
 
-	if (td->state != waiting_state)
-		return 0;
+	if (td->state != waiting_state) {
+		mvm_print("thread %" PRIu32 ": tried to wake thread %" PRIu32 " but it wasn't waiting!\n", thread_get_ref(NULL), thread_get_ref(td->thread));
+		mvm_halt();
+	}
 
 	mvm_print("thread %" PRIu32 ": waking thread %" PRIu32 "...\n", thread_get_ref(NULL), thread_get_ref(td->thread));
 
