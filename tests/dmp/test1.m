@@ -11,6 +11,12 @@ class TestThread extends Thread {
 
   Object run() {
     this.x.put(0, this.idx);
+    sleep(500);
+    this.x.put(0, this.idx);
+    sleep(500);
+    this.x.put(0, this.idx);
+    sleep(500);
+    this.x.put(0, this.idx);
     return null;
   }
 }
