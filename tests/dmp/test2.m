@@ -45,11 +45,15 @@ class TestThread extends Thread {
 
     this.sleep(50);
 
+    this.idx = this.shared.x + this.shared.y + this.shared.z;
+
     this.shared.x = this.shared.z * idx;
     this.shared.y = this.shared.x * idx;
     this.shared.z = this.shared.y * idx;
 
     this.sleep(50);
+
+    this.idx = this.shared.x + this.shared.y + this.shared.z;    
 
     this.shared.x = this.shared.y * idx;
     this.shared.y = this.shared.z * idx;
