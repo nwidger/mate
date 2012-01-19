@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <12 Jan 2012 at 15:46:11 by nwidger on macros.local>
+ * Time-stamp: <19 Jan 2012 at 18:14:08 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -100,7 +100,7 @@ int thread_dmp_set_state(struct thread_dmp *td, enum thread_dmp_state s) {
 	pthread_mutex_lock(&td->mutex);
 
 	mvm_print("thread %" PRIu32 ": transitioning from state %s to %s...\n", thread_get_ref(NULL),
-		  thread_dmp_state_to_string(td->state), 
+		  thread_dmp_state_to_string(td->state),
 		  thread_dmp_state_to_string(s));
 
 	state = td->state;
@@ -144,6 +144,7 @@ int thread_dmp_signal(struct thread_dmp *td) {
 	pthread_mutex_lock(&td->mutex);
 
 	if (td->state != waiting_state) {
+		/* assertion fail */
 		mvm_print("thread %" PRIu32 ": tried to wake thread %" PRIu32 " but it wasn't waiting!\n", thread_get_ref(NULL), thread_get_ref(td->thread));
 		mvm_halt();
 	}
@@ -192,12 +193,24 @@ int thread_dmp_incr_lock_count(struct thread_dmp *td) {
 		mvm_halt();
 	}
 
+	if (td->attr.lock_count < 0) {
+		/* assertion fail */
+		mvm_print("thread %" PRIu32 ": tried to increment thread_dmp lock count, but count is negative!\n", thread_get_ref(NULL));
+		mvm_halt();
+	}
+
 	return ++(td->attr.lock_count);
 }
 
 int thread_dmp_decr_lock_count(struct thread_dmp *td) {
 	if (td == NULL) {
 		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
+		mvm_halt();
+	}
+
+	if (td->attr.lock_count == 0) {
+		/* assertion fail */
+		mvm_print("thread %" PRIu32 ": tried to decrement thread_dmp lock count, but count is 0!\n", thread_get_ref(NULL));
 		mvm_halt();
 	}
 
@@ -384,11 +397,11 @@ int thread_dmp_default_thread_start(struct thread_dmp *td) {
 	}
 
 	errno = 0;
-	fprintf(stderr, "thread %" PRIu32 ": printing bound CPUs:\n", thread_get_ref(NULL));
+	mvm_print(stderr, "thread %" PRIu32 ": printing bound CPUs:\n", thread_get_ref(NULL));
 
 	for(i = 0; i < CPU_SETSIZE; i++) {
 		if (CPU_ISSET(i, &cpuset))
-			fprintf(stderr, "    CPU %d\n", i);
+			mvm_print(stderr, "    CPU %d\n", i);
 	}
 #endif
 

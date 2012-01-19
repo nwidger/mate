@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <07 Jan 2012 at 16:25:22 by nwidger on macros.local>
+ * Time-stamp: <17 Jan 2012 at 19:44:19 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -194,6 +194,13 @@ int object_dmp_default_store(struct object_dmp *od, int i, int r) {
 
 int object_dmp_default_chown(struct object_dmp *od, int n) {
 	mvm_print("thread %" PRIu32 ": in object_dmp_default_chown\n", thread_get_ref(NULL));
+
+	if (dmp_get_mode(dmp) == parallel_mode) {
+		/* assertion fail */
+		mvm_print("thread %" PRIu32 ": attempt to change object ownership in parallel mode!\n", thread_get_ref(NULL));
+		mvm_halt();
+	}
+	
 	return object_dmp_default_chown_aux(od, n, od->attr.depth);
 }
 

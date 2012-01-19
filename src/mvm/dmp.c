@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <12 Jan 2012 at 15:47:18 by nwidger on macros.local>
+ * Time-stamp: <17 Jan 2012 at 19:43:14 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -130,6 +130,12 @@ int dmp_add_thread(struct dmp *d, int r) {
 		mvm_halt();
 	}
 
+	if (r != 1 && dmp_get_mode(dmp) == parallel_mode) {
+		/* assertion fail */
+		mvm_print("adding thread %d to thread_set in parallel mode!\n", r);
+		mvm_halt();
+	}
+
 	mvm_print("adding thread %d to thread_set!\n", r);
 
 	ref_set_add(d->thread_set, r);
@@ -140,6 +146,11 @@ int dmp_add_thread(struct dmp *d, int r) {
 int dmp_remove_thread(struct dmp *d, int r) {
 	if (d == NULL) {
 		fprintf(stderr, "mvm: dmp not initialized!\n");
+		mvm_halt();
+	}
+
+	if (dmp_get_mode(dmp) == serial_mode) {
+		mvm_print("removing thread %d from thread_set in serial mode!\n", r);
 		mvm_halt();
 	}
 

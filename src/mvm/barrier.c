@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <06 Apr 2011 at 20:50:29 by nwidger on macros.local>
+ * Time-stamp: <17 Jan 2012 at 19:43:18 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -110,8 +110,11 @@ int barrier_await(struct barrier *b) {
 
 	pthread_mutex_lock(&b->mutex);
 
-	if (b->parties == 0)
-		return 0;
+	if (b->parties == 0) {
+		pthread_mutex_unlock(&b->mutex);
+		mvm_print("attempt to await barrier with zero parties!\n");
+		mvm_halt();
+	}
 
 	i = b->parties - ++b->waiting;
 
@@ -187,6 +190,13 @@ int barrier_dec_parties(struct barrier *b) {
 	}
 
 	pthread_mutex_lock(&b->mutex);
+
+	if (b->parties == 0) {
+		/* assertion fail */
+		pthread_mutex_unlock(&b->mutex);
+		mvm_print("attempt to decrement parties with zero parties!\n");
+		mvm_halt();
+	}
 
 	i = --b->parties - b->waiting;
 	

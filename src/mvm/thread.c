@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <07 Jan 2012 at 16:26:16 by nwidger on macros.local>
+ * Time-stamp: <19 Jan 2012 at 18:09:46 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -107,7 +107,7 @@ void thread_clear(struct thread *t) {
 struct thread_dmp * thread_get_dmp(struct thread *t) {
 	if (t == NULL)
 		t = thread_get_current();
-	
+
 	if (t == NULL) {
 		fprintf(stderr, "mvm: thread not initialized!\n");
 		mvm_halt();
@@ -155,7 +155,7 @@ int thread_get_ref(struct thread *t) {
 struct vm_stack * thread_get_vm_stack(struct thread *t) {
 	if (t == NULL)
 		t = thread_get_current();
-	
+
 	if (t == NULL) {
 		fprintf(stderr, "mvm: thread not initialized!\n");
 		mvm_halt();
@@ -167,7 +167,7 @@ struct vm_stack * thread_get_vm_stack(struct thread *t) {
 int thread_get_state(struct thread *t) {
 	if (t == NULL)
 		t = thread_get_current();
-	
+
 	if (t == NULL) {
 		fprintf(stderr, "mvm: thread not initialized!\n");
 		mvm_halt();
@@ -179,7 +179,7 @@ int thread_get_state(struct thread *t) {
 uint32_t thread_get_pc(struct thread *t) {
 	if (t == NULL)
 		t = thread_get_current();
-	
+
 	if (t == NULL) {
 		fprintf(stderr, "mvm: thread not initialized!\n");
 		mvm_halt();
@@ -212,6 +212,11 @@ int thread_start(struct object *o) {
 
 	if (t == NULL) {
 		fprintf(stderr, "mvm: thread not initialized!\n");
+		mvm_halt();
+	}
+
+	if (t->state != new_state) {
+		fprintf(stderr, "mvm: thread cannot be started more than once!\n");
 		mvm_halt();
 	}
 
@@ -325,14 +330,14 @@ int thread_sleep(struct object *o, struct object *p) {
 		mvm_halt();
 	}
 
-	i = object_get_integer(p);	
+	i = object_get_integer(p);
 	millisec = integer_get_value(i);
 
 	if (usleep(millisec * 1000) != 0) {
 		perror("mvm: usleep");
 		mvm_halt();
 	}
-	
+
 	return 0;
 }
 
@@ -395,8 +400,8 @@ void * thread_run0_main(void *p) {
 	}
 
 	if (t->dmp != NULL)
-		thread_dmp_thread_destruction(t->dmp);	
-	
+		thread_dmp_thread_destruction(t->dmp);
+
 	t->state = terminated_state;
 	/* run method has terminated, thread instance can now be collected */
 	heap_include_ref(heap, t->ref);
