@@ -92,7 +92,7 @@ class Main {
     shared = new SharedObj(NumThreads);
 
     for (i = 0; i < NumThreads; i = i + 1) {
-      thread = new TestThread(i, shared);
+      thread = new TestThread(i+1, shared);
       threads.put(i, thread);
     }
 
