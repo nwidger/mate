@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Jan 2012 at 18:14:08 by nwidger on macros.local>
+ * Time-stamp: <19 Jan 2012 at 21:03:25 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -441,8 +441,10 @@ int thread_dmp_default_thread_join(struct thread_dmp *td) {
 
 	ud = thread_get_dmp(NULL);
 
-	while (td->state != destroyed_state)
+	while (td->state != destroyed_state) {
+		mvm_print("thread %" PRIu32 ": thread to join still not destroyed, blocking...\n", thread_get_ref(NULL));
 		dmp_thread_block(dmp, ud);
+	}
 
 	return 0;
 }
@@ -452,7 +454,7 @@ int thread_dmp_default_execute_instruction(struct thread_dmp *td, uint32_t o) {
 
 	td->attr.instruction_counter++;
 
-	if (td->attr.instruction_counter > td->attr.quantum_size) {
+	if (td->attr.instruction_counter == td->attr.quantum_size) {
 		mvm_print("thread %" PRIu32 ":     quantum reached, blocking!\n", thread_get_ref(NULL));
 
 		dmp_thread_block(dmp, td);
