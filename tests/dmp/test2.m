@@ -33,6 +33,8 @@ class TestThread extends Thread {
   }
 
   Object run() {
+    Integer i;
+    
     synchronized (this.shared) {
       this.shared.count = this.shared.count - 1;
     }
