@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <10 May 2011 at 17:04:24 by nwidger on macros.local>
+ * Time-stamp: <21 Jan 2012 at 12:35:57 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -410,6 +410,8 @@ int ref_set_dump(struct ref_set *h) {
 }
 
 int ref_set_dump_iterator(struct ref_set *h) {
+	int len;
+	char *buf;
 	struct ref_set_record *p;
 
 	if (h == NULL) {
@@ -420,16 +422,30 @@ int ref_set_dump_iterator(struct ref_set *h) {
 	/* lock */
 	ref_set_lock(h);
 
-	fprintf(stderr, "dumping ref_set iterator\n");
-	fprintf(stderr, "  size = %d\n", h->size);
-	fprintf(stderr, "  refs = ");
-	for (p = h->list_head; p != NULL; p = p->list_next)
-		fprintf(stderr, "%s%d ", p == h->iterator_next ? "*" : "", p->ref);
+	len = strlen("dumping ref_set iterator\n") +
+		strlen("  size = ") + strlen("2147483648") + strlen("\n") +
+		strlen("  refs = ") + (h->size*(strlen("*")+strlen("2147483648"))) +
+		strlen("\n");
 
-	fprintf(stderr, "\n");
+	if ((buf = (char *)malloc(len+1)) == NULL) {
+		perror("mvm: malloc");
+		mvm_halt();
+	}
+
+	sprintf(buf, "dumping ref_set iterator\n");
+	sprintf(buf+strlen(buf), "  size = %d\n", h->size);
+	sprintf(buf+strlen(buf), "  refs = ");
+	for (p = h->list_head; p != NULL; p = p->list_next)
+		sprintf(buf+strlen(buf), "%s%d ", p == h->iterator_next ? "*" : "", p->ref);
+
+	sprintf(buf+strlen(buf), "\n");
+
+        free(buf);
 
 	/* unlock */
 	ref_set_unlock(h);
+
+	fprintf(stderr, "%s", buf);
 
 	return 0;
 }
