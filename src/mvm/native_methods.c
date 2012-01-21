@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Jan 2012 at 14:45:36 by nwidger on macros.local>
+ * Time-stamp: <21 Jan 2012 at 15:16:37 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -1020,8 +1020,6 @@ int native_thread_run(uint32_t i) {
 int native_thread_join(uint32_t i) {
 	int ref, n;
 	struct object *this;
-
-	fprintf(stderr, "in %s\n", __FUNCTION__);
 
 	SETUP_NATIVE_METHOD();
 	n = 0;
