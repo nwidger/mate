@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Jan 2012 at 12:35:57 by nwidger on macros.local>
+ * Time-stamp: <21 Jan 2012 at 13:00:25 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -432,20 +432,21 @@ int ref_set_dump_iterator(struct ref_set *h) {
 		mvm_halt();
 	}
 
-	sprintf(buf, "dumping ref_set iterator\n");
-	sprintf(buf+strlen(buf), "  size = %d\n", h->size);
-	sprintf(buf+strlen(buf), "  refs = ");
+	sprintf(buf, "dumping ref_set iterator\n"
+		"  size = %d\n"
+		"  refs = ",
+		h->size);
 	for (p = h->list_head; p != NULL; p = p->list_next)
 		sprintf(buf+strlen(buf), "%s%d ", p == h->iterator_next ? "*" : "", p->ref);
 
 	sprintf(buf+strlen(buf), "\n");
 
-        free(buf);
-
 	/* unlock */
 	ref_set_unlock(h);
 
 	fprintf(stderr, "%s", buf);
+
+        free(buf);
 
 	return 0;
 }
