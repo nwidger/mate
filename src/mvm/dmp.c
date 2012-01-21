@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <17 Jan 2012 at 19:43:14 by nwidger on macros.local>
+ * Time-stamp: <21 Jan 2012 at 12:18:20 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -121,6 +121,9 @@ int dmp_toggle_mode(struct dmp *d) {
 	barrier_set_hook(d->barrier, hook, (void *)d);
 	barrier_reset(d->barrier);
 
+	if (debug == 0 && verbose != 0)
+		ref_set_dump_iterator(d->thread_set);
+
 	return 0;
 }
 
@@ -140,6 +143,10 @@ int dmp_add_thread(struct dmp *d, int r) {
 
 	ref_set_add(d->thread_set, r);
 	barrier_inc_parties(d->barrier);
+
+	if (debug == 0 && verbose != 0)
+		ref_set_dump_iterator(d->thread_set);
+	
 	return 0;
 }
 
@@ -158,6 +165,10 @@ int dmp_remove_thread(struct dmp *d, int r) {
 
 	ref_set_remove(d->thread_set, r);
 	barrier_dec_parties(d->barrier);
+	
+	if (debug == 0 && verbose != 0)
+		ref_set_dump_iterator(d->thread_set);
+
 	return 0;
 }
 
