@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Jan 2012 at 12:44:23 by nwidger on macros.local>
+ * Time-stamp: <21 Jan 2012 at 14:50:04 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -288,6 +288,8 @@ int thread_dmp_thread_join(struct thread_dmp *td) {
 		mvm_halt();
 	}
 
+	fprintf(stderr, "in %s\n", __FUNCTION__);
+
 	if (td->attr.ops->thread_join == NULL)
 		return 0;
 
@@ -436,6 +438,8 @@ int thread_dmp_default_thread_destruction(struct thread_dmp *td) {
 
 int thread_dmp_default_thread_join(struct thread_dmp *td) {
 	struct thread_dmp *ud;
+
+	fprintf(stderr, "in %s\n", __FUNCTION__);
 
 	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_join\n", thread_get_ref(NULL));
 

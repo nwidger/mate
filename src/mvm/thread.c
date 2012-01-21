@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Jan 2012 at 13:44:03 by nwidger on macros.local>
+ * Time-stamp: <21 Jan 2012 at 14:53:43 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -293,16 +293,21 @@ int thread_pthread_create(struct thread *t, void * (*s)(void *)) {
 }
 
 int thread_join(struct object *o) {
+	fprintf(stderr, "in %s\n", __FUNCTION__);
 	return thread_join0(o, 1);
 }
 
 int thread_join_main(struct object *o) {
+	fprintf(stderr, "in %s\n", __FUNCTION__);
 	return thread_join0(o, 0);
 }
 
 int thread_join0(struct object *o, int d) {
 	void *value;
 	struct thread *t;
+
+	if (d != 0)
+		fprintf(stderr, "in %s, t->dmp == %p\n", __FUNCTION__, t->dmp);
 
 	t = object_get_thread(o);
 
