@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Jan 2012 at 18:09:46 by nwidger on macros.local>
+ * Time-stamp: <21 Jan 2012 at 13:41:33 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -258,7 +258,7 @@ int thread_start_main(struct object *o) {
 }
 
 int thread_pthread_create(struct thread *t, void * (*s)(void *)) {
-	int err;
+	int i, err;
 	pthread_attr_t attr;
 
 	if (pthread_attr_init(&attr) != 0) {
@@ -271,13 +271,13 @@ int thread_pthread_create(struct thread *t, void * (*s)(void *)) {
 		mvm_halt();
 	}
 
-	for (;;) {
+	for (i = 0; i < 10; i++) {
 		err = pthread_create(&t->id, &attr, s, (void *)t);
 
 		if (err == 0) {
 			break;
 		} else if (err == EAGAIN) {
-			usleep(50000);
+			usleep(50000 * i);
 			continue;
 		} else {
 			perror("mvm: pthread_create");
