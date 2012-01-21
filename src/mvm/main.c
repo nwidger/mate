@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <12 Jan 2012 at 16:46:04 by nwidger on macros.local>
+ * Time-stamp: <21 Jan 2012 at 14:07:50 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <pthread.h>
+#include <signal.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -368,6 +369,7 @@ void mvm_halt() {
 	else
 		vm_stack_dump(vm_stack, 0, 0);
 
+	kill(getpid(), SIGTERM);
 	exit(1);
 }
 
