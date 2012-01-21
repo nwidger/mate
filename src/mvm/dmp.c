@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Jan 2012 at 13:07:32 by nwidger on macros.local>
+ * Time-stamp: <21 Jan 2012 at 13:18:35 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -128,6 +128,8 @@ int dmp_toggle_mode(struct dmp *d) {
 }
 
 int dmp_add_thread(struct dmp *d, int r) {
+	struct thread *t;
+	
 	if (d == NULL) {
 		fprintf(stderr, "mvm: dmp not initialized!\n");
 		mvm_halt();
@@ -139,7 +141,10 @@ int dmp_add_thread(struct dmp *d, int r) {
 		mvm_halt();
 	}
 
-	mvm_print("adding thread %d to thread_set!\n", r);
+	if ((t = thread_get_current(NULL)) == NULL)
+		mvm_print("adding thread %d to thread_set!\n", r);
+	else
+		mvm_print("thread %" PRIu32 ": adding thread %d to thread_set!\n", thread_get_ref(t), r);
 
 	ref_set_add(d->thread_set, r);
 	barrier_inc_parties(d->barrier);
@@ -151,6 +156,8 @@ int dmp_add_thread(struct dmp *d, int r) {
 }
 
 int dmp_remove_thread(struct dmp *d, int r) {
+	struct thread *t;
+	
 	if (d == NULL) {
 		fprintf(stderr, "mvm: dmp not initialized!\n");
 		mvm_halt();
@@ -161,7 +168,10 @@ int dmp_remove_thread(struct dmp *d, int r) {
 		mvm_halt();
 	}
 
-	mvm_print("removing thread %d from thread_set!\n", r);
+	if ((t = thread_get_current(NULL)) == NULL)
+		mvm_print("removing thread %d from thread_set!\n", r);
+	else
+		mvm_print("thread %" PRIu32 ": removing thread %d from thread_set!\n", thread_get_ref(t), r);
 
 	ref_set_remove(d->thread_set, r);
 	barrier_dec_parties(d->barrier);
