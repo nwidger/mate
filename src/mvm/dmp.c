@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Jan 2012 at 12:18:20 by nwidger on macros.local>
+ * Time-stamp: <21 Jan 2012 at 13:07:32 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -326,6 +326,7 @@ void * dmp_barrier_serial_hook(int i, void *a) {
 			mvm_print("thread %" PRIu32 ": returned from garbage collector\n", thread_get_ref(NULL));
 		}
 
+		ref_set_iterator_init(d->thread_set);
 		d->first = 0;
 		/* update barrier */
 		nthreads = ref_set_size(d->thread_set);
