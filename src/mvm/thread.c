@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Jan 2012 at 13:41:33 by nwidger on macros.local>
+ * Time-stamp: <21 Jan 2012 at 13:44:03 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -280,9 +280,13 @@ int thread_pthread_create(struct thread *t, void * (*s)(void *)) {
 			usleep(50000 * i);
 			continue;
 		} else {
-			perror("mvm: pthread_create");
-			mvm_halt();
+			break;
 		}
+	}
+
+	if (err != 0) {
+		perror("mvm: pthread_create");
+		mvm_halt();
 	}
 
 	return 0;
