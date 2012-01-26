@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <07 Jan 2012 at 16:31:06 by nwidger on macros.local>
+ * Time-stamp: <25 Jan 2012 at 20:57:07 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -145,7 +145,7 @@ int table_get(struct table *t, struct object *k) {
 		mvm_halt();
 	}
 
-	hash = table_run_hash_code(t, k);
+	hash = abs(table_run_hash_code(t, k));
 	n = hash % t->current_capacity;
 
 	for (r = t->buckets[n]; r != NULL; r = r->next) {
@@ -174,7 +174,7 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 	if (t->current_capacity <= 0)
 		table_resize(t, TABLE_DEFAULT_INITIAL_CAPACITY);
 
-	hash = table_run_hash_code(t, k);
+	hash = abs(table_run_hash_code(t, k));
 	n = hash % t->current_capacity;
 	old_value = 0;
 
@@ -226,7 +226,7 @@ int table_remove(struct table *t, struct object *k) {
 		mvm_halt();
 	}
 
-	hash = table_run_hash_code(t, k);
+	hash = abs(table_run_hash_code(t, k));
 	n = hash % t->current_capacity;
 	old_value = 0;
 
