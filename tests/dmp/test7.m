@@ -32,7 +32,7 @@ class TestThread extends Thread {
   }
 
   Object run() {
-    Integer v, nulls;
+    Integer v, nulls, max;
     
     synchronized (this.shared) {
       this.shared.threadCount = this.shared.threadCount - 1;
@@ -44,7 +44,10 @@ class TestThread extends Thread {
       // consumer
       sleep(3000);
 
+      max = 3;
       nulls = 0;
+
+      out "running until " + max + " nulls seen..." + newline;
 
       while (nulls < 3) {
 	synchronized (this.shared.table) {
@@ -64,6 +67,8 @@ class TestThread extends Thread {
 
 	sleep(500);
       }
+
+      out "done!" + newline;
     } else {
       // producers
       synchronized (this.shared.table) {
