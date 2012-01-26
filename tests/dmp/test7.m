@@ -47,7 +47,7 @@ class TestThread extends Thread {
       max = 3;
       nulls = 0;
 
-      out "running until " + max + " nulls seen..." + newline;
+      out "running until " + max.toString() + " nulls seen..." + newline;
 
       while (nulls < 3) {
 	synchronized (this.shared.table) {
