@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Jan 2012 at 15:16:37 by nwidger on macros.local>
+ * Time-stamp: <26 Jan 2012 at 18:59:54 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -12,6 +12,7 @@
 #include "class.h"
 #include "class_table.h"
 #include "constants.h"
+#include "dmp.h"
 #include "frame.h"
 #include "garbage_collector.h"
 #include "globals.h"
@@ -21,6 +22,7 @@
 #include "native_method_array.h"
 #include "native_methods.h"
 #include "object.h"
+#include "object_dmp.h"
 #include "operand_stack.h"
 #include "real.h"
 #include "string.h"
@@ -837,8 +839,9 @@ int native_table_constructor_integer(uint32_t i) {
 
 int native_table_get(uint32_t i) {
 	int ref, n;
-	struct object *this, *key;
 	struct table *table;
+	struct object_dmp *od;
+	struct object *this, *key;
 
 	SETUP_NATIVE_METHOD();
 	n = 0;
@@ -849,6 +852,11 @@ int native_table_get(uint32_t i) {
 
 	ref = local_variable_array_load(local_variable_array, n++);
 	key = heap_fetch_object(heap, ref);
+
+	if (dmp != NULL) {
+		od = object_get_dmp(this);
+		object_dmp_load(od, 0);
+	}
 
 	/* lock */
 	garbage_collector_lock(garbage_collector);
@@ -864,8 +872,9 @@ int native_table_get(uint32_t i) {
 
 int native_table_put(uint32_t i) {
 	int ref, n;
-	struct object *this, *key, *value;
 	struct table *table;
+	struct object_dmp *od;
+	struct object *this, *key, *value;
 
 	SETUP_NATIVE_METHOD();
 	n = 0;
@@ -879,6 +888,11 @@ int native_table_put(uint32_t i) {
 
 	ref = local_variable_array_load(local_variable_array, n++);
 	value = heap_fetch_object(heap, ref);
+
+	if (dmp != NULL) {
+		od = object_get_dmp(this);
+		object_dmp_store(od, 0, 0);
+	}
 
 	/* lock */
 	garbage_collector_lock(garbage_collector);
