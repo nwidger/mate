@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Jan 2012 at 14:09:22 by nwidger on macros.local>
+ * Time-stamp: <27 Jan 2012 at 19:16:31 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -21,7 +21,6 @@
 #include "class_table.h"
 #include "constants.h"
 #include "disassemble.h"
-#include "dmp.h"
 #include "garbage_collector.h"
 #include "heap.h"
 #include "instruction_table.h"
@@ -33,13 +32,17 @@
 #include "native_method_array.h"
 #include "native_methods.h"
 #include "nlock.h"
-#include "nlock_dmp.h"
 #include "object.h"
-#include "object_dmp.h"
 #include "symbol_table.h"
 #include "thread.h"
-#include "thread_dmp.h"
 #include "vm_stack.h"
+
+#ifdef DMP
+#include "dmp.h"
+#include "nlock_dmp.h"
+#include "object_dmp.h"
+#include "thread_dmp.h"
+#endif
 
 #define OPTARGS ":m:s:i:daqcvhpQ:g:r"
 
@@ -59,10 +62,13 @@ struct native_method_array *native_method_array;
 struct symbol_table *symbol_table;
 int garbage_collector_interval;
 enum garbage_collector_type garbage_collector_type;
+
+#ifdef DMP
 struct dmp *dmp;
 struct object_dmp_attr object_dmp_attr;
 struct thread_dmp_attr thread_dmp_attr;
 struct nlock_dmp_attr nlock_dmp_attr;
+#endif
 
 uint32_t main_block_address;
 uint32_t main_block_end;
@@ -85,7 +91,13 @@ uint64_t parse_heap_size(char *s);
 /** prints usage text to stderr. */
 
 void usage() {
-	fprintf(stderr, "usage: mvm [-h] [-v] [-q] [-c] [-d] [-a] [-i NUM] [-s FILE] [-m NUM] [-p] [-Q NUM] [-g NUM] [-r] FILE\n");
+	fprintf(stderr, "usage: mvm [-h] [-v] [-q] [-c] [-d] [-a] [-i NUM] [-s FILE] [-m NUM]%sFILE\n",
+#ifdef DMP
+		" [-p] [-Q NUM] [-g NUM] [-r] "
+#else
+		" "
+#endif
+		);
 	fprintf(stderr, "Executes the specified maTe class file.\n");
 	fprintf(stderr, "  -h       Print this help message and exit.\n");
 	fprintf(stderr, "  -v       Verbose output.  Decodes each executed instruction to stderr.\n");
@@ -104,6 +116,7 @@ void usage() {
 	fprintf(stderr, "           passing the -s switch to the assembler.\n");
 	fprintf(stderr, "  -m NUM   Use a heap with a size of NUM bytes.  Default is %d bytes.\n",
 		HEAP_DEFAULT_SIZE);
+#ifdef DMP
 	fprintf(stderr, "  -p       Enable DMP (cannot be used with -c).\n");
 	fprintf(stderr, "  -Q NUM   With -p, specify quantum size.  Default is %d.\n",
 		THREAD_DMP_DEFAULT_QUANTUM_SIZE);
@@ -111,6 +124,7 @@ void usage() {
 		OBJECT_DMP_DEFAULT_DEPTH);
 	fprintf(stderr, "  -r       With -p, enable reduced serial mode.  Default is %s.\n",
 		THREAD_DMP_DEFAULT_REDUCED_SERIAL_MODE == full_mode ? "full serial mode" : "reduced serial mode");
+#endif
 }
 
 /** initializes mvm components.
@@ -234,6 +248,7 @@ int mvm_initialize(uint64_t h) {
 		return 1;
 	}
 
+#ifdef DMP	
 	if (dmp != NULL &&
 	    (dmp = dmp_create(&object_dmp_attr,
 			      &thread_dmp_attr,
@@ -241,7 +256,8 @@ int mvm_initialize(uint64_t h) {
 		fprintf(stderr, "mvm: error initializing DMP!\n");
 		return 1;
 	}
-
+#endif
+	
 	garbage_collector_start(garbage_collector,
 				garbage_collector_type,
 				garbage_collector_interval);
@@ -265,9 +281,11 @@ int mvm_cleanup() {
 		exit(1);
 	}
 
+#ifdef DMP	
 	if (dmp != NULL && dmp != (struct dmp *)1)
 		dmp_destroy(dmp);
-
+#endif
+	
 	if (garbage_collector != NULL) {
 		garbage_collector_stop(garbage_collector);
 		garbage_collector_destroy(garbage_collector);
@@ -339,11 +357,13 @@ void mvm_halt() {
 	struct vm_stack *vm_stack;
 	char *class_file, *instruction_name;
 
+#ifdef DMP
 	if (dmp != NULL) {
 		kill(getpid(), SIGTERM);
 		exit(1);
 	}
-
+#endif
+	
 	pc = thread_get_pc(NULL);
 	vm_stack = thread_get_vm_stack(NULL);
 
@@ -427,6 +447,7 @@ int main(int argc, char *argv[]) {
 	uint64_t heap_size;
 	int err, c, disassemble;
 
+#ifdef DMP	
 	dmp = NULL;
 
 	memcpy(&object_dmp_attr, &object_dmp_default_attr,
@@ -435,6 +456,7 @@ int main(int argc, char *argv[]) {
 	       sizeof(struct thread_dmp_attr));
 	memcpy(&nlock_dmp_attr, &nlock_dmp_default_attr,
 	       sizeof(struct nlock_dmp_attr));
+#endif
 
 	class_table = NULL;
 	garbage_collector = NULL;
@@ -497,6 +519,7 @@ int main(int argc, char *argv[]) {
 				err = 1;
 			}
 			break;
+#ifdef DMP
 		case 'p':
 			dmp = (struct dmp *)1;
 			break;
@@ -509,6 +532,7 @@ int main(int argc, char *argv[]) {
 		case 'r':
 			thread_dmp_attr.serial_mode = reduced_mode;
 			break;
+#endif
 		case 'q':
 			print_trace = 0;
 			break;
@@ -525,6 +549,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+#ifdef DMP	
 	if (dmp != NULL && garbage_collector_type == concurrent_type) {
 		fprintf(stderr, "mvm: cannot use -p and -c together!\n");
 		mvm_cleanup();
@@ -536,6 +561,7 @@ int main(int argc, char *argv[]) {
 		mvm_cleanup();
 		return 1;
 	}
+#endif
 
 	if (err == 1 || optind >= argc) {
 		usage();

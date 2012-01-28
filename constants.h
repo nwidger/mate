@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <10 May 2011 at 20:54:57 by nwidger on macros.local>
+ * Time-stamp: <27 Jan 2012 at 19:06:25 by nwidger on macros.local>
  */
 
 #ifndef _MVM_CONSTANTS_H
@@ -298,6 +298,7 @@
 /* class table constants */
 #define CLASS_TABLE_INTEGER_CACHE_SIZE 128
 
+#ifdef DMP
 /* dmp constants */
 #define DMP_GARBAGE_COLLECTOR_LOAD_FACTOR 0.90
 
@@ -308,5 +309,6 @@
 #define THREAD_DMP_DEFAULT_LOCK_COUNT          0
 #define THREAD_DMP_DEFAULT_QUANTUM_SIZE        10
 #define THREAD_DMP_DEFAULT_INSTRUCTION_COUNTER 0
+#endif
 
 #endif

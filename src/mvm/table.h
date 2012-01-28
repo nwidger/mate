@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Feb 2010 at 14:06:49 by nwidger on macros.local>
+ * Time-stamp: <26 Jan 2012 at 20:50:14 by nwidger on macros.local>
  */
 
 #ifndef _MVM_TABLE_H
@@ -31,15 +31,6 @@ void table_destroy(struct table *t);
  */
 
 void table_clear(struct table *t);
-
-/** returns the number of entries currently in the given table.
- *
- * @param t - the table to access
- *
- * @return current number of entries in the table
- */
-
-int table_get_num_entries(struct table *t);
 
 /** adds all references currently in the given table (that is, all key
  * and value pairs) to the ref_set r.

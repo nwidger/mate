@@ -2,7 +2,24 @@ AUTOMAKE_OPTIONS = foreign
 bin_PROGRAMS = mas
 man_MANS = mas.1
 
-CFLAGS = -Wall -g
+CFLAGS = -Wall
+
+if OPTIMIZE1
+CFLAGS += -O1
+endif
+
+if OPTIMIZE2
+CFLAGS += -O2
+endif
+
+if OPTIMIZE3
+CFLAGS += -O3
+endif
+
+if DEBUG
+CFLAGS += -g
+endif
+
 EXTRA_DIST =
 DEFAULT_INCLUDES = -I../..
 AM_YFLAGS = -d

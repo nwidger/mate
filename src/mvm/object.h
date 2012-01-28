@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <03 Feb 2011 at 21:13:52 by nwidger on macros.local>
+ * Time-stamp: <27 Jan 2012 at 19:17:20 by nwidger on macros.local>
  */
 
 #ifndef _MVM_OBJECT_H
@@ -10,11 +10,14 @@
 struct class;
 struct integer;
 struct object;
-struct object_dmp;
 struct ref_set;
 struct string;
 struct table;
 struct thread;
+
+#ifdef DMP
+struct object_dmp;
+#endif
 
 /** creates a new object from class c with n fields. Memory for the new
  * object shall be allocated from the heap.  Returns a reference to
@@ -44,6 +47,7 @@ void object_destroy(struct object *o);
 
 void object_clear(struct object *o);
 
+#ifdef DMP
 /** returns the object_dmp attached to this object or NULL.
  *
  * @param o - the object whose object_dmp will return returnd
@@ -52,6 +56,7 @@ void object_clear(struct object *o);
  */
 
 struct object_dmp * object_get_dmp(struct object *o);
+#endif
 
 /** causes the calling thread to acquire the monitor of the given
  * object.  If another thread currently owns it, the thread will block

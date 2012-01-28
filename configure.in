@@ -15,6 +15,7 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
 AC_C_CONST
+AC_C_INLINE
 
 AC_CHECK_FUNCS([ftruncate])
 AC_CHECK_FUNCS([memset])
@@ -62,6 +63,38 @@ AC_TYPE_UINT8_T
 AC_TYPE_INT16_T
 AC_TYPE_INT8_T
 AC_TYPE_UINT16_T
+
+AC_ARG_ENABLE(optimize,
+[  --enable-optimize  Set optimization level (0/1, default: 0)],
+[case "${enableval}" in
+  0) optimize=0 ;;
+  1) optimize=1 ;;
+  2) optimize=2 ;;
+  3) optimize=3 ;;
+  *) AC_MSG_ERROR(bad value ${enableval} for --enable-optimize) ;;
+esac],[optimize=0])
+
+AM_CONDITIONAL(OPTIMIZE1, test x$optimize == x1)
+AM_CONDITIONAL(OPTIMIZE2, test x$optimize == x2)
+AM_CONDITIONAL(OPTIMIZE3, test x$optimize == x3)
+
+AC_ARG_ENABLE(debug,
+[  --enable-debug     Enable debugging support (yes/no, default: yes)],
+[case "${enableval}" in
+  yes) debug=true ;;
+  no)  debug=false ;;
+  *) AC_MSG_ERROR(bad value ${enableval} for --enable-debug) ;;
+esac],[debug=true])
+AM_CONDITIONAL(DEBUG, test x$debug = xtrue)
+
+AC_ARG_ENABLE(dmp,
+[  --enable-dmp       Enable DMP support in mvm (yes/no, default: yes)],
+[case "${enableval}" in
+  yes) dmp=true ;;
+  no)  dmp=false ;;
+  *) AC_MSG_ERROR(bad value ${enableval} for --enable-dmp) ;;
+esac],[dmp=true])
+AM_CONDITIONAL(DMP, test x$dmp = xtrue)
 
 AC_DEFINE([__STDC_LIMIT_MACROS], [1], [set __STDC_LIMIT_MACROS to 1])
 

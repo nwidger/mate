@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <01 Feb 2011 at 21:34:21 by nwidger on macros.local>
+ * Time-stamp: <27 Jan 2012 at 19:16:21 by nwidger on macros.local>
  */
 
 #ifndef _MVM_GLOBALS_H
@@ -10,7 +10,6 @@
 #include <stdarg.h>
 
 /* forward declarations */
-struct dmp;
 struct class_table;
 struct garbage_collector;
 struct heap;
@@ -19,6 +18,10 @@ struct method_area;
 struct native_method_array;
 struct symbol_table;
 struct vm_stack;
+
+#ifdef DMP
+struct dmp;
+#endif
 
 /** returns current mode of virtual machine.
  *
@@ -99,7 +102,9 @@ extern int debug;
 /* set by debugger to signal a program restart */
 extern int restart;
 
+#ifdef DMP
 /* dmp globas */
 extern struct dmp *dmp;
+#endif
 
 #endif

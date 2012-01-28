@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <26 Jan 2012 at 18:56:42 by nwidger on macros.local>
+ * Time-stamp: <26 Jan 2012 at 20:50:03 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -45,6 +45,7 @@ struct table {
 };
 
 /* forward declarations */
+int table_entries_exceeds_load_factor(int e, int l, int c);
 int table_resize(struct table *t, int n);
 int table_run_hash_code(struct table *t, struct object *o);
 int table_run_equals(struct table *t, struct object *o, struct object *p);
@@ -106,15 +107,6 @@ void table_clear(struct table *t) {
 	}
 }
 
-int table_get_num_entries(struct table *t) {
-	if (t == NULL) {
-		fprintf(stderr, "mvm: table not initialized!\n");
-		mvm_halt();
-	}
-
-	return t->num_entries;
-}
-
 int table_populate_ref_set(struct table *t, struct ref_set *r) {
 	int i;
 	struct table_entry *p;
@@ -154,6 +146,10 @@ int table_get(struct table *t, struct object *k) {
 	}
 
 	return 0;
+}
+
+int table_entries_exceeds_load_factor(int e, int l, int c) {
+	return (e * l) > c;
 }
 
 int table_put(struct table *t, struct object *k, struct object *v) {
@@ -205,8 +201,11 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 		table_entry_destroy(r);
 	}
 
-	if ((t->num_entries * t->load_factor) > t->current_capacity)
+	if (table_entries_exceeds_load_factor(t->num_entries,
+					      t->load_factor,
+					      t->current_capacity)) {
 		table_resize(t, t->current_capacity*2);
+	}
 
 	return old_value;
 }

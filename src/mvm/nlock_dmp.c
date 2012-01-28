@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <09 Jan 2012 at 20:22:54 by nwidger on macros.local>
+ * Time-stamp: <27 Jan 2012 at 20:23:13 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H

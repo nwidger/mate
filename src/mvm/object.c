@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 May 2011 at 20:12:28 by nwidger on macros.local>
+ * Time-stamp: <27 Jan 2012 at 19:17:12 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -12,7 +12,6 @@
 
 #include "class.h"
 #include "class_table.h"
-#include "dmp.h"
 #include "globals.h"
 #include "frame.h"
 #include "heap.h"
@@ -28,6 +27,10 @@
 #include "table.h"
 #include "thread.h"
 #include "vm_stack.h"
+
+#ifdef DMP
+#include "dmp.h"
+#endif
 
 /* struct definitions */
 struct object {
@@ -48,7 +51,9 @@ struct object {
 
 	struct nlock *monitor;
 
+#ifdef DMP
 	struct object_dmp *dmp;
+#endif
 };
 
 /* forward declarations */
@@ -74,10 +79,12 @@ int object_create(struct class *c, uint32_t n, struct object **o) {
 	if ((object->monitor = nlock_create_monitor()) == NULL)
 		mvm_halt();
 
+#ifdef DMP
 	if (dmp == NULL)
 		object->dmp = NULL;
 	else
 		object->dmp = dmp_create_object_dmp(dmp, object);
+#endif
 
 	if (o != NULL)
 		*o = object;
@@ -101,6 +108,7 @@ void object_clear(struct object *o) {
 	}
 }
 
+#ifdef DMP
 struct object_dmp * object_get_dmp(struct object *o) {
 	if (o == NULL) {
 		fprintf(stderr, "mvm: object has not been initialized!\n");
@@ -109,6 +117,7 @@ struct object_dmp * object_get_dmp(struct object *o) {
 
 	return o->dmp;
 }
+#endif
 
 int object_acquire_monitor(struct object *o) {
 	if (o == NULL) {
@@ -191,8 +200,10 @@ int object_load_field(struct object *o, int i) {
 		mvm_halt();
 	}
 
+#ifdef DMP
 	if (o->dmp != NULL)
 		object_dmp_load(o->dmp, i);
+#endif
 
 	return o->fields[i];
 }
@@ -210,8 +221,10 @@ int object_store_field(struct object *o, int i, int r) {
 		mvm_halt();
 	}
 
+#ifdef DMP
 	if (o->dmp != NULL)
 		object_dmp_store(o->dmp, i, r);
+#endif
 
 	tmp = o->fields[i];
 	o->fields[i] = r;

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <09 Jan 2012 at 18:24:31 by nwidger on macros.local>
+ * Time-stamp: <27 Jan 2012 at 19:17:00 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -13,10 +13,13 @@
 #include <string.h>
 #include <time.h>
 
-#include "dmp.h"
 #include "globals.h"
 #include "nlock.h"
+
+#ifdef DMP
+#include "dmp.h"
 #include "nlock_dmp.h"
+#endif
 
 /* struct definitions */
 struct nlock {
@@ -26,7 +29,9 @@ struct nlock {
 	pthread_cond_t cond;
 	uint64_t notifies;
 
+#ifdef DMP
 	struct nlock_dmp *dmp;
+#endif
 };
 
 /* forward declarations */
@@ -79,10 +84,12 @@ struct nlock * nlock_create0(int m) {
 
 	n->notifies = 0UL;
 
+#ifdef DMP
 	if (m == 0 || dmp == NULL)
 		n->dmp = NULL;
 	else
 		n->dmp = dmp_create_nlock_dmp(dmp, n);
+#endif
 
 	return n;
 }
@@ -111,8 +118,10 @@ int nlock_lock(struct nlock *n) {
 		mvm_halt();
 	}
 
+#ifdef DMP	
 	if (n->dmp != NULL)
 		return nlock_dmp_lock(n->dmp);
+#endif
 
 	/* lock */
 	if ((err = pthread_mutex_lock(&n->mutex)) != 0) {
@@ -168,8 +177,10 @@ int nlock_unlock(struct nlock *n) {
 		mvm_halt();
 	}
 
+#ifdef DMP
 	if (n->dmp != NULL)
 		nlock_dmp_unlock(n->dmp);
+#endif
 
 	n->locks--;
 	if (n->locks == 0) memset(&n->owner, 0, sizeof(pthread_t));

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <07 Jan 2012 at 16:30:05 by nwidger on macros.local>
+ * Time-stamp: <27 Jan 2012 at 19:15:27 by nwidger on macros.local>
  */
 
 #ifndef _MVM_THREAD_H
@@ -7,7 +7,10 @@
 
 struct object;
 struct thread;
+
+#ifdef DMP
 struct thread_dmp;
+#endif
 
 /* enum */
 /** specifies current state of the thread */
@@ -30,7 +33,9 @@ void thread_destroy(struct thread *t);
 
 void thread_clear(struct thread *t);
 
+#ifdef DMP
 struct thread_dmp * thread_get_dmp(struct thread *t);
+#endif
 
 struct thread * thread_get_current();
 

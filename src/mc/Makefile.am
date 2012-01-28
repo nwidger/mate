@@ -2,8 +2,29 @@ AUTOMAKE_OPTIONS = foreign
 bin_PROGRAMS = mc
 man_MANS = mc.1
 
-CFLAGS = -Wall -g
-CXXFLAGS = -Wall -g
+CFLAGS = -Wall
+CXXFLAGS = -Wall
+
+if OPTIMIZE1
+CFLAGS += -O1
+CXXFLAGS += -O1
+endif
+
+if OPTIMIZE2
+CFLAGS += -O2
+CXXFLAGS += -O2
+endif
+
+if OPTIMIZE3
+CFLAGS += -O3
+CXXFLAGS += -O3
+endif
+
+if DEBUG
+CFLAGS += -g
+CXXFLAGS += -g
+endif
+
 DEFAULT_INCLUDES = -I../..
 AM_YFLAGS = -d
 BUILT_SOURCES = parse.h

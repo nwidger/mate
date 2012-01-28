@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Jan 2012 at 20:48:54 by nwidger on macros.local>
+ * Time-stamp: <27 Jan 2012 at 19:04:41 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -162,10 +162,8 @@ int execute_method(char *e, uint32_t a, uint32_t b, uint32_t n, uint32_t m, uint
 	int old_size;
 	uint32_t pc, opcode;
 	struct frame *frame;
-	struct thread_dmp *td;
 	struct vm_stack *vm_stack;
 
-	td = thread_get_dmp(NULL);
 	vm_stack = thread_get_vm_stack(NULL);
 
 	/* lock */
@@ -198,8 +196,14 @@ int execute_method(char *e, uint32_t a, uint32_t b, uint32_t n, uint32_t m, uint
 		if (instruction_table_execute(instruction_table, opcode) != 0)
 			mvm_halt();
 
-		if (td != NULL)
+#ifdef DMP
+		if (dmp != NULL) {
+			struct thread_dmp *td;
+			
+			td = thread_get_dmp(NULL);
 			thread_dmp_execute_instruction(td, opcode);
+		}
+#endif
 
 		if (debug != 0 && restart != 0)
 			return 0;

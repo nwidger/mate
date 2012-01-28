@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <26 Jan 2012 at 19:40:45 by nwidger on macros.local>
+ * Time-stamp: <27 Jan 2012 at 19:16:51 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -12,7 +12,6 @@
 #include "class.h"
 #include "class_table.h"
 #include "constants.h"
-#include "dmp.h"
 #include "frame.h"
 #include "garbage_collector.h"
 #include "globals.h"
@@ -22,13 +21,17 @@
 #include "native_method_array.h"
 #include "native_methods.h"
 #include "object.h"
-#include "object_dmp.h"
 #include "operand_stack.h"
 #include "real.h"
 #include "string.h"
 #include "table.h"
 #include "thread.h"
 #include "vm_stack.h"
+
+#ifdef DMP
+#include "dmp.h"
+#include "object_dmp.h"
+#endif
 
 #define SETUP_NATIVE_METHOD()						\
 	struct vm_stack *vm_stack;					\
@@ -840,7 +843,6 @@ int native_table_constructor_integer(uint32_t i) {
 int native_table_get(uint32_t i) {
 	int ref, n;
 	struct table *table;
-	struct object_dmp *od;
 	struct object *this, *key;
 
 	SETUP_NATIVE_METHOD();
@@ -853,10 +855,14 @@ int native_table_get(uint32_t i) {
 	ref = local_variable_array_load(local_variable_array, n++);
 	key = heap_fetch_object(heap, ref);
 
+#ifdef DMP
 	if (dmp != NULL) {
+		struct object_dmp *od;
+			
 		od = object_get_dmp(this);
 		object_dmp_load(od, 0);
 	}
+#endif
 
 	/* lock */
 	garbage_collector_lock(garbage_collector);
@@ -873,7 +879,6 @@ int native_table_get(uint32_t i) {
 int native_table_put(uint32_t i) {
 	int ref, n;
 	struct table *table;
-	struct object_dmp *od;
 	struct object *this, *key, *value;
 
 	SETUP_NATIVE_METHOD();
@@ -889,11 +894,15 @@ int native_table_put(uint32_t i) {
 	ref = local_variable_array_load(local_variable_array, n++);
 	value = heap_fetch_object(heap, ref);
 
+#ifdef DMP	
 	if (dmp != NULL) {
+		struct object_dmp *od;
+
 		od = object_get_dmp(this);
 		object_dmp_store(od, 0, 0);
 	}
-
+#endif
+	
 	/* lock */
 	garbage_collector_lock(garbage_collector);
 
@@ -909,7 +918,6 @@ int native_table_put(uint32_t i) {
 int native_table_remove(uint32_t i) {
 	int ref, n;
 	struct table *table;
-	struct object_dmp *od;
 	struct object *this, *key;
 
 	SETUP_NATIVE_METHOD();
@@ -922,11 +930,15 @@ int native_table_remove(uint32_t i) {
 	ref = local_variable_array_load(local_variable_array, n++);
 	key = heap_fetch_object(heap, ref);
 
+#ifdef DMP	
 	if (dmp != NULL) {
+		struct object_dmp *od;
+
 		od = object_get_dmp(this);
 		object_dmp_store(od, 0, 0);
 	}
-
+#endif
+	
 	/* lock */
 	garbage_collector_lock(garbage_collector);
 
@@ -943,7 +955,6 @@ int native_table_first_key(uint32_t i) {
 	int ref, n;
 	struct object *this;
 	struct table *table;
-	struct object_dmp *od;
 
 	SETUP_NATIVE_METHOD();
 	n = 0;
@@ -952,10 +963,14 @@ int native_table_first_key(uint32_t i) {
 	this = heap_fetch_object(heap, ref);
 	table = object_get_table(this);
 
+#ifdef DMP	
 	if (dmp != NULL) {
+		struct object_dmp *od;
+		
 		od = object_get_dmp(this);
-		object_dmp_load(od, 0);
+		object_dmp_store(od, 0, 0);
 	}
+#endif
 
 	/* lock */
 	garbage_collector_lock(garbage_collector);
@@ -973,7 +988,6 @@ int native_table_next_key(uint32_t i) {
 	int ref, n;
 	struct object *this;
 	struct table *table;
-	struct object_dmp *od;
 
 	SETUP_NATIVE_METHOD();
 	n = 0;
@@ -982,11 +996,15 @@ int native_table_next_key(uint32_t i) {
 	this = heap_fetch_object(heap, ref);
 	table = object_get_table(this);
 
+#ifdef DMP	
 	if (dmp != NULL) {
-		od = object_get_dmp(this);
-		object_dmp_load(od, 0);
-	}
+		struct object_dmp *od;
 
+		od = object_get_dmp(this);
+		object_dmp_store(od, 0, 0);
+	}
+#endif
+	
 	/* lock */
 	garbage_collector_lock(garbage_collector);
 

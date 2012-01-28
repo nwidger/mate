@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Jan 2012 at 15:16:45 by nwidger on macros.local>
+ * Time-stamp: <27 Jan 2012 at 19:17:29 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -16,7 +16,6 @@
 #include <unistd.h>
 
 #include "class_table.h"
-#include "dmp.h"
 #include "globals.h"
 #include "heap.h"
 #include "integer.h"
@@ -25,8 +24,12 @@
 #include "object.h"
 #include "operand_stack.h"
 #include "thread.h"
-#include "thread_dmp.h"
 #include "vm_stack.h"
+
+#ifdef DMP
+#include "dmp.h"
+#include "thread_dmp.h"
+#endif
 
 /* struct definitions */
 struct thread {
@@ -37,7 +40,9 @@ struct thread {
 	uint32_t pc;
 	struct vm_stack *vm_stack;
 
+#ifdef DMP
 	struct thread_dmp *dmp;
+#endif
 };
 
 /* globals */
@@ -66,10 +71,12 @@ struct thread * thread_create() {
 	if ((t->vm_stack = vm_stack_create()) == NULL)
 		mvm_halt();
 
+#ifdef DMP	
 	if (dmp == NULL)
 		t->dmp = NULL;
 	else
 		t->dmp = dmp_create_thread_dmp(dmp, t);
+#endif
 
 	return t;
 }
@@ -104,6 +111,7 @@ void thread_clear(struct thread *t) {
 	vm_stack_clear(t->vm_stack);
 }
 
+#ifdef DMP
 struct thread_dmp * thread_get_dmp(struct thread *t) {
 	if (t == NULL)
 		t = thread_get_current();
@@ -115,6 +123,7 @@ struct thread_dmp * thread_get_dmp(struct thread *t) {
 
 	return t->dmp;
 }
+#endif
 
 void thread_make_key() {
 	if (pthread_key_create(&key, NULL) != 0) {
@@ -222,8 +231,10 @@ int thread_start(struct object *o) {
 
 	t->ref = object_get_ref(o);
 
+#ifdef DMP
 	if (t->dmp != NULL)
 		thread_dmp_thread_creation(t->dmp);
+#endif	
 
 	vm_stack_push(vm_stack, "thread_start", 0, 0, 0, 0, 0);
 	frame = vm_stack_peek(vm_stack);
@@ -248,8 +259,10 @@ int thread_start_main(struct object *o) {
 
 	t->ref = object_get_ref(o);
 
+#ifdef DMP	
 	if (t->dmp != NULL)
 		dmp_add_thread(dmp, t->ref);
+#endif
 
 	if (thread_pthread_create(t, thread_run0_main) != 0)
 		mvm_halt();
@@ -311,8 +324,10 @@ int thread_join0(struct object *o, int d) {
 		mvm_halt();
 	}
 
+#ifdef DMP
 	if (d != 0 && t->dmp != NULL)
 		thread_dmp_thread_join(t->dmp);
+#endif
 
 	if (pthread_join(t->id, &value) != 0) {
 		perror("mvm: pthread_join");
@@ -366,16 +381,20 @@ void * thread_run0(void *p) {
 	if (thread_set_current(t) != 0)
 		mvm_halt();
 
+#ifdef DMP
 	if (t->dmp != NULL)
 		thread_dmp_thread_start(t->dmp);
+#endif
 
 	t->state = runnable_state;
 
 	if (invoke_virtual_method_by_name(t->ref, t->pc, "run", 0) != 0)
 		mvm_halt();
 
+#ifdef DMP
 	if (t->dmp != NULL)
 		thread_dmp_thread_destruction(t->dmp);
+#endif
 
 	t->state = terminated_state;
 	/* run method has terminated, thread instance can now be collected */
@@ -403,8 +422,10 @@ void * thread_run0_main(void *p) {
 		mvm_halt();
 	}
 
+#ifdef DMP
 	if (t->dmp != NULL)
 		thread_dmp_thread_destruction(t->dmp);
+#endif
 
 	t->state = terminated_state;
 	/* run method has terminated, thread instance can now be collected */
