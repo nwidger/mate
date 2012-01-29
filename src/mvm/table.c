@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Jan 2012 at 19:25:33 by nwidger on macros.local>
+ * Time-stamp: <29 Jan 2012 at 14:17:36 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -26,6 +26,11 @@
 #include "thread.h"
 #include "vm_stack.h"
 
+#ifdef DMP
+#include "dmp.h"
+#include "table_dmp.h"
+#endif
+
 /* struct definitions */
 struct table_entry {
 	int key;
@@ -34,6 +39,8 @@ struct table_entry {
 };
 
 struct table {
+	struct object *object;
+	
 	int num_entries;
 	float load_factor;
 	int current_capacity;
@@ -42,6 +49,10 @@ struct table {
 	int iterator_is_running;
 	int iterator_bucket;
 	struct table_entry *iterator_entry;
+
+#ifdef DMP
+	struct table_dmp *dmp;
+#endif
 };
 
 /* forward declarations */
@@ -53,11 +64,13 @@ int table_dump(struct table *t);
 struct table_entry * table_entry_create(int k, int v);
 void table_entry_destroy(struct table_entry *r);
 
-struct table * table_create(int c) {
+struct table * table_create(int c, struct object *o) {
 	struct table *t;
 
 	if ((t = (struct table *)heap_malloc(heap, sizeof(struct table))) == NULL)
 		mvm_halt();
+
+	t->object = o;
 
 	t->num_entries = 0;
 	t->current_capacity = c;
@@ -71,6 +84,13 @@ struct table * table_create(int c) {
 		mvm_halt();
 
 	memset(t->buckets, 0, sizeof(struct table_entry *)*c);
+
+#ifdef DMP
+	if (dmp == NULL)
+		t->dmp = NULL;
+	else
+		t->dmp = dmp_create_table_dmp(dmp, t, object_get_dmp(o));
+#endif
 
 	return t;
 }
@@ -128,6 +148,10 @@ int table_populate_ref_set(struct table *t, struct ref_set *r) {
 	return 0;
 }
 
+int table_entries_exceeds_load_factor(int e, int l, int c) {
+	return (e * l) > c;
+}
+
 int table_get(struct table *t, struct object *k) {
 	int n, hash;
 	struct table_entry *r;
@@ -138,18 +162,30 @@ int table_get(struct table *t, struct object *k) {
 	}
 
 	hash = abs(table_run_hash_code(t, k));
+
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_load(t->dmp);
+#endif
+
 	n = hash % t->current_capacity;
 
 	for (r = t->buckets[n]; r != NULL; r = r->next) {
-		if (table_run_equals(t, k, heap_fetch_object(heap, r->key)) == 1)
+		if (table_run_equals(t, k, heap_fetch_object(heap, r->key)) == 1) {
+#ifdef DMP
+			if (t->dmp != NULL)
+				table_dmp_load(t->dmp);
+#endif
 			return r->value;
+		}
+		
+#ifdef DMP
+		if (t->dmp != NULL)
+			table_dmp_load(t->dmp);
+#endif
 	}
 
 	return 0;
-}
-
-int table_entries_exceeds_load_factor(int e, int l, int c) {
-	return (e * l) > c;
 }
 
 int table_put(struct table *t, struct object *k, struct object *v) {
@@ -161,6 +197,11 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 		mvm_halt();
 	}
 
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_load(t->dmp);
+#endif
+
 	/* check if iterator is running */
 	if (t->iterator_is_running == 1) {
 		fprintf(stderr, "mvm: cannot put, Table's iterator is running!\n");
@@ -171,6 +212,12 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 		table_resize(t, TABLE_DEFAULT_INITIAL_CAPACITY);
 
 	hash = abs(table_run_hash_code(t, k));
+
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_load(t->dmp);
+#endif
+	
 	n = hash % t->current_capacity;
 	old_value = 0;
 
@@ -178,8 +225,18 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 		value = table_run_equals(t, k, heap_fetch_object(heap, r->key));
 		if (value == 1)
 			break;
+
+#ifdef DMP
+		if (t->dmp != NULL)
+			table_dmp_load(t->dmp);
+#endif
 	}
 
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_store(t->dmp);
+#endif
+	
 	if ((new_entry =
 	     table_entry_create(object_get_ref(k), object_get_ref(v))) == NULL) {
 		mvm_halt();
@@ -218,27 +275,54 @@ int table_remove(struct table *t, struct object *k) {
 		fprintf(stderr, "mvm: table not initialized!\n");
 		mvm_halt();
 	}
+	
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_load(t->dmp);
+#endif
 
-	/* check if interator is running */
+	/* check if iterator is running */
 	if (t->iterator_is_running == 1) {
 		fprintf(stderr, "mvm: cannot remove, Table's iterator is running!\n");
 		mvm_halt();
 	}
 
 	hash = abs(table_run_hash_code(t, k));
+
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_load(t->dmp);
+#endif
+	
 	n = hash % t->current_capacity;
 	old_value = 0;
 
 	for (s = NULL, r = t->buckets[n]; r != NULL; s = r, r = r->next) {
 		if (table_run_equals(t, k, heap_fetch_object(heap, r->key)) == 1) {
+#ifdef DMP
+			if (t->dmp != NULL)
+				table_dmp_load(t->dmp);
+#endif
+			
 			old_value = r->value;
 			break;
 		}
+
+#ifdef DMP
+		if (t->dmp != NULL)
+			table_dmp_load(t->dmp);
+#endif
 	}
 
 	if (r == NULL)
 		return 0;
-	else if (r == t->buckets[n])
+
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_store(t->dmp);
+#endif
+
+	if (r == t->buckets[n])
 		t->buckets[n] = r->next;
 	else
 		s->next = r->next;
@@ -257,6 +341,11 @@ int table_first_key(struct table *t) {
 		fprintf(stderr, "mvm: table not initialized!\n");
 		mvm_halt();
 	}
+
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_store(t->dmp);
+#endif
 
 	for (i = 0; i < t->current_capacity; i++) {
 		if (t->buckets[i] != NULL)
@@ -287,8 +376,18 @@ int table_next_key(struct table *t) {
 		mvm_halt();
 	}
 
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_load(t->dmp);
+#endif
+
 	if (t->iterator_is_running == 0)
 		return 0;
+
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_store(t->dmp);
+#endif
 
 	prev = t->iterator_entry->key;
 
@@ -320,7 +419,7 @@ int table_resize(struct table *t, int n) {
 		mvm_halt();
 	}
 
-	if ((new_table = table_create(n)) == NULL)
+	if ((new_table = table_create(n, t->object)) == NULL)
 		mvm_halt();
 
 	for (i = 0; i < t->current_capacity; i++ ) {

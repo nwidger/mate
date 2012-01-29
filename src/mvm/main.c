@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Jan 2012 at 15:15:51 by nwidger on macros.local>
+ * Time-stamp: <29 Jan 2012 at 13:25:04 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -41,6 +41,7 @@
 #include "dmp.h"
 #include "nlock_dmp.h"
 #include "object_dmp.h"
+#include "table_dmp.h"
 #include "thread_dmp.h"
 #endif
 
@@ -68,6 +69,7 @@ struct dmp *dmp;
 struct object_dmp_attr object_dmp_attr;
 struct thread_dmp_attr thread_dmp_attr;
 struct nlock_dmp_attr nlock_dmp_attr;
+struct table_dmp_attr table_dmp_attr;
 #endif
 
 uint32_t main_block_address;
@@ -252,7 +254,8 @@ int mvm_initialize(uint64_t h) {
 	if (dmp != NULL &&
 	    (dmp = dmp_create(&object_dmp_attr,
 			      &thread_dmp_attr,
-			      &nlock_dmp_attr)) == NULL) {
+			      &nlock_dmp_attr,
+			      &table_dmp_attr)) == NULL) {
 		fprintf(stderr, "mvm: error initializing DMP!\n");
 		return 1;
 	}
@@ -456,6 +459,8 @@ int main(int argc, char *argv[]) {
 	       sizeof(struct thread_dmp_attr));
 	memcpy(&nlock_dmp_attr, &nlock_dmp_default_attr,
 	       sizeof(struct nlock_dmp_attr));
+	memcpy(&table_dmp_attr, &table_dmp_default_attr,
+	       sizeof(struct table_dmp_attr));
 #endif
 
 	class_table = NULL;

@@ -40,6 +40,6 @@ symbol_table.h table.h thread.h vm_stack.h mvm.1
 
 if DMP
 CFLAGS += -DDMP
-mvm_SOURCES += dmp.c nlock_dmp.c object_dmp.c thread_dmp.c
-noinst_HEADERS += dmp.h nlock_dmp.h object_dmp.h thread_dmp.h
+mvm_SOURCES += dmp.c nlock_dmp.c object_dmp.c table_dmp.c thread_dmp.c
+noinst_HEADERS += dmp.h nlock_dmp.h object_dmp.h table_dmp.h thread_dmp.h
 endif

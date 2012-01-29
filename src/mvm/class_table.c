@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <02 Apr 2011 at 20:45:11 by nwidger on macros.local>
+ * Time-stamp: <29 Jan 2012 at 14:09:39 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -353,7 +353,7 @@ int class_table_new_table(struct class_table *c, int n, struct object **o) {
 	/* unlock */
 	garbage_collector_unlock(garbage_collector);
 
-	table = table_create(n);
+	table = table_create(n, object);
 	heap_include_ref(heap, ref);
 	object_set_table(object, table);
 

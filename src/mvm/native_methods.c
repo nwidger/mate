@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Jan 2012 at 15:10:24 by nwidger on macros.local>
+ * Time-stamp: <29 Jan 2012 at 14:09:49 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -810,7 +810,7 @@ int native_table_constructor(uint32_t i) {
 	ref = local_variable_array_load(local_variable_array, n++);
 	this = heap_fetch_object(heap, ref);
 
-	table = table_create(TABLE_DEFAULT_INITIAL_CAPACITY);
+	table = table_create(TABLE_DEFAULT_INITIAL_CAPACITY, this);
 	object_set_table(this, table);
 
 	return 0;
@@ -834,7 +834,7 @@ int native_table_constructor_integer(uint32_t i) {
 	integer = object_get_integer(object);
 	value = integer_get_value(integer);
 
-	table = table_create(value);
+	table = table_create(value, this);
 	object_set_table(this, table);
 
 	return 0;

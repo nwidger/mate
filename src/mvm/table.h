@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <26 Jan 2012 at 20:50:14 by nwidger on macros.local>
+ * Time-stamp: <29 Jan 2012 at 14:09:31 by nwidger on macros.local>
  */
 
 #ifndef _MVM_TABLE_H
@@ -12,11 +12,12 @@ struct table;
 /** creates a new table with initial capacity c.
  *
  * @param c - the initial capacity of the new table
+ * @param o - the object associated with this table
  *
  * @return pointer to new table, or NULL on failure
  */
 
-struct table * table_create(int c);
+struct table * table_create(int c, struct object *o);
 
 /** destroys the given table.
  *

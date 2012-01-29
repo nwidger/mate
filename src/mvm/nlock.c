@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <27 Jan 2012 at 19:17:00 by nwidger on macros.local>
+ * Time-stamp: <29 Jan 2012 at 14:15:53 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -110,9 +110,7 @@ void nlock_clear(struct nlock *n) {
 
 int nlock_lock(struct nlock *n) {
 	int err;
-
-	err = 0;
-
+	
 	if (n == NULL) {
 		fprintf(stderr, "mvm: nlock has not been initialized!\n");
 		mvm_halt();
@@ -137,8 +135,6 @@ int nlock_lock(struct nlock *n) {
 
 int nlock_trylock(struct nlock *n) {
 	int err;
-
-	err = 0;
 
 	if (n == NULL) {
 		fprintf(stderr, "mvm: nlock has not been initialized!\n");
@@ -177,11 +173,6 @@ int nlock_unlock(struct nlock *n) {
 		mvm_halt();
 	}
 
-#ifdef DMP
-	if (n->dmp != NULL)
-		nlock_dmp_unlock(n->dmp);
-#endif
-
 	n->locks--;
 	if (n->locks == 0) memset(&n->owner, 0, sizeof(pthread_t));
 
@@ -191,6 +182,10 @@ int nlock_unlock(struct nlock *n) {
 		mvm_halt();
 	}
 
+#ifdef DMP
+	if (n->dmp != NULL)
+		nlock_dmp_unlock(n->dmp);
+#endif
 
 	return 0;
 }

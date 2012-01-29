@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Jan 2012 at 15:15:16 by nwidger on macros.local>
+ * Time-stamp: <29 Jan 2012 at 14:18:51 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -22,6 +22,7 @@
 #include "nlock_dmp.h"
 #include "object_dmp.h"
 #include "ref_set.h"
+#include "table_dmp.h"
 #include "thread_dmp.h"
 
 /* struct definitions */
@@ -41,6 +42,9 @@ struct dmp {
 
 	/* nlock_dmp defaults */
 	struct nlock_dmp_attr *nd_attr;
+
+	/* table_dmp defaults */
+	struct table_dmp_attr *tb_attr;
 };
 
 /* forward declarations */
@@ -51,27 +55,29 @@ void * dmp_barrier_serial_hook(int i, void *a);
 
 struct dmp * dmp_create(struct object_dmp_attr *a,
 			struct thread_dmp_attr *t,
-			struct nlock_dmp_attr *n) {
-	struct dmp *dmp;
+			struct nlock_dmp_attr *n,
+			struct table_dmp_attr *tb) {
+	struct dmp *d;
 
-	if ((dmp = (struct dmp *)malloc(sizeof(struct dmp))) == NULL) {
+	if ((d = (struct dmp *)malloc(sizeof(struct dmp))) == NULL) {
 		perror("mvm: malloc");
 		mvm_halt();
 	}
 
-	dmp->mode = parallel_mode;
+	d->mode = parallel_mode;
 
-	dmp->thread_set = ref_set_create();
+	d->thread_set = ref_set_create();
 
-	dmp->first = 0;
-	dmp->barrier = barrier_create(0);
-	barrier_set_hook(dmp->barrier, dmp_barrier_parallel_hook, dmp);
+	d->first = 0;
+	d->barrier = barrier_create(0);
+	barrier_set_hook(d->barrier, dmp_barrier_parallel_hook, d);
 
-	dmp->od_attr = a;
-	dmp->td_attr = t;
-	dmp->nd_attr = n;
+	d->od_attr = a;
+	d->td_attr = t;
+	d->nd_attr = n;
+	d->tb_attr = tb;
 
-	return dmp;
+	return d;
 }
 
 void dmp_destroy(struct dmp *d) {
@@ -87,6 +93,9 @@ void dmp_clear(struct dmp *d) {
 		ref_set_clear(d->thread_set);
 		barrier_clear(d->barrier);
 		d->od_attr = NULL;
+		d->td_attr = NULL;
+		d->nd_attr = NULL;
+		d->tb_attr = NULL;
 	}
 }
 
@@ -216,6 +225,18 @@ struct nlock_dmp * dmp_create_nlock_dmp(struct dmp *d, struct nlock *n) {
 
 	nd = nlock_dmp_create(n, d->nd_attr);
 	return nd;
+}
+
+struct table_dmp * dmp_create_table_dmp(struct dmp *d, struct table *t, struct object_dmp *od) {
+	struct table_dmp *td;
+
+	if (d == NULL) {
+		fprintf(stderr, "mvm: dmp not initialized!\n");
+		mvm_halt();
+	}
+
+	td = table_dmp_create(t, d->tb_attr, od);
+	return td;
 }
 
 int dmp_shm_read(struct dmp *d, int c, int r, enum dmp_thread_action *ta, enum dmp_owner_action *oa) {
