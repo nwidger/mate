@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <11 Feb 2010 at 23:06:14 by nwidger on macros.local>
+ * Time-stamp: <29 Jan 2012 at 18:49:01 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -82,11 +82,11 @@ int string_length(struct object *o) {
 }
 
 int string_substr(struct object *o, struct object *p, struct object *q) {
-	char tmp;
 	int ref;
-	int32_t beg_index, end_index;
+	char *buf;
 	struct string *s;
 	struct integer *b, *e;
+	int32_t beg_index, end_index;
 
 	s = object_get_string(o);
 
@@ -116,14 +116,18 @@ int string_substr(struct object *o, struct object *p, struct object *q) {
 		mvm_halt();
 	}
 
-	tmp = s->chars[end_index+1];
-	s->chars[end_index+1] = '\0';
+	if ((buf = (char *)malloc(sizeof(char)*(end_index-beg_index+2))) == NULL) {
+		perror("mvm: malloc");
+		mvm_halt();
+	}
 
-	if ((ref = class_table_new_string(class_table, (s->chars)+beg_index, NULL)) == 0)
+	strncpy(buf, s->chars+beg_index, (end_index-beg_index)+2);
+	buf[(end_index-beg_index)+1] = '\0';
+
+	if ((ref = class_table_new_string(class_table, buf, NULL)) == 0)
 		mvm_halt();
 
-	s->chars[end_index+1] = tmp;
-
+	free(buf);
 	return ref;
 }
 
