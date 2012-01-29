@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <27 Jan 2012 at 20:22:39 by nwidger on macros.local>
+ * Time-stamp: <28 Jan 2012 at 15:15:33 by nwidger on macros.local>
  */
 
 #ifndef _MVM_DMP_H
@@ -22,6 +22,17 @@ enum dmp_mode {
 	serial_mode	= 1
 };
 
+enum dmp_thread_action {
+	block_action   = 0,
+	proceed_action = 1
+};
+
+enum dmp_owner_action {
+	no_action      = 0,
+	shared_action  = 1,
+	private_action = 2
+};
+
 struct dmp * dmp_create(struct object_dmp_attr *a,
 			struct thread_dmp_attr *t,
 			struct nlock_dmp_attr *n);
@@ -34,5 +45,7 @@ struct object_dmp * dmp_create_object_dmp(struct dmp *d, struct object *o);
 struct thread_dmp * dmp_create_thread_dmp(struct dmp *d, struct thread *t);
 struct nlock_dmp * dmp_create_nlock_dmp(struct dmp *d, struct nlock *n);
 int dmp_thread_block(struct dmp *d, struct thread_dmp *td);
+int dmp_shm_read(struct dmp *d, int c, int r, enum dmp_thread_action *ta, enum dmp_owner_action *oa);
+int dmp_shm_write(struct dmp *d, int c, int r, enum dmp_thread_action *ta, enum dmp_owner_action *oa);
 
 #endif

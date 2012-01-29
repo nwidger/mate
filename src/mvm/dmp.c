@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <27 Jan 2012 at 20:22:53 by nwidger on macros.local>
+ * Time-stamp: <28 Jan 2012 at 15:15:16 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -129,7 +129,7 @@ int dmp_toggle_mode(struct dmp *d) {
 
 int dmp_add_thread(struct dmp *d, int r) {
 	struct thread *t;
-	
+
 	if (d == NULL) {
 		fprintf(stderr, "mvm: dmp not initialized!\n");
 		mvm_halt();
@@ -151,13 +151,13 @@ int dmp_add_thread(struct dmp *d, int r) {
 
 	if (debug == 0 && verbose != 0)
 		ref_set_dump_iterator(d->thread_set);
-	
+
 	return 0;
 }
 
 int dmp_remove_thread(struct dmp *d, int r) {
 	struct thread *t;
-	
+
 	if (d == NULL) {
 		fprintf(stderr, "mvm: dmp not initialized!\n");
 		mvm_halt();
@@ -175,7 +175,7 @@ int dmp_remove_thread(struct dmp *d, int r) {
 
 	ref_set_remove(d->thread_set, r);
 	barrier_dec_parties(d->barrier);
-	
+
 	if (debug == 0 && verbose != 0)
 		ref_set_dump_iterator(d->thread_set);
 
@@ -216,6 +216,57 @@ struct nlock_dmp * dmp_create_nlock_dmp(struct dmp *d, struct nlock *n) {
 
 	nd = nlock_dmp_create(n, d->nd_attr);
 	return nd;
+}
+
+int dmp_shm_read(struct dmp *d, int c, int r, enum dmp_thread_action *ta, enum dmp_owner_action *oa) {
+	enum dmp_owner_action oaction;
+	enum dmp_thread_action taction;
+
+	if (DMP_SHARED(c)) {
+		taction = proceed_action;
+		oaction = no_action;
+		mvm_print("thread %" PRIu32 ":     shared: proceed!\n", r);
+	} else if (c != r) {
+		taction = (d->mode == parallel_mode) ? block_action : proceed_action;
+		oaction = shared_action;
+		mvm_print("thread %" PRIu32 ":     private not owned by me (%d): %sset shared, proceed!\n", r, c,
+			  taction == block_action ? "block, " : "");
+	} else {
+		taction = proceed_action;
+		oaction = no_action;
+                mvm_print("thread %" PRIu32 ":     private owned by me: proceed!\n", r);
+	}
+
+	if (ta != NULL) *ta = taction;
+	if (oa != NULL) *oa = oaction;
+
+	return 0;
+}
+
+int dmp_shm_write(struct dmp *d, int c, int r, enum dmp_thread_action *ta, enum dmp_owner_action *oa) {
+	enum dmp_owner_action oaction;
+	enum dmp_thread_action taction;
+
+	if (DMP_SHARED(c)) {
+		taction = (d->mode == parallel_mode) ? block_action : proceed_action;
+		oaction = private_action;
+		mvm_print("thread %" PRIu32 ":     shared: %sset private owned by me, proceed!\n", r,
+			  taction == block_action ? "block, " : "");
+	} else if (c != r) {
+		taction = (d->mode == parallel_mode) ? block_action : proceed_action;
+		oaction = private_action;
+		mvm_print("thread %" PRIu32 ":     private not owned by me (%d): %sset private owned by me, proceed!\n", r, c,
+			  taction == block_action ? "block, " : "");
+	} else {
+		taction = proceed_action;
+		oaction = no_action;
+		mvm_print("thread %" PRIu32 ":     private owned by me: proceed!\n", r);
+	}
+
+	if (ta != NULL) *ta = taction;
+	if (oa != NULL) *oa = oaction;
+
+	return 0;
 }
 
 int dmp_acquiesce(struct dmp *d, int r, enum thread_dmp_state s) {
@@ -308,7 +359,7 @@ void * dmp_barrier_parallel_hook(int i, void *a) {
 }
 
 void * dmp_barrier_serial_hook(int i, void *a) {
-	double load;	
+	double load;
 	int nthreads;
 	struct dmp *d;
 	uint64_t size, free;

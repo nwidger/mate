@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <27 Jan 2012 at 19:17:12 by nwidger on macros.local>
+ * Time-stamp: <28 Jan 2012 at 13:46:25 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -19,7 +19,6 @@
 #include "invoke_method.h"
 #include "nlock.h"
 #include "object.h"
-#include "object_dmp.h"
 #include "operand_stack.h"
 #include "real.h"
 #include "ref_set.h"
@@ -30,6 +29,7 @@
 
 #ifdef DMP
 #include "dmp.h"
+#include "object_dmp.h"
 #endif
 
 /* struct definitions */

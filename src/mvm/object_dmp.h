@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <27 Jan 2012 at 20:22:25 by nwidger on macros.local>
+ * Time-stamp: <28 Jan 2012 at 13:32:19 by nwidger on macros.local>
  */
 
 #ifndef _MVM_OBJECT_DMP_H
@@ -8,10 +8,6 @@
 struct object;
 struct object_dmp;
 struct object_dmp_ops;
-
-/** for accessing owner field */
-#define SHARED(x) (x == 0)
-#define PRIVATE(x) (x != 0)
 
 /* struct definitions */
 struct object_dmp_ops {
