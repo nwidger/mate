@@ -1,20 +1,19 @@
 #!/bin/bash
 
 PREDEFINED="/usr/local/share/doc/mate/predefined_classes.m"
-STOP_AFTER_COMPILE=0
+GENERATE_ASSEMBLER=0
 GENERATE_SYMBOL_TABLE=0
 INPUT=""
 OUTPUT=""
 ERR=0
 
 function usage() {
-    echo "usage: mcc [-h] [-s] [-S] [-o FILE] FILE"
+    echo "usage: mcc [-h] [-s] [-S] FILE"
     echo "-h       Print this help message and exit"
-    echo "-s       Generate symbol table and exit"
-    echo "-S       Compile only; do not assemble"
+    echo "-s       Generate symbol table"
+    echo "-S       Generate assembler output"
     echo "-p FILE  Specify location of predefined classes file"
     echo "         Default is '/usr/local/share/doc/mate/predefined_classes.m'"
-    echo "-o FILE  Place the output into FILE"
 }
 
 # parse arguments
@@ -38,13 +37,10 @@ while getopts $OPTARGS opt; do
     PREDEFINED="$OPTARG"
     ;;
     S)
-    STOP_AFTER_COMPILE=1
+    GENERATE_ASSEMBLER=1
     ;;
     s)
     GENERATE_SYMBOL_TABLE=1
-    ;;
-    o)
-    OUTPUT="$OPTARG"
     ;;
     \?)
     echo "Invalid switch option '$OPTARG'" >&2
@@ -94,14 +90,25 @@ TEMP=/tmp/mate-$RANDOM
 
 if [ ! -r $PREDEFINED ];
 then
-    mc < $INPUT > $TEMP        
+    mc < $INPUT > $TEMP
+    RETVAL=$?
 else
-    cat $PREDEFINED $INPUT | mc > $TEMP
+    # cat $PREDEFINED $INPUT | mc > $TEMP
+
+    PREDEFINED_LINES=$(wc -l $PREDEFINED | awk '{ print $1 }')
+    STR='s{([^:]+): (\d+): (.*)}{$1 . ": " . ($2-'
+    STR+="$PREDEFINED_LINES"
+    STR+=') . ": " . $3}e'
+    TEMP2=/tmp/mate-$RANDOM
+    cat $PREDEFINED $INPUT | mc > $TEMP 2> $TEMP2
+    RETVAL=$?
+    perl -pe "$STR" $TEMP2
+    rm -rf $TEMP2
 fi
 
 # abort if compile stage failed
 
-if [[ $? -ne 0 ]];
+if [[ $RETVAL -ne 0 ]];
 then
     rm -rf $TEMP > /dev/null 2>&1
     exit 1
@@ -109,26 +116,18 @@ fi
 
 # don't assemble, just copy assembler to OUTPUT file and exit success
 
-if [[ $STOP_AFTER_COMPILE -ne 0 ]];
+if [[ $GENERATE_ASSEMBLER -ne 0 ]];
 then
-    if [ "$OUTPUT" == "" ];
-    then
-	OUTPUT=${INPUT%%.m}.s
-    fi
-    
+    OUTPUT=${INPUT%%.m}.s
     cp $TEMP $OUTPUT > /dev/null 2>&1
-    rm -rf $TEMP > /dev/null 2>&1
-    exit 0
+    # rm -rf $TEMP > /dev/null 2>&1
 fi
 
 # write symbol table to OUTPUT and exit
 
 if [[ $GENERATE_SYMBOL_TABLE -ne 0 ]];
 then
-    if [ "$OUTPUT" == "" ];
-    then
-	OUTPUT=${INPUT%%.m}.sym
-    fi
+    OUTPUT=${INPUT%%.m}.sym
     
     mas -s < $TEMP > $OUTPUT
 
@@ -140,16 +139,12 @@ then
 	exit 1
     fi
     
-    rm -rf $TEMP > /dev/null 2>&1
-    exit 0
+    # rm -rf $TEMP > /dev/null 2>&1
 fi
 
 # generate OUTPUT by stripping .m suffix from INPUT and adding .class
 
-if [ "$OUTPUT" == "" ];
-then
-    OUTPUT=${INPUT%%.m}.class
-fi
+OUTPUT=${INPUT%%.m}.class
 
 # assemble, writing class file to OUTPUT
 
