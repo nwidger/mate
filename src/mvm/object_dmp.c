@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Jan 2012 at 14:40:53 by nwidger on macros.local>
+ * Time-stamp: <01 Feb 2012 at 21:19:29 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -233,7 +233,8 @@ int object_dmp_default_chown_aux(struct object_dmp *od, int n, int d) {
 		field = heap_fetch_object(heap, ref);
 		field_od = object_get_dmp(field);
 
-		object_dmp_default_chown_aux(field_od, n, d-1);
+		if (field_dmp != NULL)
+			object_dmp_default_chown_aux(field_od, n, d-1);
 	}
 
 	ref_set_destroy(fields);

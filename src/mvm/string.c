@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <29 Jan 2012 at 18:49:01 by nwidger on macros.local>
+ * Time-stamp: <01 Feb 2012 at 20:53:05 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -52,6 +52,7 @@ void string_destroy(struct string *s) {
 
 void string_clear(struct string *s) {
 	if (s != NULL) {
+
 	}
 }
 
