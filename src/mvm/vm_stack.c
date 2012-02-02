@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Nov 2010 at 20:05:47 by nwidger on macros.local>
+ * Time-stamp: <01 Feb 2012 at 20:40:35 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -173,6 +173,8 @@ uint32_t vm_stack_pop_n(struct vm_stack *s, int n) {
 		fprintf(stderr, "mvm: stack not initialized!\n");
 		mvm_halt();
 	}
+
+	return_address = 0;
 
 	/* lock */
 	vm_stack_lock(s);

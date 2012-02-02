@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <09 Jan 2012 at 21:04:25 by nwidger on macros.local>
+ * Time-stamp: <01 Feb 2012 at 20:40:03 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -1589,7 +1589,7 @@ int until_function(char **t, int n) {
 			return 0;
 		}
 
-		until_address = addresses_value[index+1];
+		until_address = address = addresses_value[index+1];
 	} else {
 		if (strspn(t[1], "0123456789") == strlen(t[1])) {
 			address = atoi(t[1]);

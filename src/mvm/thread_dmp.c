@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <27 Jan 2012 at 20:23:05 by nwidger on macros.local>
+ * Time-stamp: <01 Feb 2012 at 20:33:40 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -353,7 +353,7 @@ int thread_dmp_default_thread_start(struct thread_dmp *td) {
 
 	td->state = running_state;
 
-#ifdef __linux
+#if defined(__linux)
 	cpu_set_t cpuset, retset;
 	pthread_t thread;
 	int i, retval;
