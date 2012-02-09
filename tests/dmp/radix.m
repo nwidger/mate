@@ -4,14 +4,21 @@ class BinaryInteger {
   IntegerTable bits;
 
   BinaryInteger(Integer v) {
+    if (v < 0) {
+      out "Error: BinaryInteger passed negative number, using zero instead" + newline;
+      v = 0;
+    }
+    
     str = null;
     value = v;
     regenerate();
   }
 
   BinaryInteger(String s) {
-    if (s.length() == 0)
+    if (s.length() == 0) {
+      out "Error: BinaryInteger passed zero-length string, using zero instead" + newline;
       s = "0";
+    }
 
     str = s;
     value = null;
@@ -292,7 +299,7 @@ class RadixSort {
     for (i = 0; i < n; i = i + 1) {
       tary.put(i, new Tuple());
     }
-	
+
     max = 0;
 	
     for (i = 0; i < n; i = i + 1) {
@@ -357,16 +364,6 @@ Integer main() {
   IntegerTable ary;
   String sn, snbits;
   Integer i, n, nbits, temp;
-
-  // BinaryInteger bi;
-
-  // while ((sn = in) != null) {
-  //   bi = new BinaryInteger(sn);
-
-  //   out "bi = " + bi.toInteger().toString() + newline;
-  // }
-
-  // return 1;
 
   sn = in;
   snbits = in;
