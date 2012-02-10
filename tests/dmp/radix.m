@@ -1,3 +1,5 @@
+////////////////////////////////////////////////////////////////////////////////
+
 class BinaryInteger {
   String str;
   Integer value;
@@ -58,7 +60,7 @@ class BinaryInteger {
       b = 30;
       i = 1073741824;		// 2^30
     
-      while (b >= 0) {
+      while (v > 0 && b >= 0) {
 	if (v >= i) {
 	  v = v - i;
 	  bits.put(b, 1);
@@ -78,20 +80,64 @@ class BinaryInteger {
 
     newbits = new IntegerTable(32);
 
-    bits.firstKey();
-
-    while ((k = bits.nextKey()) != null) {
-      v = bits.get(k);
-      newbits.put(k, v);
-    }
-
     for (i = 31; i > (nbits-1) && i >= 0; i = i - 1) {
       newbits.put(i, 0);
+    }
+
+    while (i >= 0) {
+      newbits.put(i, bits.get(i));
+      i = i - 1;
     }
 
     return new BinaryInteger(newbits);
   }
 
+  BinaryInteger shiftLeft(Integer n) {
+    Integer v, i;
+
+    if (n < 0) {
+      out "Error: BinaryInteger passed negative shift, returning zero" + newline;
+      return new BinaryInteger(0);
+    }
+    
+    if (n.equals(0))
+      return this;
+
+    if (n >= 32)
+      return new BinaryInteger(0);
+
+    v = toInteger();
+
+    for (i = 0; !v.equals(0) && i < n; i = i + 1) {
+      v = v * 2;
+    }
+
+    return new BinaryInteger(v);
+  }
+
+  BinaryInteger shiftRight(Integer n) {
+    Integer v, i;
+
+    if (n < 0) {
+      out "Error: BinaryInteger passed negative shift, returning zero" + newline;
+      return new BinaryInteger(0);
+    }
+    
+    if (n.equals(0))
+      return this;
+
+    if (n >= 32)
+      return new BinaryInteger(0);
+
+    v = toInteger();
+
+    for (i = 0; !v.equals(0) && i < n; i = i + 1) {
+      v = v / 2;
+    }
+
+    return new BinaryInteger(v);
+  }
+  
   Integer toInteger() {
     Integer i, b, v;
     
@@ -117,6 +163,10 @@ class BinaryInteger {
   }
   
   String toString() {
+    return toInteger().toString();
+  }
+
+  String toBinaryString() {
     String s;
     Integer i;
     
@@ -133,20 +183,24 @@ class BinaryInteger {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 class Tuple {
-  Integer value;
-  Integer masked;
+  BinaryInteger value;
+  BinaryInteger masked;
 
   Tuple() {
-    value = 0;
-    masked = 0;
+    value = new BinaryInteger(0);
+    masked = new BinaryInteger(0);
   }
 
-  Tuple(Integer v, Integer m) {
+  Tuple(BinaryInteger v, BinaryInteger m) {
     value = v;
     masked = m;
   }
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 class TupleTable {
   Table t;
@@ -208,6 +262,8 @@ class TupleTable {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 class IntegerTable {
   Table t;
   
@@ -268,8 +324,72 @@ class IntegerTable {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+class BinaryIntegerTable {
+  Table t;
+  
+  BinaryIntegerTable() {
+    t = new Table();
+  }
+  
+  BinaryIntegerTable(Integer n) {
+    t = new Table(n);
+  }
+
+  BinaryInteger get(Integer key) {
+    Object value;
+
+    value = t.get(key);
+
+    if (value == null)
+      return null;
+
+    return (BinaryInteger)value;
+  }
+
+  BinaryInteger put(Integer key, BinaryInteger value) {
+    Object prev;
+
+    prev = t.put(key, value);
+
+    if (prev == null)
+      return null;
+
+    return (BinaryInteger)prev;
+  }
+
+  BinaryInteger remove(Integer key) {
+    Object value;
+
+    value = t.remove(key);
+
+    if (value == null)
+      return null;
+
+    return (BinaryInteger)value;
+  }
+
+  Integer firstKey() {
+    return t.firstKey();
+  }
+
+  Integer nextKey() {
+    Object key;
+
+    key = t.nextKey();
+
+    if (key == null)
+      return null;
+
+    return (Integer)key;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 class RadixSort {
-  Object doSort(IntegerTable ary, Integer n, Integer nbits) {
+  Object doSort(BinaryIntegerTable ary, Integer n, Integer nbits) {
     Integer i;
 
     for (i = 8; i <= nbits; i = i * 2) {
@@ -281,11 +401,7 @@ class RadixSort {
     return 0;
   }
 
-  Integer mask(Integer v, Integer nbits) {
-    return new BinaryInteger(v).mask(nbits).toInteger();
-  }
-
-  Integer doCountingSort(IntegerTable ary, Integer n, Integer nbits) {
+  Integer doCountingSort(BinaryIntegerTable ary, Integer n, Integer nbits) {
     Tuple t;
     IntegerTable C;
     TupleTable tary;
@@ -304,10 +420,10 @@ class RadixSort {
 	
     for (i = 0; i < n; i = i + 1) {
       tary.get(i).value = ary.get(i);
-      tary.get(i).masked = mask(ary.get(i), nbits);
+      tary.get(i).masked = ary.get(i).mask(nbits);
 
-      if (tary.get(i).masked > max)
-	max = tary.get(i).masked;
+      if (tary.get(i).masked.toInteger() > max)
+	max = tary.get(i).masked.toInteger();
     }
 
     max = max + 1;
@@ -322,7 +438,7 @@ class RadixSort {
       // 
       // C.put(tary.get(i).masked, C.get(tary.get(i).masked)+1);
 
-      temp1 = tary.get(i).masked;
+      temp1 = tary.get(i).masked.toInteger();
       temp2 = C.get(temp1);
       C.put(temp1, temp2 + 1);
     }
@@ -346,11 +462,11 @@ class RadixSort {
 
       t = tary.get(i);
       
-      temp1 = t.masked;
+      temp1 = t.masked.toInteger();
       temp2 = C.get(temp1) - 1;
       ary.put(temp2, t.value);
       
-      temp1 = t.masked - 1;
+      temp1 = t.masked.toInteger() - 1;
       temp2 = C.get(temp1);
       C.put(temp1, temp2 - 1);
     }
@@ -359,12 +475,25 @@ class RadixSort {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 Integer main() {
   RadixSort rs;
-  IntegerTable ary;
+  BinaryIntegerTable ary;
   String sn, snbits;
-  Integer i, n, nbits, temp;
+  BinaryInteger temp;
+  Integer i, n, nbits;
 
+  // BinaryInteger bi;
+
+  // bi = new BinaryInteger("01111111111111111111111111111111");
+
+  // for (i = 0; i < 32; i = i + 1) {
+  //   out "bi = " + bi.mask(i).toBinaryString() + newline;
+  // }
+
+  // return 1;
+  
   sn = in;
   snbits = in;
 
@@ -377,16 +506,16 @@ Integer main() {
   nbits = snbits.toInteger();
 
   if (n <= 0 || nbits <= 0 || nbits > 32) {
-    out "Bad arguments" + newline;
+    out "n and nbits must be non-negative, nbits must be <= 32" + newline;
     return 1;
   }
 
-  ary = new IntegerTable(n);
+  ary = new BinaryIntegerTable(n);
 
   for (i = 0; i < n; i = i + 1) {
-    temp = in.toInteger();
+    temp = new BinaryInteger(in.toInteger());
 
-    if (temp < 0) {
+    if (temp.toInteger() < 0) {
       out "Numbers must be non-negative" + newline;
       return 1;
     }
