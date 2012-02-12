@@ -75,7 +75,7 @@ class BinaryInteger {
   }
 
   BinaryInteger mask(Integer nbits) {
-    Integer i, k, v;
+    Integer i;
     IntegerTable newbits;
 
     newbits = new IntegerTable(32);
@@ -87,6 +87,71 @@ class BinaryInteger {
     while (i >= 0) {
       newbits.put(i, bits.get(i));
       i = i - 1;
+    }
+
+    return new BinaryInteger(newbits);
+  }
+
+  BinaryInteger and(BinaryInteger bi) {
+    Integer i, v1, v2, b;
+    IntegerTable newbits;
+
+    newbits = new IntegerTable(32);
+
+    for (i = 0; i < 32; i = i + 1) {
+      v1 = this.bits.get(i);
+      v2 = bi.bits.get(i);
+
+      if (v1.equals(1) && v2.equals(1))
+	b = 1;
+      else
+	b = 0;
+
+      newbits.put(i, b);
+    }
+
+    return new BinaryInteger(newbits);
+  }
+
+  BinaryInteger or(BinaryInteger bi) {
+    Integer i, v1, v2, b;
+    IntegerTable newbits;
+
+    newbits = new IntegerTable(32);
+
+    for (i = 0; i < 32; i = i + 1) {
+      v1 = this.bits.get(i);
+      v2 = bi.bits.get(i);
+
+      if (v1.equals(1) || v2.equals(1))
+	b = 1;
+      else
+	b = 0;
+
+      newbits.put(i, b);
+    }
+
+    return new BinaryInteger(newbits);
+  }
+
+  BinaryInteger xor(BinaryInteger bi) {
+    Integer i, v1, v2, b;
+    IntegerTable newbits;
+
+    newbits = new IntegerTable(32);
+
+    for (i = 0; i < 32; i = i + 1) {
+      v1 = this.bits.get(i);
+      v2 = bi.bits.get(i);
+
+      if ((v1.equals(1) && v2.equals(0)) ||
+	  (v2.equals(1) && v1.equals(0))) {
+	b = 1;
+      } else {
+	b = 0;
+      }
+
+      newbits.put(i, b);
     }
 
     return new BinaryInteger(newbits);
@@ -160,6 +225,10 @@ class BinaryInteger {
     }
     
     return value;
+  }
+
+  Integer hashCode() {
+    return toInteger();
   }
   
   String toString() {
@@ -281,7 +350,7 @@ class IntegerTable {
     value = t.get(key);
 
     if (value == null)
-      return null;
+      return 0;
 
     return (Integer)value;
   }
@@ -292,7 +361,7 @@ class IntegerTable {
     prev = t.put(key, value);
 
     if (prev == null)
-      return null;
+      return 0;
 
     return (Integer)prev;
   }
@@ -303,7 +372,7 @@ class IntegerTable {
     value = t.remove(key);
 
     if (value == null)
-      return null;
+      return 0;
 
     return (Integer)value;
   }
@@ -388,8 +457,8 @@ class BinaryIntegerTable {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class RadixSort {
-  Object doSort(BinaryIntegerTable ary, Integer n, Integer nbits) {
+class Sort {
+  Object doRadixSort(BinaryIntegerTable ary, Integer n, Integer nbits) {
     Integer i;
 
     for (i = 8; i <= nbits; i = i * 2) {
@@ -405,6 +474,8 @@ class RadixSort {
     Tuple t;
     IntegerTable C;
     TupleTable tary;
+    IntegerTable keys;
+    BinaryInteger b1, b2;
     Integer i, max, temp1, temp2, temp3;
 
     if (nbits > 20)
@@ -412,26 +483,26 @@ class RadixSort {
 
     tary = new TupleTable(n);
 
-    for (i = 0; i < n; i = i + 1) {
-      tary.put(i, new Tuple());
-    }
-
     max = 0;
-	
-    for (i = 0; i < n; i = i + 1) {
-      tary.get(i).value = ary.get(i);
-      tary.get(i).masked = ary.get(i).mask(nbits);
 
-      if (tary.get(i).masked.toInteger() > max)
-	max = tary.get(i).masked.toInteger();
+    for (i = 0; i < n; i = i + 1) {
+      // tary.get(i).value = ary.get(i);
+      // tary.get(i).masked = ary.get(i).mask(nbits);
+
+      // if (tary.get(i).masked.toInteger() > max)
+      // 	max = tary.get(i).masked.toInteger();
+
+      b1 = ary.get(i);
+      b2 = b1.mask(nbits);
+      tary.put(i, new Tuple(b1, b2));
+
+      if (b2.toInteger() > max)
+	max = b2.toInteger();
     }
 
     max = max + 1;
 
     C = new IntegerTable(max);
-    for (i = 0; i < max; i = i + 1) {
-      C.put(i, 0);
-    }
 
     for (i = 0; i < n; i = i + 1) {
       // C[tary[i].masked]++;
@@ -463,10 +534,10 @@ class RadixSort {
       t = tary.get(i);
       
       temp1 = t.masked.toInteger();
-      temp2 = C.get(temp1) - 1;
-      ary.put(temp2, t.value);
+      temp2 = C.get(temp1);
+      ary.put(temp2 - 1, t.value);
       
-      temp1 = t.masked.toInteger() - 1;
+      temp1 = t.masked.toInteger();
       temp2 = C.get(temp1);
       C.put(temp1, temp2 - 1);
     }
@@ -478,21 +549,11 @@ class RadixSort {
 ////////////////////////////////////////////////////////////////////////////////
 
 Integer main() {
-  RadixSort rs;
-  BinaryIntegerTable ary;
+  Sort s;
   String sn, snbits;
   BinaryInteger temp;
   Integer i, n, nbits;
-
-  // BinaryInteger bi;
-
-  // bi = new BinaryInteger("01111111111111111111111111111111");
-
-  // for (i = 0; i < 32; i = i + 1) {
-  //   out "bi = " + bi.mask(i).toBinaryString() + newline;
-  // }
-
-  // return 1;
+  BinaryIntegerTable ary;
   
   sn = in;
   snbits = in;
@@ -525,16 +586,16 @@ Integer main() {
 
   // PRE-SORT
   
-  for (i = 0; i < n; i = i + 1) {
-    out ary.get(i).toString();
-    out " ";
-  }
+  // for (i = 0; i < n; i = i + 1) {
+  //   out ary.get(i).toString();
+  //   out " ";
+  // }
+  //
+  // out newline;
 
-  out newline;
+  s = new Sort();
 
-  rs = new RadixSort();
-
-  if (rs.doSort(ary, n, nbits).equals(1)) {
+  if (s.doRadixSort(ary, n, nbits).equals(1)) {
     out "error!" + newline;
     return 1;
   }
@@ -542,11 +603,8 @@ Integer main() {
   // POST-SORT
 
   for (i = 0; i < n; i = i + 1) {
-    out ary.get(i).toString();
-    out " ";
+    out ary.get(i).toString() + newline;
   }
 
-  out newline;
-  
   return 0;
 }
