@@ -53,6 +53,7 @@ typedef int flex_int32_t;
 typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
+#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -82,8 +83,6 @@ typedef unsigned int flex_uint32_t;
 #ifndef UINT32_MAX
 #define UINT32_MAX             (4294967295U)
 #endif
-
-#endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
@@ -141,15 +140,7 @@ typedef unsigned int flex_uint32_t;
 
 /* Size of default input buffer. */
 #ifndef YY_BUF_SIZE
-#ifdef __ia64__
-/* On IA-64, the buffer size is 16k, not 8k.
- * Moreover, YY_BUF_SIZE is 2*YY_READ_BUF_SIZE in the general case.
- * Ditto for the __ia64__ case accordingly.
- */
-#define YY_BUF_SIZE 32768
-#else
 #define YY_BUF_SIZE 16384
-#endif /* __ia64__ */
 #endif
 
 /* The state buf must be large enough to hold one state per character in the main buffer.
@@ -161,7 +152,12 @@ typedef unsigned int flex_uint32_t;
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
-extern int yyleng;
+#ifndef YY_TYPEDEF_YY_SIZE_T
+#define YY_TYPEDEF_YY_SIZE_T
+typedef size_t yy_size_t;
+#endif
+
+extern yy_size_t yyleng;
 
 extern FILE *yyin, *yyout;
 
@@ -187,11 +183,6 @@ extern FILE *yyin, *yyout;
 
 #define unput(c) yyunput( c, (yytext_ptr)  )
 
-#ifndef YY_TYPEDEF_YY_SIZE_T
-#define YY_TYPEDEF_YY_SIZE_T
-typedef size_t yy_size_t;
-#endif
-
 #ifndef YY_STRUCT_YY_BUFFER_STATE
 #define YY_STRUCT_YY_BUFFER_STATE
 struct yy_buffer_state
@@ -209,7 +200,7 @@ struct yy_buffer_state
 	/* Number of characters read into yy_ch_buf, not including EOB
 	 * characters.
 	 */
-	int yy_n_chars;
+	yy_size_t yy_n_chars;
 
 	/* Whether we "own" the buffer - i.e., we know we created it,
 	 * and can realloc() it to grow it, and should free() it to
@@ -279,8 +270,8 @@ static YY_BUFFER_STATE * yy_buffer_stack = 0; /**< Stack as an array. */
 
 /* yy_hold_char holds the character lost when yytext is formed. */
 static char yy_hold_char;
-static int yy_n_chars;		/* number of characters read into yy_ch_buf */
-int yyleng;
+static yy_size_t yy_n_chars;		/* number of characters read into yy_ch_buf */
+yy_size_t yyleng;
 
 /* Points to current character in buffer. */
 static char *yy_c_buf_p = (char *) 0;
@@ -308,7 +299,7 @@ static void yy_init_buffer (YY_BUFFER_STATE b,FILE *file  );
 
 YY_BUFFER_STATE yy_scan_buffer (char *base,yy_size_t size  );
 YY_BUFFER_STATE yy_scan_string (yyconst char *yy_str  );
-YY_BUFFER_STATE yy_scan_bytes (yyconst char *bytes,int len  );
+YY_BUFFER_STATE yy_scan_bytes (yyconst char *bytes,yy_size_t len  );
 
 void *yyalloc (yy_size_t  );
 void *yyrealloc (void *,yy_size_t  );
@@ -562,7 +553,7 @@ char *yytext;
 #line 2 "scan.ll"
 
 // Niels Widger
-// Time-stamp: <12 May 2011 at 15:45:13 by nwidger on macros.local>
+// Time-stamp: <06 Mar 2012 at 19:01:20 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -594,6 +585,7 @@ static string * stashStringLiteral(char *);
 extern StringPool * stringPool;
 extern bool err;
 extern int yyparse();
+extern int predefinedLines;
 
 // scanner tracks the current line number
 static int sourceLineNumber = 1;
@@ -612,7 +604,7 @@ int displayToken (char *);
 
 #endif
 
-#line 616 "scan.cc"
+#line 608 "scan.cc"
 
 #define INITIAL 0
 
@@ -651,7 +643,7 @@ FILE *yyget_out (void );
 
 void yyset_out  (FILE * out_str  );
 
-int yyget_leng (void );
+yy_size_t yyget_leng (void );
 
 char *yyget_text (void );
 
@@ -691,12 +683,7 @@ static int input (void );
 
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
-#ifdef __ia64__
-/* On IA-64, the buffer size is 16k, not 8k */
-#define YY_READ_BUF_SIZE 16384
-#else
 #define YY_READ_BUF_SIZE 8192
-#endif /* __ia64__ */
 #endif
 
 /* Copy whatever the last rule matched to the standard output. */
@@ -704,7 +691,7 @@ static int input (void );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO do { if (fwrite( yytext, yyleng, 1, yyout )) {} } while (0)
+#define ECHO fwrite( yytext, yyleng, 1, yyout )
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -715,7 +702,7 @@ static int input (void );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		size_t n; \
+		yy_size_t n; \
 		for ( n = 0; n < max_size && \
 			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
@@ -797,10 +784,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 62 "scan.ll"
+#line 63 "scan.ll"
 
 
-#line 804 "scan.cc"
+#line 791 "scan.cc"
 
 	if ( !(yy_init) )
 		{
@@ -885,14 +872,14 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 64 "scan.ll"
+#line 65 "scan.ll"
 {
 			   // do nothing: comments discarded
 			 }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 68 "scan.ll"
+#line 69 "scan.ll"
 {
                            // do nothing: whitespace discarded
                          }
@@ -900,7 +887,7 @@ YY_RULE_SETUP
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 72 "scan.ll"
+#line 73 "scan.ll"
 {
                            // just advance the line number then discard newline
                            sourceLineNumber += 1;
@@ -910,7 +897,7 @@ YY_RULE_SETUP
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 78 "scan.ll"
+#line 79 "scan.ll"
 {
                            // just advance the line number then discard newline
                            sourceLineNumber += 1;
@@ -919,21 +906,21 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 84 "scan.ll"
+#line 85 "scan.ll"
 {
 			   yylval.value = a2int(yytext+7);
 			   return token(NATIVE);
 			 }
 	YY_BREAK
 case 6:
-#line 90 "scan.ll"
-case 7:
 #line 91 "scan.ll"
-case 8:
+case 7:
 #line 92 "scan.ll"
+case 8:
+#line 93 "scan.ll"
 case 9:
 YY_RULE_SETUP
-#line 92 "scan.ll"
+#line 93 "scan.ll"
 {
                            yylval.float_value = a2float(yytext);
                            return token(FLOAT_LITERAL);
@@ -941,7 +928,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 97 "scan.ll"
+#line 98 "scan.ll"
 {
                            yylval.value = a2int(yytext);
                            return token(INTEGER_LITERAL);
@@ -949,102 +936,102 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 102 "scan.ll"
+#line 103 "scan.ll"
 {
                            return token(SYNCHRONIZED);
                          }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 106 "scan.ll"
+#line 107 "scan.ll"
 {
                            return token(NULL_LITERAL);
                          }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 110 "scan.ll"
+#line 111 "scan.ll"
 {
                            return token(MAIN);
                          }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 114 "scan.ll"
+#line 115 "scan.ll"
 {
                            return token(CLASS);
                          }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 118 "scan.ll"
+#line 119 "scan.ll"
 {
 			   return token(OPERATOR);
 			 }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 122 "scan.ll"
+#line 123 "scan.ll"
 {
                            return token(EXTENDS);
                          }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 126 "scan.ll"
+#line 127 "scan.ll"
 {
                            return token(THIS);
                          }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 130 "scan.ll"
+#line 131 "scan.ll"
 {
                            return token(SUPER);
                          }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 134 "scan.ll"
+#line 135 "scan.ll"
 {
                            return token(IF);
                          }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 138 "scan.ll"
+#line 139 "scan.ll"
 {
                            return token(ELSE);
                          }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 142 "scan.ll"
+#line 143 "scan.ll"
 {
                            return token(FOR);
                          }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 146 "scan.ll"
+#line 147 "scan.ll"
 {
                            return token(WHILE);
                          }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 150 "scan.ll"
+#line 151 "scan.ll"
 {
                            return token(INSTANCEOF_OP);
                          }
 	YY_BREAK
 case 24:
-#line 155 "scan.ll"
-case 25:
 #line 156 "scan.ll"
+case 25:
+#line 157 "scan.ll"
 case 26:
 YY_RULE_SETUP
-#line 156 "scan.ll"
+#line 157 "scan.ll"
 {
 			   yylval.str = stashStringLiteral(yytext);
 			   return token(STRING_LITERAL);
@@ -1052,49 +1039,49 @@ YY_RULE_SETUP
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 161 "scan.ll"
+#line 162 "scan.ll"
 {
                            return token(NEW);
                          }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 165 "scan.ll"
+#line 166 "scan.ll"
 {
                            return token(RETURN);
                          }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 169 "scan.ll"
+#line 170 "scan.ll"
 {
                            return token(OUT);
                          }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 173 "scan.ll"
+#line 174 "scan.ll"
 {
                            return token(BREAK);
                          }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 177 "scan.ll"
+#line 178 "scan.ll"
 {
                            return token(CONTINUE);
                          }			 			 
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 181 "scan.ll"
+#line 182 "scan.ll"
 {
 			   return token(IN);
 			 }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 185 "scan.ll"
+#line 186 "scan.ll"
 {
                            yylval.str = stashIdentifier(yytext);
                            return token(IDENTIFIER);
@@ -1102,63 +1089,63 @@ YY_RULE_SETUP
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 190 "scan.ll"
+#line 191 "scan.ll"
 {
                            return token('{');
                          }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 194 "scan.ll"
+#line 195 "scan.ll"
 {
                            return token('}');
                          }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 198 "scan.ll"
+#line 199 "scan.ll"
 {
                            return token('(');
                          }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 202 "scan.ll"
+#line 203 "scan.ll"
 {
                            return token(')');
                          }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 206 "scan.ll"
+#line 207 "scan.ll"
 {
                            return token(';');
                          }			 
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 210 "scan.ll"
+#line 211 "scan.ll"
 {
                            return token(BOOL_AND);
                          }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 214 "scan.ll"
+#line 215 "scan.ll"
 {
                            return token(BOOL_OR);
                          }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 218 "scan.ll"
+#line 219 "scan.ll"
 {
                            return token(EQ_OP);
                          }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 222 "scan.ll"
+#line 223 "scan.ll"
 {
 			   yylval.str = stringPool->getOpString("!");
                            return token(NE_OP);
@@ -1166,7 +1153,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 227 "scan.ll"
+#line 228 "scan.ll"
 {
 			   yylval.str = stringPool->getOpString(yytext);
 			   return token(GE_OP);
@@ -1174,7 +1161,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 232 "scan.ll"
+#line 233 "scan.ll"
 {
 			   yylval.str = stringPool->getOpString(yytext);
 			   return token(LE_OP);
@@ -1182,7 +1169,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 237 "scan.ll"
+#line 238 "scan.ll"
 {
 			   yylval.str = stringPool->getOpString(yytext);
 			   return token('>');
@@ -1190,7 +1177,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 242 "scan.ll"
+#line 243 "scan.ll"
 {
 			   yylval.str = stringPool->getOpString(yytext);
 			   return token('<');
@@ -1198,28 +1185,28 @@ YY_RULE_SETUP
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 247 "scan.ll"
+#line 248 "scan.ll"
 {
 			   return token('=');
 			 }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 251 "scan.ll"
+#line 252 "scan.ll"
 {
                            return token('~');
                          }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 255 "scan.ll"
+#line 256 "scan.ll"
 {
                            return token(',');
                          }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 259 "scan.ll"
+#line 260 "scan.ll"
 {
 			   yylval.str = stringPool->getOpString(yytext);
 			   return token('+');
@@ -1227,7 +1214,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 264 "scan.ll"
+#line 265 "scan.ll"
 {
 			   yylval.str = stringPool->getOpString(yytext);
 			   return token('-');
@@ -1235,7 +1222,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 269 "scan.ll"
+#line 270 "scan.ll"
 {
 			   yylval.str = stringPool->getOpString(yytext);
 			   return token('*');
@@ -1243,7 +1230,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 274 "scan.ll"
+#line 275 "scan.ll"
 {
 			   yylval.str = stringPool->getOpString(yytext);
 			   return token('/');
@@ -1251,7 +1238,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 279 "scan.ll"
+#line 280 "scan.ll"
 {
 			   yylval.str = stringPool->getOpString(yytext);
 			   return token('!');
@@ -1259,24 +1246,24 @@ YY_RULE_SETUP
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 284 "scan.ll"
+#line 285 "scan.ll"
 {
 			   return token('.');
 			 }			 			 			 
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 288 "scan.ll"
+#line 289 "scan.ll"
 {
                            return token(BAD);
                          }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 292 "scan.ll"
+#line 293 "scan.ll"
 ECHO;
 	YY_BREAK
-#line 1280 "scan.cc"
+#line 1267 "scan.cc"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1462,7 +1449,7 @@ static int yy_get_next_buffer (void)
 
 	else
 		{
-			int num_to_read =
+			yy_size_t num_to_read =
 			YY_CURRENT_BUFFER_LVALUE->yy_buf_size - number_to_move - 1;
 
 		while ( num_to_read <= 0 )
@@ -1476,7 +1463,7 @@ static int yy_get_next_buffer (void)
 
 			if ( b->yy_is_our_buffer )
 				{
-				int new_size = b->yy_buf_size * 2;
+				yy_size_t new_size = b->yy_buf_size * 2;
 
 				if ( new_size <= 0 )
 					b->yy_buf_size += b->yy_buf_size / 8;
@@ -1507,7 +1494,7 @@ static int yy_get_next_buffer (void)
 
 		/* Read in more data. */
 		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-			(yy_n_chars), (size_t) num_to_read );
+			(yy_n_chars), num_to_read );
 
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
 		}
@@ -1629,7 +1616,7 @@ static int yy_get_next_buffer (void)
 
 		else
 			{ /* need more input */
-			int offset = (yy_c_buf_p) - (yytext_ptr);
+			yy_size_t offset = (yy_c_buf_p) - (yytext_ptr);
 			++(yy_c_buf_p);
 
 			switch ( yy_get_next_buffer(  ) )
@@ -1653,7 +1640,7 @@ static int yy_get_next_buffer (void)
 				case EOB_ACT_END_OF_FILE:
 					{
 					if ( yywrap( ) )
-						return EOF;
+						return 0;
 
 					if ( ! (yy_did_buffer_switch_on_eof) )
 						YY_NEW_FILE;
@@ -1905,7 +1892,7 @@ void yypop_buffer_state (void)
  */
 static void yyensure_buffer_stack (void)
 {
-	int num_to_alloc;
+	yy_size_t num_to_alloc;
     
 	if (!(yy_buffer_stack)) {
 
@@ -1997,17 +1984,16 @@ YY_BUFFER_STATE yy_scan_string (yyconst char * yystr )
 
 /** Setup the input buffer state to scan the given bytes. The next call to yylex() will
  * scan from a @e copy of @a bytes.
- * @param yybytes the byte buffer to scan
- * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
+ * @param bytes the byte buffer to scan
+ * @param len the number of bytes in the buffer pointed to by @a bytes.
  * 
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE yy_scan_bytes  (yyconst char * yybytes, int  _yybytes_len )
+YY_BUFFER_STATE yy_scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_len )
 {
 	YY_BUFFER_STATE b;
 	char *buf;
-	yy_size_t n;
-	int i;
+	yy_size_t n, i;
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
 	n = _yybytes_len + 2;
@@ -2089,7 +2075,7 @@ FILE *yyget_out  (void)
 /** Get the length of the current token.
  * 
  */
-int yyget_leng  (void)
+yy_size_t yyget_leng  (void)
 {
         return yyleng;
 }
@@ -2237,7 +2223,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 292 "scan.ll"
+#line 293 "scan.ll"
 
 
 
@@ -2340,7 +2326,7 @@ static string * stashStringLiteral(char *str)
 // provide the AST routines access to the line number
 int getCurrentSourceLineNumber()
 {
-  return sourceLineNumber;
+  return sourceLineNumber - predefinedLines;
 }
 
 // following supports the stand-alone scanner program: lexdbg

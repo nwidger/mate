@@ -2,8 +2,8 @@ AUTOMAKE_OPTIONS = foreign
 bin_PROGRAMS = mc
 man_MANS = mc.1
 
-CFLAGS = -Wall
-CXXFLAGS = -Wall
+CFLAGS = -Wall -DDATA_PATH=\"$(pkgdatadir)\"
+CXXFLAGS = -Wall -DDATA_PATH=\"$(pkgdatadir)\"
 
 if OPTIMIZE1
 CFLAGS += -O1

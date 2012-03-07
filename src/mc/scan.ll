@@ -1,7 +1,7 @@
 %{
 
 // Niels Widger
-// Time-stamp: <12 May 2011 at 15:45:13 by nwidger on macros.local>
+// Time-stamp: <06 Mar 2012 at 19:01:20 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -33,6 +33,7 @@ static string * stashStringLiteral(char *);
 extern StringPool * stringPool;
 extern bool err;
 extern int yyparse();
+extern int predefinedLines;
 
 // scanner tracks the current line number
 static int sourceLineNumber = 1;
@@ -390,7 +391,7 @@ static string * stashStringLiteral(char *str)
 // provide the AST routines access to the line number
 int getCurrentSourceLineNumber()
 {
-  return sourceLineNumber;
+  return sourceLineNumber - predefinedLines;
 }
 
 // following supports the stand-alone scanner program: lexdbg

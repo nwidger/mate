@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PREDEFINED="/usr/local/share/doc/mate/predefined_classes.m"
+PREDEFINED=""
 GENERATE_ASSEMBLER=0
 GENERATE_SYMBOL_TABLE=0
 INPUT=""
@@ -12,8 +12,7 @@ function usage() {
     echo "-h       Print this help message and exit"
     echo "-s       Generate symbol table"
     echo "-S       Generate assembler output"
-    echo "-p FILE  Specify location of predefined classes file"
-    echo "         Default is '/usr/local/share/doc/mate/predefined_classes.m'"
+    echo "-p FILE  Specify alternate location of predefined classes file"
 }
 
 # parse arguments
@@ -88,22 +87,13 @@ fi
 
 TEMP=/tmp/mate-$RANDOM
 
-if [ ! -r $PREDEFINED ];
+if [ "$PREDEFINED" != "" ];
 then
-    mc < $INPUT > $TEMP
+    mc -p "$PREDEFINED" < $INPUT > $TEMP
     RETVAL=$?
 else
-    # cat $PREDEFINED $INPUT | mc > $TEMP
-
-    PREDEFINED_LINES=$(wc -l $PREDEFINED | awk '{ print $1 }')
-    STR='s{([^:]+): (\d+): (.*)}{$1 . ": " . ($2-'
-    STR+="$PREDEFINED_LINES"
-    STR+=') . ": " . $3}e'
-    TEMP2=/tmp/mate-$RANDOM
-    cat $PREDEFINED $INPUT | mc > $TEMP 2> $TEMP2
+    mc < $INPUT > $TEMP
     RETVAL=$?
-    perl -pe "$STR" $TEMP2
-    rm -rf $TEMP2
 fi
 
 # abort if compile stage failed

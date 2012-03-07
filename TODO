@@ -3,50 +3,37 @@
 #+STARTUP: hidestars
 #
 # Niels Widger
-# Time-stamp: <07 Jan 2012 at 16:16:32 by nwidger on macros.local>
+# Time-stamp: <01 Feb 2012 at 21:37:04 by nwidger on macros.local>
 
 * mc
 * mas
 * mvm
-** thread creation
-*** creating thread
-*** new thread
-*** barrier
-** thread destruction
-*** 
 * mdb
 * spec
 * general
 
-* state transitions
-** created_state (START)
-*** GOTO: running_state UPON: turn in serial mode
-** running_state
-*** GOTO: blocking_state UPON: end of current mode
-*** GOTO: destroyed_state UPON: thread done executing
-** blocking_state
-*** 
-** waiting_state
-** destroyed_state (END)
+* evaluation
+** quantum sizes: 1000, 5000 and 10000
+** full and reduced serial mode
+** ownership table granularity - 1, 5 and 10 depth
 
+1,000 instruction quantum, full serial mode, 1 ownership table depth	 = -p -Q1000 -g1
+1,000 instruction quantum, full serial mode, 5 ownership table depth	 = -p -Q1000 -g5
+1,000 instruction quantum, full serial mode, 10 ownership table depth	 = -p -Q1000 -g10
+1,000 instruction quantum, reduced serial mode, 1 ownership table depth	 = -pr -Q1000 -g1
+1,000 instruction quantum, reduced serial mode, 5 ownership table depth	 = -pr -Q1000 -g5
+1,000 instruction quantum, reduced serial mode, 10 ownership table depth = -pr -Q1000 -g10
 
-* thread creation
-** thread X has been instantiated, thread Y calls 'start' method
-** need to add thread to thread set deterministically to ensure
-   thread order in serial mode is deterministic
-** if in parallel mode
-*** thread Y blocks until its serial turn
-** add thread X to end of thread set
-* thread start
-** 'start' method has been called on thread X by thread Y
-** thread X blocks until start of its serial turn
-* thread destruction
-** thread X has executed all of its instructions and wishes to
-   terminate
-** if in parallel mode
-*** thread X blocks until its serial turn
-** thread X blocks until parallel mode
-** thread X removes itself from the thread set
-* thread join
-** thread X wishes to wait until thread Y has finished executing
-** until thread Y is destroyed, block for next mode
+5,000 instruction quantum, full serial mode, 1 ownership table depth     = -p -Q5000 -g1	 
+5,000 instruction quantum, full serial mode, 5 ownership table depth	 = -p -Q5000 -g5	
+5,000 instruction quantum, full serial mode, 10 ownership table depth	 = -p -Q5000 -g10
+5,000 instruction quantum, reduced serial mode, 1 ownership table depth	 = -pr -Q5000 -g1
+5,000 instruction quantum, reduced serial mode, 5 ownership table depth	 = -pr -Q5000 -g5
+5,000 instruction quantum, reduced serial mode, 10 ownership table depth = -pr -Q5000 -g10
+
+10,000 instruction quantum, full serial mode, 1 ownership table depth     = -p -Q10000 -g1	
+10,000 instruction quantum, full serial mode, 5 ownership table depth	  = -p -Q10000 -g5	
+10,000 instruction quantum, full serial mode, 10 ownership table depth	  = -p -Q10000 -g10
+10,000 instruction quantum, reduced serial mode, 1 ownership table depth  = -pr -Q10000 -g1
+10,000 instruction quantum, reduced serial mode, 5 ownership table depth  = -pr -Q10000 -g5
+10,000 instruction quantum, reduced serial mode, 10 ownership table depth = -pr -Q10000 -g10

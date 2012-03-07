@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <02 Dec 2010 at 13:04:06 by nwidger on macros.local>
+// Time-stamp: <06 Mar 2012 at 18:50:38 by nwidger on macros.local>
 
 #ifndef _GLOBALS_H
 #define _GLOBALS_H
@@ -24,6 +24,7 @@ extern MonitorStack *monitorStack;
 extern Seq *ast;
 
 extern int labelCounter;
+extern int predefinedLines;
 extern int synchronizedCounter;
 extern const char *whileLabel;
 extern const char *label;

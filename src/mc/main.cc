@@ -1,10 +1,11 @@
 // Niels Widger
-// Time-stamp: <02 Dec 2010 at 13:03:29 by nwidger on macros.local>
+// Time-stamp: <06 Mar 2012 at 19:41:03 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
 
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <string>
@@ -22,6 +23,8 @@ using namespace std;
 
 // forward declarations
 extern int yyparse();
+extern FILE *yyin;
+int getInput(char *predefinedFile);
 void usage();
 
 #ifdef YYDEBUG
@@ -37,7 +40,9 @@ MonitorStack *monitorStack;
 Seq *ast;
 
 int labelCounter;
+int predefinedLines;
 int synchronizedCounter;
+const char *predefinedFileDefault = DATA_PATH "/predefined_classes.m";
 const char *whileLabel = "W.";
 const char *label = "L.";
 
@@ -58,16 +63,76 @@ ClassConstructorNode * constructorAnalyzing = 0;
 
 bool err = false;
 
+int getInput(char *predefinedFile) {
+	int n;
+	uint8_t c;
+	FILE *tmp, *predefined;
+
+	predefinedLines = 0;
+
+	if ((predefined = fopen(predefinedFile, "r")) == NULL) {
+		fprintf(stderr, "mc: %s: %s\n", predefinedFile, strerror(errno));
+		return 1;
+	}
+
+	if ((tmp = tmpfile()) == NULL) {
+		perror("mc: tmpfile");
+		return 1;
+	}
+
+	while ((n = fread(&c, sizeof(c), 1, predefined)) > 0) {
+		if (c == '\n') predefinedLines++;
+
+		if (fwrite(&c, sizeof(c), 1, tmp) < 0) {
+			perror("mc: fwrite");
+			return 1;
+		}
+	}
+
+	while ((n = fread(&c, sizeof(c), 1, stdin)) > 0) {
+		if (fwrite(&c, sizeof(c), 1, tmp) < 0) {
+			perror("mc: fwrite");
+			return 1;
+		}
+	}
+
+	if (n < 0) {
+		perror("mc: fread");
+		return 1;
+	}
+
+	if (fflush(yyin) == EOF) {
+		perror("mc: fflush");
+		return 1;
+	}
+
+	if (fseek(tmp, 0, SEEK_SET) < 0) {
+		perror("mc: fseek");
+		return 1;
+	}
+
+	yyin = tmp;
+
+	return 0;
+}
+
 void usage() {
 	fprintf(stderr, "usage: mc [-h] [-before] [-after] [-classes]\n");
 	fprintf(stderr, "Reads maTe source code from stdin and writes maTe assembler to stdout.\n");
 	fprintf(stderr, "  -h        Display this help message and exit.\n");
+	fprintf(stderr, "  -p FILE   Specify alternate location of predefined classes file\n");
+	fprintf(stderr, "            Defaults to \"%s\".\n",
+		predefinedFileDefault);
 	fprintf(stderr, "  -before   Dump the AST before semantic analysis.\n");
 	fprintf(stderr, "  -after    Dump the AST after semantic analysis.\n");
 	fprintf(stderr, "  -classes  Dump the class table after semantic analysis.\n");
 }
 
 int main(int argc, char *argv[]) {
+	char *predefinedFile;
+
+	predefinedFile = (char *)predefinedFileDefault;
+	
 #ifdef YYDEBUG
 	yydebug = 1;
 #endif
@@ -75,6 +140,14 @@ int main(int argc, char *argv[]) {
 		if (strcmp(argv[i], "-h") == 0) {
 			usage();
 			return 0;
+		} else if (strcmp(argv[i], "-p") == 0) {
+			if (i+1 >= argc) {
+				cerr << "mc: No filename argument for -p switch\n";
+				usage();
+				return 0;
+			}
+			
+			predefinedFile = argv[++i];
 		}
 	}
 
@@ -87,7 +160,7 @@ int main(int argc, char *argv[]) {
 	labelCounter = 0;
 	synchronizedCounter = 0;
 
-	if (yyparse() != 0) {
+	if (getInput(predefinedFile) != 0 || yyparse() != 0) {
 		delete ast;
 		delete labelStack;
 		delete monitorStack;

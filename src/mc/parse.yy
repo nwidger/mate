@@ -2,7 +2,7 @@
 
 // Niels Widger
 // CS 712
-// Time-stamp: <12 May 2011 at 19:25:47 by nwidger on macros.local>
+// Time-stamp: <06 Mar 2012 at 19:01:00 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -60,6 +60,8 @@ extern TypeModule *types;
 
 	BlockStatementNode *blockStmnt;
 };
+
+%error-verbose
 
 %expect 1 // suppress if/else conflict message
 

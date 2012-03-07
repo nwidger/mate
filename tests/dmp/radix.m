@@ -457,6 +457,36 @@ class BinaryIntegerTable {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+class Counter extends Thread {
+  Integer i;
+  Integer n;
+  IntegerTable C;
+  TupleTable tary;
+
+  Counter(Integer i, Integer n, IntegerTable C, TupleTable tary) {
+    this.i = i;
+    this.n = n;
+    this.C = C;
+    this.tary = tary;
+  }
+
+  Object run() {
+    return go();
+  }
+
+  Object go() {
+    Integer j, temp1, temp2;
+    
+    for (j = i; j < n; j = j + 1) {
+      temp1 = tary.get(j).masked.toInteger();
+      temp2 = C.get(temp1);
+      C.put(temp1, temp2 + 1);
+    }
+
+    return null;
+  }
+}
+
 class Sort {
   Object doRadixSort(BinaryIntegerTable ary, Integer n, Integer nbits) {
     Integer i;
@@ -470,15 +500,32 @@ class Sort {
     return 0;
   }
 
+  Integer getIndex(Integer masked, IntegerTable C) {
+    Integer k, retval, sum;
+
+    sum = 1;
+    retval = 1;
+    
+    C.firstKey();
+    for (k = C.nextKey(); k != null; k = C.nextKey()) {
+      if (k <= masked) {
+	retval = sum;
+      }
+      
+      sum = sum + C.get(k);
+    }
+
+    return retval;
+  }
+  
   Integer doCountingSort(BinaryIntegerTable ary, Integer n, Integer nbits) {
     Tuple t;
     IntegerTable C;
     TupleTable tary;
-    IntegerTable keys;
     BinaryInteger b1, b2;
-    Integer i, max, temp1, temp2, temp3;
+    Integer i, max, temp1, temp2, temp3, ii;
 
-    if (nbits > 20)
+    if (nbits > 32)
       return 1;
 
     tary = new TupleTable(n);
@@ -486,12 +533,6 @@ class Sort {
     max = 0;
 
     for (i = 0; i < n; i = i + 1) {
-      // tary.get(i).value = ary.get(i);
-      // tary.get(i).masked = ary.get(i).mask(nbits);
-
-      // if (tary.get(i).masked.toInteger() > max)
-      // 	max = tary.get(i).masked.toInteger();
-
       b1 = ary.get(i);
       b2 = b1.mask(nbits);
       tary.put(i, new Tuple(b1, b2));
@@ -504,43 +545,76 @@ class Sort {
 
     C = new IntegerTable(max);
 
-    for (i = 0; i < n; i = i + 1) {
-      // C[tary[i].masked]++;
-      // 
-      // C.put(tary.get(i).masked, C.get(tary.get(i).masked)+1);
+    if (1) {
+      Counter c;
+      Table counters;
+      
+      counters = new Table(10);
 
-      temp1 = tary.get(i).masked.toInteger();
-      temp2 = C.get(temp1);
-      C.put(temp1, temp2 + 1);
-    }
+      for (i = 0; i < n; i = i + 1) {
+	c = new Counter(i, i + 1, new IntegerTable(max), tary);
+	counters.put(i, c);
+      }
 
-    for (i = 1; i < max; i = i + 1) {
-      // C[i] += C[i-1];
-      // 
-      // C.put(i, C.get(i) + C.get(i-1));
+      for (i = 0; i < n; i = i + 1) {
+	c = (Counter)counters.get(i);
+	c.start();
+      }
 
-      temp1 = C.get(i);
-      temp2 = C.get(i-1);
-      C.put(i, temp1 + temp2);
+      for (i = 0; i < n; i = i + 1) {
+	c = (Counter)counters.get(i);
+
+	c.join();
+
+	for (ii = c.i; ii < c.n; ii = ii + 1) {
+	  temp1 = tary.get(ii).masked.toInteger();
+	  temp2 = c.C.get(temp1);
+	  temp3 = C.get(temp1);
+	  C.put(temp1, temp2 + temp3);
+	}
+      }
+    } else {
+      for (i = 0; i < n; i = i + 1) {
+	temp1 = tary.get(i).masked.toInteger();
+	temp2 = C.get(temp1);
+	C.put(temp1, temp2 + 1);
+      }
     }
 
     for (i = n - 1; i >= 0; i = i - 1) {
-      // ary[C[tary[i].masked]-1] = tary[i].value;
-      // C[tary[i].masked-1]--;
-      // 
-      // ary.put(C.get(tary.get(i).masked)-1, tary.get(i).value);
-      // C.put(tary.get(i).masked-1, C.get(tary.get(i).masked-1)-1);
-
       t = tary.get(i);
-      
+
       temp1 = t.masked.toInteger();
-      temp2 = C.get(temp1);
+      temp2 = getIndex(temp1, C);
+
       ary.put(temp2 - 1, t.value);
-      
-      temp1 = t.masked.toInteger();
+
+      temp1 = temp2;
       temp2 = C.get(temp1);
-      C.put(temp1, temp2 - 1);
+
+      if (temp2.equals(0))
+      	C.remove(temp1);
+      else
+      	C.put(temp1, temp2 - 1);
     }
+
+    // for (i = 1; i < max; i = i + 1) {
+    //   temp1 = C.get(i);
+    //   temp2 = C.get(i-1);
+    //   C.put(i, temp1 + temp2);
+    // }
+
+    // for (i = n - 1; i >= 0; i = i - 1) {
+    //   t = tary.get(i);
+      
+    //   temp1 = t.masked.toInteger();
+    //   temp2 = C.get(temp1);
+    //   ary.put(temp2 - 1, t.value);
+      
+    //   temp1 = t.masked.toInteger();
+    //   temp2 = C.get(temp1);
+    //   C.put(temp1, temp2 - 1);
+    // }
 
     return 0;
   }
@@ -584,23 +658,12 @@ Integer main() {
     ary.put(i, temp);
   }
 
-  // PRE-SORT
-  
-  // for (i = 0; i < n; i = i + 1) {
-  //   out ary.get(i).toString();
-  //   out " ";
-  // }
-  //
-  // out newline;
-
   s = new Sort();
 
-  if (s.doRadixSort(ary, n, nbits).equals(1)) {
+  if (s.doCountingSort(ary, n, nbits).equals(1)) {
     out "error!" + newline;
     return 1;
   }
-
-  // POST-SORT
 
   for (i = 0; i < n; i = i + 1) {
     out ary.get(i).toString() + newline;
