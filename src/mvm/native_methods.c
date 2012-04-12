@@ -1,13 +1,15 @@
 /* Niels Widger
- * Time-stamp: <29 Jan 2012 at 14:09:49 by nwidger on macros.local>
+ * Time-stamp: <11 Apr 2012 at 20:47:54 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "class.h"
 #include "class_table.h"
@@ -22,6 +24,7 @@
 #include "native_methods.h"
 #include "object.h"
 #include "operand_stack.h"
+#include "parse.h"
 #include "real.h"
 #include "string.h"
 #include "table.h"
@@ -32,6 +35,19 @@
 #include "dmp.h"
 #include "object_dmp.h"
 #endif
+
+/* extern declarations */
+extern int line;
+extern FILE *yyin;
+extern int yylex();
+extern char *yytext;
+extern int yyparse();
+#ifdef YYDEBUG
+extern int yydebug;
+#endif
+
+/* globals */
+struct native_class *native_classes;
 
 #define SETUP_NATIVE_METHOD()						\
 	struct vm_stack *vm_stack;					\
@@ -1455,256 +1471,206 @@ int native_real_to_string(uint32_t i) {
 	return 0;
 }
 
+/* struct definitions */
+struct native_class {
+        char *name;
+	struct native_method *methods;
+	struct native_class *next;
+};
+
+struct native_method {
+        unsigned long index;
+	char *name;
+	struct native_method *next;
+};
+
+struct native_class * native_class_create(char *n, struct native_method *m, struct native_class *x) {
+        struct native_class *c;
+
+	if ((c = (struct native_class *)malloc(sizeof(struct native_class))) == NULL) {
+	        perror("mvm: malloc");
+		return NULL;
+	}
+
+	c->name = n;
+	c->methods = m;
+	c->next = x;
+
+	return c;
+}
+
+int native_class_set_next(struct native_class *c, struct native_class *x) {
+	if (c == NULL)
+		return 1;
+	
+	c->next = x;
+	return 0;
+}
+
+struct native_method * native_method_create(unsigned long i, char *n, struct native_method *x) {
+        struct native_method *m;
+
+	if ((m = (struct native_method *)malloc(sizeof(struct native_method))) == NULL) {
+	        perror("mvm: malloc");
+		return NULL;
+	}
+
+	m->index = i;
+	m->name = n;
+	m->next = x;
+
+	return m;
+}
+
+int native_method_set_next(struct native_method *c, struct native_method *x) {
+	if (c == NULL)
+		return 1;
+	
+	c->next = x;
+	return 0;
+}
+
 int add_native_methods(struct native_method_array *n) {
-	native_method_array_set(n, OBJECT_CONSTRUCTOR_NATIVE_INDEX,
-				OBJECT_CONSTRUCTOR_NATIVE_NAME,
-				native_object_constructor);
-	native_method_array_set(n, OBJECT_EQUALS_NATIVE_INDEX,
-				OBJECT_EQUALS_NATIVE_NAME,
-				native_object_equals);
-	native_method_array_set(n, OBJECT_HASH_CODE_NATIVE_INDEX,
-				OBJECT_HASH_CODE_NATIVE_NAME,
-				native_object_hash_code);
-	native_method_array_set(n, OBJECT_TO_STRING_NATIVE_INDEX,
-				OBJECT_TO_STRING_NATIVE_NAME,
-				native_object_to_string);
-	native_method_array_set(n, OBJECT_NOTIFY_NATIVE_INDEX,
-				OBJECT_NOTIFY_NATIVE_NAME,
-				native_object_notify);
-	native_method_array_set(n, OBJECT_NOTIFY_ALL_NATIVE_INDEX,
-				OBJECT_NOTIFY_ALL_NATIVE_NAME,
-				native_object_notify_all);
-	native_method_array_set(n, OBJECT_WAIT_NATIVE_INDEX,
-				OBJECT_WAIT_NATIVE_NAME,
-				native_object_wait);
-	native_method_array_set(n, OBJECT_WAIT_INTEGER_NATIVE_INDEX,
-				OBJECT_WAIT_INTEGER_NATIVE_NAME,
-				native_object_wait_integer);
+	FILE *f;
+	int len;
+	char *name;
+	char *predefined_file;
+	struct native_class *c, *pc;
+	struct native_method *m, *pm;
 
-	native_method_array_set(n, INTEGER_CONSTRUCTOR_NATIVE_INDEX,
-				INTEGER_CONSTRUCTOR_NATIVE_NAME,
-				native_integer_constructor);
-	native_method_array_set(n, INTEGER_CONSTRUCTOR_INTEGER_NATIVE_INDEX,
-				INTEGER_CONSTRUCTOR_INTEGER_NATIVE_NAME,
-				native_integer_constructor_integer);
-	native_method_array_set(n, INTEGER_ADD_NATIVE_INDEX,
-				INTEGER_ADD_NATIVE_NAME,
-				native_integer_add);
-	native_method_array_set(n, INTEGER_SUBTRACT_NATIVE_INDEX,
-				INTEGER_SUBTRACT_NATIVE_NAME,
-				native_integer_subtract);
-	native_method_array_set(n, INTEGER_MULTIPLY_NATIVE_INDEX,
-				INTEGER_MULTIPLY_NATIVE_NAME,
-				native_integer_multiply);
-	native_method_array_set(n, INTEGER_DIVIDE_NATIVE_INDEX,
-				INTEGER_DIVIDE_NATIVE_NAME,
-				native_integer_divide);
-	native_method_array_set(n, INTEGER_GREATER_THAN_NATIVE_INDEX,
-				INTEGER_GREATER_THAN_NATIVE_NAME,
-				native_integer_greater_than);
-	native_method_array_set(n, INTEGER_LESS_THAN_NATIVE_INDEX,
-				INTEGER_LESS_THAN_NATIVE_NAME,
-				native_integer_less_than);
-	native_method_array_set(n, INTEGER_GREATER_THAN_EQUAL_NATIVE_INDEX,
-				INTEGER_GREATER_THAN_EQUAL_NATIVE_NAME,
-				native_integer_greater_than);
-	native_method_array_set(n, INTEGER_LESS_THAN_EQUAL_NATIVE_INDEX,
-				INTEGER_LESS_THAN_EQUAL_NATIVE_NAME,
-				native_integer_less_than);
-	native_method_array_set(n, INTEGER_NOT_NATIVE_INDEX,
-				INTEGER_NOT_NATIVE_NAME,
-				native_integer_not);
-	native_method_array_set(n, INTEGER_MINUS_NATIVE_INDEX,
-				INTEGER_MINUS_NATIVE_NAME,
-				native_integer_minus);
-	native_method_array_set(n, INTEGER_ADD_OP_NATIVE_INDEX,
-				INTEGER_ADD_OP_NATIVE_NAME,
-				native_integer_add);
-	native_method_array_set(n, INTEGER_SUBTRACT_OP_NATIVE_INDEX,
-				INTEGER_SUBTRACT_OP_NATIVE_NAME,
-				native_integer_subtract);
-	native_method_array_set(n, INTEGER_MULTIPLY_OP_NATIVE_INDEX,
-				INTEGER_MULTIPLY_OP_NATIVE_NAME,
-				native_integer_multiply);
-	native_method_array_set(n, INTEGER_DIVIDE_OP_NATIVE_INDEX,
-				INTEGER_DIVIDE_OP_NATIVE_NAME,
-				native_integer_divide);
-	native_method_array_set(n, INTEGER_GREATER_THAN_OP_NATIVE_INDEX,
-				INTEGER_GREATER_THAN_OP_NATIVE_NAME,
-				native_integer_greater_than);
-	native_method_array_set(n, INTEGER_LESS_THAN_OP_NATIVE_INDEX,
-				INTEGER_LESS_THAN_OP_NATIVE_NAME,
-				native_integer_less_than);
-	native_method_array_set(n, INTEGER_GREATER_THAN_EQUAL_OP_NATIVE_INDEX,
-				INTEGER_GREATER_THAN_EQUAL_OP_NATIVE_NAME,
-				native_integer_greater_than_equal);
-	native_method_array_set(n, INTEGER_LESS_THAN_EQUAL_OP_NATIVE_INDEX,
-				INTEGER_LESS_THAN_EQUAL_OP_NATIVE_NAME,
-				native_integer_less_than_equal);
-	native_method_array_set(n, INTEGER_NOT_OP_NATIVE_INDEX,
-				INTEGER_NOT_OP_NATIVE_NAME,
-				native_integer_not);
-	native_method_array_set(n, INTEGER_MINUS_OP_NATIVE_INDEX,
-				INTEGER_MINUS_OP_NATIVE_NAME,
-				native_integer_minus);
-	native_method_array_set(n, INTEGER_EQUALS_NATIVE_INDEX,
-				INTEGER_EQUALS_NATIVE_NAME,
-				native_integer_equals);
-	native_method_array_set(n, INTEGER_HASH_CODE_NATIVE_INDEX,
-				INTEGER_HASH_CODE_NATIVE_NAME,
-				native_integer_hash_code);
-	native_method_array_set(n, INTEGER_TO_STRING_NATIVE_INDEX,
-				INTEGER_TO_STRING_NATIVE_NAME,
-				native_integer_to_string);
+	predefined_file = DATA_PATH "/predefined_classes.m";
 
-	native_method_array_set(n, STRING_CONSTRUCTOR_STRING_NATIVE_INDEX,
-				STRING_CONSTRUCTOR_STRING_NATIVE_NAME,
-				native_string_constructor_string);
-	native_method_array_set(n, STRING_LENGTH_NATIVE_INDEX,
-				STRING_LENGTH_NATIVE_NAME,
-				native_string_length);
-	native_method_array_set(n, STRING_SUBSTR_NATIVE_INDEX,
-				STRING_SUBSTR_NATIVE_NAME,
-				native_string_substr);
-	native_method_array_set(n, STRING_TO_INTEGER_NATIVE_INDEX,
-				STRING_TO_INTEGER_NATIVE_NAME,
-				native_string_to_integer);
-	native_method_array_set(n, STRING_CONCAT_NATIVE_INDEX,
-				STRING_CONCAT_NATIVE_NAME,
-				native_string_concat);
-	native_method_array_set(n, STRING_GREATER_THAN_NATIVE_INDEX,
-				STRING_GREATER_THAN_NATIVE_NAME,
-				native_string_greater_than);
-	native_method_array_set(n, STRING_LESS_THAN_NATIVE_INDEX,
-				STRING_LESS_THAN_NATIVE_NAME,
-				native_string_less_than);
-	native_method_array_set(n, STRING_HASH_CODE_NATIVE_INDEX,
-				STRING_HASH_CODE_NATIVE_NAME,
-				native_string_hash_code);
-	native_method_array_set(n, STRING_EQUALS_NATIVE_INDEX,
-				STRING_EQUALS_NATIVE_NAME,
-				native_string_equals);
-	native_method_array_set(n, STRING_TO_STRING_NATIVE_INDEX,
-				STRING_TO_STRING_NATIVE_NAME,
-				native_string_to_string);
-	native_method_array_set(n, STRING_CONCAT_OP_NATIVE_INDEX,
-				STRING_CONCAT_OP_NATIVE_NAME,
-				native_string_concat);
+	if ((f = fopen(predefined_file, "r")) == NULL) {
+		fprintf(stderr, "mvm: %s: %s\n", predefined_file, strerror(errno));
+		return 1;
+	}
 
-	native_method_array_set(n, TABLE_CONSTRUCTOR_NATIVE_INDEX,
-				TABLE_CONSTRUCTOR_NATIVE_NAME,
-				native_table_constructor);
-	native_method_array_set(n, TABLE_CONSTRUCTOR_INTEGER_NATIVE_INDEX,
-				TABLE_CONSTRUCTOR_INTEGER_NATIVE_NAME,
-				native_table_constructor_integer);
-	native_method_array_set(n, TABLE_GET_NATIVE_INDEX,
-				TABLE_GET_NATIVE_NAME,
-				native_table_get);
-	native_method_array_set(n, TABLE_PUT_NATIVE_INDEX,
-				TABLE_PUT_NATIVE_NAME,
-				native_table_put);
-	native_method_array_set(n, TABLE_REMOVE_NATIVE_INDEX,
-				TABLE_REMOVE_NATIVE_NAME,
-				native_table_remove);
-	native_method_array_set(n, TABLE_FIRST_KEY_NATIVE_INDEX,
-				TABLE_FIRST_KEY_NATIVE_NAME,
-				native_table_first_key);
-	native_method_array_set(n,
-				TABLE_NEXT_KEY_NATIVE_INDEX,
-				TABLE_NEXT_KEY_NATIVE_NAME,
-				native_table_next_key);
+	yyin = f;
+	
+	if (yyparse() != 0)
+		return 0;
 
-	native_method_array_set(n, THREAD_CONSTRUCTOR_NATIVE_INDEX,
-				THREAD_CONSTRUCTOR_NATIVE_NAME,
-				native_thread_constructor);
-	native_method_array_set(n, THREAD_START_NATIVE_INDEX,
-				THREAD_START_NATIVE_NAME,
-				native_thread_start);
-	native_method_array_set(n, THREAD_RUN_NATIVE_INDEX,
-				THREAD_RUN_NATIVE_NAME,
-				native_thread_run);
-	native_method_array_set(n, THREAD_JOIN_NATIVE_INDEX,
-				THREAD_JOIN_NATIVE_NAME,
-				native_thread_join);
-	native_method_array_set(n, THREAD_SLEEP_NATIVE_INDEX,
-				THREAD_SLEEP_NATIVE_NAME,
-				native_thread_sleep);
+	fclose(f);
 
-	native_method_array_set(n, REAL_CONSTRUCTOR_NATIVE_INDEX,
-				REAL_CONSTRUCTOR_NATIVE_NAME,
-				native_real_constructor);
-	native_method_array_set(n, REAL_CONSTRUCTOR_REAL_NATIVE_INDEX,
-				REAL_CONSTRUCTOR_REAL_NATIVE_NAME,
-				native_real_constructor_real);
-	native_method_array_set(n, REAL_ADD_NATIVE_INDEX,
-				REAL_ADD_NATIVE_NAME,
-				native_real_add);
-	native_method_array_set(n, REAL_SUBTRACT_NATIVE_INDEX,
-				REAL_SUBTRACT_NATIVE_NAME,
-				native_real_subtract);
-	native_method_array_set(n, REAL_MULTIPLY_NATIVE_INDEX,
-				REAL_MULTIPLY_NATIVE_NAME,
-				native_real_multiply);
-	native_method_array_set(n, REAL_DIVIDE_NATIVE_INDEX,
-				REAL_DIVIDE_NATIVE_NAME,
-				native_real_divide);
-	native_method_array_set(n, REAL_GREATER_THAN_NATIVE_INDEX,
-				REAL_GREATER_THAN_NATIVE_NAME,
-				native_real_greater_than);
-	native_method_array_set(n, REAL_LESS_THAN_NATIVE_INDEX,
-				REAL_LESS_THAN_NATIVE_NAME,
-				native_real_less_than);
-	native_method_array_set(n, REAL_GREATER_THAN_EQUAL_NATIVE_INDEX,
-				REAL_GREATER_THAN_EQUAL_NATIVE_NAME,
-				native_real_greater_than);
-	native_method_array_set(n, REAL_LESS_THAN_EQUAL_NATIVE_INDEX,
-				REAL_LESS_THAN_EQUAL_NATIVE_NAME,
-				native_real_less_than);
-	native_method_array_set(n, REAL_NOT_NATIVE_INDEX,
-				REAL_NOT_NATIVE_NAME,
-				native_real_not);
-	native_method_array_set(n, REAL_MINUS_NATIVE_INDEX,
-				REAL_MINUS_NATIVE_NAME,
-				native_real_minus);
-	native_method_array_set(n, REAL_ADD_OP_NATIVE_INDEX,
-				REAL_ADD_OP_NATIVE_NAME,
-				native_real_add);
-	native_method_array_set(n, REAL_SUBTRACT_OP_NATIVE_INDEX,
-				REAL_SUBTRACT_OP_NATIVE_NAME,
-				native_real_subtract);
-	native_method_array_set(n, REAL_MULTIPLY_OP_NATIVE_INDEX,
-				REAL_MULTIPLY_OP_NATIVE_NAME,
-				native_real_multiply);
-	native_method_array_set(n, REAL_DIVIDE_OP_NATIVE_INDEX,
-				REAL_DIVIDE_OP_NATIVE_NAME,
-				native_real_divide);
-	native_method_array_set(n, REAL_GREATER_THAN_OP_NATIVE_INDEX,
-				REAL_GREATER_THAN_OP_NATIVE_NAME,
-				native_real_greater_than);
-	native_method_array_set(n, REAL_LESS_THAN_OP_NATIVE_INDEX,
-				REAL_LESS_THAN_OP_NATIVE_NAME,
-				native_real_less_than);
-	native_method_array_set(n, REAL_GREATER_THAN_EQUAL_OP_NATIVE_INDEX,
-				REAL_GREATER_THAN_EQUAL_OP_NATIVE_NAME,
-				native_real_greater_than_equal);
-	native_method_array_set(n, REAL_LESS_THAN_EQUAL_OP_NATIVE_INDEX,
-				REAL_LESS_THAN_EQUAL_OP_NATIVE_NAME,
-				native_real_less_than_equal);	
-	native_method_array_set(n, REAL_NOT_OP_NATIVE_INDEX,
-				REAL_NOT_OP_NATIVE_NAME,
-				native_real_not);
-	native_method_array_set(n, REAL_MINUS_OP_NATIVE_INDEX,
-				REAL_MINUS_OP_NATIVE_NAME,
-				native_real_minus);
-	native_method_array_set(n, REAL_EQUALS_NATIVE_INDEX,
-				REAL_EQUALS_NATIVE_NAME,
-				native_real_equals);
-	native_method_array_set(n, REAL_HASH_CODE_NATIVE_INDEX,
-				REAL_HASH_CODE_NATIVE_NAME,
-				native_real_hash_code);
-	native_method_array_set(n, REAL_TO_STRING_NATIVE_INDEX,
-				REAL_TO_STRING_NATIVE_NAME,
-				native_real_to_string);
+	c = native_classes;
+	while (c != NULL) {
+		m = c->methods;
+		while (m != NULL) {
+			if (strncmp(m->name+strlen(c->name), "_constructor",
+				    strlen("_constructor")) != 0) {
+				len = strlen(c->name)+strlen("$")+strlen(m->name);
+
+				name = malloc(sizeof(char)*(len+2));
+				name[0] = '\0';
+
+				strcat(name, c->name);
+				strcat(name, "$");
+				strcat(name, m->name);
+
+				free(m->name);
+				m->name = name;
+			}
+			
+			native_method_array_set(n, m->index, m->name);
+
+			pm = m;
+			m = m->next;
+			free(pm->name);
+			free(pm);
+		}
+
+		pc = c;
+		c = c->next;
+		free(pc->name);
+		free(pc);
+	}
+	
+	native_method_array_set_method(n, OBJECT_CONSTRUCTOR_NATIVE_INDEX, native_object_constructor);
+	native_method_array_set_method(n, OBJECT_EQUALS_NATIVE_INDEX, native_object_equals);
+	native_method_array_set_method(n, OBJECT_HASH_CODE_NATIVE_INDEX, native_object_hash_code);
+	native_method_array_set_method(n, OBJECT_TO_STRING_NATIVE_INDEX, native_object_to_string);
+	native_method_array_set_method(n, OBJECT_NOTIFY_NATIVE_INDEX, native_object_notify);
+	native_method_array_set_method(n, OBJECT_NOTIFY_ALL_NATIVE_INDEX, native_object_notify_all);
+	native_method_array_set_method(n, OBJECT_WAIT_NATIVE_INDEX, native_object_wait);
+	native_method_array_set_method(n, OBJECT_WAIT_INTEGER_NATIVE_INDEX, native_object_wait_integer);
+
+	native_method_array_set_method(n, INTEGER_CONSTRUCTOR_NATIVE_INDEX, native_integer_constructor);
+	native_method_array_set_method(n, INTEGER_CONSTRUCTOR_INTEGER_NATIVE_INDEX, native_integer_constructor_integer);
+	native_method_array_set_method(n, INTEGER_ADD_NATIVE_INDEX, native_integer_add);
+	native_method_array_set_method(n, INTEGER_SUBTRACT_NATIVE_INDEX, native_integer_subtract);
+	native_method_array_set_method(n, INTEGER_MULTIPLY_NATIVE_INDEX, native_integer_multiply);
+	native_method_array_set_method(n, INTEGER_DIVIDE_NATIVE_INDEX, native_integer_divide);
+	native_method_array_set_method(n, INTEGER_GREATER_THAN_NATIVE_INDEX, native_integer_greater_than);
+	native_method_array_set_method(n, INTEGER_LESS_THAN_NATIVE_INDEX, native_integer_less_than);
+	native_method_array_set_method(n, INTEGER_GREATER_THAN_EQUAL_NATIVE_INDEX, native_integer_greater_than);
+	native_method_array_set_method(n, INTEGER_LESS_THAN_EQUAL_NATIVE_INDEX, native_integer_less_than);
+	native_method_array_set_method(n, INTEGER_NOT_NATIVE_INDEX, native_integer_not);
+	native_method_array_set_method(n, INTEGER_MINUS_NATIVE_INDEX, native_integer_minus);
+	native_method_array_set_method(n, INTEGER_ADD_OP_NATIVE_INDEX, native_integer_add);
+	native_method_array_set_method(n, INTEGER_SUBTRACT_OP_NATIVE_INDEX, native_integer_subtract);
+	native_method_array_set_method(n, INTEGER_MULTIPLY_OP_NATIVE_INDEX, native_integer_multiply);
+	native_method_array_set_method(n, INTEGER_DIVIDE_OP_NATIVE_INDEX, native_integer_divide);
+	native_method_array_set_method(n, INTEGER_GREATER_THAN_OP_NATIVE_INDEX, native_integer_greater_than);
+	native_method_array_set_method(n, INTEGER_LESS_THAN_OP_NATIVE_INDEX, native_integer_less_than);
+	native_method_array_set_method(n, INTEGER_GREATER_THAN_EQUAL_OP_NATIVE_INDEX, native_integer_greater_than_equal);
+	native_method_array_set_method(n, INTEGER_LESS_THAN_EQUAL_OP_NATIVE_INDEX, native_integer_less_than_equal);
+	native_method_array_set_method(n, INTEGER_NOT_OP_NATIVE_INDEX, native_integer_not);
+	native_method_array_set_method(n, INTEGER_MINUS_OP_NATIVE_INDEX, native_integer_minus);
+	native_method_array_set_method(n, INTEGER_EQUALS_NATIVE_INDEX, native_integer_equals);
+	native_method_array_set_method(n, INTEGER_HASH_CODE_NATIVE_INDEX, native_integer_hash_code);
+	native_method_array_set_method(n, INTEGER_TO_STRING_NATIVE_INDEX, native_integer_to_string);
+
+	native_method_array_set_method(n, STRING_CONSTRUCTOR_STRING_NATIVE_INDEX, native_string_constructor_string);
+	native_method_array_set_method(n, STRING_LENGTH_NATIVE_INDEX, native_string_length);
+	native_method_array_set_method(n, STRING_SUBSTR_NATIVE_INDEX, native_string_substr);
+	native_method_array_set_method(n, STRING_TO_INTEGER_NATIVE_INDEX, native_string_to_integer);
+	native_method_array_set_method(n, STRING_CONCAT_NATIVE_INDEX, native_string_concat);
+	native_method_array_set_method(n, STRING_GREATER_THAN_NATIVE_INDEX, native_string_greater_than);
+	native_method_array_set_method(n, STRING_LESS_THAN_NATIVE_INDEX, native_string_less_than);
+	native_method_array_set_method(n, STRING_HASH_CODE_NATIVE_INDEX, native_string_hash_code);
+	native_method_array_set_method(n, STRING_EQUALS_NATIVE_INDEX, native_string_equals);
+	native_method_array_set_method(n, STRING_TO_STRING_NATIVE_INDEX, native_string_to_string);
+	native_method_array_set_method(n, STRING_CONCAT_OP_NATIVE_INDEX, native_string_concat);
+
+	native_method_array_set_method(n, TABLE_CONSTRUCTOR_NATIVE_INDEX, native_table_constructor);
+	native_method_array_set_method(n, TABLE_CONSTRUCTOR_INTEGER_NATIVE_INDEX, native_table_constructor_integer);
+	native_method_array_set_method(n, TABLE_GET_NATIVE_INDEX, native_table_get);
+	native_method_array_set_method(n, TABLE_PUT_NATIVE_INDEX, native_table_put);
+	native_method_array_set_method(n, TABLE_REMOVE_NATIVE_INDEX, native_table_remove);
+	native_method_array_set_method(n, TABLE_FIRST_KEY_NATIVE_INDEX, native_table_first_key);
+	native_method_array_set_method(n, TABLE_NEXT_KEY_NATIVE_INDEX, native_table_next_key);
+
+	native_method_array_set_method(n, THREAD_CONSTRUCTOR_NATIVE_INDEX, native_thread_constructor);
+	native_method_array_set_method(n, THREAD_START_NATIVE_INDEX, native_thread_start);
+	native_method_array_set_method(n, THREAD_RUN_NATIVE_INDEX, native_thread_run);
+	native_method_array_set_method(n, THREAD_JOIN_NATIVE_INDEX, native_thread_join);
+	native_method_array_set_method(n, THREAD_SLEEP_NATIVE_INDEX, native_thread_sleep);
+
+	native_method_array_set_method(n, REAL_CONSTRUCTOR_NATIVE_INDEX, native_real_constructor);
+	native_method_array_set_method(n, REAL_CONSTRUCTOR_REAL_NATIVE_INDEX, native_real_constructor_real);
+	native_method_array_set_method(n, REAL_ADD_NATIVE_INDEX, native_real_add);
+	native_method_array_set_method(n, REAL_SUBTRACT_NATIVE_INDEX, native_real_subtract);
+	native_method_array_set_method(n, REAL_MULTIPLY_NATIVE_INDEX, native_real_multiply);
+	native_method_array_set_method(n, REAL_DIVIDE_NATIVE_INDEX, native_real_divide);
+	native_method_array_set_method(n, REAL_GREATER_THAN_NATIVE_INDEX, native_real_greater_than);
+	native_method_array_set_method(n, REAL_LESS_THAN_NATIVE_INDEX, native_real_less_than);
+	native_method_array_set_method(n, REAL_GREATER_THAN_EQUAL_NATIVE_INDEX, native_real_greater_than);
+	native_method_array_set_method(n, REAL_LESS_THAN_EQUAL_NATIVE_INDEX, native_real_less_than);
+	native_method_array_set_method(n, REAL_NOT_NATIVE_INDEX, native_real_not);
+	native_method_array_set_method(n, REAL_MINUS_NATIVE_INDEX, native_real_minus);
+	native_method_array_set_method(n, REAL_ADD_OP_NATIVE_INDEX, native_real_add);
+	native_method_array_set_method(n, REAL_SUBTRACT_OP_NATIVE_INDEX, native_real_subtract);
+	native_method_array_set_method(n, REAL_MULTIPLY_OP_NATIVE_INDEX, native_real_multiply);
+	native_method_array_set_method(n, REAL_DIVIDE_OP_NATIVE_INDEX, native_real_divide);
+	native_method_array_set_method(n, REAL_GREATER_THAN_OP_NATIVE_INDEX, native_real_greater_than);
+	native_method_array_set_method(n, REAL_LESS_THAN_OP_NATIVE_INDEX, native_real_less_than);
+	native_method_array_set_method(n, REAL_GREATER_THAN_EQUAL_OP_NATIVE_INDEX, native_real_greater_than_equal);
+	native_method_array_set_method(n, REAL_LESS_THAN_EQUAL_OP_NATIVE_INDEX, native_real_less_than_equal);	
+	native_method_array_set_method(n, REAL_NOT_OP_NATIVE_INDEX, native_real_not);
+	native_method_array_set_method(n, REAL_MINUS_OP_NATIVE_INDEX, native_real_minus);
+	native_method_array_set_method(n, REAL_EQUALS_NATIVE_INDEX, native_real_equals);
+	native_method_array_set_method(n, REAL_HASH_CODE_NATIVE_INDEX, native_real_hash_code);
+	native_method_array_set_method(n, REAL_TO_STRING_NATIVE_INDEX, native_real_to_string);
 	
 	return 0;
 }

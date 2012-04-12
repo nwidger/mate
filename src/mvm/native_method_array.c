@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Nov 2010 at 22:30:32 by nwidger on macros.local>
+ * Time-stamp: <11 Apr 2012 at 20:18:54 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -73,8 +73,7 @@ void native_method_array_clear(struct native_method_array *n) {
 	}
 }
 
-int native_method_array_set(struct native_method_array *n, int i, char *s,
-			    int (*m)(uint32_t)) {
+int native_method_array_set(struct native_method_array *n, int i, char *s) {
 	if (n == NULL) {
 		fprintf(stderr, "mvm: native method array not initialized!\n");
 		mvm_halt();
@@ -88,8 +87,31 @@ int native_method_array_set(struct native_method_array *n, int i, char *s,
 	if (n->native_methods[i] != NULL)
 		native_method_record_destroy(n->native_methods[i]);
 
-	if ((n->native_methods[i] = native_method_record_create(s, m)) == NULL)
+	if ((n->native_methods[i] = native_method_record_create(s, NULL)) == NULL)
 		mvm_halt();
+
+	return 0;
+}
+
+int native_method_array_set_method(struct native_method_array *n, int i, int (*m)(uint32_t)) {
+	struct native_method_record *r;
+	
+	if (n == NULL) {
+		fprintf(stderr, "mvm: native method array not initialized!\n");
+		mvm_halt();
+	}
+
+	if (i < 0 || i >= n->size) {
+		fprintf(stderr, "mvm: bad native method array index!\n");
+		mvm_halt();
+	}
+
+	if ((r = n->native_methods[i]) == NULL) {
+		fprintf(stderr, "mvm: native method was not set!\n");
+		mvm_halt();
+	}
+
+	r->method = m;
 
 	return 0;
 }

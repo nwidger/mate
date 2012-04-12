@@ -1,11 +1,13 @@
 /* Niels Widger
- * Time-stamp: <10 May 2011 at 20:43:56 by nwidger on macros.local>
+ * Time-stamp: <11 Apr 2012 at 20:40:25 by nwidger on macros.local>
  */
 
 #ifndef _MVM_NATIVEMETHODS_H
 #define _MVM_NATIVEMETHODS_H
 
 #include <inttypes.h>
+
+struct native_method_array;
 
 /* these functions implement each native method of the maTe language */
 
@@ -83,5 +85,15 @@ int native_real_to_string(uint32_t i);
  */
 
 int add_native_methods(struct native_method_array *n);
+
+/* private code used by parse.y */
+struct native_class;
+struct native_method;
+
+struct native_class * native_class_create(char *n, struct native_method *m, struct native_class *x);
+int native_class_set_next(struct native_class *c, struct native_class *x);
+
+struct native_method * native_method_create(unsigned long i, char *n, struct native_method *x);
+int native_method_set_next(struct native_method *c, struct native_method *x);
 
 #endif
