@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <11 Apr 2012 at 20:54:38 by nwidger on macros.local>
+ * Time-stamp: <12 Apr 2012 at 19:48:20 by nwidger on macros.local>
  */
 
 #ifndef _MVM_CONSTANTS_H
@@ -69,9 +69,6 @@
 #define MONITORENTER_NAME "monitorenter"
 #define MONITOREXIT_NAME "monitorexit"
 #define NEWREAL_NAME "newreal"
-
-/* native methods */
-#define NUM_NATIVES 81
 
 /* ref_set constants */
 #define REF_SET_DEFAULT_INITIAL_CAPACITY 300

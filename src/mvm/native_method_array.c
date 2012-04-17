@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <11 Apr 2012 at 20:18:54 by nwidger on macros.local>
+ * Time-stamp: <12 Apr 2012 at 19:43:59 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -93,7 +93,8 @@ int native_method_array_set(struct native_method_array *n, int i, char *s) {
 	return 0;
 }
 
-int native_method_array_set_method(struct native_method_array *n, int i, int (*m)(uint32_t)) {
+int native_method_array_set_method(struct native_method_array *n, char *s, int (*m)(uint32_t)) {
+	int i;
 	struct native_method_record *r;
 	
 	if (n == NULL) {
@@ -101,19 +102,17 @@ int native_method_array_set_method(struct native_method_array *n, int i, int (*m
 		mvm_halt();
 	}
 
-	if (i < 0 || i >= n->size) {
-		fprintf(stderr, "mvm: bad native method array index!\n");
-		mvm_halt();
+	for (i = 0; i < n->size; i++) {
+		r = n->native_methods[i];
+		
+		if (r != NULL && strcmp(r->name, s) == 0) {
+			fprintf(stderr, "index == %d, name == %s\n", i, s);
+			r->method = m;
+			return 0;
+		}
 	}
 
-	if ((r = n->native_methods[i]) == NULL) {
-		fprintf(stderr, "mvm: native method was not set!\n");
-		mvm_halt();
-	}
-
-	r->method = m;
-
-	return 0;
+	return 1;
 }
 
 int native_method_array_execute(struct native_method_array *n, int i) {

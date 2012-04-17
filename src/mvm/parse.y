@@ -1,7 +1,7 @@
 %{
 
 /* Niels Widger
- * Time-stamp: <11 Apr 2012 at 20:47:41 by nwidger on macros.local>
+ * Time-stamp: <12 Apr 2012 at 19:23:12 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -22,7 +22,8 @@ extern int get_current_source_line_number();
 extern int yylex();
 void yyerror(const char *s);
 
-struct native_class *native_classes;
+extern int max_native_index;
+extern struct native_class *native_classes;
 
 %}
 
@@ -154,6 +155,9 @@ ClassBodyDeclaration
 
 	  $$ = native_method_create($1, name, NULL);
 
+	  if ($1 > max_native_index)
+	    max_native_index = $1;
+
 	  free($2);
 	  free($3);
 	}
@@ -180,6 +184,9 @@ ClassBodyDeclaration
 
 	  $$ = native_method_create($1, name, NULL);
 
+	  if ($1 > max_native_index)
+	    max_native_index = $1;
+
 	  free($2);
 	  free($3);
 	  free($4);
@@ -198,6 +205,9 @@ ClassBodyDeclaration
 	  strcat(name, $3);
 
   	  $$ = native_method_create($1, name, NULL);
+
+	  if ($1 > max_native_index)
+	    max_native_index = $1;
 
 	  free($2);
 	  free($3);

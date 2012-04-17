@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <11 Apr 2012 at 20:53:50 by nwidger on macros.local>
+ * Time-stamp: <12 Apr 2012 at 20:00:00 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -47,6 +47,7 @@ extern int yydebug;
 #endif
 
 /* globals */
+int max_native_index = -1;
 struct native_class *native_classes;
 
 #define SETUP_NATIVE_METHOD()						\
@@ -1530,31 +1531,41 @@ int native_method_set_next(struct native_method *c, struct native_method *x) {
 	return 0;
 }
 
-int add_native_methods(struct native_method_array *n) {
+/* return largest native index found in predefined classes file,
+ * or -1 on error */
+int native_methods_parse_predefined_classes_file() {
 	FILE *f;
-	int i, len;
-	char *name;
 	char *predefined_file;
-	struct native_class *c, *pc;
-	struct native_method *m, *pm;
 
 	predefined_file = DATA_PATH "/predefined_classes.m";
 
 	if ((f = fopen(predefined_file, "r")) == NULL) {
 		fprintf(stderr, "mvm: %s: %s\n", predefined_file, strerror(errno));
-		return 1;
+		return -1;
 	}
 
 	yyin = f;
 	
 	if (yyparse() != 0)
-		return 0;
+		return -1;
 
 	fclose(f);
 
+	return max_native_index;
+}
+
+int native_methods_load_predefined_classes_file(struct native_method_array *n) {
+	int len;
+	char *name;
+	struct native_class *c, *pc;
+	struct native_method *m, *pm;
+
 	c = native_classes;
+	
 	while (c != NULL) {
+		
 		m = c->methods;
+		
 		while (m != NULL) {
 			if (strncmp(m->name+strlen(c->name), "_constructor",
 				    strlen("_constructor")) != 0) {
@@ -1585,94 +1596,96 @@ int add_native_methods(struct native_method_array *n) {
 		free(pc);
 	}
 
-	i = 0;
-	
-	native_method_array_set_method(n, i++, native_object_constructor);
-	native_method_array_set_method(n, i++, native_object_equals);
-	native_method_array_set_method(n, i++, native_object_hash_code);
-	native_method_array_set_method(n, i++, native_object_to_string);
-	native_method_array_set_method(n, i++, native_object_notify);
-	native_method_array_set_method(n, i++, native_object_notify_all);
-	native_method_array_set_method(n, i++, native_object_wait);
-	native_method_array_set_method(n, i++, native_object_wait_integer);
+	return 0;
+}
 
-	native_method_array_set_method(n, i++, native_integer_constructor);
-	native_method_array_set_method(n, i++, native_integer_constructor_integer);
-	native_method_array_set_method(n, i++, native_integer_add);
-	native_method_array_set_method(n, i++, native_integer_subtract);
-	native_method_array_set_method(n, i++, native_integer_multiply);
-	native_method_array_set_method(n, i++, native_integer_divide);
-	native_method_array_set_method(n, i++, native_integer_greater_than);
-	native_method_array_set_method(n, i++, native_integer_less_than);
-	native_method_array_set_method(n, i++, native_integer_greater_than);
-	native_method_array_set_method(n, i++, native_integer_less_than);
-	native_method_array_set_method(n, i++, native_integer_not);
-	native_method_array_set_method(n, i++, native_integer_minus);
-	native_method_array_set_method(n, i++, native_integer_add);
-	native_method_array_set_method(n, i++, native_integer_subtract);
-	native_method_array_set_method(n, i++, native_integer_multiply);
-	native_method_array_set_method(n, i++, native_integer_divide);
-	native_method_array_set_method(n, i++, native_integer_greater_than);
-	native_method_array_set_method(n, i++, native_integer_less_than);
-	native_method_array_set_method(n, i++, native_integer_greater_than_equal);
-	native_method_array_set_method(n, i++, native_integer_less_than_equal);
-	native_method_array_set_method(n, i++, native_integer_not);
-	native_method_array_set_method(n, i++, native_integer_minus);
-	native_method_array_set_method(n, i++, native_integer_equals);
-	native_method_array_set_method(n, i++, native_integer_hash_code);
-	native_method_array_set_method(n, i++, native_integer_to_string);
+int add_native_methods(struct native_method_array *n) {
+	native_method_array_set_method(n, "Object_constructor", native_object_constructor);
+	native_method_array_set_method(n, "Object$equals$Object", native_object_equals);
+	native_method_array_set_method(n, "Object$hashCode", native_object_hash_code);
+	native_method_array_set_method(n, "Object$toString", native_object_to_string);
+	native_method_array_set_method(n, "Object$notify", native_object_notify);
+	native_method_array_set_method(n, "Object$notifyAll", native_object_notify_all);
+	native_method_array_set_method(n, "Object$wait", native_object_wait);
+	native_method_array_set_method(n, "Object$wait$Integer", native_object_wait_integer);
 
-	native_method_array_set_method(n, i++, native_string_constructor_string);
-	native_method_array_set_method(n, i++, native_string_length);
-	native_method_array_set_method(n, i++, native_string_substr);
-	native_method_array_set_method(n, i++, native_string_to_integer);
-	native_method_array_set_method(n, i++, native_string_concat);
-	native_method_array_set_method(n, i++, native_string_greater_than);
-	native_method_array_set_method(n, i++, native_string_less_than);
-	native_method_array_set_method(n, i++, native_string_hash_code);
-	native_method_array_set_method(n, i++, native_string_equals);
-	native_method_array_set_method(n, i++, native_string_to_string);
-	native_method_array_set_method(n, i++, native_string_concat);
+	native_method_array_set_method(n, "Integer_constructor", native_integer_constructor);
+	native_method_array_set_method(n, "Integer_constructor$Integer", native_integer_constructor_integer);
+	native_method_array_set_method(n, "Integer$add$Integer", native_integer_add);
+	native_method_array_set_method(n, "Integer$subtract$Integer", native_integer_subtract);
+	native_method_array_set_method(n, "Integer$multiply$Integer", native_integer_multiply);
+	native_method_array_set_method(n, "Integer$divide$Integer", native_integer_divide);
+	native_method_array_set_method(n, "Integer$greaterThan$Integer", native_integer_greater_than);
+	native_method_array_set_method(n, "Integer$lessThan$Integer", native_integer_less_than);
+	native_method_array_set_method(n, "Integer$greaterThanEqual$Integer", native_integer_greater_than_equal);
+	native_method_array_set_method(n, "Integer$lessThanEqual$Integer", native_integer_less_than_equal);
+	native_method_array_set_method(n, "Integer$not", native_integer_not);
+	native_method_array_set_method(n, "Integer$minus", native_integer_minus);
+	native_method_array_set_method(n, "Integer$operator+$Integer", native_integer_add);
+	native_method_array_set_method(n, "Integer$operator-$Integer", native_integer_subtract);
+	native_method_array_set_method(n, "Integer$operator*$Integer", native_integer_multiply);
+	native_method_array_set_method(n, "Integer$operator/$Integer", native_integer_divide);
+	native_method_array_set_method(n, "Integer$operator>$Integer", native_integer_greater_than);
+	native_method_array_set_method(n, "Integer$operator<$Integer", native_integer_less_than);
+	native_method_array_set_method(n, "Integer$operator>=$Integer", native_integer_greater_than_equal);
+	native_method_array_set_method(n, "Integer$operator<=$Integer", native_integer_less_than_equal);
+	native_method_array_set_method(n, "Integer$operator!", native_integer_not);
+	native_method_array_set_method(n, "Integer$operator-", native_integer_minus);
+	native_method_array_set_method(n, "Integer$equals$Object", native_integer_equals);
+	native_method_array_set_method(n, "Integer$hashCode", native_integer_hash_code);
+	native_method_array_set_method(n, "Integer$toString", native_integer_to_string);
 
-	native_method_array_set_method(n, i++, native_table_constructor);
-	native_method_array_set_method(n, i++, native_table_constructor_integer);
-	native_method_array_set_method(n, i++, native_table_get);
-	native_method_array_set_method(n, i++, native_table_put);
-	native_method_array_set_method(n, i++, native_table_remove);
-	native_method_array_set_method(n, i++, native_table_first_key);
-	native_method_array_set_method(n, i++, native_table_next_key);
+	native_method_array_set_method(n, "String_constructor$String", native_string_constructor_string);
+	native_method_array_set_method(n, "String$length", native_string_length);
+	native_method_array_set_method(n, "String$substr$Integer$Integer", native_string_substr);
+	native_method_array_set_method(n, "String$toInteger", native_string_to_integer);
+	native_method_array_set_method(n, "String$concat$String", native_string_concat);
+	native_method_array_set_method(n, "String$operator+$String", native_string_concat);
+	native_method_array_set_method(n, "String$operator>$String", native_string_greater_than);
+	native_method_array_set_method(n, "String$operator<$String", native_string_less_than);
+	native_method_array_set_method(n, "String$hashCode", native_string_hash_code);
+	native_method_array_set_method(n, "String$equals$Object", native_string_equals);
+	native_method_array_set_method(n, "String$toString", native_string_to_string);
 
-	native_method_array_set_method(n, i++, native_thread_constructor);
-	native_method_array_set_method(n, i++, native_thread_start);
-	native_method_array_set_method(n, i++, native_thread_run);
-	native_method_array_set_method(n, i++, native_thread_join);
-	native_method_array_set_method(n, i++, native_thread_sleep);
+	native_method_array_set_method(n, "Table_constructor", native_table_constructor);
+	native_method_array_set_method(n, "Table_constructor$Integer", native_table_constructor_integer);
+	native_method_array_set_method(n, "Table$get$Object", native_table_get);
+	native_method_array_set_method(n, "Table$put$Object$Object", native_table_put);
+	native_method_array_set_method(n, "Table$remove$Object", native_table_remove);
+	native_method_array_set_method(n, "Table$firstKey", native_table_first_key);
+	native_method_array_set_method(n, "Table$nextKey", native_table_next_key);
 
-	native_method_array_set_method(n, i++, native_real_constructor);
-	native_method_array_set_method(n, i++, native_real_constructor_real);
-	native_method_array_set_method(n, i++, native_real_add);
-	native_method_array_set_method(n, i++, native_real_subtract);
-	native_method_array_set_method(n, i++, native_real_multiply);
-	native_method_array_set_method(n, i++, native_real_divide);
-	native_method_array_set_method(n, i++, native_real_greater_than);
-	native_method_array_set_method(n, i++, native_real_less_than);
-	native_method_array_set_method(n, i++, native_real_greater_than);
-	native_method_array_set_method(n, i++, native_real_less_than);
-	native_method_array_set_method(n, i++, native_real_not);
-	native_method_array_set_method(n, i++, native_real_minus);
-	native_method_array_set_method(n, i++, native_real_add);
-	native_method_array_set_method(n, i++, native_real_subtract);
-	native_method_array_set_method(n, i++, native_real_multiply);
-	native_method_array_set_method(n, i++, native_real_divide);
-	native_method_array_set_method(n, i++, native_real_greater_than);
-	native_method_array_set_method(n, i++, native_real_less_than);
-	native_method_array_set_method(n, i++, native_real_greater_than_equal);
-	native_method_array_set_method(n, i++, native_real_less_than_equal);	
-	native_method_array_set_method(n, i++, native_real_not);
-	native_method_array_set_method(n, i++, native_real_minus);
-	native_method_array_set_method(n, i++, native_real_equals);
-	native_method_array_set_method(n, i++, native_real_hash_code);
-	native_method_array_set_method(n, i++, native_real_to_string);
+	native_method_array_set_method(n, "Thread_constructor", native_thread_constructor);
+	native_method_array_set_method(n, "Thread$start", native_thread_start);
+	native_method_array_set_method(n, "Thread$run", native_thread_run);
+	native_method_array_set_method(n, "Thread$join", native_thread_join);
+	native_method_array_set_method(n, "Thread$sleep$Integer", native_thread_sleep);
+
+	native_method_array_set_method(n, "Real_constructor", native_real_constructor);
+	native_method_array_set_method(n, "Real_constructor$Real", native_real_constructor_real);
+	native_method_array_set_method(n, "Real$add$Real", native_real_add);
+	native_method_array_set_method(n, "Real$subtract$Real", native_real_subtract);
+	native_method_array_set_method(n, "Real$multiply$Real", native_real_multiply);
+	native_method_array_set_method(n, "Real$divide$Real", native_real_divide);
+	native_method_array_set_method(n, "Real$greaterThan$Real", native_real_greater_than);
+	native_method_array_set_method(n, "Real$lessThan$Real", native_real_less_than);
+	native_method_array_set_method(n, "Real$greaterThanEqual$Real", native_real_greater_than_equal);
+	native_method_array_set_method(n, "Real$lessThanEqual$Real", native_real_less_than_equal);
+	native_method_array_set_method(n, "Real$not", native_real_not);
+	native_method_array_set_method(n, "Real$minus", native_real_minus);
+	native_method_array_set_method(n, "Real$operator+$Real", native_real_add);
+	native_method_array_set_method(n, "Real$operator-$Real", native_real_subtract);
+	native_method_array_set_method(n, "Real$operator*$Real", native_real_multiply);
+	native_method_array_set_method(n, "Real$operator/$Real", native_real_divide);
+	native_method_array_set_method(n, "Real$operator>$Real", native_real_greater_than);
+	native_method_array_set_method(n, "Real$operator<$Real", native_real_less_than);
+	native_method_array_set_method(n, "Real$operator>=$Real", native_real_greater_than_equal);
+	native_method_array_set_method(n, "Real$operator<=$Real", native_real_less_than_equal);	
+	native_method_array_set_method(n, "Real$operator!", native_real_not);
+	native_method_array_set_method(n, "Real$operator-", native_real_minus);
+	native_method_array_set_method(n, "Real$equals$Object", native_real_equals);
+	native_method_array_set_method(n, "Real$hashCode", native_real_hash_code);
+	native_method_array_set_method(n, "Real$toString", native_real_to_string);
 	
 	return 0;
 }

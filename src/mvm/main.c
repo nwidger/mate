@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <29 Jan 2012 at 13:25:04 by nwidger on macros.local>
+ * Time-stamp: <12 Apr 2012 at 19:33:33 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -137,8 +137,8 @@ void usage() {
  */
 
 int mvm_initialize(uint64_t h) {
-	int len;
 	char *buf;
+	int len, max_native_index;
 
 	input = stdin;
 	output = stdout;
@@ -163,8 +163,18 @@ int mvm_initialize(uint64_t h) {
 		return 1;
 	}
 
-	if ((native_method_array = native_method_array_create(NUM_NATIVES)) == NULL) {
+	if ((max_native_index = native_methods_parse_predefined_classes_file()) == -1) {
+		fprintf(stderr, "mvm: error parsing predefined classes file!\n");
+		return 1;
+	}
+
+	if ((native_method_array = native_method_array_create(max_native_index+1)) == NULL) {
 		fprintf(stderr, "mvm: error creating native method array!\n");
+		return 1;
+	}
+
+	if (native_methods_load_predefined_classes_file(native_method_array) != 0) {
+		fprintf(stderr, "mvm: error loading predefined classes file!\n");
 		return 1;
 	}
 

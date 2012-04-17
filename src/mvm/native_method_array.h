@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <11 Apr 2012 at 20:18:26 by nwidger on macros.local>
+ * Time-stamp: <12 Apr 2012 at 19:37:27 by nwidger on macros.local>
  */
 
 #ifndef _MVM_NATIVEMETHODARRAY_H
@@ -46,14 +46,16 @@ void native_method_array_clear(struct native_method_array *n);
 int native_method_array_set(struct native_method_array *n, int i, char *s);
 
 /** set pointer to native method for native method in the given
- * native_method_array at index i.
+ * native_method_array with native method name s.
  *
+ * @param n - the native_method_array to add to
+ * @param s - native method name as c-string
  * @param m - pointer to native method
  *
  * @return 0 on success, non-zero on failure
  */
 
-int native_method_array_set_method(struct native_method_array *n, int i, int (*m)(uint32_t));
+int native_method_array_set_method(struct native_method_array *n, char *s, int (*m)(uint32_t));
 
 /** executes the native method at index i of the given
  * native_method_array.

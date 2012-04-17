@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <11 Apr 2012 at 20:40:25 by nwidger on macros.local>
+ * Time-stamp: <12 Apr 2012 at 19:33:13 by nwidger on macros.local>
  */
 
 #ifndef _MVM_NATIVEMETHODS_H
@@ -85,6 +85,9 @@ int native_real_to_string(uint32_t i);
  */
 
 int add_native_methods(struct native_method_array *n);
+
+int native_methods_parse_predefined_classes_file();
+int native_methods_load_predefined_classes_file(struct native_method_array *n);
 
 /* private code used by parse.y */
 struct native_class;

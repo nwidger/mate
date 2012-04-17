@@ -94,7 +94,7 @@
 
 
 /* Niels Widger
- * Time-stamp: <11 Apr 2012 at 20:47:41 by nwidger on macros.local>
+ * Time-stamp: <12 Apr 2012 at 19:23:12 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -115,7 +115,8 @@ extern int get_current_source_line_number();
 extern int yylex();
 void yyerror(const char *s);
 
-struct native_class *native_classes;
+extern int max_native_index;
+extern struct native_class *native_classes;
 
 
 
@@ -139,7 +140,7 @@ struct native_class *native_classes;
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 29 "parse.y"
+#line 30 "parse.y"
 {
         int value;
 	char *str;
@@ -148,7 +149,7 @@ typedef union YYSTYPE
 	struct native_method *nmethod;
 }
 /* Line 187 of yacc.c.  */
-#line 152 "parse.c"
+#line 153 "parse.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -161,7 +162,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 165 "parse.c"
+#line 166 "parse.c"
 
 #ifdef short
 # undef short
@@ -457,10 +458,10 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    78,    78,    85,    90,    98,   102,   107,   112,   120,
-     125,   133,   160,   187,   208,   212,   219,   233,   242,   258,
-     274,   286,   301,   308,   312,   316,   320,   324,   328,   332,
-     339
+       0,    79,    79,    86,    91,    99,   103,   108,   113,   121,
+     126,   134,   164,   194,   218,   222,   229,   243,   252,   268,
+     284,   296,   311,   318,   322,   326,   330,   334,   338,   342,
+     349
 };
 #endif
 
@@ -1400,14 +1401,14 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 79 "parse.y"
+#line 80 "parse.y"
     {
 	  native_classes = (yyval.nclass);
 	}
     break;
 
   case 3:
-#line 86 "parse.y"
+#line 87 "parse.y"
     {
 	  (yyval.nclass) = (yyvsp[(1) - (2)].nclass);
 	  native_class_set_next((yyval.nclass), (yyvsp[(2) - (2)].nclass));
@@ -1415,7 +1416,7 @@ yyreduce:
     break;
 
   case 4:
-#line 91 "parse.y"
+#line 92 "parse.y"
     {
 	  (yyval.nclass) = (yyvsp[(1) - (1)].nclass);
 	  native_class_set_next((yyval.nclass), NULL);
@@ -1423,14 +1424,14 @@ yyreduce:
     break;
 
   case 5:
-#line 99 "parse.y"
+#line 100 "parse.y"
     {
 	  (yyval.nclass) = native_class_create((yyvsp[(2) - (5)].str), (yyvsp[(4) - (5)].nmethod), NULL);
 	}
     break;
 
   case 6:
-#line 103 "parse.y"
+#line 104 "parse.y"
     {
           (yyval.nclass) = native_class_create((yyvsp[(2) - (4)].str), NULL, NULL);
 	  free((yyvsp[(2) - (4)].str));
@@ -1438,7 +1439,7 @@ yyreduce:
     break;
 
   case 7:
-#line 108 "parse.y"
+#line 109 "parse.y"
     {
 	  (yyval.nclass) = native_class_create((yyvsp[(2) - (7)].str), (yyvsp[(6) - (7)].nmethod), NULL);
 	  free((yyvsp[(4) - (7)].str));
@@ -1446,7 +1447,7 @@ yyreduce:
     break;
 
   case 8:
-#line 113 "parse.y"
+#line 114 "parse.y"
     {
 	  (yyval.nclass) = native_class_create((yyvsp[(2) - (6)].str), NULL, NULL);
 	  free((yyvsp[(4) - (6)].str));
@@ -1454,7 +1455,7 @@ yyreduce:
     break;
 
   case 9:
-#line 121 "parse.y"
+#line 122 "parse.y"
     {
 	  (yyval.nmethod) = (yyvsp[(1) - (2)].nmethod);
 	  native_method_set_next((yyval.nmethod), (yyvsp[(2) - (2)].nmethod));
@@ -1462,7 +1463,7 @@ yyreduce:
     break;
 
   case 10:
-#line 126 "parse.y"
+#line 127 "parse.y"
     {
 	  (yyval.nmethod) = (yyvsp[(1) - (1)].nmethod);
 	  native_method_set_next((yyval.nmethod), NULL);
@@ -1470,7 +1471,7 @@ yyreduce:
     break;
 
   case 11:
-#line 134 "parse.y"
+#line 135 "parse.y"
     {
           /* constructor */
 	  int len;
@@ -1494,13 +1495,16 @@ yyreduce:
 
 	  (yyval.nmethod) = native_method_create((yyvsp[(1) - (4)].value), name, NULL);
 
+	  if ((yyvsp[(1) - (4)].value) > max_native_index)
+	    max_native_index = (yyvsp[(1) - (4)].value);
+
 	  free((yyvsp[(2) - (4)].str));
 	  free((yyvsp[(3) - (4)].str));
 	}
     break;
 
   case 12:
-#line 161 "parse.y"
+#line 165 "parse.y"
     {
           /* method */
 	  int len;
@@ -1523,6 +1527,9 @@ yyreduce:
 
 	  (yyval.nmethod) = native_method_create((yyvsp[(1) - (5)].value), name, NULL);
 
+	  if ((yyvsp[(1) - (5)].value) > max_native_index)
+	    max_native_index = (yyvsp[(1) - (5)].value);
+
 	  free((yyvsp[(2) - (5)].str));
 	  free((yyvsp[(3) - (5)].str));
 	  free((yyvsp[(4) - (5)].str));
@@ -1530,7 +1537,7 @@ yyreduce:
     break;
 
   case 13:
-#line 188 "parse.y"
+#line 195 "parse.y"
     {
           /* operator */
 	  int len;
@@ -1545,27 +1552,30 @@ yyreduce:
 
   	  (yyval.nmethod) = native_method_create((yyvsp[(1) - (4)].value), name, NULL);
 
+	  if ((yyvsp[(1) - (4)].value) > max_native_index)
+	    max_native_index = (yyvsp[(1) - (4)].value);
+
 	  free((yyvsp[(2) - (4)].str));
 	  free((yyvsp[(3) - (4)].str));
 	}
     break;
 
   case 14:
-#line 209 "parse.y"
+#line 219 "parse.y"
     {
 	  (yyval.str) = (yyvsp[(2) - (3)].str);
 	}
     break;
 
   case 15:
-#line 213 "parse.y"
+#line 223 "parse.y"
     {
 	  (yyval.str) = strdup("");
 	}
     break;
 
   case 16:
-#line 220 "parse.y"
+#line 230 "parse.y"
     {
 	  (yyval.str) = malloc(sizeof(char)*(strlen((yyvsp[(1) - (4)].str))+strlen("$")+strlen((yyvsp[(3) - (4)].str))+2));
 
@@ -1582,7 +1592,7 @@ yyreduce:
     break;
 
   case 17:
-#line 234 "parse.y"
+#line 244 "parse.y"
     { 
 	  (yyval.str) = (yyvsp[(1) - (2)].str);
 
@@ -1591,7 +1601,7 @@ yyreduce:
     break;
 
   case 18:
-#line 243 "parse.y"
+#line 253 "parse.y"
     {
 	  (yyval.str) = malloc(sizeof(char)*(strlen((yyvsp[(1) - (6)].str))+strlen((yyvsp[(2) - (6)].str))+strlen("$")+strlen((yyvsp[(4) - (6)].str))+2));
 
@@ -1610,7 +1620,7 @@ yyreduce:
     break;
 
   case 19:
-#line 259 "parse.y"
+#line 269 "parse.y"
     {
 	  (yyval.str) = malloc(sizeof(char)*(strlen((yyvsp[(1) - (6)].str))+strlen((yyvsp[(2) - (6)].str))+strlen("$")+strlen((yyvsp[(4) - (6)].str))+2));
 
@@ -1629,7 +1639,7 @@ yyreduce:
     break;
 
   case 20:
-#line 275 "parse.y"
+#line 285 "parse.y"
     {
 	  (yyval.str) = malloc(sizeof(char)*(strlen((yyvsp[(1) - (4)].str))+strlen((yyvsp[(2) - (4)].str))+2));
 
@@ -1644,7 +1654,7 @@ yyreduce:
     break;
 
   case 21:
-#line 287 "parse.y"
+#line 297 "parse.y"
     {
 	  (yyval.str) = malloc(sizeof(char)*(strlen((yyvsp[(1) - (4)].str))+strlen((yyvsp[(2) - (4)].str))+2));
 
@@ -1659,63 +1669,63 @@ yyreduce:
     break;
 
   case 22:
-#line 302 "parse.y"
+#line 312 "parse.y"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
 	}
     break;
 
   case 23:
-#line 309 "parse.y"
+#line 319 "parse.y"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
 	}
     break;
 
   case 24:
-#line 313 "parse.y"
+#line 323 "parse.y"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
 	}
     break;
 
   case 25:
-#line 317 "parse.y"
+#line 327 "parse.y"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
 	}
     break;
 
   case 26:
-#line 321 "parse.y"
+#line 331 "parse.y"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
 	}
     break;
 
   case 27:
-#line 325 "parse.y"
+#line 335 "parse.y"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
 	}
     break;
 
   case 28:
-#line 329 "parse.y"
+#line 339 "parse.y"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
 	}
     break;
 
   case 29:
-#line 333 "parse.y"
+#line 343 "parse.y"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
 	}
     break;
 
   case 30:
-#line 340 "parse.y"
+#line 350 "parse.y"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
 	}
@@ -1723,7 +1733,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1727 "parse.c"
+#line 1737 "parse.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1937,7 +1947,7 @@ yyreturn:
 }
 
 
-#line 345 "parse.y"
+#line 355 "parse.y"
 
 
 
