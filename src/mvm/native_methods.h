@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <12 Apr 2012 at 19:33:13 by nwidger on macros.local>
+ * Time-stamp: <19 Apr 2012 at 19:56:27 by nwidger on macros.local>
  */
 
 #ifndef _MVM_NATIVEMETHODS_H
@@ -22,6 +22,7 @@ int native_object_wait_integer(uint32_t i);
 
 int native_integer_constructor(uint32_t i);
 int native_integer_constructor_integer(uint32_t i);
+int native_integer_constructor_real(uint32_t i);
 int native_integer_add(uint32_t i);
 int native_integer_subtract(uint32_t i);
 int native_integer_multiply(uint32_t i);
@@ -63,6 +64,7 @@ int native_thread_sleep(uint32_t i);
 
 int native_real_constructor(uint32_t i);
 int native_real_constructor_real(uint32_t i);
+int native_real_constructor_integer(uint32_t i);
 int native_real_add(uint32_t i);
 int native_real_subtract(uint32_t i);
 int native_real_multiply(uint32_t i);
@@ -76,6 +78,7 @@ int native_real_minus(uint32_t i);
 int native_real_equals(uint32_t i);
 int native_real_hash_code(uint32_t i);
 int native_real_to_string(uint32_t i);
+int native_real_square_root(uint32_t i);
 
 /** adds all necessary native methods to the given native_method_array.
  *

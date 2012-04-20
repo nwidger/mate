@@ -1,11 +1,12 @@
 /* Niels Widger
- * Time-stamp: <10 May 2011 at 20:52:49 by nwidger on macros.local>
+ * Time-stamp: <19 Apr 2012 at 19:57:57 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -319,6 +320,26 @@ int real_to_string(struct object *o) {
 
 	snprintf(buf, REAL_TO_STRING_BUFFER_SIZE, "%f", r->value);
 	if ((ref = class_table_new_string(class_table, buf, NULL)) == 0)		
+		mvm_halt();
+
+	return ref;
+}
+
+int real_square_root(struct object *o) {
+	int ref;
+	float value;
+	struct real *r;
+
+	r = object_get_real(o);
+	
+	if (r == NULL) {
+		fprintf(stderr, "mvm: real not initialized!\n");
+		mvm_halt();
+	}
+
+	value = sqrtf(r->value);
+
+	if ((ref = class_table_new_real(class_table, value, NULL)) == 0)		
 		mvm_halt();
 
 	return ref;

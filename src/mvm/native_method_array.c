@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <12 Apr 2012 at 19:43:59 by nwidger on macros.local>
+ * Time-stamp: <19 Apr 2012 at 21:17:11 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -106,7 +106,6 @@ int native_method_array_set_method(struct native_method_array *n, char *s, int (
 		r = n->native_methods[i];
 		
 		if (r != NULL && strcmp(r->name, s) == 0) {
-			fprintf(stderr, "index == %d, name == %s\n", i, s);
 			r->method = m;
 			return 0;
 		}

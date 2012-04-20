@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <12 Apr 2012 at 20:00:00 by nwidger on macros.local>
+ * Time-stamp: <19 Apr 2012 at 19:56:45 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -259,6 +259,30 @@ int native_integer_constructor_integer(uint32_t i) {
 	value = integer_get_value(integer);
 
 	integer = integer_create(value);
+	object_set_integer(this, integer);
+
+	return 0;
+}
+
+int native_integer_constructor_real(uint32_t i) {
+	int ref, n;
+	float value;
+	struct real *real;
+	struct integer *integer;
+	struct object *this, *object;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	object = heap_fetch_object(heap, ref);
+	real = object_get_real(object);
+	value = real_get_value(real);
+
+	integer = integer_create((int32_t)value);
 	object_set_integer(this, integer);
 
 	return 0;
@@ -1159,6 +1183,30 @@ int native_real_constructor_real(uint32_t i) {
 	return 0;
 }
 
+int native_real_constructor_integer(uint32_t i) {
+	int ref, n;
+	int32_t value;
+	struct real *real;
+	struct integer *integer;
+	struct object *this, *object;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	object = heap_fetch_object(heap, ref);
+	integer = object_get_integer(object);
+	value = integer_get_value(integer);
+
+	real = real_create((float)value);
+	object_set_real(this, real);
+
+	return 0;
+}
+
 int native_real_add(uint32_t i) {
 	int ref, n;
 	struct object *this, *object;
@@ -1472,6 +1520,28 @@ int native_real_to_string(uint32_t i) {
 	return 0;
 }
 
+int native_real_square_root(uint32_t i) {
+	int ref, n;
+	struct object *this;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = real_square_root(this);
+	operand_stack_push(calling_frame_operand_stack, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	return 0;
+}
+
 /* struct definitions */
 struct native_class {
         char *name;
@@ -1611,6 +1681,7 @@ int add_native_methods(struct native_method_array *n) {
 
 	native_method_array_set_method(n, "Integer_constructor", native_integer_constructor);
 	native_method_array_set_method(n, "Integer_constructor$Integer", native_integer_constructor_integer);
+	native_method_array_set_method(n, "Integer_constructor$Real", native_integer_constructor_real);
 	native_method_array_set_method(n, "Integer$add$Integer", native_integer_add);
 	native_method_array_set_method(n, "Integer$subtract$Integer", native_integer_subtract);
 	native_method_array_set_method(n, "Integer$multiply$Integer", native_integer_multiply);
@@ -1663,6 +1734,7 @@ int add_native_methods(struct native_method_array *n) {
 
 	native_method_array_set_method(n, "Real_constructor", native_real_constructor);
 	native_method_array_set_method(n, "Real_constructor$Real", native_real_constructor_real);
+	native_method_array_set_method(n, "Real_constructor$Integer", native_real_constructor_integer);
 	native_method_array_set_method(n, "Real$add$Real", native_real_add);
 	native_method_array_set_method(n, "Real$subtract$Real", native_real_subtract);
 	native_method_array_set_method(n, "Real$multiply$Real", native_real_multiply);
@@ -1686,6 +1758,7 @@ int add_native_methods(struct native_method_array *n) {
 	native_method_array_set_method(n, "Real$equals$Object", native_real_equals);
 	native_method_array_set_method(n, "Real$hashCode", native_real_hash_code);
 	native_method_array_set_method(n, "Real$toString", native_real_to_string);
+	native_method_array_set_method(n, "Real$squareRoot", native_real_square_root);
 	
 	return 0;
 }

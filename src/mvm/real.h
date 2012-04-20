@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <10 May 2011 at 20:52:28 by nwidger on macros.local>
+ * Time-stamp: <19 Apr 2012 at 19:58:55 by nwidger on macros.local>
  */
 
 #ifndef _MVM_REAL_H
@@ -190,5 +190,15 @@ int real_hash_code(struct object *o);
  */
 
 int real_to_string(struct object *o);
+
+/** returns a reference to a new Real object whose value is the square
+ * root of the value of o.  o must be a pointer to an Real object.
+ *
+ * @param o - an Real object
+ *
+ * @return reference to new Real object, or 0 on failure
+ */
+
+int real_square_root(struct object *o);
 
 #endif
