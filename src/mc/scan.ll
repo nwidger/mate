@@ -1,7 +1,7 @@
 %{
 
 // Niels Widger
-// Time-stamp: <06 Mar 2012 at 19:01:20 by nwidger on macros.local>
+// Time-stamp: <26 Apr 2012 at 19:26:50 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -82,8 +82,7 @@ identifier      {letter}({letter}|{digit})*
 			   yylloc.first_line = sourceLineNumber;
                          }
 			 
-native[:]({digit})+      {
-			   yylval.value = a2int(yytext+7);
+native                   {
 			   return token(NATIVE);
 			 }
 

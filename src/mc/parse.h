@@ -43,21 +43,21 @@
      STRING_LITERAL = 259,
      NEWLINE = 260,
      TAB = 261,
-     NATIVE = 262,
-     INTEGER_LITERAL = 263,
-     FLOAT_LITERAL = 264,
-     NULL_LITERAL = 265,
-     OPERATOR = 266,
-     EQ_OP = 267,
-     NE_OP = 268,
-     INSTANCEOF_OP = 269,
-     GE_OP = 270,
-     LE_OP = 271,
-     BOOL_AND = 272,
-     BOOL_OR = 273,
-     MAIN = 274,
-     CLASS = 275,
-     EXTENDS = 276,
+     INTEGER_LITERAL = 262,
+     FLOAT_LITERAL = 263,
+     NULL_LITERAL = 264,
+     OPERATOR = 265,
+     EQ_OP = 266,
+     NE_OP = 267,
+     INSTANCEOF_OP = 268,
+     GE_OP = 269,
+     LE_OP = 270,
+     BOOL_AND = 271,
+     BOOL_OR = 272,
+     MAIN = 273,
+     CLASS = 274,
+     EXTENDS = 275,
+     NATIVE = 276,
      THIS = 277,
      SUPER = 278,
      SYNCHRONIZED = 279,
@@ -79,21 +79,21 @@
 #define STRING_LITERAL 259
 #define NEWLINE 260
 #define TAB 261
-#define NATIVE 262
-#define INTEGER_LITERAL 263
-#define FLOAT_LITERAL 264
-#define NULL_LITERAL 265
-#define OPERATOR 266
-#define EQ_OP 267
-#define NE_OP 268
-#define INSTANCEOF_OP 269
-#define GE_OP 270
-#define LE_OP 271
-#define BOOL_AND 272
-#define BOOL_OR 273
-#define MAIN 274
-#define CLASS 275
-#define EXTENDS 276
+#define INTEGER_LITERAL 262
+#define FLOAT_LITERAL 263
+#define NULL_LITERAL 264
+#define OPERATOR 265
+#define EQ_OP 266
+#define NE_OP 267
+#define INSTANCEOF_OP 268
+#define GE_OP 269
+#define LE_OP 270
+#define BOOL_AND 271
+#define BOOL_OR 272
+#define MAIN 273
+#define CLASS 274
+#define EXTENDS 275
+#define NATIVE 276
 #define THIS 277
 #define SUPER 278
 #define SYNCHRONIZED 279
@@ -114,7 +114,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 33 "parse.yy"
+#line 34 "parse.yy"
 {
 	Seq *seq;
 
@@ -145,7 +145,7 @@ typedef union YYSTYPE
 
 	BlockStatementNode *blockStmnt;
 }
-/* Line 1529 of yacc.c.  */
+/* Line 1489 of yacc.c.  */
 #line 150 "parse.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

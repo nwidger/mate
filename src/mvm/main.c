@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <12 Apr 2012 at 19:33:33 by nwidger on macros.local>
+ * Time-stamp: <26 Apr 2012 at 19:32:34 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -168,7 +168,7 @@ int mvm_initialize(uint64_t h) {
 		return 1;
 	}
 
-	if ((native_method_array = native_method_array_create(max_native_index+1)) == NULL) {
+	if ((native_method_array = native_method_array_create(max_native_index)) == NULL) {
 		fprintf(stderr, "mvm: error creating native method array!\n");
 		return 1;
 	}

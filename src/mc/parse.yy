@@ -2,7 +2,7 @@
 
 // Niels Widger
 // CS 712
-// Time-stamp: <06 Mar 2012 at 19:01:00 by nwidger on macros.local>
+// Time-stamp: <26 Apr 2012 at 19:28:11 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -25,6 +25,7 @@ extern int getCurrentSourceLineNumber();
 extern int yylex();
 void yyerror(const char *s);
 
+extern int nativeIndex;
 extern Seq *ast;
 extern TypeModule *types;
 
@@ -69,7 +70,6 @@ extern TypeModule *types;
 %token <str> STRING_LITERAL
 %token NEWLINE
 %token TAB
-%token <value> NATIVE
 %token <value> INTEGER_LITERAL
 %token <float_value> FLOAT_LITERAL
 %token NULL_LITERAL
@@ -90,7 +90,7 @@ extern TypeModule *types;
 %token <str> '<'
 %token <str> '*'
 
-%token MAIN CLASS EXTENDS
+%token MAIN CLASS EXTENDS NATIVE
 %token THIS SUPER
 %token SYNCHRONIZED
 %token IF ELSE FOR WHILE NEW RETURN
@@ -325,7 +325,7 @@ FieldDeclaration
 MethodDeclaration
 	: NATIVE Type MethodDeclarator ';'
 	{
-	  $3->setNativeIndex($1);
+	  $3->setNativeIndex(nativeIndex++);
 	  $3->setType($2);
 	  $3->setBody(new BlockStatementNode());
 	  $$ = $3;
@@ -357,7 +357,7 @@ MethodBody
 OperatorDeclaration
 	: NATIVE Type OperatorDeclarator ';'
 	{
-	  $3->setNativeIndex($1);
+	  $3->setNativeIndex(nativeIndex++);
 	  $3->setType($2);
 	  $3->setBody(new BlockStatementNode());
 	  $$ = $3;
@@ -401,7 +401,7 @@ OperatorBody
 ConstructorDeclaration
 	: NATIVE ConstructorDeclarator ';'
 	{
-	  $2->setNativeIndex($1);
+	  $2->setNativeIndex(nativeIndex++);
 	  $2->setBody(new BlockStatementNode());
 	  $$ = $2;
 	}

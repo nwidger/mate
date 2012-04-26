@@ -40,23 +40,23 @@
       know about them.  */
    enum yytokentype {
      IDENTIFIER = 258,
-     NATIVE = 259,
-     OPERATOR = 260,
-     GE_OP = 261,
-     LE_OP = 262,
-     CLASS = 263,
-     EXTENDS = 264,
+     OPERATOR = 259,
+     GE_OP = 260,
+     LE_OP = 261,
+     CLASS = 262,
+     EXTENDS = 263,
+     NATIVE = 264,
      BAD = 265
    };
 #endif
 /* Tokens.  */
 #define IDENTIFIER 258
-#define NATIVE 259
-#define OPERATOR 260
-#define GE_OP 261
-#define LE_OP 262
-#define CLASS 263
-#define EXTENDS 264
+#define OPERATOR 259
+#define GE_OP 260
+#define LE_OP 261
+#define CLASS 262
+#define EXTENDS 263
+#define NATIVE 264
 #define BAD 265
 
 

@@ -1,7 +1,7 @@
 %{
 
 /* Niels Widger
- * Time-stamp: <10 Apr 2012 at 21:35:01 by nwidger on macros.local>
+ * Time-stamp: <26 Apr 2012 at 19:22:56 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -65,8 +65,7 @@ identifier      {letter}({letter}|{digit})*
                            line += 1;
                          }
 
-native[:]({digit})+      {
-			   yylval.value = atoi(yytext+7);
+native                   {
 			   return token(NATIVE);
 			 }
 

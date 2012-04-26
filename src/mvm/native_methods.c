@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Apr 2012 at 19:56:45 by nwidger on macros.local>
+ * Time-stamp: <26 Apr 2012 at 19:20:25 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -47,7 +47,7 @@ extern int yydebug;
 #endif
 
 /* globals */
-int max_native_index = -1;
+int max_native_index = 0;
 struct native_class *native_classes;
 
 #define SETUP_NATIVE_METHOD()						\

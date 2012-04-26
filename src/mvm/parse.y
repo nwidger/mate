@@ -1,7 +1,7 @@
 %{
 
 /* Niels Widger
- * Time-stamp: <19 Apr 2012 at 19:44:49 by nwidger on macros.local>
+ * Time-stamp: <26 Apr 2012 at 19:22:38 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -38,7 +38,6 @@ extern struct native_class *native_classes;
 %error-verbose
 
 %token <str> IDENTIFIER
-%token <value> NATIVE
 %token <str> OPERATOR
 
 %token <str> GE_OP
@@ -51,7 +50,7 @@ extern struct native_class *native_classes;
 %token <str> '<'
 %token <str> '*'
 
-%token CLASS EXTENDS
+%token CLASS EXTENDS NATIVE
 
 %token BAD
 
@@ -153,10 +152,7 @@ ClassBodyDeclaration
             strcat(name, $3);
           }
 
-	  $$ = native_method_create($1, name, NULL);
-
-	  if ($1 > max_native_index)
-	    max_native_index = $1;
+	  $$ = native_method_create(max_native_index++, name, NULL);
 
 	  free($2);
 	  free($3);
@@ -182,10 +178,7 @@ ClassBodyDeclaration
             strcat(name, $4);
           }
 
-	  $$ = native_method_create($1, name, NULL);
-
-	  if ($1 > max_native_index)
-	    max_native_index = $1;
+	  $$ = native_method_create(max_native_index++, name, NULL);
 
 	  free($2);
 	  free($3);
@@ -204,10 +197,7 @@ ClassBodyDeclaration
 
 	  strcat(name, $3);
 
-  	  $$ = native_method_create($1, name, NULL);
-
-	  if ($1 > max_native_index)
-	    max_native_index = $1;
+  	  $$ = native_method_create(max_native_index++, name, NULL);
 
 	  free($2);
 	  free($3);

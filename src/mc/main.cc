@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <06 Mar 2012 at 19:41:03 by nwidger on macros.local>
+// Time-stamp: <26 Apr 2012 at 19:27:26 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -39,6 +39,7 @@ LabelStack *labelStack;
 MonitorStack *monitorStack;
 Seq *ast;
 
+int nativeIndex = 0;
 int labelCounter;
 int predefinedLines;
 int synchronizedCounter;
