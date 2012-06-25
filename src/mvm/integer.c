@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <10 May 2011 at 20:51:58 by nwidger on macros.local>
+ * Time-stamp: <28 Apr 2012 at 16:27:26 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -319,6 +319,26 @@ int integer_to_string(struct object *o) {
 
 	snprintf(buf, INTEGER_TO_STRING_BUFFER_SIZE, "%" PRId32, i->value);
 	if ((ref = class_table_new_string(class_table, buf, NULL)) == 0)		
+		mvm_halt();
+
+	return ref;
+}
+
+int integer_mod(struct object *o, struct object *p) {
+	int ref;
+	int32_t value;
+	struct integer *i, *j;
+
+	i = object_get_integer(o);
+	j = object_get_integer(p);
+
+	if (i == NULL || j == NULL) {
+		fprintf(stderr, "mvm: integer not initialized!\n");
+		mvm_halt();
+	}
+
+	value = i->value % j->value;
+	if ((ref = class_table_new_integer(class_table, value, NULL)) == 0)
 		mvm_halt();
 
 	return ref;

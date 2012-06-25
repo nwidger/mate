@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <26 Apr 2012 at 19:20:25 by nwidger on macros.local>
+ * Time-stamp: <28 Apr 2012 at 16:18:14 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -593,6 +593,31 @@ int native_integer_to_string(uint32_t i) {
 	garbage_collector_lock(garbage_collector);
 
 	ref = integer_to_string(this);
+	operand_stack_push(calling_frame_operand_stack, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	return 0;
+}
+
+int native_integer_mod(uint32_t i) {
+	int ref, n;
+	struct object *this, *object;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	object = heap_fetch_object(heap, ref);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = integer_mod(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */

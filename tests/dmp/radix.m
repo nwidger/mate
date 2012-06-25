@@ -17,7 +17,7 @@ class BinaryInteger {
   }
 
   BinaryInteger(String s) {
-    if (s.length() == 0) {
+    if (s.length().equals(0)) {
       out "Error: BinaryInteger passed zero-length string, using zero instead" + newline;
       s = "0";
     }
@@ -471,10 +471,6 @@ class Counter extends Thread {
   }
 
   Object run() {
-    return go();
-  }
-
-  Object go() {
     Integer j, temp1, temp2;
     
     for (j = i; j < n; j = j + 1) {
@@ -492,38 +488,30 @@ class Sort {
     Integer i;
 
     for (i = 8; i <= nbits; i = i * 2) {
-      if (doCountingSort(ary, n, i) == 1) {
+      if (doCountingSort(ary, n, i).equals(1)) {
 	return 1;
+      }
+
+      Integer j;
+
+      out "--------------------------------------------------------------------------------" + newline;
+      out "result" + newline;
+      for (j = 0; j < n; j = j + 1) {
+	      out "nbits = " + i.toString() + " ary[" + j.toString() + "] = " +
+		      ary.get(j).toString() + " ary[" + j.toString() + "].mask(" + i.toString() + ") = " +
+		      ary.get(j).mask(i).toString() + newline;
       }
     }
 
     return 0;
   }
 
-  Integer getIndex(Integer masked, IntegerTable C) {
-    Integer k, retval, sum;
-
-    sum = 1;
-    retval = 1;
-    
-    C.firstKey();
-    for (k = C.nextKey(); k != null; k = C.nextKey()) {
-      if (k <= masked) {
-	retval = sum;
-      }
-      
-      sum = sum + C.get(k);
-    }
-
-    return retval;
-  }
-  
   Integer doCountingSort(BinaryIntegerTable ary, Integer n, Integer nbits) {
     Tuple t;
-    IntegerTable C;
+    IntegerTable C, C2;
     TupleTable tary;
     BinaryInteger b1, b2;
-    Integer i, max, temp1, temp2, temp3, ii;
+    Integer i, max, temp1, temp2, temp3, ii, xx, x, sum;
 
     if (nbits > 32)
       return 1;
@@ -535,6 +523,9 @@ class Sort {
     for (i = 0; i < n; i = i + 1) {
       b1 = ary.get(i);
       b2 = b1.mask(nbits);
+
+      out "arg.get(" + i.toString() + ") = " + b1.toString() + ", ary.get().mask(" + nbits.toString() + ") = " + b2.toString() + newline;
+
       tary.put(i, new Tuple(b1, b2));
 
       if (b2.toInteger() > max)
@@ -545,7 +536,7 @@ class Sort {
 
     C = new IntegerTable(max);
 
-    if (1) {
+    if (0) {			// parallel
       Counter c;
       Table counters;
       
@@ -573,7 +564,7 @@ class Sort {
 	  C.put(temp1, temp2 + temp3);
 	}
       }
-    } else {
+    } else {			// serial
       for (i = 0; i < n; i = i + 1) {
 	temp1 = tary.get(i).masked.toInteger();
 	temp2 = C.get(temp1);
@@ -581,40 +572,42 @@ class Sort {
       }
     }
 
+    sum = 0;
+    C2 = new IntegerTable(max);
+    
+    x = C.firstKey();
+    for (x = C.nextKey(); x != null; x = C.nextKey()) {
+	    xx = C.get(x);
+	    C2.put(x, sum+xx);
+	    sum = sum + xx;
+    }
+
+    C = C2;
+
+    out "--------------------------------------------------------------------------------" + newline;
+    out "dumping C" + newline;
+
+    x = C.firstKey();
+    for (x = C.nextKey(); x != null; x = C.nextKey()) {
+	    xx = C.get(x);
+	    out "C[" + x.toString() + ", " + xx.toString() + "]" + newline;
+    }
+
+    out "--------------------------------------------------------------------------------" + newline;
+
     for (i = n - 1; i >= 0; i = i - 1) {
       t = tary.get(i);
 
       temp1 = t.masked.toInteger();
-      temp2 = getIndex(temp1, C);
-
-      ary.put(temp2 - 1, t.value);
-
-      temp1 = temp2;
       temp2 = C.get(temp1);
+      C.put(temp1, temp2 - 1);
 
-      if (temp2.equals(0))
-      	C.remove(temp1);
-      else
-      	C.put(temp1, temp2 - 1);
+      temp2 = temp2 - 1;
+
+      out "tary(" + i.toString() + ") = " + t.masked.toString() + ", index = " + temp2.toString() + newline;
+
+      ary.put(temp2, t.value);
     }
-
-    // for (i = 1; i < max; i = i + 1) {
-    //   temp1 = C.get(i);
-    //   temp2 = C.get(i-1);
-    //   C.put(i, temp1 + temp2);
-    // }
-
-    // for (i = n - 1; i >= 0; i = i - 1) {
-    //   t = tary.get(i);
-      
-    //   temp1 = t.masked.toInteger();
-    //   temp2 = C.get(temp1);
-    //   ary.put(temp2 - 1, t.value);
-      
-    //   temp1 = t.masked.toInteger();
-    //   temp2 = C.get(temp1);
-    //   C.put(temp1, temp2 - 1);
-    // }
 
     return 0;
   }
@@ -660,7 +653,8 @@ Integer main() {
 
   s = new Sort();
 
-  if (s.doCountingSort(ary, n, nbits).equals(1)) {
+  // if (s.doCountingSort(ary, n, nbits).equals(1)) {
+  if (s.doRadixSort(ary, n, nbits).equals(1)) {
     out "error!" + newline;
     return 1;
   }

@@ -36,6 +36,7 @@ class Integer extends Object {
 	native Integer equals(Object obj);
 	native Integer hashCode();
 	native String toString();
+	native Integer mod(Integer i);
 }
 
 class String extends Object {

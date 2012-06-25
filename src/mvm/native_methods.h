@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Apr 2012 at 19:56:27 by nwidger on macros.local>
+ * Time-stamp: <28 Apr 2012 at 16:17:10 by nwidger on macros.local>
  */
 
 #ifndef _MVM_NATIVEMETHODS_H
@@ -36,6 +36,7 @@ int native_integer_minus(uint32_t i);
 int native_integer_equals(uint32_t i);
 int native_integer_hash_code(uint32_t i);
 int native_integer_to_string(uint32_t i);
+int native_integer_mod(uint32_t i);
 
 int native_string_constructor_string(uint32_t i);
 int native_string_length(uint32_t i);

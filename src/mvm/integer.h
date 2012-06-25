@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <10 May 2011 at 20:51:37 by nwidger on macros.local>
+ * Time-stamp: <28 Apr 2012 at 16:27:58 by nwidger on macros.local>
  */
 
 #ifndef _MVM_INTEGER_H
@@ -192,5 +192,17 @@ int integer_hash_code(struct object *o);
  */
 
 int integer_to_string(struct object *o);
+
+/** returns a reference to a new Integer object whose value is the
+ * integer value of o modulo the integer value of p.  o and p must be
+ * pointers to Integer objects.
+ *
+ * @param o - first Integer object
+ * @param p - second Integer object
+ *
+ * @return reference to new Integer object, or 0 on failure
+ */
+
+int integer_mod(struct object *o, struct object *p);
 
 #endif

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <01 Feb 2012 at 20:40:03 by nwidger on macros.local>
+ * Time-stamp: <24 Jun 2012 at 19:55:22 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -1325,11 +1325,13 @@ void mdb_dump_threads() {
 
 		frame = vm_stack_peek(vm_stack);
 
+		fprintf(stderr, "* %d %-14" PRIu32 " in ", i--, pc);
+
 		if (frame == NULL) {
-			fprintf(stderr, "* %d %-14" PRIu32 " in ??? ()\n", i--, pc);
+			fprintf(stderr, "??? ()\n");
 		} else {
 			name = frame_get_method_name(frame);
-			fprintf(stderr, "* %d %-14" PRIu32 " in %s ()\n", i--, pc, name);
+			frame_dump(frame, 0, 0);
 		}
 	}
 }
