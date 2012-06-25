@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Feb 2010 at 11:30:28 by nwidger on macros.local>
+ * Time-stamp: <25 Jun 2012 at 16:45:16 by nwidger on macros.local>
  */
 
 #ifndef _MVM_MDB_H
@@ -13,7 +13,7 @@
 enum mdb_hook {
 	/** program has not been started */
 	startup_hook			= 0,
-	/** program has just enter a new method */
+	/** program has just entered a new method */
 	enter_method_hook		= 1,
 	/** program has just left a method */
 	leave_method_hook		= 2,

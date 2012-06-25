@@ -484,6 +484,14 @@ class Counter extends Thread {
 }
 
 class Sort {
+  Object dout(String msg) {
+	  if (0) {
+		  out msg;
+	  }
+
+	  return null;
+  }
+	
   Object doRadixSort(BinaryIntegerTable ary, Integer n, Integer nbits) {
     Integer i;
 
@@ -494,12 +502,12 @@ class Sort {
 
       Integer j;
 
-      out "--------------------------------------------------------------------------------" + newline;
-      out "result" + newline;
+      dout("--------------------------------------------------------------------------------" + newline);
+      dout("result" + newline);
       for (j = 0; j < n; j = j + 1) {
-	      out "nbits = " + i.toString() + " ary[" + j.toString() + "] = " +
+	      dout("nbits = " + i.toString() + " ary[" + j.toString() + "] = " +
 		      ary.get(j).toString() + " ary[" + j.toString() + "].mask(" + i.toString() + ") = " +
-		      ary.get(j).mask(i).toString() + newline;
+		      ary.get(j).mask(i).toString() + newline);
       }
     }
 
@@ -524,7 +532,7 @@ class Sort {
       b1 = ary.get(i);
       b2 = b1.mask(nbits);
 
-      out "arg.get(" + i.toString() + ") = " + b1.toString() + ", ary.get().mask(" + nbits.toString() + ") = " + b2.toString() + newline;
+      dout("ary.get(" + i.toString() + ") = " + b1.toString() + ", ary.get().mask(" + nbits.toString() + ") = " + b2.toString() + newline);
 
       tary.put(i, new Tuple(b1, b2));
 
@@ -536,31 +544,61 @@ class Sort {
 
     C = new IntegerTable(max);
 
-    if (0) {			// parallel
+    if (1) {			// parallel
       Counter c;
       Table counters;
-      
-      counters = new Table(10);
+      Integer numCounters, rem, beg, end;
 
-      for (i = 0; i < n; i = i + 1) {
-	c = new Counter(i, i + 1, new IntegerTable(max), tary);
-	counters.put(i, c);
+      numCounters = 2;
+
+      counters = new Table(numCounters);
+
+      if (numCounters > n) {
+	      out "numCounters must not be greater than n!" + newline;
+	      return 1;
       }
 
-      for (i = 0; i < n; i = i + 1) {
+      i = 0;
+      beg = 0;
+      end = 0;
+      rem = n;
+
+      while (rem > 0) {
+	      beg = end;
+
+	      if (rem >= (n/numCounters))
+		      end = end + (n/numCounters);
+	      else
+		      end = end + rem;
+	      
+	      rem = rem - (end - beg);
+	      
+	      c = new Counter(beg, end, new IntegerTable(max), tary);
+	      counters.put(i, c);
+
+	      dout("counter " + i.toString() + " beg=" + beg.toString() + ", end=" + end.toString() + " rem=" + rem.toString() + newline);
+
+	      i = i + 1;
+      }
+
+      numCounters = i;
+
+      for (i = 0; i < numCounters; i = i + 1) {
 	c = (Counter)counters.get(i);
 	c.start();
       }
 
-      for (i = 0; i < n; i = i + 1) {
+      for (i = 0; i < numCounters; i = i + 1) {
 	c = (Counter)counters.get(i);
 
 	c.join();
 
-	for (ii = c.i; ii < c.n; ii = ii + 1) {
-	  temp1 = tary.get(ii).masked.toInteger();
+	ii = c.C.firstKey();
+	for (ii = c.C.nextKey(); ii != null; ii = c.C.nextKey()) {
+	  temp1 = ii;
 	  temp2 = c.C.get(temp1);
 	  temp3 = C.get(temp1);
+		dout("i = " + i.toString() + " temp1 = " + temp1.toString() + " temp2 = " + temp2.toString() + " temp3 = " + temp3.toString() + newline);
 	  C.put(temp1, temp2 + temp3);
 	}
       }
@@ -584,16 +622,16 @@ class Sort {
 
     C = C2;
 
-    out "--------------------------------------------------------------------------------" + newline;
-    out "dumping C" + newline;
+    dout("--------------------------------------------------------------------------------" + newline);
+    dout("dumping C" + newline);
 
     x = C.firstKey();
     for (x = C.nextKey(); x != null; x = C.nextKey()) {
 	    xx = C.get(x);
-	    out "C[" + x.toString() + ", " + xx.toString() + "]" + newline;
+	    dout("C[" + x.toString() + ", " + xx.toString() + "]" + newline);
     }
 
-    out "--------------------------------------------------------------------------------" + newline;
+    dout("--------------------------------------------------------------------------------" + newline);
 
     for (i = n - 1; i >= 0; i = i - 1) {
       t = tary.get(i);
@@ -604,7 +642,7 @@ class Sort {
 
       temp2 = temp2 - 1;
 
-      out "tary(" + i.toString() + ") = " + t.masked.toString() + ", index = " + temp2.toString() + newline;
+      dout("tary(" + i.toString() + ") = " + t.masked.toString() + ", index = " + temp2.toString() + newline);
 
       ary.put(temp2, t.value);
     }
