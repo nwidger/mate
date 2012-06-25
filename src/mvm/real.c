@@ -1,10 +1,12 @@
 /* Niels Widger
- * Time-stamp: <19 Apr 2012 at 19:57:57 by nwidger on macros.local>
+ * Time-stamp: <25 Jun 2012 at 18:45:11 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
+
+#define _POSIX_C_SOURCE 200112L
 
 #include <math.h>
 #include <stdio.h>
