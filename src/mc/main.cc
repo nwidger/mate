@@ -1,11 +1,12 @@
 // Niels Widger
-// Time-stamp: <26 Apr 2012 at 19:27:26 by nwidger on macros.local>
+// Time-stamp: <25 Jun 2012 at 18:41:31 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
 
 #include <errno.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <string>
