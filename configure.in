@@ -54,6 +54,7 @@ AC_PROG_YACC
 AC_SEARCH_LIBS(pthread_create, pthread)
 AC_SEARCH_LIBS(tgetent, [readline, ncurses, termcap])
 AC_SEARCH_LIBS(readline, readline)
+AC_SEARCH_LIBS(m, m)
 AC_TYPE_INT32_T
 AC_TYPE_INT64_T
 AC_TYPE_SIZE_T
