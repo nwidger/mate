@@ -504,11 +504,11 @@ class Sort {
 
       // dout("--------------------------------------------------------------------------------" + newline);
       // dout("result" + newline);
-      for (j = 0; j < n; j = j + 1) {
-	      // dout("nbits = " + i.toString() + " ary[" + j.toString() + "] = " +
-	      // 	      ary.get(j).toString() + " ary[" + j.toString() + "].mask(" + i.toString() + ") = " +
-	      // 	      ary.get(j).mask(i).toString() + newline);
-      }
+      // for (j = 0; j < n; j = j + 1) {
+      // 	      dout("nbits = " + i.toString() + " ary[" + j.toString() + "] = " +
+      // 	      	      ary.get(j).toString() + " ary[" + j.toString() + "].mask(" + i.toString() + ") = " +
+      // 	      	      ary.get(j).mask(i).toString() + newline);
+      // }
     }
 
     return 0;
@@ -625,11 +625,11 @@ class Sort {
     // dout("--------------------------------------------------------------------------------" + newline);
     // dout("dumping C" + newline);
 
-    x = C.firstKey();
-    for (x = C.nextKey(); x != null; x = C.nextKey()) {
-	    xx = C.get(x);
-	    // dout("C[" + x.toString() + ", " + xx.toString() + "]" + newline);
-    }
+    // x = C.firstKey();
+    // for (x = C.nextKey(); x != null; x = C.nextKey()) {
+    // 	    xx = C.get(x);
+    // 	    dout("C[" + x.toString() + ", " + xx.toString() + "]" + newline);
+    // }
 
     // dout("--------------------------------------------------------------------------------" + newline);
 
