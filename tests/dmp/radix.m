@@ -549,7 +549,7 @@ class Sort {
       Table counters;
       Integer numCounters, rem, beg, end;
 
-      numCounters = 8;
+      numCounters = 16;
 
       counters = new Table(numCounters);
 
