@@ -1,10 +1,12 @@
 /* Niels Widger
- * Time-stamp: <25 Jun 2012 at 18:46:27 by nwidger on macros.local>
+ * Time-stamp: <25 Jun 2012 at 18:47:24 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
+
+#define _POSIX_C_SOURCE 200112L
 
 #include <math.h>
 #include <stdio.h>
@@ -337,7 +339,7 @@ int real_square_root(struct object *o) {
 		mvm_halt();
 	}
 
-	value = sqrt(r->value);
+	value = sqrtf(r->value);
 
 	if ((ref = class_table_new_real(class_table, value, NULL)) == 0)		
 		mvm_halt();
