@@ -88,9 +88,7 @@ class Main {
     // Wait for each of the threads to terminate
     for (i = 0; i < NumThreads; i = i + 1) {
       thread = (TestThread)threads.get(i);
-      out "joining thread... ";
       thread.join();
-      out "done!" + newline;
     }
 
     if (shared.n == null) {
