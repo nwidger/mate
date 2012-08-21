@@ -360,6 +360,74 @@ class Slave extends Thread {
     
     return null;
   }
+
+  Object lu() {
+    Integer i, il, j, jl, k, kl;
+    Integer I, J, K;
+    Real A, B, C, D;
+    Integer dimI, dimJ, dimK;
+    Integer strI;
+    Integer t1, t2, t3, t4, t11, t22;
+    Integer diagowner;
+    Integer colowner;
+
+    strI = global.n;
+    k = 0;
+    K = 0;
+    while (k < n) {
+      k1 = k + bs;
+      if (kl > n) {
+	kl = n;
+      }
+
+      k = k + bs;
+      K = K + 1;
+
+      if (MyNum.equals(0) || dostats) {
+	// CLOCK(t1);
+      }
+
+      // factor diagonal block
+      diagowner = BlockOwner(K, K);
+      if (diagowner.equals(MyNum)) {
+	// A = &(a[k+k*n]);
+	// lu0(A, kl-k, strI);
+      }
+
+      global.start.await();
+
+      if (MyNum.equals(0) || dostats) {
+	// CLOCK(t11);
+      }
+
+      global.start.await();
+
+      if (MyNum.equals(0) || dostats) {
+	// CLOCK(t2);
+      }
+
+      // divide column k by diagonal block
+      // D = &(a[k+k*n]);
+
+      i = k1;
+      I = K+1;
+      while (i < n) {
+	if (BlockOwner(I, K).equals(MyNum)) {
+	  i1 = i + bs;
+	  if (il > n) {
+	    il = n;
+	  }
+
+	  // A = &(a[i+k*n]);
+	  bdiv(A, D, strI, n, il-i, kl-k);
+	
+	  i = i + bs;
+	  I = I + 1;
+      }
+    }
+    
+    return null;
+  }
 }
 
 Integer main() {
