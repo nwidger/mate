@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Feb 2010 at 14:05:34 by nwidger on macros.local>
+ * Time-stamp: <03 Sep 2012 at 21:42:33 by nwidger on macros.local>
  */
 
 #ifndef _MVM_STRING_H
@@ -88,6 +88,18 @@ int string_concat(struct object *o, struct object *p);
  */
 
 int string_to_integer(struct object *o);
+
+/** returns a reference to a new Real object whose value is the
+ * floating-point value obtained by parsing the characters in o as a
+ * signed floating-point number.  o must be a pointer to a String
+ * object.
+ *
+ * @param o - a String object
+ *
+ * @return reference to new Real object, or 0 on failure
+ */
+
+int string_to_real(struct object *o);
 
 /** returns a reference to a new Integer object whose value is 1 if the
  * characters in p lexicographically precede the characters in o, and

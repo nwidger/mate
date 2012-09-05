@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <25 Jun 2012 at 18:47:24 by nwidger on macros.local>
+ * Time-stamp: <05 Sep 2012 at 15:35:22 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -320,7 +320,7 @@ int real_to_string(struct object *o) {
 		mvm_halt();
 	}
 
-	snprintf(buf, REAL_TO_STRING_BUFFER_SIZE, "%f", r->value);
+	snprintf(buf, REAL_TO_STRING_BUFFER_SIZE, "%.10f", r->value);
 	if ((ref = class_table_new_string(class_table, buf, NULL)) == 0)		
 		mvm_halt();
 

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <01 Feb 2012 at 20:53:05 by nwidger on macros.local>
+ * Time-stamp: <03 Sep 2012 at 21:48:12 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -176,7 +176,7 @@ int string_to_integer(struct object *o) {
 	}
 
 	if (s->length <= 0) {
-		fprintf(stderr, "mvm: cannot invoke toInteger on String on length zero!\n");
+		fprintf(stderr, "mvm: cannot invoke toInteger on String of length zero!\n");
 		mvm_halt();
 	}
 
@@ -199,6 +199,43 @@ int string_to_integer(struct object *o) {
 	}
 
 	if ((ref = class_table_new_integer(class_table, (int32_t)value, NULL)) == 0)
+		mvm_halt();
+
+	return ref;
+}
+
+int string_to_real(struct object *o) {
+	int ref;
+	char *ptr;
+	float value;
+	struct string *s;
+
+	s = object_get_string(o);
+
+	if (s == NULL) {
+		fprintf(stderr, "mvm: string has not been initialized!\n");
+		mvm_halt();
+	}
+
+	if (s->length <= 0) {
+		fprintf(stderr, "mvm: cannot invoke toReal on String of length zero!\n");
+		mvm_halt();
+	}
+
+	ptr = (s->chars[0] == '-') ? s->chars+1 : s->chars;
+	if (strspn(ptr, "0123456789.eE+-") != strlen(ptr)) {
+		fprintf(stderr, "mvm: invalid characters, cannot invoke toReal\n");
+		mvm_halt();
+	}
+
+        errno = 0;
+	value = strtof(s->chars, &ptr);
+	if (errno != 0 || ptr == s->chars) {
+		perror("mvm: strtof");
+		mvm_halt();
+	}
+
+	if ((ref = class_table_new_real(class_table, value, NULL)) == 0)
 		mvm_halt();
 
 	return ref;

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Apr 2012 at 16:18:14 by nwidger on macros.local>
+ * Time-stamp: <03 Sep 2012 at 21:49:41 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -713,6 +713,28 @@ int native_string_to_integer(uint32_t i) {
 	garbage_collector_lock(garbage_collector);
 
 	ref = string_to_integer(this);
+	operand_stack_push(calling_frame_operand_stack, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	return 0;
+}
+
+int native_string_to_real(uint32_t i) {
+	int ref, n;
+	struct object *this;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = string_to_real(this);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
@@ -1735,6 +1757,7 @@ int add_native_methods(struct native_method_array *n) {
 	native_method_array_set_method(n, "String$length", native_string_length);
 	native_method_array_set_method(n, "String$substr$Integer$Integer", native_string_substr);
 	native_method_array_set_method(n, "String$toInteger", native_string_to_integer);
+	native_method_array_set_method(n, "String$toReal", native_string_to_real);
 	native_method_array_set_method(n, "String$concat$String", native_string_concat);
 	native_method_array_set_method(n, "String$operator+$String", native_string_concat);
 	native_method_array_set_method(n, "String$operator>$String", native_string_greater_than);

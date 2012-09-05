@@ -44,6 +44,7 @@ class String extends Object {
 	native Integer length();
 	native String substr(Integer beg, Integer end);
 	native Integer toInteger();
+	native Real toReal();
 	native String concat(String s);
 	native String operator + (String s);
 	native Integer operator > (String s);
