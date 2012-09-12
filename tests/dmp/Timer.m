@@ -4,7 +4,7 @@ class Timer extends Thread {
   Integer granularity;
 
   Timer() {
-    this(50);
+    this(5);
   }
 
   Timer(Integer g) {
