@@ -24,27 +24,27 @@ class Clause {
 		Clause nc;
 		Integer i, j, literal, size;
 
-		nc = c;
+		nc = this;
 
-		for (i = 0; i < c.size; i = i + 1) {
+		for (i = 0; i < this.size; i = i + 1) {
 			literal = (Integer)this.literals.get(i);
 
 			if (!literal.equals(1) && !literals.equals(-1))
 				continue;
 
-			if ((v.equals(1) && literal > 0) ||
-			    (v.equals(0) && literal < 0)) {
+			if ((value.equals(1) && literal > 0) ||
+			    (value.equals(0) && literal < 0)) {
 				// remove clause
 				nc = null;
 
-				for (i = 0; i < c.size; i = i + 1) {
-					state.decrementLiteral(abs((Integer)c.literals.get(i)));
+				for (i = 0; i < this.size; i = i + 1) {
+					state.decrementLiteral(abs((Integer)this.literals.get(i)));
 				}
 			} else {
 				// remove literal
 				state.decrementLiteral(abs(literal));
 
-				size = c.size;
+				size = this.size;
 				nc = new Clause(size-1);
 
 				if (i.equals(0)) {
@@ -88,23 +88,23 @@ class State {
 	Table literals;
 
 	State() {
-		Clause c;
-		String s;
-		Integer i, n;
+		String str;
+		Clause clause;
+		Integer i, n, literal;
 
-		while ((s = in) != null) {
-			if (s.equals("c")) {
+		while ((str = in) != null) {
+			if (str.equals("c")) {
 				// comment
-			} else if (s.equals("p")) {
+			} else if (str.equals("p")) {
 				// cnf
-				s = in;
-				if (s == null) return;
+				str = in;
+				if (str == null) return;
 				// nbvar
-				s = in; if (s == null) return;
-				this.num_variables = s.toInteger();
+				str = in; if (str == null) return;
+				this.num_variables = str.toInteger();
 				// nbclauses
-				s = in; if (s == null) return;
-				this.num_clauses = s.toInteger();
+				str = in; if (str == null) return;
+				this.num_clauses = str.toInteger();
 
 				this.clauses_size = this.num_clauses;
 				this.clauses = new Table(this.num_clauses);
@@ -116,13 +116,13 @@ class State {
 					this.literals.put(i, 0);
 				}
 			} else {
-				c = new Clause(this.num_variables);
+				clause = new Clause(this.num_variables);
 				
-				for (n = 0; (s = in) != null && !s.equals("0"); n = n + 1) {
-					c.literals.put(n, s.toInteger());
+				for (n = 0; (str = in) != null && !str.equals("0"); n = n + 1) {
+					clause.literals.put(n, str.toInteger());
 				}
 
-				c.size = n;
+				clause.size = n;
 			}
 		}
 
@@ -130,12 +130,10 @@ class State {
 		this.unit_value = 0;
 		this.empty_clause = 0;
 
-		c = c.size;
-
-		if (size.equals(0)) {
+		if (clause.size.equals(0)) {
 			this.empty_clause = 1;
-		} else if (size.equals(1)) {
-			this.unit_literal = (Integer)c.literals.get(0);
+		} else if (clause.size.equals(1)) {
+			this.unit_literal = (Integer)clause.literals.get(0);
 			if (this.unit_literal < 0) this.unit_value = 0;
 			else this.unit_value = 1;
 			this.unit_literal = abs(this.unit_literal);
@@ -178,44 +176,54 @@ class State {
 		return a;
 	}
 
+	Object incrementLiteral(Integer literal) {
+		this.literals.put(literal, ((Integer)this.literals.get(literal)) + 1);
+		return null;
+	}
+	
+	Object decrementLiteral(Integer literal) {
+		this.literals.put(literal, ((Integer)this.literals.get(literal)) - 1);
+		return null;
+	}
+
 	State assignLiteral(Integer literal, Integer value) {
-		Clause c;
+		Clause clause;
 		Integer i, literal, size;
 		
 		this.unit_literal = -1;
-		s.unit_value = 0;
-		s.empty_clause = 0;
+		this.unit_value = 0;
+		this.empty_clause = 0;
 
-		for (i = 0; i < s.clauses_size; i = i + 1) {
-			c = (Clause)this.clauses.get(i);
+		for (i = 0; i < this.clauses_size; i = i + 1) {
+			clause = (Clause)this.clauses.get(i);
 
-			if (c == null || c.size.equals(0))
+			if (clause == null || clause.size.equals(0))
 				continue;
 
-			c = c.assignLiteral(this, literal, value);
-			s.clauses.put(i, c);
+			clause = clause.assignLiteral(this, literal, value);
+			this.clauses.put(i, clause);
 
-			if (c == null) {
-				s.num_clauses = s.num_clauses + 1;
+			if (clause == null) {
+				this.num_clauses = this.num_clauses + 1;
 				continue;
 			}
 
-			size = c.size;
+			size = clause.size;
 
 			if (size.equals(0)) {
-				s.empty_clause = 1;
+				this.empty_clause = 1;
 			} else if (size.equals(1)) {
-				s.unit_literal = (Integer)c.literals.get(0);
-				if (s.unit_literal < 0) s.unit_value = 0;
-				else s.unit_value = 1;
-				s.unit_literal = abs(s.unit_literal);
+				this.unit_literal = (Integer)clause.literals.get(0);
+				if (this.unit_literal < 0) this.unit_value = 0;
+				else this.unit_value = 1;
+				this.unit_literal = abs(this.unit_literal);
 			}
 		}
 
-		for (i = 1; i < s.literals_size; i = i + 1) {
-			literal = (Integer)s.literals.get(i);
+		for (i = 1; i < this.literals_size; i = i + 1) {
+			literal = (Integer)this.literals.get(i);
 			if (literal > 0) {
-				s.next_unassigned = i;
+				this.next_unassigned = i;
 				break;
 			}
 		}
@@ -225,7 +233,7 @@ class State {
 }
 
 class Node {
-	Ojbect mutex;
+	Object mutex;
 	
 	Integer level;
 
@@ -256,7 +264,7 @@ class Node {
 	}
 
 	Node simplifyState() {
-		if (n.state != null)
+		if (this.state != null)
 			this.state = this.state.assignLiteral(this.literal, this.value);
 
 		return this;
@@ -275,9 +283,23 @@ class QueueRecord {
 		this.next = null;
 		this.prev = null;
 	}
+}
+
+class QueueList {
+	Object mutex;
+	QueueRecord head;
+	QueueRecord tail;
+
+	QueueList() {
+		this.mutex = new Object();
+
+		this.head = null;
+		this.tail = null;
+		
+	}
 
 	Integer empty() {
-		return q.head == null;
+		return this.head == null;
 	}
 
 	Object addFirst(QueueRecord record) {
@@ -285,7 +307,7 @@ class QueueRecord {
 			if (this.head == null) {
 				this.head = this.tail = record;
 			} else {
-				record.head = this.head;
+				record.next = this.head;
 				this.head.prev = record;
 				this.head = record;
 			}
@@ -321,7 +343,7 @@ class QueueRecord {
 				this.head = this.tail = null;
 			} else {
 				record = this.head;
-				this.head = this.head.next.;
+				this.head = this.head.next;
 				this.head.prev = null;
 			}
 		}
@@ -355,20 +377,6 @@ class QueueRecord {
 	}
 }
 
-class QueueList {
-	Object mutex;
-	QueueRecord head;
-	QueueRecord tail;
-
-	QueueList() {
-		this.mutex = new Object();
-
-		this.head = null;
-		this.tail = null;
-		
-	}
-}
-
 class RunQueue {
 	Integer size;
 	Table levels;
@@ -380,7 +388,7 @@ class RunQueue {
 		this.levels = new Table(this.size);
 
 		for (i = 0; i < this.size; i = i + 1) {
-			r.levels.put(i, new QueueList());
+			this.levels.put(i, new QueueList());
 		}
 	}
 
@@ -481,9 +489,5 @@ class DPL {
 }
 
 Integer main() {
-	DPL dpl;
-
-	dpl = new DPL();
-	
-	return dpl.dpl();
+	return 0;
 }
