@@ -4,8 +4,10 @@ class Clause {
 	Integer size;
 	Table literals;
 
+	Integer removed;
+
 	Clause() {
-		this(10);
+		this.removed = 0;
 	}
 	
 	Clause(Integer size) {
@@ -13,6 +15,8 @@ class Clause {
 
 		this.size = size;
 		this.literals = new Table(this.size);
+
+		this.removed = 0;
 	}
 
 	Integer abs(Integer a) {
@@ -22,27 +26,31 @@ class Clause {
 
 	Clause assignLiteral(State state, Integer literal, Integer value) {
 		Clause nc;
-		Integer i, j, literal, size;
+		Integer i, j, lit, size;
 
 		nc = this;
 
 		for (i = 0; i < this.size; i = i + 1) {
-			literal = (Integer)this.literals.get(i);
+			lit = (Integer)this.literals.get(i);
 
-			if (!literal.equals(1) && !literals.equals(-1))
+			if (!lit.equals(literal) && !lit.equals(-literal)) {
+				i = i + 1;
 				continue;
+			}
 
-			if ((value.equals(1) && literal > 0) ||
-			    (value.equals(0) && literal < 0)) {
+			if ((value.equals(1) && lit > 0) ||
+			    (value.equals(0) && lit < 0)) {
 				// remove clause
-				nc = null;
+				nc = new Clause();
+				nc.removed = 1;
+
 
 				for (i = 0; i < this.size; i = i + 1) {
 					state.decrementLiteral(abs((Integer)this.literals.get(i)));
 				}
 			} else {
 				// remove literal
-				state.decrementLiteral(abs(literal));
+				state.decrementLiteral(abs(lit));
 
 				size = this.size;
 				nc = new Clause(size-1);
@@ -65,6 +73,8 @@ class Clause {
 					}
 				}
 			}
+
+			break;
 		}
 
 		return nc;
@@ -208,7 +218,7 @@ class State {
 
 	State assignLiteral(Integer literal, Integer value) {
 		Clause clause;
-		Integer i, literal, size;
+		Integer i, lit, size;
 		
 		this.unit_literal = -1;
 		this.unit_value = 0;
@@ -217,14 +227,17 @@ class State {
 		for (i = 0; i < this.clauses_size; i = i + 1) {
 			clause = (Clause)this.clauses.get(i);
 
-			if (clause == null || clause.size.equals(0))
+			if (clause.removed || clause.size.equals(0)) {
+				i = i + 1;
 				continue;
+			}
 
 			clause = clause.assignLiteral(this, literal, value);
 			this.clauses.put(i, clause);
 
-			if (clause == null) {
-				this.num_clauses = this.num_clauses + 1;
+			if (clause.removed) {
+				this.num_clauses = this.num_clauses - 1;
+				i = i + 1;
 				continue;
 			}
 
@@ -241,8 +254,8 @@ class State {
 		}
 
 		for (i = 1; i < this.literals_size; i = i + 1) {
-			literal = (Integer)this.literals.get(i);
-			if (literal > 0) {
+			lit = (Integer)this.literals.get(i);
+			if (lit > 0) {
 				this.next_unassigned = i;
 				break;
 			}
@@ -284,8 +297,9 @@ class Node {
 	}
 
 	Node simplifyState() {
-		if (this.state != null)
+		if (this.state != null) {
 			this.state = this.state.assignLiteral(this.literal, this.value);
+		}
 
 		return this;
 	}
@@ -523,8 +537,10 @@ class DPL {
 			}
 
 			for (i = 0; i < num_variables; i = i + 1) {
-				if (((Integer)values.get(i)).equals(0))
+				if (((Integer)values.get(i)).equals(0)) {
+					i = i + 1;
 					continue;
+				}
 				out "v " + ((Integer)values.get(i)).toString() + newline;
 			}
 		}
