@@ -8,10 +8,10 @@ class Clause {
 		this(10);
 	}
 	
-	Clause(Integer s) {
-		mutex = new Object();
+	Clause(Integer size) {
+		this.mutex = new Object();
 
-		this.size = s;
+		this.size = size;
 		this.literals = new Table(this.size);
 	}
 
@@ -88,9 +88,40 @@ class State {
 	Table literals;
 
 	State() {
+
+	}
+
+	State(State state) {
+		Integer i;
+		
+		this.num_clauses = state.num_clauses;
+		this.num_variables = state.num_variables;
+		this.unit_literal = state.unit_literal;
+		this.unit_value = state.unit_value;
+		this.next_unassigned = state.next_unassigned;
+		this.empty_clause = state.empty_clause;
+
+		this.clauses_size = state.clauses_size;
+		this.clauses = new Table(this.clauses_size);
+
+		for (i = 0; i < this.clauses_size; i = i + 1) {
+			this.clauses.put(i, state.clauses.get(i));
+		}
+
+		this.literals_size = state.literals_size;
+		this.literals = new Table(this.literals_size);
+
+		for (i = 0; i < this.literals_size; i = i + 1) {
+			this.literals.put(i, state.literals.get(i));
+		}
+	}
+
+	Object readDimac() {
 		String str;
 		Clause clause;
-		Integer i, n, literal;
+		Integer i, n, literal, count;
+
+		count = 0;
 
 		while ((str = in) != null) {
 			if (str.equals("c")) {
@@ -98,12 +129,14 @@ class State {
 			} else if (str.equals("p")) {
 				// cnf
 				str = in;
-				if (str == null) return;
+				if (str == null) return null;
+
 				// nbvar
-				str = in; if (str == null) return;
+				str = in; if (str == null) return null;
 				this.num_variables = str.toInteger();
+
 				// nbclauses
-				str = in; if (str == null) return;
+				str = in; if (str == null) return null;
 				this.num_clauses = str.toInteger();
 
 				this.clauses_size = this.num_clauses;
@@ -117,18 +150,25 @@ class State {
 				}
 			} else {
 				clause = new Clause(this.num_variables);
+
+				clause.literals.put(0, str.toInteger());
 				
-				for (n = 0; (str = in) != null && !str.equals("0"); n = n + 1) {
+				for (n = 1; (str = in) != null && !str.equals("0"); n = n + 1) {
 					clause.literals.put(n, str.toInteger());
 				}
 
 				clause.size = n;
+
+				this.clauses.put(count, clause);
+				count = count + 1;
 			}
 		}
 
 		this.unit_literal = -1;
 		this.unit_value = 0;
 		this.empty_clause = 0;
+
+		clause = (Clause)this.clauses.get(0);
 
 		if (clause.size.equals(0)) {
 			this.empty_clause = 1;
@@ -139,6 +179,7 @@ class State {
 			this.unit_literal = abs(this.unit_literal);
 		}
 
+
 		for (i = 1; i < this.literals_size; i = i + 1) {
 			literal = (Integer)this.literals.get(i);
 			if (literal > 0) {
@@ -146,29 +187,8 @@ class State {
 				break;
 			}
 		}
-	}
 
-	State(State s) {
-		Integer i;
-		
-		this.num_clauses = s.num_clauses;
-		this.num_variables = s.num_variables;
-		this.unit_literal = s.unit_literal;
-		this.unit_value = s.unit_value;
-		this.next_unassigned = s.next_unassigned;
-		this.empty_clause = s.empty_clause;
-
-		this.clauses_size = s.clauses_size;
-
-		for (i = 0; i < this.clauses_size; i = i + 1) {
-			this.clauses.put(i, s.clauses.get(i));
-		}
-
-		this.literals_size = s.literals_size;
-
-		for (i = 0; i < this.literals_size; i = i + 1) {
-			this.literals.put(i, s.literals.get(i));
-		}
+		return null;
 	}
 
 	Integer abs(Integer a) {
@@ -459,35 +479,137 @@ class RunQueue {
 }
 
 class DPL {
+	Node root;
+	Object print_mutex;
+	
 	DPL() {
-
+		root = null;
+		print_mutex = new Object();
 	}
 
+	Object printSolution(Node child) {
+		Integer i;
+		Integer value, num_variables, num_clauses;
+		Table values;
+		State state;
+
+		synchronized(this.print_mutex) {
+			state = child.state;
+			num_variables = state.num_variables;
+			num_clauses = state.clauses_size;
+
+			values = new Table(num_variables);
+
+			for (i = 0; i < num_variables; i = i + 1) {
+				values.put(i, 0);
+			}
+
+			out "s cnf 1 " + num_variables.toString() + " " + num_clauses.toString() + newline;
+			out "t cnf 1 " + num_variables.toString() + " " + num_clauses.toString() + newline;
+
+			i = 0;
+			while (child.parent != null) {
+				value = child.literal;
+				if (child.value.equals(0))
+					value = -value;
+				values.put(i, value);
+				i = i + 1;
+				child = child.parent;
+			}
+
+			for (i = 0; i < num_variables; i = i + 1) {
+				if (((Integer)values.get(i)).equals(0))
+					values.put(i, i);
+			}
+
+			for (i = 0; i < num_variables; i = i + 1) {
+				if (((Integer)values.get(i)).equals(0))
+					continue;
+				out "v " + ((Integer)values.get(i)).toString() + newline;
+			}
+		}
+		
+		return null;
+	}
+	
 	Object initialize() {
-		Node root;
 		State state;
 		Integer num_variables;
 
 		state = new State();
+		state.readDimac();
 
 		num_variables = state.num_variables;
 
-		root = new Node(null, 0, 0);
+		this.root = new Node(null, 0, 0);
 
-		root.state = state;
+		this.root.state = state;
 		
 		return null;
 	}
 
-	Integer dpl(Node n) {
+	Node simplify(Node node, Integer literal, Integer value) {
+		Node child;
+
+		child = new Node(node, literal, value);
+
+		return child.simplifyState();
+	}
+
+	Node dpl(Node node) {
+		Integer unit_literal, unit_value, next_unassigned,
+			empty_clause, num_clauses, num_variables;
+		Node retval, child1, child2;
+		State state;
+
+		retval = null;
+		state = node.state;
+
+		num_clauses = state.num_clauses;
+		num_variables = state.num_variables;
+		unit_literal = state.unit_literal;
+		unit_value = state.unit_value;
+		next_unassigned = state.next_unassigned;
+		empty_clause = state.empty_clause;
+
+		if (!empty_clause.equals(0)) {
+			// empty clause, return false
+		} else if (num_clauses.equals(0)) {
+			// no clauses, return true
+			this.printSolution(node);
+			return null;
+		} else if (!unit_literal.equals(-1)) {
+			// unit clause, simplify
+			child1 = this.simplify(node, unit_literal, unit_value);
+			retval = this.dpl(child1);
+		} else if (next_unassigned <= num_variables) {
+			// assign next unassigned literal
+			child1 = new Node(node, next_unassigned, 0);
+			child2 = new Node(node, next_unassigned, 1);
+
+			if (retval == null)
+				retval = this.dpl(child1.simplifyState());
+		}
+
+		return retval;
+	}
+
+	Integer _main() {
 		Integer retval;
 
 		retval = 0;
 		initialize();
+
+		this.dpl(this.root);
+		
 		return retval;
 	}
 }
 
 Integer main() {
-	return 0;
+	DPL dpl;
+
+	dpl = new DPL();
+	
+	return dpl._main();
 }
