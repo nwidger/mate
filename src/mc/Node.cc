@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <10 May 2011 at 22:31:35 by nwidger on macros.local>
+// Time-stamp: <30 Sep 2012 at 15:50:26 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -1815,6 +1815,66 @@ Node * IfThenElseStatementNode::analyze(void *param) {
 	localVariableStack->enterBlock();
 	elseStatement = (StatementNode *)elseStatement->analyze(param);
 	localVariableStack->leaveBlock();
+
+	return (Node *)this;
+}
+
+ForStatementNode::ForStatementNode(ExpressionNode *i, ExpressionNode *c, ExpressionNode *u, StatementNode *b) {
+	init = i;
+	condition = c;
+	update = u;
+	body = b;
+	initLabel = 0;
+	entryLabel = 0;
+	exitLabel = 0;
+	nodeName = "ForStatementNode";
+}
+
+ForStatementNode::~ForStatementNode() {
+	if (init != 0)
+		delete init;
+	if (condition != 0)
+		delete condition;
+	if (update != 0)
+		delete update;
+	if (body != 0)
+		delete body;
+}
+
+void ForStatementNode::dump() {
+	StatementNode::dump();
+	init->dump();
+	condition->dump();
+	update->dump();
+	body->dump();
+}
+
+Node * ForStatementNode::analyze(void *param) {
+	LabelStackRecord *lsr;
+
+	labelCounter++;
+	initLabel = labelCounter-1;
+
+	lsr = labelStack->push();
+
+	entryLabel = lsr->getEntryLabel();
+	exitLabel = lsr->getExitLabel();
+
+	init = (ExpressionNode *)init->analyze(param);
+	condition = (ExpressionNode *)condition->analyze(param);
+	update = (ExpressionNode *)update->analyze(param);
+
+	if (condition->getType() != types->classTable()->find("Integer")) {
+		cerr << line << ": expression of a while statement must be of"
+		     << " Integer type!\n";
+		err = true;
+	}
+
+	localVariableStack->enterBlock();
+	body = (StatementNode *)body->analyze(param);
+	localVariableStack->leaveBlock();
+
+	labelStack->pop();
 
 	return (Node *)this;
 }

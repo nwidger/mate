@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <10 May 2011 at 22:27:48 by nwidger on macros.local>
+// Time-stamp: <30 Sep 2012 at 15:39:53 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -285,6 +285,21 @@ void IfThenElseStatementNode::encode() {
 	     << label << elseLabel << ":\n";
 	elseStatement->encode();
 	cout << label << endLabel << ":\n";
+}
+
+void ForStatementNode::encode() {
+	Node::encode();
+
+	init->encode();
+	cout << "  goto $" << label << initLabel << '\n';
+	cout << *entryLabel << ":\n";
+	update->encode();
+	cout << label << initLabel << ":\n";
+	condition->encode();
+	cout << "  ifeq $" << *exitLabel << '\n';
+	body->encode();
+	cout << " goto $" << *entryLabel << '\n'
+	     << *exitLabel << ":\n";
 }
 
 void WhileStatementNode::encode() {

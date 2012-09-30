@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <03 Sep 2012 at 21:48:12 by nwidger on macros.local>
+ * Time-stamp: <26 Sep 2012 at 19:16:43 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -193,7 +193,7 @@ int string_to_integer(struct object *o) {
 		mvm_halt();
 	}
 
-	if (value > INTEGER_MAX_INTEGER || value < INTEGER_MIN_INTEGER) {
+	if (abs(value) > INTEGER_MAX_INTEGER || abs(value) < INTEGER_MIN_INTEGER) {
 		fprintf(stderr, "mvm: String integer value out of range!\n");
 		mvm_halt();
 	}

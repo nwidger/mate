@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <10 May 2011 at 22:26:50 by nwidger on macros.local>
+// Time-stamp: <30 Sep 2012 at 15:31:25 by nwidger on macros.local>
 
 #ifndef _NODE_H
 #define _NODE_H
@@ -626,6 +626,23 @@ protected:
 	StatementNode *elseStatement;
 	int elseLabel;
 	int endLabel;
+};
+
+class ForStatementNode : public StatementNode {
+public:
+	ForStatementNode(ExpressionNode *i, ExpressionNode *c, ExpressionNode *u, StatementNode *b);
+	~ForStatementNode();
+	void dump();
+	void encode();
+	Node * analyze(void *param);
+protected:
+	ExpressionNode *init;
+	ExpressionNode *condition;
+	ExpressionNode *update;
+	StatementNode *body;
+	int initLabel;
+	string *entryLabel;
+	string *exitLabel;
 };
 
 class WhileStatementNode : public StatementNode {

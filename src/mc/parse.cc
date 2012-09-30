@@ -145,7 +145,7 @@
 
 // Niels Widger
 // CS 712
-// Time-stamp: <26 Apr 2012 at 19:28:11 by nwidger on macros.local>
+// Time-stamp: <30 Sep 2012 at 15:34:00 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -606,15 +606,15 @@ static const yytype_uint16 yyrline[] =
      451,   455,   462,   466,   473,   481,   489,   493,   500,   507,
      511,   518,   522,   529,   533,   537,   541,   545,   550,   554,
      558,   562,   566,   570,   574,   578,   585,   592,   600,   604,
-     611,   619,   627,   635,   654,   660,   666,   671,   677,   683,
-     689,   697,   701,   708,   715,   722,   729,   736,   744,   751,
-     755,   762,   769,   773,   780,   787,   791,   798,   802,   806,
-     813,   817,   822,   829,   833,   840,   844,   848,   852,   856,
-     863,   867,   871,   878,   882,   886,   893,   898,   902,   909,
-     913,   920,   924,   928,   932,   936,   940,   944,   948,   955,
-     962,   970,   977,   984,   991,   995,  1002,  1006,  1010,  1017,
-    1021,  1028,  1032,  1039,  1046,  1050,  1054,  1058,  1065,  1072,
-    1076,  1080,  1084,  1088,  1092,  1096,  1103
+     611,   619,   627,   635,   643,   649,   655,   660,   666,   672,
+     678,   686,   690,   697,   704,   711,   718,   725,   733,   740,
+     744,   751,   758,   762,   769,   776,   780,   787,   791,   795,
+     802,   806,   811,   818,   822,   829,   833,   837,   841,   845,
+     852,   856,   860,   867,   871,   875,   882,   887,   891,   898,
+     902,   909,   913,   917,   921,   925,   929,   933,   937,   944,
+     951,   959,   966,   973,   980,   984,   991,   995,   999,  1006,
+    1010,  1017,  1021,  1028,  1035,  1039,  1043,  1047,  1054,  1061,
+    1065,  1069,  1073,  1077,  1081,  1085,  1092
 };
 #endif
 
@@ -2352,68 +2352,57 @@ yyreduce:
   case 73:
 #line 636 "parse.yy"
     {
-	  BlockStatementNode *retval, *body;
-
-	  body = new BlockStatementNode();
-	  body->add((yyvsp[(7) - (9)].node));
-	  body->add((yyvsp[(9) - (9)].stmnt));
-
-	  retval = new BlockStatementNode();
-	  retval->add(new WhileStatementNode((yyvsp[(5) - (9)].expr), body));
-	  retval->add((yyvsp[(3) - (9)].node));
-
-	  retval->setLineNumber((yyloc).first_line);
-
-	  (yyval.stmnt) = retval;
+	  (yyval.stmnt) = new ForStatementNode((yyvsp[(3) - (9)].expr), (yyvsp[(5) - (9)].expr), (yyvsp[(7) - (9)].expr), (yyvsp[(9) - (9)].stmnt));
+	  (yyval.stmnt)->setLineNumber((yyloc).first_line);
 	}
     break;
 
   case 74:
-#line 655 "parse.yy"
+#line 644 "parse.yy"
     {
-	  (yyval.node) = (yyvsp[(1) - (1)].expr);
+	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	  ((ExpressionNode *)(yyvsp[(1) - (1)].expr))->setIsStatement(true);
 	}
     break;
 
   case 75:
-#line 660 "parse.yy"
+#line 649 "parse.yy"
     {
-          (yyval.node) = new BlockStatementNode(new Seq(0, 0));
+          (yyval.expr) = new ExpressionNode();
 	}
     break;
 
   case 76:
-#line 667 "parse.yy"
+#line 656 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	}
     break;
 
   case 77:
-#line 671 "parse.yy"
+#line 660 "parse.yy"
     {
           (yyval.expr) = new IntegerLiteralNode(1);
 	}
     break;
 
   case 78:
-#line 678 "parse.yy"
+#line 667 "parse.yy"
     {
-	  (yyval.node) = (yyvsp[(1) - (1)].expr);
+	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	  ((ExpressionNode *)(yyvsp[(1) - (1)].expr))->setIsStatement(true);
 	}
     break;
 
   case 79:
-#line 683 "parse.yy"
+#line 672 "parse.yy"
     {
-          (yyval.node) = new BlockStatementNode(new Seq(0, 0));
+          (yyval.expr) = new ExpressionNode();
 	}
     break;
 
   case 80:
-#line 690 "parse.yy"
+#line 679 "parse.yy"
     {
 	  (yyval.stmnt) = new WhileStatementNode((yyvsp[(2) - (3)].expr), (yyvsp[(3) - (3)].stmnt));
 	  (yyval.stmnt)->setLineNumber((yyloc).first_line);
@@ -2421,49 +2410,49 @@ yyreduce:
     break;
 
   case 81:
-#line 698 "parse.yy"
+#line 687 "parse.yy"
     {
 	  (yyval.stmnt) = new ReturnStatementNode();
 	}
     break;
 
   case 82:
-#line 702 "parse.yy"
+#line 691 "parse.yy"
     {
 	  (yyval.stmnt) = new ReturnStatementNode((yyvsp[(2) - (3)].expr));
 	}
     break;
 
   case 83:
-#line 709 "parse.yy"
+#line 698 "parse.yy"
     {
 	  (yyval.stmnt) = new OutStatementNode((yyvsp[(2) - (3)].expr));
 	}
     break;
 
   case 84:
-#line 716 "parse.yy"
+#line 705 "parse.yy"
     {
 	  (yyval.stmnt) = new BreakStatementNode();
 	}
     break;
 
   case 85:
-#line 723 "parse.yy"
+#line 712 "parse.yy"
     {
 	  (yyval.stmnt) = new ContinueStatementNode();
 	}
     break;
 
   case 86:
-#line 730 "parse.yy"
+#line 719 "parse.yy"
     {
 	  (yyval.stmnt) = new StatementNode();
 	}
     break;
 
   case 87:
-#line 737 "parse.yy"
+#line 726 "parse.yy"
     {
 	  (yyvsp[(2) - (3)].expr)->setIsParenthesized(true);
 	  (yyval.expr) = (yyvsp[(2) - (3)].expr);
@@ -2471,98 +2460,98 @@ yyreduce:
     break;
 
   case 88:
-#line 745 "parse.yy"
+#line 734 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (2)].expr);
 	}
     break;
 
   case 89:
-#line 752 "parse.yy"
+#line 741 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	}
     break;
 
   case 90:
-#line 756 "parse.yy"
+#line 745 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	}
     break;
 
   case 91:
-#line 763 "parse.yy"
+#line 752 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	}
     break;
 
   case 92:
-#line 770 "parse.yy"
+#line 759 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	}
     break;
 
   case 93:
-#line 774 "parse.yy"
+#line 763 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	}
     break;
 
   case 94:
-#line 781 "parse.yy"
+#line 770 "parse.yy"
     {
 	  (yyval.expr) = new AssignmentOperatorNode((yyvsp[(1) - (3)].expr), (yyvsp[(3) - (3)].expr));
 	}
     break;
 
   case 95:
-#line 788 "parse.yy"
+#line 777 "parse.yy"
     {
 	  (yyval.expr) = new DerefNode(new VarNode((yyvsp[(1) - (1)].str)));
 	}
     break;
 
   case 96:
-#line 792 "parse.yy"
+#line 781 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	}
     break;
 
   case 97:
-#line 799 "parse.yy"
+#line 788 "parse.yy"
     {
 	  (yyval.expr) = new BooleanAndOperatorNode((yyvsp[(1) - (3)].expr), (yyvsp[(3) - (3)].expr));
 	}
     break;
 
   case 98:
-#line 803 "parse.yy"
+#line 792 "parse.yy"
     {
 	  (yyval.expr) = new BooleanOrOperatorNode((yyvsp[(1) - (3)].expr), (yyvsp[(3) - (3)].expr));
 	}
     break;
 
   case 99:
-#line 807 "parse.yy"
+#line 796 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	}
     break;
 
   case 100:
-#line 814 "parse.yy"
+#line 803 "parse.yy"
     {
 	  (yyval.expr) = new EqualityOperatorNode((yyvsp[(1) - (3)].expr), (yyvsp[(3) - (3)].expr));
 	}
     break;
 
   case 101:
-#line 818 "parse.yy"
+#line 807 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode(new EqualityOperatorNode((yyvsp[(1) - (3)].expr), (yyvsp[(3) - (3)].expr)),
 	           (yyvsp[(2) - (3)].str), new Seq(0, 0));
@@ -2570,105 +2559,105 @@ yyreduce:
     break;
 
   case 102:
-#line 823 "parse.yy"
+#line 812 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	}
     break;
 
   case 103:
-#line 830 "parse.yy"
+#line 819 "parse.yy"
     {
 	  (yyval.expr) = new InstanceOfExpressionNode((yyvsp[(1) - (3)].expr), (yyvsp[(3) - (3)].type));
 	}
     break;
 
   case 104:
-#line 834 "parse.yy"
+#line 823 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	}
     break;
 
   case 105:
-#line 841 "parse.yy"
+#line 830 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode((yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].str), new Seq(0, (yyvsp[(3) - (3)].expr)));
 	}
     break;
 
   case 106:
-#line 845 "parse.yy"
+#line 834 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode((yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].str), new Seq(0, (yyvsp[(3) - (3)].expr)));
 	}
     break;
 
   case 107:
-#line 849 "parse.yy"
+#line 838 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode((yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].str), new Seq(0, (yyvsp[(3) - (3)].expr)));
 	}
     break;
 
   case 108:
-#line 853 "parse.yy"
+#line 842 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode((yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].str), new Seq(0, (yyvsp[(3) - (3)].expr)));
 	}
     break;
 
   case 109:
-#line 857 "parse.yy"
+#line 846 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	}
     break;
 
   case 110:
-#line 864 "parse.yy"
+#line 853 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode((yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].str), new Seq(0, (yyvsp[(3) - (3)].expr)));
 	}
     break;
 
   case 111:
-#line 868 "parse.yy"
+#line 857 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode((yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].str), new Seq(0, (yyvsp[(3) - (3)].expr)));
 	}
     break;
 
   case 112:
-#line 872 "parse.yy"
+#line 861 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	}
     break;
 
   case 113:
-#line 879 "parse.yy"
+#line 868 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode((yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].str), new Seq(0, (yyvsp[(3) - (3)].expr)));
 	}
     break;
 
   case 114:
-#line 883 "parse.yy"
+#line 872 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode((yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].str), new Seq(0, (yyvsp[(3) - (3)].expr)));
 	}
     break;
 
   case 115:
-#line 887 "parse.yy"
+#line 876 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	}
     break;
 
   case 116:
-#line 894 "parse.yy"
+#line 883 "parse.yy"
     {
 	  (yyvsp[(2) - (2)].expr)->setParentIsNegate(true);
 	  (yyval.expr) = new MethodInvocationExpressionNode((yyvsp[(2) - (2)].expr), (yyvsp[(1) - (2)].str), new Seq(0, 0));
@@ -2676,98 +2665,98 @@ yyreduce:
     break;
 
   case 117:
-#line 899 "parse.yy"
+#line 888 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode((yyvsp[(2) - (2)].expr), (yyvsp[(1) - (2)].str), new Seq(0, 0));
 	}
     break;
 
   case 118:
-#line 903 "parse.yy"
+#line 892 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	}
     break;
 
   case 119:
-#line 910 "parse.yy"
+#line 899 "parse.yy"
     {
 	  (yyval.expr) = new CastExpressionNode((yyvsp[(1) - (2)].expr), (yyvsp[(2) - (2)].expr));
 	}
     break;
 
   case 120:
-#line 914 "parse.yy"
+#line 903 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	}
     break;
 
   case 121:
-#line 921 "parse.yy"
+#line 910 "parse.yy"
     {
 	  (yyval.expr) = new DerefNode(new VarNode((yyvsp[(1) - (1)].str)));
 	}
     break;
 
   case 122:
-#line 925 "parse.yy"
+#line 914 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	}
     break;
 
   case 123:
-#line 929 "parse.yy"
+#line 918 "parse.yy"
     {
 	  (yyval.expr) = new ThisExpressionNode();
 	}
     break;
 
   case 124:
-#line 933 "parse.yy"
+#line 922 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	}
     break;
 
   case 125:
-#line 937 "parse.yy"
+#line 926 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	}
     break;
 
   case 126:
-#line 941 "parse.yy"
+#line 930 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	}
     break;
 
   case 127:
-#line 945 "parse.yy"
+#line 934 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	}
     break;
 
   case 128:
-#line 949 "parse.yy"
+#line 938 "parse.yy"
     {
 	  (yyval.expr) = (yyvsp[(1) - (1)].expr);
 	}
     break;
 
   case 129:
-#line 956 "parse.yy"
+#line 945 "parse.yy"
     {
 	  (yyval.expr) = new InExpressionNode();
 	}
     break;
 
   case 130:
-#line 963 "parse.yy"
+#line 952 "parse.yy"
     {
 	  (yyval.expr) = new ClassInstanceCreationExpressionNode((yyvsp[(2) - (3)].type)->getName(), (yyvsp[(3) - (3)].seq));
 	  delete (yyvsp[(2) - (3)].type);
@@ -2775,182 +2764,182 @@ yyreduce:
     break;
 
   case 131:
-#line 971 "parse.yy"
+#line 960 "parse.yy"
     {
 	  (yyval.type) = (yyvsp[(1) - (1)].type);
 	}
     break;
 
   case 132:
-#line 978 "parse.yy"
+#line 967 "parse.yy"
     {
 	  (yyval.type) = (yyvsp[(1) - (1)].type);
 	}
     break;
 
   case 133:
-#line 985 "parse.yy"
+#line 974 "parse.yy"
     {
 	  (yyval.type) = new ClassType((yyvsp[(1) - (1)].str));
 	}
     break;
 
   case 134:
-#line 992 "parse.yy"
+#line 981 "parse.yy"
     {
 	  (yyval.expr) = new DerefNode(new FieldAccessOperatorNode((yyvsp[(1) - (3)].expr), (yyvsp[(3) - (3)].str)));
 	}
     break;
 
   case 135:
-#line 996 "parse.yy"
+#line 985 "parse.yy"
     {
 	  (yyval.expr) = new DerefNode(new FieldAccessOperatorNode(new SuperExpressionNode(), (yyvsp[(3) - (3)].str)));
 	}
     break;
 
   case 136:
-#line 1003 "parse.yy"
+#line 992 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode(new ThisExpressionNode(), (yyvsp[(1) - (2)].str), (yyvsp[(2) - (2)].seq));
 	}
     break;
 
   case 137:
-#line 1007 "parse.yy"
+#line 996 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode((yyvsp[(1) - (4)].expr), (yyvsp[(3) - (4)].str), (yyvsp[(4) - (4)].seq));
 	}
     break;
 
   case 138:
-#line 1011 "parse.yy"
+#line 1000 "parse.yy"
     {
 	  (yyval.expr) = new MethodInvocationExpressionNode(new SuperExpressionNode(), (yyvsp[(3) - (4)].str), (yyvsp[(4) - (4)].seq));
 	}
     break;
 
   case 139:
-#line 1018 "parse.yy"
+#line 1007 "parse.yy"
     {
 	  (yyval.seq) = (yyvsp[(2) - (3)].seq);
 	}
     break;
 
   case 140:
-#line 1022 "parse.yy"
+#line 1011 "parse.yy"
     {
 	  (yyval.seq) = new Seq(0, 0);
 	}
     break;
 
   case 141:
-#line 1029 "parse.yy"
+#line 1018 "parse.yy"
     {
 	  (yyval.seq) = new Seq((yyvsp[(1) - (3)].seq), (yyvsp[(3) - (3)].expr));
 	}
     break;
 
   case 142:
-#line 1033 "parse.yy"
+#line 1022 "parse.yy"
     {
 	  (yyval.seq) = new Seq(0, (yyvsp[(1) - (1)].expr));
 	}
     break;
 
   case 143:
-#line 1040 "parse.yy"
+#line 1029 "parse.yy"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
 	}
     break;
 
   case 144:
-#line 1047 "parse.yy"
+#line 1036 "parse.yy"
     {
 	  (yyval.expr) = new IntegerLiteralNode((yyvsp[(1) - (1)].value));
 	}
     break;
 
   case 145:
-#line 1051 "parse.yy"
+#line 1040 "parse.yy"
     {
 	  (yyval.expr) = new RealLiteralNode((yyvsp[(1) - (1)].float_value));
 	}
     break;
 
   case 146:
-#line 1055 "parse.yy"
+#line 1044 "parse.yy"
     {
 	  (yyval.expr) = new NullLiteralNode();
 	}
     break;
 
   case 147:
-#line 1059 "parse.yy"
+#line 1048 "parse.yy"
     {
 	  (yyval.expr) = new StringLiteralNode((yyvsp[(1) - (1)].str));
 	}
     break;
 
   case 148:
-#line 1066 "parse.yy"
+#line 1055 "parse.yy"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
 	}
     break;
 
   case 149:
-#line 1073 "parse.yy"
+#line 1062 "parse.yy"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
 	}
     break;
 
   case 150:
-#line 1077 "parse.yy"
+#line 1066 "parse.yy"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
 	}
     break;
 
   case 151:
-#line 1081 "parse.yy"
+#line 1070 "parse.yy"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
 	}
     break;
 
   case 152:
-#line 1085 "parse.yy"
+#line 1074 "parse.yy"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
 	}
     break;
 
   case 153:
-#line 1089 "parse.yy"
+#line 1078 "parse.yy"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
 	}
     break;
 
   case 154:
-#line 1093 "parse.yy"
+#line 1082 "parse.yy"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
 	}
     break;
 
   case 155:
-#line 1097 "parse.yy"
+#line 1086 "parse.yy"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
 	}
     break;
 
   case 156:
-#line 1104 "parse.yy"
+#line 1093 "parse.yy"
     {
 	  (yyval.str) = (yyvsp[(1) - (1)].str);
 	}
@@ -2958,7 +2947,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 2962 "parse.cc"
+#line 2951 "parse.cc"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -3178,7 +3167,7 @@ yyreturn:
 }
 
 
-#line 1109 "parse.yy"
+#line 1098 "parse.yy"
 
 
 void yyerror(const char *s) {

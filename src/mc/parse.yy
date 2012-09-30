@@ -2,7 +2,7 @@
 
 // Niels Widger
 // CS 712
-// Time-stamp: <26 Apr 2012 at 19:28:11 by nwidger on macros.local>
+// Time-stamp: <30 Sep 2012 at 15:34:00 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -145,9 +145,9 @@ extern TypeModule *types;
 %type <stmnt> IfThenElseStatement
 %type <stmnt> WhileStatement
 %type <stmnt> ForStatement
-%type <node> ForInit
+%type <expr> ForInit
 %type <expr> ForExpression
-%type <node> ForUpdate
+%type <expr> ForUpdate
 %type <stmnt> ReturnStatement
 %type <stmnt> OutputStatement
 %type <stmnt> BreakStatement
@@ -634,19 +634,8 @@ IfThenElseStatement
 ForStatement
 	: FOR '(' ForInit ';' ForExpression ';' ForUpdate ')' Statement
 	{
-	  BlockStatementNode *retval, *body;
-
-	  body = new BlockStatementNode();
-	  body->add($7);
-	  body->add($9);
-
-	  retval = new BlockStatementNode();
-	  retval->add(new WhileStatementNode($5, body));
-	  retval->add($3);
-
-	  retval->setLineNumber(@$.first_line);
-
-	  $$ = retval;
+	  $$ = new ForStatementNode($3, $5, $7, $9);
+	  $$->setLineNumber(@$.first_line);
 	}
 	;
 
@@ -658,7 +647,7 @@ ForInit
 	}
 	| /* null */
 	{
-          $$ = new BlockStatementNode(new Seq(0, 0));
+          $$ = new ExpressionNode();
 	}
 	;
 
@@ -681,7 +670,7 @@ ForUpdate
 	}
 	| /* null */
 	{
-          $$ = new BlockStatementNode(new Seq(0, 0));
+          $$ = new ExpressionNode();
 	}
 	;
 

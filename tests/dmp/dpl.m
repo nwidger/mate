@@ -34,7 +34,7 @@ class Clause {
 			lit = (Integer)this.literals.get(i);
 
 			if (!lit.equals(literal) && !lit.equals(-literal)) {
-				i = i + 1;
+				// i = i + 1;
 				continue;
 			}
 
@@ -129,7 +129,7 @@ class State {
 	Object readDimac() {
 		String str;
 		Clause clause;
-		Integer i, n, literal, count;
+		Integer i, n, p, literal, count;
 
 		count = 0;
 
@@ -161,10 +161,13 @@ class State {
 			} else {
 				clause = new Clause(this.num_variables);
 
-				clause.literals.put(0, str.toInteger());
+				p = str.toInteger();
+				clause.literals.put(0, p);
 				
 				for (n = 1; (str = in) != null && !str.equals("0"); n = n + 1) {
-					clause.literals.put(n, str.toInteger());
+					p = str.toInteger();
+					clause.literals.put(n, p);
+					this.literals.put(abs(p), ((Integer)this.literals.get(abs(p))) + 1);
 				}
 
 				clause.size = n;
@@ -178,17 +181,18 @@ class State {
 		this.unit_value = 0;
 		this.empty_clause = 0;
 
-		clause = (Clause)this.clauses.get(0);
+		for (i = 0; i < this.clauses_size; i = i + 1) {
+			clause = (Clause)this.clauses.get(i);
 
-		if (clause.size.equals(0)) {
-			this.empty_clause = 1;
-		} else if (clause.size.equals(1)) {
-			this.unit_literal = (Integer)clause.literals.get(0);
-			if (this.unit_literal < 0) this.unit_value = 0;
-			else this.unit_value = 1;
-			this.unit_literal = abs(this.unit_literal);
+			if (clause.size.equals(0)) {
+				this.empty_clause = 1;
+			} else if (clause.size.equals(1)) {
+				this.unit_literal = (Integer)clause.literals.get(0);
+				if (this.unit_literal < 0) this.unit_value = 0;
+				else this.unit_value = 1;
+				this.unit_literal = abs(this.unit_literal);
+			}
 		}
-
 
 		for (i = 1; i < this.literals_size; i = i + 1) {
 			literal = (Integer)this.literals.get(i);
@@ -228,7 +232,7 @@ class State {
 			clause = (Clause)this.clauses.get(i);
 
 			if (clause.removed || clause.size.equals(0)) {
-				i = i + 1;
+				// i = i + 1;
 				continue;
 			}
 
@@ -237,7 +241,7 @@ class State {
 
 			if (clause.removed) {
 				this.num_clauses = this.num_clauses - 1;
-				i = i + 1;
+				// i = i + 1;
 				continue;
 			}
 
@@ -538,7 +542,7 @@ class DPL {
 
 			for (i = 0; i < num_variables; i = i + 1) {
 				if (((Integer)values.get(i)).equals(0)) {
-					i = i + 1;
+					// i = i + 1;
 					continue;
 				}
 				out "v " + ((Integer)values.get(i)).toString() + newline;
@@ -587,6 +591,13 @@ class DPL {
 		unit_value = state.unit_value;
 		next_unassigned = state.next_unassigned;
 		empty_clause = state.empty_clause;
+
+		// out "num_clauses = " + num_clauses.toString() + newline;
+		// out "num_variables = " + num_variables.toString() + newline;
+		// out "unit_literal = " + unit_literal.toString() + newline;
+		// out "unit_value = " + unit_value.toString() + newline;
+		// out "next_unassigned = " + next_unassigned.toString() + newline;
+		// out "empty_clause = " + empty_clause.toString() + newline;
 
 		if (!empty_clause.equals(0)) {
 			// empty clause, return false
