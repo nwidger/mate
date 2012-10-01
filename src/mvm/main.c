@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <25 Jun 2012 at 20:12:58 by nwidger on macros.local>
+ * Time-stamp: <01 Oct 2012 at 19:56:07 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -139,6 +139,7 @@ void usage() {
 
 int mvm_initialize(uint64_t h) {
 	char *buf;
+	struct stat stat_buf;
 	int len, max_native_index;
 
 	input = stdin;
@@ -230,7 +231,14 @@ int mvm_initialize(uint64_t h) {
 	    symbol_table_load_dump(symbol_table, symbol_file) != 0)
 		return 1;
 
-	if (access(class_file, F_OK) != 0) {
+	memset(&stat_buf, 0, sizeof(stat_buf));
+
+	if (stat(class_file, &stat_buf) != 0) {
+		perror("stat");
+		return 1;
+	}
+	
+	if (!S_ISREG(stat_buf.st_mode) || access(class_file, F_OK) != 0) {
 		len = strlen(class_file);
 		if ((buf = (char *)malloc(len + strlen(".class") + 1)) == NULL) {
 			perror("malloc");

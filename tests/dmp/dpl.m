@@ -14,7 +14,9 @@ class Clause {
 		this.mutex = new Object();
 
 		this.size = size;
-		this.literals = new Table(this.size);
+
+		if (!this.size.equals(0))
+			this.literals = new Table(this.size);
 
 		this.removed = 0;
 	}
@@ -34,7 +36,6 @@ class Clause {
 			lit = (Integer)this.literals.get(i);
 
 			if (!lit.equals(literal) && !lit.equals(-literal)) {
-				// i = i + 1;
 				continue;
 			}
 
@@ -232,7 +233,6 @@ class State {
 			clause = (Clause)this.clauses.get(i);
 
 			if (clause.removed || clause.size.equals(0)) {
-				// i = i + 1;
 				continue;
 			}
 
@@ -241,7 +241,6 @@ class State {
 
 			if (clause.removed) {
 				this.num_clauses = this.num_clauses - 1;
-				// i = i + 1;
 				continue;
 			}
 
@@ -542,7 +541,6 @@ class DPL {
 
 			for (i = 0; i < num_variables; i = i + 1) {
 				if (((Integer)values.get(i)).equals(0)) {
-					// i = i + 1;
 					continue;
 				}
 				out "v " + ((Integer)values.get(i)).toString() + newline;
@@ -582,6 +580,8 @@ class DPL {
 		Node retval, child1, child2;
 		State state;
 
+		out "        in DPL(" + node.hashCode().toString() + ")" + newline;
+
 		retval = null;
 		state = node.state;
 
@@ -592,27 +592,34 @@ class DPL {
 		next_unassigned = state.next_unassigned;
 		empty_clause = state.empty_clause;
 
-		// out "num_clauses = " + num_clauses.toString() + newline;
-		// out "num_variables = " + num_variables.toString() + newline;
-		// out "unit_literal = " + unit_literal.toString() + newline;
-		// out "unit_value = " + unit_value.toString() + newline;
-		// out "next_unassigned = " + next_unassigned.toString() + newline;
-		// out "empty_clause = " + empty_clause.toString() + newline;
+		out "num_clauses = " + num_clauses.toString() + newline;
+		out "num_variables = " + num_variables.toString() + newline;
+		out "unit_literal = " + unit_literal.toString() + newline;
+		out "unit_value = " + unit_value.toString() + newline;
+		out "next_unassigned = " + next_unassigned.toString() + newline;
+		out "empty_clause = " + empty_clause.toString() + newline;
 
 		if (!empty_clause.equals(0)) {
 			// empty clause, return false
+			out "        empty clause found" + newline;
 		} else if (num_clauses.equals(0)) {
 			// no clauses, return true
+			out "        num_clauses == 0" + newline;
 			this.printSolution(node);
 			return null;
 		} else if (!unit_literal.equals(-1)) {
 			// unit clause, simplify
+			out "        unit literal found, l = " + unit_literal.toString() +
+				", v = " + unit_value.toString() + newline;
 			child1 = this.simplify(node, unit_literal, unit_value);
 			retval = this.dpl(child1);
 		} else if (next_unassigned <= num_variables) {
 			// assign next unassigned literal
+			out "        assigning next unassigned = " + next_unassigned.toString() + newline;
 			child1 = new Node(node, next_unassigned, 0);
 			child2 = new Node(node, next_unassigned, 1);
+
+			retval = this.dpl(child2.simplifyState());
 
 			if (retval == null)
 				retval = this.dpl(child1.simplifyState());
