@@ -21,6 +21,25 @@ class Clause {
 		this.removed = 0;
 	}
 
+	String toString() {
+		Integer i;
+		String str;
+		
+		if (this.removed) {
+			str = "[ removed ]";
+		} else {
+			str = "[";
+			
+			for (i = 0; i < this.size; i = i + 1) {
+				str = str + " " + ((Integer)this.literals.get(i)).toString() + " ";
+			}
+			
+			str = str + "]";
+		}
+
+		return str;
+	}
+	
 	Integer abs(Integer a) {
 		if (a < 0) return -a;
 		return a;
@@ -29,6 +48,8 @@ class Clause {
 	Clause assignLiteral(State state, Integer literal, Integer value) {
 		Clause nc;
 		Integer i, j, lit, size;
+
+		// out "in assignLiteral, clause = " + this.toString() + newline;
 
 		nc = this;
 
@@ -127,6 +148,28 @@ class State {
 		}
 	}
 
+	String toString() {
+		Integer i;
+		String str;
+
+		str = "[";
+
+		str = str + "|" + "num_clauses=" + num_clauses.toString() + ",";
+		str = str + "num_variables=" + num_variables.toString() + ",";
+		str = str + "unit_literal=" + unit_literal.toString() + ",";
+		str = str + "unit_value=" + unit_value.toString() + ",";
+		str = str + "next_unassigned=" + next_unassigned.toString() + ",";
+		str = str + "empty_clause=" + empty_clause.toString() + "| ";
+
+		for (i = 0; i < this.literals_size; i = i + 1) {
+			str = str + ((Integer)this.literals.get(i)).toString() + " ";
+		}
+
+		str = str + "]";
+
+		return str;
+	}
+	
 	Object readDimac() {
 		String str;
 		Clause clause;
@@ -164,11 +207,14 @@ class State {
 
 				p = str.toInteger();
 				clause.literals.put(0, p);
+				p = abs(p);
+				this.literals.put(p, ((Integer)this.literals.get(p)) + 1);
 				
 				for (n = 1; (str = in) != null && !str.equals("0"); n = n + 1) {
 					p = str.toInteger();
 					clause.literals.put(n, p);
-					this.literals.put(abs(p), ((Integer)this.literals.get(abs(p))) + 1);
+					p = abs(p);
+					this.literals.put(p, ((Integer)this.literals.get(p)) + 1);
 				}
 
 				clause.size = n;
@@ -210,14 +256,19 @@ class State {
 		if (a < 0) return -a;
 		return a;
 	}
-
-	Object incrementLiteral(Integer literal) {
-		this.literals.put(literal, ((Integer)this.literals.get(literal)) + 1);
-		return null;
-	}
 	
 	Object decrementLiteral(Integer literal) {
-		this.literals.put(literal, ((Integer)this.literals.get(literal)) - 1);
+		Integer l;
+
+		l = (Integer)this.literals.get(literal);
+
+		if ((l - 1) < 0) {
+			out "ERROR: Literal must be non-negative!" + newline;
+		}
+
+		this.literals.put(literal, l - 1);
+
+		
 		return null;
 	}
 
@@ -278,6 +329,12 @@ class Node {
 
 	Node parent;
 	State state;
+
+	Integer solved;
+
+	Node() {
+		this.solved = 0;
+	}
 	
 	Node(Node parent, Integer literal, Integer value) {
 		this.mutex = new Object();
@@ -580,7 +637,7 @@ class DPL {
 		Node retval, child1, child2;
 		State state;
 
-		out "        in DPL(" + node.hashCode().toString() + ")" + newline;
+		// out "        in DPL(" + node.hashCode().toString() + ")" + newline;
 
 		retval = null;
 		state = node.state;
@@ -592,30 +649,38 @@ class DPL {
 		next_unassigned = state.next_unassigned;
 		empty_clause = state.empty_clause;
 
-		out "num_clauses = " + num_clauses.toString() + newline;
-		out "num_variables = " + num_variables.toString() + newline;
-		out "unit_literal = " + unit_literal.toString() + newline;
-		out "unit_value = " + unit_value.toString() + newline;
-		out "next_unassigned = " + next_unassigned.toString() + newline;
-		out "empty_clause = " + empty_clause.toString() + newline;
+		// out state.toString() + newline + newline;
+
+		if (num_clauses.equals(1)) {
+			Clause c;
+			Integer i;
+
+			for (i = 0; i < state.clauses_size; i = i + 1) {
+				c = (Clause)state.clauses.get(i);
+				if (c.removed || c.size.equals(0)) continue;
+				out c.toString() + newline;
+			}
+		}
 
 		if (!empty_clause.equals(0)) {
 			// empty clause, return false
-			out "        empty clause found" + newline;
+			// out "        empty clause found" + newline;
 		} else if (num_clauses.equals(0)) {
 			// no clauses, return true
-			out "        num_clauses == 0" + newline;
+			// out "        num_clauses == 0" + newline;
 			this.printSolution(node);
-			return null;
+			retval = new Node();
+			retval.solved = 1;
+			return retval;
 		} else if (!unit_literal.equals(-1)) {
 			// unit clause, simplify
-			out "        unit literal found, l = " + unit_literal.toString() +
-				", v = " + unit_value.toString() + newline;
+			// out "        unit literal found, l = " + unit_literal.toString() +
+			// 	", v = " + unit_value.toString() + newline;
 			child1 = this.simplify(node, unit_literal, unit_value);
 			retval = this.dpl(child1);
 		} else if (next_unassigned <= num_variables) {
 			// assign next unassigned literal
-			out "        assigning next unassigned = " + next_unassigned.toString() + newline;
+			// out "        assigning next unassigned = " + next_unassigned.toString() + newline;
 			child1 = new Node(node, next_unassigned, 0);
 			child2 = new Node(node, next_unassigned, 1);
 
