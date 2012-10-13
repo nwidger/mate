@@ -471,18 +471,88 @@ class QueueList {
 	}
 }
 
-class RunQueue {
+class RunQueue extends Thread {
+	Integer index;
 	Integer size;
+	DPL dpl;
+	Integer stalled;
 	Table levels;
 
-	RunQueue(Integer size) {
+	RunQueue(Integer index, Integer size, DPL dpl) {
 		Integer i;
-		
+
+		this.index = index;
 		this.size = size;
+		this.dpl = dpl;
+		this.stalled = 0;
 		this.levels = new Table(this.size);
 
 		for (i = 0; i < this.size; i = i + 1) {
 			this.levels.put(i, new QueueList());
+		}
+	}
+
+	Object print(String str) {
+		out "[thread " + this.index.toString() + "] " + str + newline;
+		return null;
+	}
+	
+	Object run() {
+		Node node;
+		Integer i, thread;
+		RunQueue queue;
+
+		for (;;) {
+			synchronized (this.dpl.print_mutex) {
+				if (this.dpl.solved) {
+					break;
+				}
+			}
+			
+			node = this.remove();
+
+			if (node != null) {
+				// print("no steal necessary");
+			} else {
+				for (;;) {
+					this.stalled = 1;
+					for (i = 0; i < this.dpl.num_threads; i = i + 1) {
+						if (!(((RunQueue)this.dpl.runQueues.get(i)).stalled))
+							break;
+					}
+
+					// print("check stalled, i = " + i.toString());
+
+					if (i.equals(this.dpl.num_threads)) {
+						synchronized (this.dpl.print_mutex) {
+							print("no solution found");
+							return null;
+						}
+					}
+
+					i = i.rand().mod(this.dpl.num_threads);
+					if (i.equals(this.index))
+					    continue;
+
+					if (!this.dpl.random_steal)
+						node = ((RunQueue)this.dpl.runQueues.get(i)).steal();
+					else
+						node = ((RunQueue)this.dpl.runQueues.get(i)).stealRandom();
+
+					if (node != null) {
+						this.stalled = 0;
+						print("stole from " + i.toString());
+						break;
+					}
+
+					// this.sleep(10);
+				}
+			}
+
+			if (node == null)
+				continue;
+
+			node = this.dpl.dpl(node.simplifyState(), this.index);
 		}
 	}
 
@@ -541,8 +611,10 @@ class RunQueue {
 		Integer i;
 		QueueList list;
 
+		i = 0;
+
 		for (;;) {
-			i = 0; // i = rand() % this.size;
+			i = i.rand().mod(this.size);
 			list = (QueueList)this.levels.get(i);
 			if (!list.empty())
 				return list.removeLast();
@@ -554,10 +626,19 @@ class RunQueue {
 
 class DPL {
 	Node root;
+	Integer solved;
+	Integer num_threads;
+	Integer random_steal;
+	Integer parallel;
 	Object print_mutex;
+	Table runQueues;
 	
 	DPL() {
 		root = null;
+		solved = 0;
+		random_steal = 1;
+		parallel = 1;
+		num_threads = 2;
 		print_mutex = new Object();
 	}
 
@@ -567,7 +648,12 @@ class DPL {
 		Table values;
 		State state;
 
-		synchronized(this.print_mutex) {
+		synchronized (this.print_mutex) {
+			if (this.solved)
+				return null;
+
+			this.solved = 1;
+
 			state = child.state;
 			num_variables = state.num_variables;
 			num_clauses = state.clauses_size;
@@ -609,7 +695,7 @@ class DPL {
 	
 	Object initialize() {
 		State state;
-		Integer num_variables;
+		Integer i, num_variables;
 
 		state = new State();
 		state.readDimac();
@@ -619,6 +705,17 @@ class DPL {
 		this.root = new Node(null, 0, 0);
 
 		this.root.state = state;
+
+		this.parallel = 0;
+
+		if (this.parallel) {
+			this.num_threads = 2;
+			this.runQueues = new Table(num_threads);
+
+			for (i = 0; i < num_threads; i = i + 1) {
+				this.runQueues.put(i, new RunQueue(i, num_variables+1, this));
+			}
+		}
 		
 		return null;
 	}
@@ -631,7 +728,7 @@ class DPL {
 		return child.simplifyState();
 	}
 
-	Node dpl(Node node) {
+	Node dpl(Node node, Integer index) {
 		Integer unit_literal, unit_value, next_unassigned,
 			empty_clause, num_clauses, num_variables;
 		Node retval, child1, child2;
@@ -649,8 +746,6 @@ class DPL {
 		next_unassigned = state.next_unassigned;
 		empty_clause = state.empty_clause;
 
-		// out state.toString() + newline + newline;
-
 		if (num_clauses.equals(1)) {
 			Clause c;
 			Integer i;
@@ -658,7 +753,6 @@ class DPL {
 			for (i = 0; i < state.clauses_size; i = i + 1) {
 				c = (Clause)state.clauses.get(i);
 				if (c.removed || c.size.equals(0)) continue;
-				out c.toString() + newline;
 			}
 		}
 
@@ -677,29 +771,70 @@ class DPL {
 			// out "        unit literal found, l = " + unit_literal.toString() +
 			// 	", v = " + unit_value.toString() + newline;
 			child1 = this.simplify(node, unit_literal, unit_value);
-			retval = this.dpl(child1);
+			retval = this.dpl(child1, index);
 		} else if (next_unassigned <= num_variables) {
 			// assign next unassigned literal
 			// out "        assigning next unassigned = " + next_unassigned.toString() + newline;
 			child1 = new Node(node, next_unassigned, 0);
 			child2 = new Node(node, next_unassigned, 1);
 
-			retval = this.dpl(child2.simplifyState());
+			if (this.parallel) {
+				((RunQueue)this.runQueues.get(index)).enqueue(child1);
+			}
 
-			if (retval == null)
-				retval = this.dpl(child1.simplifyState());
+			retval = this.dpl(child2.simplifyState(), index);
+
+			if (!this.parallel) {
+				if (retval == null)
+					retval = this.dpl(child1.simplifyState(), index);
+			}
 		}
 
 		return retval;
 	}
 
 	Integer _main() {
+		Node node;
 		Integer retval;
 
 		retval = 0;
 		initialize();
 
-		this.dpl(this.root);
+		if (!this.parallel) {
+			node = this.dpl(this.root, 0);
+		} else {
+			State state;
+			RunQueue queue;
+			Integer i, unit_literal, unit_value, next_unassigned;
+			
+			state = root.state;
+
+			unit_literal = state.unit_literal;
+			unit_value = state.unit_value;
+			next_unassigned = state.next_unassigned;
+
+			queue = (RunQueue)this.runQueues.get(0);
+
+			if (!unit_literal.equals(-1)) {
+				queue.enqueue(this.simplify(root, unit_literal, unit_value));
+			} else {
+				queue.enqueue(this.simplify(root, next_unassigned, 0));
+				queue.enqueue(this.simplify(root, next_unassigned, 1));
+			}
+
+			for (i = 0; i < this.num_threads; i = i + 1) {
+				queue = (RunQueue)this.runQueues.get(i);
+				queue.start();
+			}
+
+			for (i = 0; i < this.num_threads; i = i + 1) {
+				queue = (RunQueue)this.runQueues.get(i);
+				queue.join();
+			}
+		}
+
+		if (node != null && !node.solved)
+			out "no solution found" + newline;
 		
 		return retval;
 	}

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Apr 2012 at 16:27:58 by nwidger on macros.local>
+ * Time-stamp: <09 Oct 2012 at 19:27:17 by nwidger on macros.local>
  */
 
 #ifndef _MVM_INTEGER_H
@@ -204,5 +204,16 @@ int integer_to_string(struct object *o);
  */
 
 int integer_mod(struct object *o, struct object *p);
+
+/** returns a reference to a new Integer object whose value is the
+ * integer value of the next sequence from the pseudo-random number
+ * generator.  o must be a pointer to an Integer objects.
+ *
+ * @param o - first Integer object
+ *
+ * @return reference to new Integer object, or 0 on failure
+ */
+
+int integer_rand(struct object *o);
 
 #endif

@@ -1,5 +1,5 @@
 // Niels Widger
-// Time-stamp: <30 Sep 2012 at 15:50:26 by nwidger on macros.local>
+// Time-stamp: <09 Oct 2012 at 19:02:45 by nwidger on macros.local>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -1657,6 +1657,7 @@ Node * SynchronizedStatementNode::analyze(void *param) {
 
 	statements = statements->analyze(param);
 
+	labelStack->removeMonitor();
 	localVariableStack->leaveBlock();
 	monitorStack->pop();
 
@@ -2068,7 +2069,7 @@ Node * BreakStatementNode::analyze(void *param) {
 	LabelStackRecord *lsr;
 
 	if ((lsr = labelStack->peek()) == 0) {
-		cerr << line << ": break statement is not enclosed in a while"
+		cerr << line << ": break statement is not enclosed in a while/for"
 		     << " statement!\n";
 		err = true;
 		exitLabel = &mainExitLabel;

@@ -37,6 +37,7 @@ class Integer extends Object {
 	native Integer hashCode();
 	native String toString();
 	native Integer mod(Integer i);
+	native Integer rand();
 }
 
 class String extends Object {

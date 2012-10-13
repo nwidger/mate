@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <03 Sep 2012 at 21:49:41 by nwidger on macros.local>
+ * Time-stamp: <09 Oct 2012 at 19:27:39 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -618,6 +618,28 @@ int native_integer_mod(uint32_t i) {
 	garbage_collector_lock(garbage_collector);
 
 	ref = integer_mod(this, object);
+	operand_stack_push(calling_frame_operand_stack, ref);
+
+	/* unlock */
+	garbage_collector_unlock(garbage_collector);
+
+	return 0;
+}
+
+int native_integer_rand(uint32_t i) {
+	int ref, n;
+	struct object *this, *object;
+
+	SETUP_NATIVE_METHOD();
+	n = 0;
+
+	ref = local_variable_array_load(local_variable_array, n++);
+	this = heap_fetch_object(heap, ref);
+
+	/* lock */
+	garbage_collector_lock(garbage_collector);
+
+	ref = integer_rand(this);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
@@ -1752,6 +1774,8 @@ int add_native_methods(struct native_method_array *n) {
 	native_method_array_set_method(n, "Integer$equals$Object", native_integer_equals);
 	native_method_array_set_method(n, "Integer$hashCode", native_integer_hash_code);
 	native_method_array_set_method(n, "Integer$toString", native_integer_to_string);
+	native_method_array_set_method(n, "Integer$mod$Integer", native_integer_mod);
+	native_method_array_set_method(n, "Integer$rand", native_integer_rand);
 
 	native_method_array_set_method(n, "String_constructor$String", native_string_constructor_string);
 	native_method_array_set_method(n, "String$length", native_string_length);

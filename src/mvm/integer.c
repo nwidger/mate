@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Apr 2012 at 16:27:26 by nwidger on macros.local>
+ * Time-stamp: <09 Oct 2012 at 19:26:43 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "class.h"
 #include "class_table.h"
@@ -338,6 +339,26 @@ int integer_mod(struct object *o, struct object *p) {
 	}
 
 	value = i->value % j->value;
+	if ((ref = class_table_new_integer(class_table, value, NULL)) == 0)
+		mvm_halt();
+
+	return ref;
+}
+
+int integer_rand(struct object *o) {
+	int ref;
+	int32_t value;
+	struct integer *i;
+
+	i = object_get_integer(o);
+
+	if (i == NULL) {
+		fprintf(stderr, "mvm: integer not initialized!\n");
+		mvm_halt();
+	}
+
+	srand(time(NULL));
+	value = rand();
 	if ((ref = class_table_new_integer(class_table, value, NULL)) == 0)
 		mvm_halt();
 
