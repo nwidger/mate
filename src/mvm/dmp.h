@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <29 Jan 2012 at 14:16:49 by nwidger on macros.local>
+ * Time-stamp: <15 Oct 2012 at 19:49:17 by nwidger on macros.local>
  */
 
 #ifndef _MVM_DMP_H
@@ -39,7 +39,7 @@ enum dmp_owner_action {
 struct dmp * dmp_create(struct object_dmp_attr *a,
 			struct thread_dmp_attr *t,
 			struct nlock_dmp_attr *n,
-			struct table_dmp_attr *tb);
+			struct table_dmp_attr *tb, int s);
 void dmp_destroy(struct dmp *d);
 void dmp_clear(struct dmp *d);
 int dmp_get_mode(struct dmp *d);

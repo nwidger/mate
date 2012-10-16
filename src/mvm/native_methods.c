@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <09 Oct 2012 at 19:27:39 by nwidger on macros.local>
+ * Time-stamp: <15 Oct 2012 at 19:51:55 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -628,7 +628,7 @@ int native_integer_mod(uint32_t i) {
 
 int native_integer_rand(uint32_t i) {
 	int ref, n;
-	struct object *this, *object;
+	struct object *this;
 
 	SETUP_NATIVE_METHOD();
 	n = 0;

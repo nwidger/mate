@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <01 Oct 2012 at 19:56:07 by nwidger on macros.local>
+ * Time-stamp: <15 Oct 2012 at 20:16:48 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -45,7 +45,7 @@
 #include "thread_dmp.h"
 #endif
 
-#define OPTARGS ":m:s:i:daqcvhpQ:g:r"
+#define OPTARGS ":m:s:i:daqcvhpQ:g:rD"
 
 /* globals */
 FILE *input;
@@ -66,6 +66,7 @@ enum garbage_collector_type garbage_collector_type;
 
 #ifdef DMP
 struct dmp *dmp;
+int dmp_stats;
 struct object_dmp_attr object_dmp_attr;
 struct thread_dmp_attr thread_dmp_attr;
 struct nlock_dmp_attr nlock_dmp_attr;
@@ -127,6 +128,7 @@ void usage() {
 		OBJECT_DMP_DEFAULT_DEPTH);
 	fprintf(stderr, "  -r       With -p, enable reduced serial mode.  Default is %s.\n",
 		THREAD_DMP_DEFAULT_REDUCED_SERIAL_MODE == full_mode ? "full serial mode" : "reduced serial mode");
+	fprintf(stderr, "  -D       Record DMP statistics and print out upon program termination.\n");
 #endif
 }
 
@@ -140,7 +142,7 @@ void usage() {
 int mvm_initialize(uint64_t h) {
 	char *buf;
 	struct stat stat_buf;
-	int len, max_native_index;
+	int retval, len, max_native_index;
 
 	input = stdin;
 	output = stdout;
@@ -233,12 +235,9 @@ int mvm_initialize(uint64_t h) {
 
 	memset(&stat_buf, 0, sizeof(stat_buf));
 
-	if (stat(class_file, &stat_buf) != 0) {
-		perror("stat");
-		return 1;
-	}
+	retval = stat(class_file, &stat_buf);
 	
-	if (!S_ISREG(stat_buf.st_mode) || access(class_file, F_OK) != 0) {
+	if ((retval != 0 && !S_ISREG(stat_buf.st_mode)) || access(class_file, F_OK) != 0) {
 		len = strlen(class_file);
 		if ((buf = (char *)malloc(len + strlen(".class") + 1)) == NULL) {
 			perror("malloc");
@@ -274,7 +273,7 @@ int mvm_initialize(uint64_t h) {
 	    (dmp = dmp_create(&object_dmp_attr,
 			      &thread_dmp_attr,
 			      &nlock_dmp_attr,
-			      &table_dmp_attr)) == NULL) {
+			      &table_dmp_attr, dmp_stats)) == NULL) {
 		fprintf(stderr, "mvm: error initializing DMP!\n");
 		return 1;
 	}
@@ -471,6 +470,7 @@ int main(int argc, char *argv[]) {
 
 #ifdef DMP	
 	dmp = NULL;
+	dmp_stats = 0;
 
 	memcpy(&object_dmp_attr, &object_dmp_default_attr,
 	       sizeof(struct object_dmp_attr));
@@ -556,6 +556,9 @@ int main(int argc, char *argv[]) {
 		case 'r':
 			thread_dmp_attr.serial_mode = reduced_mode;
 			break;
+		case 'D':
+			dmp_stats = 1;
+			break;
 #endif
 		case 'q':
 			print_trace = 0;
@@ -618,6 +621,12 @@ int main(int argc, char *argv[]) {
 		thread_start_main(object);
 		thread_join_main(object);
 	} while (restart != 0);
+
+#ifdef DMP
+	if (dmp_stats) {
+		dmp_dump_stats(dmp);
+	}
+#endif
 
 	mvm_cleanup();
 	return main_block_return_value;
