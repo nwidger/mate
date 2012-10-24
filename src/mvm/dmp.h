@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <15 Oct 2012 at 19:49:17 by nwidger on macros.local>
+ * Time-stamp: <21 Oct 2012 at 10:37:18 by nwidger on macros.local>
  */
 
 #ifndef _MVM_DMP_H
@@ -42,6 +42,7 @@ struct dmp * dmp_create(struct object_dmp_attr *a,
 			struct table_dmp_attr *tb, int s);
 void dmp_destroy(struct dmp *d);
 void dmp_clear(struct dmp *d);
+void dmp_dump_stats(struct dmp *d);
 int dmp_get_mode(struct dmp *d);
 int dmp_add_thread(struct dmp *d, int r);
 int dmp_remove_thread(struct dmp *d, int r);

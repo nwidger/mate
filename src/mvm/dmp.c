@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <15 Oct 2012 at 20:40:48 by nwidger on macros.local>
+ * Time-stamp: <21 Oct 2012 at 10:36:51 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -26,7 +26,7 @@
 #include "thread_dmp.h"
 
 /* struct definitions */
-struct _dmp_shm_stats {
+struct dmp_shm_stats {
 	uint32_t total;
 
 	uint32_t blocks;
@@ -37,9 +37,14 @@ struct _dmp_shm_stats {
 	uint32_t private_not_mine;
 };
 
-struct dmp_shm_stats {
-	struct _dmp_shm_stats reads;
-	struct _dmp_shm_stats writes;
+struct dmp_stats {
+	uint32_t rounds;
+
+	uint32_t parallel_modes;
+	uint32_t serial_modes;
+
+	struct dmp_shm_stats reads;
+	struct dmp_shm_stats writes;
 };
 
 struct dmp {
@@ -62,7 +67,7 @@ struct dmp {
 	/* table_dmp defaults */
 	struct table_dmp_attr *tb_attr;
 
-	struct dmp_shm_stats *stats;
+	struct dmp_stats *stats;
 };
 
 /* forward declarations */
@@ -99,7 +104,7 @@ struct dmp * dmp_create(struct object_dmp_attr *a,
 	if (s == 0) {
 		d->stats = NULL;
 	} else {
-		if ((d->stats = (struct dmp_shm_stats *)calloc(1, sizeof(struct dmp_shm_stats))) == NULL) {
+		if ((d->stats = (struct dmp_stats *)calloc(1, sizeof(struct dmp_stats))) == NULL) {
 			perror("mvm: malloc");
 			mvm_halt();
 		}
@@ -132,7 +137,7 @@ float dmp_percentage(float part, float total) {
 }
 
 void dmp_dump_stats(struct dmp *d) {
-	struct dmp_shm_stats *stats;
+	struct dmp_stats *stats;
 	
 	if (d == NULL) {
 		fprintf(stderr, "mvm: dmp not initialized!\n");
@@ -143,6 +148,10 @@ void dmp_dump_stats(struct dmp *d) {
 		return;
 
 	stats = d->stats;
+
+	fprintf(stdout, "\n");
+
+	fprintf(stdout, "%-30s %10" PRIu32 "\n", "Rounds:", stats->rounds);
 
 	fprintf(stdout, "\n");
 
@@ -199,12 +208,18 @@ int dmp_get_mode(struct dmp *d) {
 }
 
 int dmp_toggle_mode(struct dmp *d) {
+	struct dmp_stats *stats;
+	
 	void * (*hook)(int, void *);
 
 	if (d == NULL) {
 		fprintf(stderr, "mvm: dmp not initialized!\n");
 		mvm_halt();
 	}
+
+	stats = d->stats;
+
+	if (stats != NULL) stats->rounds++;
 
 	if (d->mode == parallel_mode) {
 		mvm_print("thread %" PRIu32 ": entering serial mode\n", thread_get_ref(NULL));
@@ -214,7 +229,6 @@ int dmp_toggle_mode(struct dmp *d) {
 		mvm_print("thread %" PRIu32 ": entering parallel mode\n", thread_get_ref(NULL));
 		d->mode = parallel_mode;
 		hook = dmp_barrier_parallel_hook;
-
 	}
 
 	barrier_set_hook(d->barrier, hook, (void *)d);
@@ -330,7 +344,7 @@ struct table_dmp * dmp_create_table_dmp(struct dmp *d, struct table *t, struct o
 }
 
 int dmp_shm_read(struct dmp *d, int c, int r, enum dmp_thread_action *ta, enum dmp_owner_action *oa) {
-	struct dmp_shm_stats *stats;
+	struct dmp_stats *stats;
 	enum dmp_owner_action oaction;
 	enum dmp_thread_action taction;
 
@@ -372,7 +386,7 @@ int dmp_shm_read(struct dmp *d, int c, int r, enum dmp_thread_action *ta, enum d
 }
 
 int dmp_shm_write(struct dmp *d, int c, int r, enum dmp_thread_action *ta, enum dmp_owner_action *oa) {
-	struct dmp_shm_stats *stats;
+	struct dmp_stats *stats;
 	enum dmp_owner_action oaction;
 	enum dmp_thread_action taction;
 
