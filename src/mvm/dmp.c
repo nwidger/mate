@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Oct 2012 at 10:36:51 by nwidger on macros.local>
+ * Time-stamp: <24 Oct 2012 at 20:02:38 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/time.h>
 #include <unistd.h>
 
 #include "barrier.h"
@@ -22,6 +23,7 @@
 #include "nlock_dmp.h"
 #include "object_dmp.h"
 #include "ref_set.h"
+#include "stall_time.h"
 #include "table_dmp.h"
 #include "thread_dmp.h"
 
@@ -39,6 +41,13 @@ struct dmp_shm_stats {
 
 struct dmp_stats {
 	uint32_t rounds;
+
+	/* just used for calculating */
+	time_type start_time;
+	time_type stop_time;
+
+	double parallel_time;
+	double serial_time;
 
 	uint32_t parallel_modes;
 	uint32_t serial_modes;
@@ -108,6 +117,9 @@ struct dmp * dmp_create(struct object_dmp_attr *a,
 			perror("mvm: malloc");
 			mvm_halt();
 		}
+
+		/* start timer for first parallel mode run */
+		get_time(&d->stats->start_time);
 	}
 
 	return d;
@@ -152,6 +164,15 @@ void dmp_dump_stats(struct dmp *d) {
 	fprintf(stdout, "\n");
 
 	fprintf(stdout, "%-30s %10" PRIu32 "\n", "Rounds:", stats->rounds);
+
+	fprintf(stdout, "\n");
+
+	fprintf(stdout, "%-30s %10f (%5.5f%%)\n", "Parallel time:", stats->parallel_time,
+		dmp_percentage(stats->parallel_time, stats->parallel_time+stats->serial_time));
+	fprintf(stdout, "%-30s %10f (%5.5f%%)\n", "Serial time:", stats->serial_time,
+		dmp_percentage(stats->serial_time, stats->parallel_time+stats->serial_time));
+	fprintf(stdout, "============================================================\n");
+	fprintf(stdout, "%-30s %10f (100.0%%)\n", "Total time:", stats->parallel_time+stats->serial_time);
 
 	fprintf(stdout, "\n");
 
@@ -225,10 +246,22 @@ int dmp_toggle_mode(struct dmp *d) {
 		mvm_print("thread %" PRIu32 ": entering serial mode\n", thread_get_ref(NULL));
 		d->mode = serial_mode;
 		hook = dmp_barrier_serial_hook;
+
+		if (stats != NULL) {
+			get_time(&stats->stop_time);
+			stats->parallel_time += stall_time(&stats->start_time, &stats->stop_time);
+			get_time(&stats->start_time);
+		}
 	} else {
 		mvm_print("thread %" PRIu32 ": entering parallel mode\n", thread_get_ref(NULL));
 		d->mode = parallel_mode;
 		hook = dmp_barrier_parallel_hook;
+
+		if (stats != NULL) {
+			get_time(&stats->stop_time);
+			stats->serial_time += stall_time(&stats->start_time, &stats->stop_time);
+			get_time(&stats->start_time);
+		}
 	}
 
 	barrier_set_hook(d->barrier, hook, (void *)d);

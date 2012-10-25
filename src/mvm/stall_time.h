@@ -1,10 +1,10 @@
  /* Niels Widger
- * Time-stamp: <24 Oct 2012 at 19:37:52 by nwidger on macros.local>
+ * Time-stamp: <24 Oct 2012 at 19:56:49 by nwidger on macros.local>
  */
 
 #include <unistd.h>
 
-#if defined(_POSIX_TIMERS)
+#if defined(_POSIX_TIMERS) && !defined(__MACH__)
 
     /* use the newer Posix high-resolution time facilities */
     /* must be linked on all machines with -lrt */
