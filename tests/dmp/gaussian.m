@@ -65,7 +65,6 @@ class Gaussian {
       a.put(i, N, 0.0);
       for (j = 0; j < N; j = j + 1) {
 	d = new Real(r.rand().mod(100)) / 100.0;
-	out "d = " + d.toString() + newline;
 	a.put(i, j, d);
 	a.put(i, N, a.get(i, N) + (new Real(j) * a.get(i, j)));
       }
