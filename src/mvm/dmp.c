@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <24 Oct 2012 at 20:02:38 by nwidger on macros.local>
+ * Time-stamp: <25 Oct 2012 at 21:05:09 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -161,62 +161,67 @@ void dmp_dump_stats(struct dmp *d) {
 
 	stats = d->stats;
 
-	fprintf(stdout, "\n");
+	fprintf(stderr, "\n");
 
-	fprintf(stdout, "%-30s %10" PRIu32 "\n", "Rounds:", stats->rounds);
+	fprintf(stderr, "%-30s %10" PRIu32 "\n", "Rounds:", stats->rounds);
 
-	fprintf(stdout, "\n");
+	fprintf(stderr, "\n");
 
-	fprintf(stdout, "%-30s %10f (%5.5f%%)\n", "Parallel time:", stats->parallel_time,
+	fprintf(stderr, "%-30s %10f (%5.5f%%)\n", "Parallel time (seconds):", stats->parallel_time,
 		dmp_percentage(stats->parallel_time, stats->parallel_time+stats->serial_time));
-	fprintf(stdout, "%-30s %10f (%5.5f%%)\n", "Serial time:", stats->serial_time,
+	fprintf(stderr, "%-30s %10f (%5.5f%%)\n", "Serial time (seconds):", stats->serial_time,
 		dmp_percentage(stats->serial_time, stats->parallel_time+stats->serial_time));
-	fprintf(stdout, "============================================================\n");
-	fprintf(stdout, "%-30s %10f (100.0%%)\n", "Total time:", stats->parallel_time+stats->serial_time);
+	fprintf(stderr, "============================================================\n");
+	fprintf(stderr, "%-30s %10f (100.0%%)\n", "Total time (seconds):", stats->parallel_time+stats->serial_time);
 
-	fprintf(stdout, "\n");
+	fprintf(stderr, "\n");
 
-	fprintf(stdout, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Reads:", stats->reads.total,
+	fprintf(stderr, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Reads:", stats->reads.total,
 		dmp_percentage(stats->reads.total, stats->reads.total+stats->writes.total));
-	fprintf(stdout, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Writes:", stats->writes.total,
+	fprintf(stderr, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Writes:", stats->writes.total,
 		dmp_percentage(stats->writes.total, stats->reads.total+stats->writes.total));
-	fprintf(stdout, "============================================================\n");
-	fprintf(stdout, "%-30s %10" PRIu32 " (100.0%%)\n", "Total:", stats->reads.total+stats->writes.total);
+	fprintf(stderr, "============================================================\n");
+	fprintf(stderr, "%-30s %10" PRIu32 " (100.0%%)\n", "Total:", stats->reads.total+stats->writes.total);
 
-	fprintf(stdout, "\n");
+	fprintf(stderr, "\n");
 
-	fprintf(stdout, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Total (shared):", stats->reads.shared+stats->writes.shared,
+	fprintf(stderr, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Total (shared) [?]:", stats->reads.shared+stats->writes.shared,
 		dmp_percentage(stats->reads.shared+stats->writes.shared, stats->reads.total+stats->writes.total));
-	fprintf(stdout, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Total (private mine):", stats->reads.private_mine+stats->writes.private_mine,
+	fprintf(stderr, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Total (private mine):", stats->reads.private_mine+stats->writes.private_mine,
 		dmp_percentage(stats->reads.private_mine+stats->writes.private_mine, stats->reads.total+stats->writes.total));
-	fprintf(stdout, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Total (private not mine):", stats->reads.private_not_mine+stats->writes.private_not_mine,
+	fprintf(stderr, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Total (private not mine) [*]:", stats->reads.private_not_mine+stats->writes.private_not_mine,
 		dmp_percentage(stats->reads.private_not_mine+stats->writes.private_not_mine, stats->reads.total+stats->writes.total));
-	fprintf(stdout, "============================================================\n");
-	fprintf(stdout, "%-30s %10" PRIu32 " (100.0%%)\n", "Total:", stats->reads.total+stats->writes.total);
+	fprintf(stderr, "============================================================\n");
+	fprintf(stderr, "%-30s %10" PRIu32 " (100.0%%)\n", "Total:", stats->reads.total+stats->writes.total);
 
-	fprintf(stdout, "\n");
+	fprintf(stderr, "\n");
 
-	fprintf(stdout, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Reads (shared):", stats->reads.shared,
+	fprintf(stderr, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Reads (shared):", stats->reads.shared,
 		dmp_percentage(stats->reads.shared, stats->reads.total));
-	fprintf(stdout, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Reads (private mine):", stats->reads.private_mine,
+	fprintf(stderr, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Reads (private mine):", stats->reads.private_mine,
 		dmp_percentage(stats->reads.private_mine, stats->reads.total));
-	fprintf(stdout, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Reads (private not mine):", stats->reads.private_not_mine,
+	fprintf(stderr, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Reads (private not mine) [*]:", stats->reads.private_not_mine,
 		dmp_percentage(stats->reads.private_not_mine, stats->reads.total));
-	fprintf(stdout, "============================================================\n");
-	fprintf(stdout, "%-30s %10" PRIu32 " (100.0%%)\n", "Total:", stats->reads.total);
+	fprintf(stderr, "============================================================\n");
+	fprintf(stderr, "%-30s %10" PRIu32 " (100.0%%)\n", "Total:", stats->reads.total);
 
-	fprintf(stdout, "\n");
+	fprintf(stderr, "\n");
 
-	fprintf(stdout, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Writes (shared):", stats->writes.shared,
+	fprintf(stderr, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Writes (shared) [*]:", stats->writes.shared,
 		dmp_percentage(stats->writes.shared, stats->writes.total));
-	fprintf(stdout, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Writes (private mine):", stats->writes.private_mine,
+	fprintf(stderr, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Writes (private mine):", stats->writes.private_mine,
 		dmp_percentage(stats->writes.private_mine, stats->writes.total));
-	fprintf(stdout, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Writes (private not mine):", stats->writes.private_not_mine,
+	fprintf(stderr, "%-30s %10" PRIu32 " (%5.5f%%)\n", "Writes (private not mine) [*]:", stats->writes.private_not_mine,
 		dmp_percentage(stats->writes.private_not_mine, stats->writes.total));
-	fprintf(stdout, "============================================================\n");
-	fprintf(stdout, "%-30s %10" PRIu32 " (100.0%%)\n", "Total:", stats->writes.total);
+	fprintf(stderr, "============================================================\n");
+	fprintf(stderr, "%-30s %10" PRIu32 " (100.0%%)\n", "Total:", stats->writes.total);
 
-	fprintf(stdout, "\n");
+	fprintf(stderr, "\n");
+
+	fprintf(stderr, "[*] Reads/writes required blocking\n");
+	fprintf(stderr, "[?] Writes required blocking\n");
+
+	fprintf(stderr, "\n");
 }
 
 int dmp_get_mode(struct dmp *d) {
