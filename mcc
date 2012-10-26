@@ -89,10 +89,10 @@ TEMP=/tmp/mate-$RANDOM
 
 if [ "$PREDEFINED" != "" ];
 then
-    cpp -x c -P $INPUT | mc -p "$PREDEFINED" > $TEMP
+    cpp -xc -P $INPUT | mc -p "$PREDEFINED" > $TEMP
     RETVAL=$?
 else
-    cpp -x c -P $INPUT | mc > $TEMP
+    cpp -xc -P $INPUT | mc > $TEMP
     RETVAL=$?
 fi
 

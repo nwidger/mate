@@ -54,14 +54,19 @@ class Gaussian {
 
   // cook up a system where ans.get(i) will be i
   Object initialize_system() {
-    Integer i, j, iN;
+    Real d;
+    Integer i, j, iN, r;
+
+    r = 0;
 
     for (i = 0; i < N; i = i + 1) {
       iN = i*N;
       marked.put(i, 0);
       a.put(i, N, 0.0);
       for (j = 0; j < N; j = j + 1) {
-	a.put(i, j, in.toReal());
+	d = new Real(r.rand().mod(100)) / 100.0;
+	out "d = " + d.toString() + newline;
+	a.put(i, j, d);
 	a.put(i, N, a.get(i, N) + (new Real(j) * a.get(i, j)));
       }
     }

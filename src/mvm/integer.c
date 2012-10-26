@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <09 Oct 2012 at 19:26:43 by nwidger on macros.local>
+ * Time-stamp: <25 Oct 2012 at 21:38:35 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -349,6 +349,7 @@ int integer_rand(struct object *o) {
 	int ref;
 	int32_t value;
 	struct integer *i;
+	static int once = 1;
 
 	i = object_get_integer(o);
 
@@ -357,7 +358,11 @@ int integer_rand(struct object *o) {
 		mvm_halt();
 	}
 
-	srand(time(NULL));
+	if (once) {
+		srand(time(NULL));
+		once = !once;
+	}
+	
 	value = rand();
 	if ((ref = class_table_new_integer(class_table, value, NULL)) == 0)
 		mvm_halt();
