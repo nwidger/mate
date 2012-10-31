@@ -263,7 +263,70 @@ class Slave extends Thread {
 	  I = I + 1;
 	}
       }
+
+      // modify row k by diagonal block
+      j = k1;
+      J = K+1;
+      while (j < n) {
+	if (BlockOwner(K, J).equals(MyNum)) {
+	  jl = j + bs;
+	  if (jl > n) {
+	    jl = n;
+	  }
+	  // A = &(a[k+j*n]);
+	  // bmodd(D,A, k1-k, jl-j, n, strI);
+	}
+	
+	j = j + bs;
+	J = J + 1;
+      }
+
+      if ((MyNum.equals(0)) || (dostats)) {
+	// CLOCK(t22);
+      }
+
+      global.start.await();
+
+      if ((MyNum.equals(0)) || (dostats)) {
+	// CLOCK(t23);
+      }
+
+      // modify subsequent block columns
+      i = k1;
+      I = K+1;
+      while (i < n) {
+	il = i + bs;
+	if (il > n) {
+	  il = n;
+	}
+	colowner = BlockOwner(I,K);
+	// A = &(a[i+k*n]);
+	j = k1;
+	J = K + 1;
+	while (j < n) {
+	  jl = j + bs;
+	  if (jl > n) {
+	    jl = n;
+	  }
+	  if (BlockOwner(I, J).equals(MyNum)) { // parcel out blocks
+	    // B = &(a[k+j*n]);
+	    // C = &(a[i+j*n]);
+	    // bmod(A, B, C, il-i, jlij, k1-k, n);
+	  }
+	  j = j + bs;
+	  J = J + 1;
+	}
+
+	i = i + bs;
+	I = I + 1;
+      }
+    }
+
     
+      if ((MyNum.equals(0)) || (dostats)) {
+	// CLOCK(t4);
+      }
+
       return null;
     }
   }

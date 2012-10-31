@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <25 Oct 2012 at 21:05:09 by nwidger on macros.local>
+ * Time-stamp: <31 Oct 2012 at 19:09:58 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -39,6 +39,12 @@ struct dmp_shm_stats {
 	uint32_t private_not_mine;
 };
 
+struct dmp_seg_stats {
+	double max_segment;
+	double min_segment;
+	double avg_segment;
+};
+
 struct dmp_stats {
 	uint32_t rounds;
 
@@ -49,8 +55,8 @@ struct dmp_stats {
 	double parallel_time;
 	double serial_time;
 
-	uint32_t parallel_modes;
-	uint32_t serial_modes;
+	struct dmp_seg_stats parallel_seg;
+	struct dmp_seg_stats serial_seg;
 
 	struct dmp_shm_stats reads;
 	struct dmp_shm_stats writes;
@@ -118,6 +124,14 @@ struct dmp * dmp_create(struct object_dmp_attr *a,
 			mvm_halt();
 		}
 
+		d->stats->parallel_seg.min_segment = 999999999.99;
+		d->stats->parallel_seg.max_segment = -1.0;
+		d->stats->parallel_seg.avg_segment = 0.0;
+
+		d->stats->serial_seg.min_segment = 999999999.99;
+		d->stats->serial_seg.max_segment = -1.0;
+		d->stats->serial_seg.avg_segment = 0.0;
+
 		/* start timer for first parallel mode run */
 		get_time(&d->stats->start_time);
 	}
@@ -173,6 +187,18 @@ void dmp_dump_stats(struct dmp *d) {
 		dmp_percentage(stats->serial_time, stats->parallel_time+stats->serial_time));
 	fprintf(stderr, "============================================================\n");
 	fprintf(stderr, "%-30s %10f (100.0%%)\n", "Total time (seconds):", stats->parallel_time+stats->serial_time);
+
+	fprintf(stderr, "\n");
+
+	fprintf(stderr, "%-30s %10f\n", "Max parallel segment (seconds):", stats->parallel_seg.max_segment);
+	fprintf(stderr, "%-30s %10f\n", "Min parallel segment (seconds):", stats->parallel_seg.min_segment);
+	fprintf(stderr, "%-30s %10f\n", "Avg parallel segment (seconds):", stats->parallel_seg.avg_segment);
+
+	fprintf(stderr, "\n");
+
+	fprintf(stderr, "%-30s %10f\n", "Max serial segment (seconds):", stats->serial_seg.max_segment);
+	fprintf(stderr, "%-30s %10f\n", "Min serial segment (seconds):", stats->serial_seg.min_segment);
+	fprintf(stderr, "%-30s %10f\n", "Avg serial segment (seconds):", stats->serial_seg.avg_segment);
 
 	fprintf(stderr, "\n");
 
@@ -234,6 +260,7 @@ int dmp_get_mode(struct dmp *d) {
 }
 
 int dmp_toggle_mode(struct dmp *d) {
+	double t;
 	struct dmp_stats *stats;
 	
 	void * (*hook)(int, void *);
@@ -254,7 +281,25 @@ int dmp_toggle_mode(struct dmp *d) {
 
 		if (stats != NULL) {
 			get_time(&stats->stop_time);
-			stats->parallel_time += stall_time(&stats->start_time, &stats->stop_time);
+			t = stall_time(&stats->start_time, &stats->stop_time);
+			
+			stats->parallel_time += t;
+
+			if (t < stats->parallel_seg.min_segment) {
+				stats->parallel_seg.min_segment = t;
+			} else if (t > stats->parallel_seg.max_segment) {
+				stats->parallel_seg.max_segment = t;
+			}
+
+			/* compute moving average */
+			if (stats->parallel_seg.avg_segment == 0.0) {
+				stats->parallel_seg.avg_segment = t;
+			} else { 
+				stats->parallel_seg.avg_segment = 
+					(stats->parallel_seg.avg_segment) + ((t - (stats->parallel_seg.avg_segment)) / 
+									   ((double)stats->rounds));
+			} 
+			
 			get_time(&stats->start_time);
 		}
 	} else {
@@ -264,7 +309,25 @@ int dmp_toggle_mode(struct dmp *d) {
 
 		if (stats != NULL) {
 			get_time(&stats->stop_time);
-			stats->serial_time += stall_time(&stats->start_time, &stats->stop_time);
+			t = stall_time(&stats->start_time, &stats->stop_time);
+			
+			stats->serial_time += t;
+
+			if (t < stats->serial_seg.min_segment) {
+				stats->serial_seg.min_segment = t;
+			} else if (t > stats->serial_seg.max_segment) {
+				stats->serial_seg.max_segment = t;
+			}
+
+			/* compute moving average */
+			if (stats->serial_seg.avg_segment == 0.0) {
+				stats->serial_seg.avg_segment = t;
+			} else { 
+				stats->serial_seg.avg_segment = 
+					(stats->serial_seg.avg_segment) + ((t - (stats->serial_seg.avg_segment)) / 
+									   ((double)stats->rounds));
+			} 
+			
 			get_time(&stats->start_time);
 		}
 	}
