@@ -130,6 +130,7 @@ class Sort {
 
       maxers = new Table(numCounters);
 
+      dout("dolling out numbers");
       i = 0;
       beg = 0;
       end = 0;
@@ -152,13 +153,16 @@ class Sort {
       }
 
       numMaxers = i;
+      dout("done dolling out numbers");
 
+      dout("starting maxers");
       for (i = 0; i < numMaxers; i = i + 1) {
 	      m = (Maxer)maxers.get(i);
 	      m.start();
       }
 
       for (i = 0; i < numMaxers; i = i + 1) {
+	      dout("joining maxer " + i.toString());
 	      m = (Maxer)maxers.get(i);
 	      m.join();
 
