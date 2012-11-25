@@ -23,17 +23,17 @@ class Maxer extends Thread {
   }
 
   Object run() {
-    Integer j;
+    Integer j, b2i;
     BinaryInteger b1, b2;
     
     for (j = i; j < n; j = j + 1) {
       b1 = ary.get(j);
       b2 = b1.mask(nbits);
-
       tary.put(j, new Tuple(b1, b2));
 
-      if (b2.toInteger() > max)
-	max = b2.toInteger();
+      b2i = b2.toInteger();
+      if (b2i > max)
+	max = b2i;
     }
 
     return null;
@@ -78,7 +78,7 @@ class Sort {
   }
   
   Object dout(String msg) {
-	  if (0) {
+	  if (1) {
 		  out msg + newline;
 	  }
 
@@ -109,7 +109,7 @@ class Sort {
 
   Integer doCountingSort(BinaryIntegerTable ary, Integer n, Integer nbits) {
     Tuple t;
-    Integer rem, beg, end;
+    Integer rem, beg, end, b2i;
     IntegerTable C, C2;
     TupleTable tary;
     BinaryInteger b1, b2;
@@ -145,7 +145,8 @@ class Sort {
 		      end = end + rem;
 	      
 	      rem = rem - (end - beg);
-	      
+
+	      dout("maxer " + i.toString() + " beg=" + beg.toString() + " end=" + end.toString());
 	      m = new Maxer(beg, end, nbits, ary, tary);
 	      maxers.put(i, m);
 
@@ -155,8 +156,8 @@ class Sort {
       numMaxers = i;
       dout("done dolling out numbers");
 
-      dout("starting maxers");
       for (i = 0; i < numMaxers; i = i + 1) {
+	      dout("starting maxer " + i.toString());
 	      m = (Maxer)maxers.get(i);
 	      m.start();
       }
@@ -174,12 +175,11 @@ class Sort {
 		    b1 = ary.get(i);
 		    b2 = b1.mask(nbits);
 
-		    // dout("ary.get(" + i.toString() + ") = " + b1.toString() + ", ary.get().mask(" + nbits.toString() + ") = " + b2.toString() + newline);
-
 		    tary.put(i, new Tuple(b1, b2));
 
-		    if (b2.toInteger() > max)
-			    max = b2.toInteger();
+		    b2i = b2.toInteger();
+		    if (b2i > max)
+		      max = b2i;
 	    }
     }
 
@@ -212,8 +212,6 @@ class Sort {
 	      
 	      c = new Counter(beg, end, new IntegerTable(max), tary);
 	      counters.put(i, c);
-
-	      // dout("counter " + i.toString() + " beg=" + beg.toString() + ", end=" + end.toString() + " rem=" + rem.toString() + newline);
 
 	      i = i + 1;
       }
