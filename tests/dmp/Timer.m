@@ -30,6 +30,8 @@ class Timer extends Thread {
       this.started = 0;
       
     }
+
+    this.join();
     
     return m;
   }

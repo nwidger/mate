@@ -1,8 +1,44 @@
 #include "BinaryInteger.m"
 #include "BinaryIntegerTable.m"
 #include "IntegerTable.m"
+#include "Timer.m"
 #include "Tuple.m"
 #include "TupleTable.m"
+
+class Maxer extends Thread {
+  Integer i;
+  Integer n;
+  Integer nbits;
+  BinaryIntegerTable ary;
+  TupleTable tary;
+  Integer max;
+
+  Maxer(Integer i, Integer n, Integer nbits, BinaryIntegerTable ary, TupleTable tary) {
+    this.i = i;
+    this.n = n;
+    this.nbits = nbits;
+    this.ary = ary;
+    this.tary = tary;
+    this.max = 0;
+  }
+
+  Object run() {
+    Integer j;
+    BinaryInteger b1, b2;
+    
+    for (j = i; j < n; j = j + 1) {
+      b1 = ary.get(j);
+      b2 = b1.mask(nbits);
+
+      tary.put(j, new Tuple(b1, b2));
+
+      if (b2.toInteger() > max)
+	max = b2.toInteger();
+    }
+
+    return null;
+  }
+}
 
 class Counter extends Thread {
   Integer i;
@@ -31,9 +67,19 @@ class Counter extends Thread {
 }
 
 class Sort {
+  Integer numCounters;
+
+  Sort() {
+    this.numCounters = 2;
+  }
+  
+  Sort(Integer numCounters) {
+    this.numCounters = numCounters;
+  }
+  
   Object dout(String msg) {
 	  if (0) {
-		  out msg;
+		  out msg + newline;
 	  }
 
 	  return null;
@@ -63,6 +109,7 @@ class Sort {
 
   Integer doCountingSort(BinaryIntegerTable ary, Integer n, Integer nbits) {
     Tuple t;
+    Integer rem, beg, end;
     IntegerTable C, C2;
     TupleTable tary;
     BinaryInteger b1, b2;
@@ -73,37 +120,76 @@ class Sort {
 
     tary = new TupleTable(n);
 
+    dout("determining max");
     max = 0;
 
-    for (i = 0; i < n; i = i + 1) {
-      b1 = ary.get(i);
-      b2 = b1.mask(nbits);
+    if (1) {			// parallel
+      Maxer m;
+      Table maxers;
+      Integer numMaxers;
 
-      // dout("ary.get(" + i.toString() + ") = " + b1.toString() + ", ary.get().mask(" + nbits.toString() + ") = " + b2.toString() + newline);
+      maxers = new Table(numCounters);
 
-      tary.put(i, new Tuple(b1, b2));
+      i = 0;
+      beg = 0;
+      end = 0;
+      rem = n;
 
-      if (b2.toInteger() > max)
-	max = b2.toInteger();
+      while (rem > 0) {
+	      beg = end;
+
+	      if (rem >= (n/numCounters))
+		      end = end + (n/numCounters);
+	      else
+		      end = end + rem;
+	      
+	      rem = rem - (end - beg);
+	      
+	      m = new Maxer(beg, end, nbits, ary, tary);
+	      maxers.put(i, m);
+
+	      i = i + 1;
+      }
+
+      numMaxers = i;
+
+      for (i = 0; i < numMaxers; i = i + 1) {
+	      m = (Maxer)maxers.get(i);
+	      m.start();
+      }
+
+      for (i = 0; i < numMaxers; i = i + 1) {
+	      m = (Maxer)maxers.get(i);
+	      m.join();
+
+	      if (m.max > max)
+		      max = m.max;
+      }
+    } else {
+	    for (i = 0; i < n; i = i + 1) {
+		    b1 = ary.get(i);
+		    b2 = b1.mask(nbits);
+
+		    // dout("ary.get(" + i.toString() + ") = " + b1.toString() + ", ary.get().mask(" + nbits.toString() + ") = " + b2.toString() + newline);
+
+		    tary.put(i, new Tuple(b1, b2));
+
+		    if (b2.toInteger() > max)
+			    max = b2.toInteger();
+	    }
     }
 
     max = max + 1;
+    dout("done determining max");
 
     C = new IntegerTable(max);
 
     if (1) {			// parallel
       Counter c;
       Table counters;
-      Integer numCounters, rem, beg, end;
 
-      numCounters = 16;
-
+      dout("dolling out numbers");
       counters = new Table(numCounters);
-
-      if (numCounters > n) {
-	      out "numCounters must not be greater than n!" + newline;
-	      return 1;
-      }
 
       i = 0;
       beg = 0;
@@ -129,9 +215,11 @@ class Sort {
       }
 
       numCounters = i;
+      dout("done dolling out numbers");
 
       for (i = 0; i < numCounters; i = i + 1) {
 	c = (Counter)counters.get(i);
+	dout("starting thread " + (i+1).toString());
 	c.start();
       }
 
@@ -139,15 +227,20 @@ class Sort {
 	c = (Counter)counters.get(i);
 
 	c.join();
+	dout("joined thread " + (i+1).toString());
+
+	dout("aggregating totals");
 
 	ii = c.C.firstKey();
 	for (ii = c.C.nextKey(); ii != null; ii = c.C.nextKey()) {
 	  temp1 = ii;
 	  temp2 = c.C.get(temp1);
 	  temp3 = C.get(temp1);
-		// dout("i = " + i.toString() + " temp1 = " + temp1.toString() + " temp2 = " + temp2.toString() + " temp3 = " + temp3.toString() + newline);
+
 	  C.put(temp1, temp2 + temp3);
 	}
+
+	dout("done aggregating");
       }
     } else {			// serial
       for (i = 0; i < n; i = i + 1) {
@@ -156,6 +249,8 @@ class Sort {
 	C.put(temp1, temp2 + 1);
       }
     }
+
+    dout("doing rest");
 
     sum = 0;
     C2 = new IntegerTable(max);
@@ -194,6 +289,8 @@ class Sort {
       ary.put(temp2, t.value);
     }
 
+    dout("done doing rest");
+
     return 0;
   }
 }
@@ -202,16 +299,23 @@ class Sort {
 
 Integer main() {
   Sort s;
-  String sn, snbits;
+  String sn, snbits, snc;
   BinaryInteger temp;
-  Integer i, n, nbits;
   BinaryIntegerTable ary;
-  
+  Integer i, n, nbits, numCounters;
+
+  snc = in;
+
+  if (snc == null) {
+    out "Usage: nthreads n nbits [NUMBERS...]" + newline;
+    return 1;
+  }
+
   sn = in;
   snbits = in;
 
   if (sn == null || snbits == null) {
-    out "Usage: n nbits [NUMBERS...]" + newline;
+    out "Usage: nthreads n nbits [NUMBERS...]" + newline;
     return 1;
   }
 
@@ -220,6 +324,13 @@ Integer main() {
 
   if (n <= 0 || nbits <= 0 || nbits > 32) {
     out "n and nbits must be non-negative, nbits must be <= 32" + newline;
+    return 1;
+  }
+
+  numCounters = snc.toInteger();
+
+  if (numCounters > n) {
+    out "nthreads must not be greater than n!" + newline;
     return 1;
   }
 
@@ -236,7 +347,13 @@ Integer main() {
     ary.put(i, temp);
   }
 
-  s = new Sort();
+  s = new Sort(numCounters);
+
+  Timer timer;
+
+  timer = new Timer();
+
+  timer.start_timer();
 
   // if (s.doCountingSort(ary, n, nbits).equals(1)) {
   if (s.doRadixSort(ary, n, nbits).equals(1)) {
@@ -244,9 +361,13 @@ Integer main() {
     return 1;
   }
 
-  for (i = 0; i < n; i = i + 1) {
-    out ary.get(i).toString() + newline;
-  }
+  timer.stop_timer();
+
+  // for (i = 0; i < n; i = i + 1) {
+  //   out ary.get(i).toString() + newline;
+  // }
+
+  out "Total time: " + (new Real(timer.millisecs) / 1000.0).toString() + " sec" + newline;
 
   return 0;
 }
