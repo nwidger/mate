@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Dec 2012 at 12:55:09 by nwidger on macros.local>
+ * Time-stamp: <04 Dec 2012 at 13:57:20 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -130,7 +130,7 @@ struct frame * vm_stack_peek(struct vm_stack *s) {
 }
 
 uint32_t vm_stack_pop(struct vm_stack *s) {
-	struct frame *f;
+	struct frame *f, *cf;
 	uint32_t return_address;
 	
 	if (s == NULL) {
@@ -143,13 +143,14 @@ uint32_t vm_stack_pop(struct vm_stack *s) {
 		mvm_halt();
 	}
 
+	f = s->head;
+	cf = frame_get_calling_frame(f);
+	return_address = frame_get_return_address(f);
+
 	/* lock */
 	vm_stack_lock(s);
 
-	f = s->head;
-	s->head = frame_get_calling_frame(f);
-	return_address = frame_get_return_address(f);
-	
+	s->head = cf;
 	s->size--;
 
 	/* unlock */
