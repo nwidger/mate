@@ -20,6 +20,10 @@ if DEBUG
 CFLAGS += -g
 endif
 
+if PROFILE
+CFLAGS += -pg
+endif
+
 EXTRA_DIST =
 DEFAULT_INCLUDES = -I../..
 AM_YFLAGS = -d

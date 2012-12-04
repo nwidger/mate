@@ -25,6 +25,11 @@ CFLAGS += -g
 CXXFLAGS += -g
 endif
 
+if PROFILE
+CFLAGS += -pg
+CXXFLAGS += -pg
+endif
+
 DEFAULT_INCLUDES = -I../..
 AM_YFLAGS = -d
 BUILT_SOURCES = parse.h
