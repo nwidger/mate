@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <30 Aug 2010 at 17:24:49 by nwidger on macros.local>
+ * Time-stamp: <04 Dec 2012 at 12:57:19 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -346,7 +346,7 @@ int frame_lock(struct frame *f) {
 	}
 
 	/* lock */
-	nlock_lock(f->nlock);
+	/* nlock_lock(f->nlock); */
 
 	return 0;
 }
@@ -358,7 +358,7 @@ int frame_unlock(struct frame *f) {
 	}
 
 	/* unlock */
-	nlock_unlock(f->nlock);
+	/* nlock_unlock(f->nlock); */
 
 	return 0;
 }

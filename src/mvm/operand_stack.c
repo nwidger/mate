@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <01 Feb 2012 at 20:42:00 by nwidger on macros.local>
+ * Time-stamp: <04 Dec 2012 at 09:59:08 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -319,7 +319,7 @@ int operand_stack_lock(struct operand_stack *s) {
 	}
 
 	/* lock */
-	nlock_lock(s->nlock);
+	/* nlock_lock(s->nlock); */
 
 	return 0;
 }
@@ -331,7 +331,7 @@ int operand_stack_unlock(struct operand_stack *s) {
 	}
 
 	/* unlock */
-	nlock_unlock(s->nlock);
+	/* nlock_unlock(s->nlock); */
 
 	return 0;
 }

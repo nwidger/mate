@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Feb 2010 at 15:27:52 by nwidger on macros.local>
+ * Time-stamp: <04 Dec 2012 at 10:50:38 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -176,7 +176,7 @@ int local_variable_array_lock(struct local_variable_array *l) {
 	}
 
 	/* unlock */
-	nlock_lock(l->nlock);
+	/* nlock_lock(l->nlock); */
 
 	return 0;
 }
@@ -188,7 +188,7 @@ int local_variable_array_unlock(struct local_variable_array *l) {
 	}
 
 	/* unlock */
-	nlock_unlock(l->nlock);
+	/* nlock_unlock(l->nlock); */
 
 	return 0;
 }

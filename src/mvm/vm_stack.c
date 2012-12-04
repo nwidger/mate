@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <01 Feb 2012 at 20:40:35 by nwidger on macros.local>
+ * Time-stamp: <04 Dec 2012 at 12:55:09 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -76,29 +76,24 @@ struct frame * vm_stack_push(struct vm_stack *s, char *e, int n, int m,
 		mvm_halt();
 	}
 
-	/* lock */
-	vm_stack_lock(s);
-
 	if (n < 0) {
 		fprintf(stderr, "mvm: argument count must be >= 0!\n");
-		/* unlock */
-		vm_stack_unlock(s);
 		mvm_halt();
 	}
 	
 	if (m < 0) {
 		fprintf(stderr, "mvm: max locals count must be >= 0!\n");
-		/* unlock */
-		vm_stack_unlock(s);		
 		mvm_halt();
 	}
 
 	if ((f = frame_create(e, n, m, a, b, r, s->head)) == NULL) {
 		fprintf(stderr, "mvm: error pushing vm_stack frame!\n");
-		/* unlock */
-		vm_stack_unlock(s);
 		mvm_halt();
 	}
+
+
+	/* lock */
+	vm_stack_lock(s);
 
 	s->head = f;
 	s->size++;
@@ -118,18 +113,18 @@ struct frame * vm_stack_peek(struct vm_stack *s) {
 	}
 
 	/* lock */
-	vm_stack_lock(s);
+	/* vm_stack_lock(s); */
 	
 	if (vm_stack_empty(s) == 1) {
 		/* unlock */
-		vm_stack_unlock(s);
+		/* vm_stack_unlock(s); */
 		return NULL;
 	}
 
 	head = s->head;
 
 	/* unlock */
-	vm_stack_unlock(s);
+	/* vm_stack_unlock(s); */
 
 	return head;
 }
@@ -143,25 +138,24 @@ uint32_t vm_stack_pop(struct vm_stack *s) {
 		mvm_halt();
 	}
 
-	/* lock */
-	vm_stack_lock(s);
-
 	if (s->size <= 0) {
 		fprintf(stderr, "mvm: stack underflow!\n");
-		/* unlock */
-		vm_stack_unlock(s);
 		mvm_halt();
 	}
+
+	/* lock */
+	vm_stack_lock(s);
 
 	f = s->head;
 	s->head = frame_get_calling_frame(f);
 	return_address = frame_get_return_address(f);
-	frame_destroy(f);
 	
 	s->size--;
 
 	/* unlock */
 	vm_stack_unlock(s);
+
+	frame_destroy(f);
 	
 	return return_address;
 }
@@ -177,13 +171,13 @@ uint32_t vm_stack_pop_n(struct vm_stack *s, int n) {
 	return_address = 0;
 
 	/* lock */
-	vm_stack_lock(s);
+	/* vm_stack_lock(s); */
 
 	while (n-- > 0)
 		return_address = vm_stack_pop(s);
 
 	/* unlock */
-	vm_stack_unlock(s);
+	/* vm_stack_unlock(s); */
 
 	return return_address;
 }
@@ -197,12 +191,12 @@ int vm_stack_empty(struct vm_stack *s) {
 	}
 
 	/* lock */
-	vm_stack_lock(s);
+	/* vm_stack_lock(s); */
 
 	empty = s->size == 0;
 	
 	/* unlock */
-	vm_stack_unlock(s);
+	/* vm_stack_unlock(s); */
 
 	return empty;
 }
@@ -216,12 +210,12 @@ int vm_stack_size(struct vm_stack *s) {
 	}
 
 	/* lock */
-	vm_stack_lock(s);
+	/* vm_stack_lock(s); */
 
 	size = s->size;
 
 	/* unlock */
-	vm_stack_unlock(s);
+	/* vm_stack_unlock(s); */
 
 	return size;
 }
