@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <27 Jan 2012 at 19:17:29 by nwidger on macros.local>
+ * Time-stamp: <04 Dec 2012 at 10:28:36 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -352,9 +352,11 @@ int thread_sleep(struct object *o, struct object *p) {
 	i = object_get_integer(p);
 	millisec = integer_get_value(i);
 
-	if (usleep(millisec * 1000) != 0) {
-		perror("mvm: usleep");
-		mvm_halt();
+	while (usleep(millisec * 1000) != 0) {
+		if (errno != EINTR) {
+			perror("mvm: usleep");
+			mvm_halt();
+		}
 	}
 
 	return 0;
