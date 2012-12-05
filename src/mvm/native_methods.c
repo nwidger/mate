@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <15 Oct 2012 at 19:51:55 by nwidger on macros.local>
+ * Time-stamp: <04 Dec 2012 at 19:38:25 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -102,13 +102,13 @@ int native_object_equals(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = object_equals(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -124,13 +124,13 @@ int native_object_hash_code(uint32_t i) {
 	this = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = object_hash_code(this);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -146,13 +146,13 @@ int native_object_to_string(uint32_t i) {
 	this = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = object_to_string(this);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -302,13 +302,13 @@ int native_integer_add(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = integer_add(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -327,13 +327,13 @@ int native_integer_subtract(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = integer_subtract(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -352,13 +352,13 @@ int native_integer_multiply(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = integer_multiply(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -377,13 +377,13 @@ int native_integer_divide(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = integer_divide(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -402,13 +402,13 @@ int native_integer_greater_than(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = integer_greater_than(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -427,13 +427,13 @@ int native_integer_less_than(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = integer_less_than(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -452,13 +452,13 @@ int native_integer_greater_than_equal(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = integer_greater_than_equal(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -477,13 +477,13 @@ int native_integer_less_than_equal(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = integer_less_than_equal(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -499,13 +499,13 @@ int native_integer_not(uint32_t i) {
 	this = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = integer_not(this);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -521,13 +521,13 @@ int native_integer_minus(uint32_t i) {
 	this = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = integer_minus(this);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -546,13 +546,13 @@ int native_integer_equals(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = integer_equals(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -568,13 +568,13 @@ int native_integer_hash_code(uint32_t i) {
 	this = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = integer_hash_code(this);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -590,13 +590,13 @@ int native_integer_to_string(uint32_t i) {
 	this = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = integer_to_string(this);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -615,13 +615,13 @@ int native_integer_mod(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = integer_mod(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -637,13 +637,13 @@ int native_integer_rand(uint32_t i) {
 	this = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = integer_rand(this);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -682,13 +682,13 @@ int native_string_length(uint32_t i) {
 	this = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = string_length(this);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -710,13 +710,13 @@ int native_string_substr(uint32_t i) {
 	end = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = string_substr(this, beg, end);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -732,13 +732,13 @@ int native_string_to_integer(uint32_t i) {
 	this = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = string_to_integer(this);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -754,13 +754,13 @@ int native_string_to_real(uint32_t i) {
 	this = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = string_to_real(this);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -779,13 +779,13 @@ int native_string_concat(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = string_concat(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -804,13 +804,13 @@ int native_string_greater_than(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = string_greater_than(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -829,13 +829,13 @@ int native_string_less_than(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = string_less_than(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -851,13 +851,13 @@ int native_string_hash_code(uint32_t i) {
 	this = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = string_hash_code(this);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -876,13 +876,13 @@ int native_string_equals(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = string_equals(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -898,13 +898,13 @@ int native_string_to_string(uint32_t i) {
 	this = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = string_to_string(this);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -975,13 +975,13 @@ int native_table_get(uint32_t i) {
 #endif
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = table_get(table, key);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -1014,13 +1014,13 @@ int native_table_put(uint32_t i) {
 #endif
 	
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = table_put(table, key, value);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -1050,13 +1050,13 @@ int native_table_remove(uint32_t i) {
 #endif
 	
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = table_remove(table, key);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -1083,13 +1083,13 @@ int native_table_first_key(uint32_t i) {
 #endif
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = table_first_key(table);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -1116,13 +1116,13 @@ int native_table_next_key(uint32_t i) {
 #endif
 	
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = table_next_key(table);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -1290,13 +1290,13 @@ int native_real_add(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = real_add(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -1315,13 +1315,13 @@ int native_real_subtract(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = real_subtract(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -1340,13 +1340,13 @@ int native_real_multiply(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = real_multiply(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -1365,13 +1365,13 @@ int native_real_divide(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = real_divide(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -1390,13 +1390,13 @@ int native_real_greater_than(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = real_greater_than(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -1415,13 +1415,13 @@ int native_real_less_than(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = real_less_than(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -1440,13 +1440,13 @@ int native_real_greater_than_equal(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = real_greater_than_equal(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -1465,13 +1465,13 @@ int native_real_less_than_equal(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = real_less_than_equal(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -1487,13 +1487,13 @@ int native_real_not(uint32_t i) {
 	this = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = real_not(this);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -1509,13 +1509,13 @@ int native_real_minus(uint32_t i) {
 	this = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = real_minus(this);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -1534,13 +1534,13 @@ int native_real_equals(uint32_t i) {
 	object = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = real_equals(this, object);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -1556,13 +1556,13 @@ int native_real_hash_code(uint32_t i) {
 	this = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = real_hash_code(this);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -1578,13 +1578,13 @@ int native_real_to_string(uint32_t i) {
 	this = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = real_to_string(this);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }
@@ -1600,13 +1600,13 @@ int native_real_square_root(uint32_t i) {
 	this = heap_fetch_object(heap, ref);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = real_square_root(this);
 	operand_stack_push(calling_frame_operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	return 0;
 }

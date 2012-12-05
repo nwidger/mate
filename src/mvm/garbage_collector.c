@@ -1,11 +1,12 @@
 /* Niels Widger
- * Time-stamp: <07 Jan 2012 at 16:26:42 by nwidger on macros.local>
+ * Time-stamp: <04 Dec 2012 at 19:37:26 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
 
+#include <inttypes.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +30,7 @@
 /* struct definitions */
 struct garbage_collector {
 	int type;
-	int interval;
+	uint64_t interval;
 	pthread_t threadid;
 
 	struct nlock *nlock;
@@ -146,7 +147,7 @@ int garbage_collector_is_running(struct garbage_collector *g) {
 }
 
 int garbage_collector_start(struct garbage_collector *g,
-			    enum garbage_collector_type t, int i) {
+			    enum garbage_collector_type t, uint64_t i) {
 	if (g == NULL) {
 		fprintf(stderr, "mvm: garbage collector has not been initialized!\n");
 		mvm_halt();
@@ -167,6 +168,46 @@ int garbage_collector_start(struct garbage_collector *g,
 			mvm_halt();
 		}
 	}
+
+	return 0;
+}
+
+int garbage_collector_pause(struct garbage_collector *g) {
+	long retval;
+
+	if (g == NULL) {
+		fprintf(stderr, "mvm: garbage collector has not been initialized!\n");
+		mvm_halt();
+	}
+
+	if (g->is_running == 0)
+		return 0;
+
+	g->is_running = 0;
+
+	retval = 0;
+	if (g->type == concurrent_type) {
+		pthread_mutex_lock(&g->collecting_mutex);
+		while (g->is_running == 1 && g->is_collecting == 1) {
+			pthread_cond_wait(&g->collecting_cond, &g->collecting_mutex);
+		}
+		pthread_mutex_unlock(&g->collecting_mutex);
+	}
+
+	return retval;
+}
+
+int garbage_collector_unpause(struct garbage_collector *g) {
+
+	if (g == NULL) {
+		fprintf(stderr, "mvm: garbage collector has not been initialized!\n");
+		mvm_halt();
+	}
+
+	if (g->is_running == 1)
+		return 0;
+
+	g->is_running = 1;
 
 	return 0;
 }
@@ -448,7 +489,7 @@ int garbage_collector_dump(struct garbage_collector *g) {
 		fprintf(stderr, "%-16s%s\n", "type", "serial");
 	} else {
 		fprintf(stderr, "%-16s%s\n", "type", "concurrent");
-		fprintf(stderr, "%-16s%d\n", "interval", g->interval);
+		fprintf(stderr, "%-16s%" PRIu64 "\n", "interval", g->interval);
 	}
 
 	fprintf(stderr, "%-16s%s\n", "running",

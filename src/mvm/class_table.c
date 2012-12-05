@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <16 Feb 2012 at 18:40:37 by nwidger on macros.local>
+ * Time-stamp: <04 Dec 2012 at 19:38:09 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -263,13 +263,13 @@ int class_table_new_integer(struct class_table *c, int32_t v, struct object **o)
 		vmt = class_get_vmt(integer_class);
 
 		/* lock */
-		garbage_collector_lock(garbage_collector);
+		garbage_collector_pause(garbage_collector);
 
 		ref = class_table_new(class_table, vmt, &object);
 		heap_exclude_ref(heap, ref);
 
 		/* unlock */
-		garbage_collector_unlock(garbage_collector);
+		garbage_collector_unpause(garbage_collector);
 
 		integer = integer_create(v);
 		if (v < 0 || v > CLASS_TABLE_INTEGER_CACHE_SIZE) heap_include_ref(heap, ref);
@@ -305,13 +305,13 @@ int class_table_new_string(struct class_table *c, char *b, struct object **o) {
 	vmt = class_get_vmt(string_class);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = class_table_new(class_table, vmt, &object);
 	heap_exclude_ref(heap, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	string = string_create(b);
 	heap_include_ref(heap, ref);
@@ -345,13 +345,13 @@ int class_table_new_table(struct class_table *c, int n, struct object **o) {
 	vmt = class_get_vmt(table_class);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = class_table_new(class_table, vmt, &object);
 	heap_exclude_ref(heap, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	table = table_create(n, object);
 	heap_include_ref(heap, ref);
@@ -385,13 +385,13 @@ int class_table_new_thread(struct class_table *c, struct object **o) {
 	vmt = class_get_vmt(thread_class);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = class_table_new(class_table, vmt, &object);
 	heap_exclude_ref(heap, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	thread = thread_create();
 	/* thread instances are not collectable until run method terminates */
@@ -427,13 +427,13 @@ int class_table_new_real(struct class_table *c, float v, struct object **o) {
 	vmt = class_get_vmt(real_class);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = class_table_new(class_table, vmt, &object);
 	heap_exclude_ref(heap, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	real = real_create(v);
 	heap_include_ref(heap, ref);

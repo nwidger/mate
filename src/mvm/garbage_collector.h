@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Feb 2010 at 15:16:58 by nwidger on macros.local>
+ * Time-stamp: <04 Dec 2012 at 19:37:11 by nwidger on macros.local>
  */
 
 #ifndef _MVM_GARBAGECOLLECTOR_H
@@ -66,7 +66,27 @@ int garbage_collector_is_running(struct garbage_collector *g);
  */
 
 int garbage_collector_start(struct garbage_collector *g,
-			    enum garbage_collector_type t, int i);
+			    enum garbage_collector_type t, uint64_t i);
+
+/** pauses the garbage_collector temporarily.  If garbage_collector is
+ * currently running and collecting, blocks until collection is
+ * finished.
+ *
+ * @param g - the garbage_collector to pause
+ *
+ * @return 0 on success, non-zero on failure
+ */
+
+int garbage_collector_pause(struct garbage_collector *g);
+
+/** unpauses the garbage_collector temporarily.
+ *
+ * @param g - the garbage_collector to pause
+ *
+ * @return 0 on success, non-zero on failure
+ */
+
+int garbage_collector_unpause(struct garbage_collector *g);
 
 /** stops the garbage_collector.
  *

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <13 Feb 2012 at 18:26:38 by nwidger on macros.local>
+ * Time-stamp: <04 Dec 2012 at 19:38:22 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -235,13 +235,13 @@ int checkcast_instruction(uint32_t o) {
 		operand_stack_pop(operand_stack);
 
 		/* lock */
-		garbage_collector_lock(garbage_collector);
+		garbage_collector_pause(garbage_collector);
 
 		ref = class_table_new_integer(class_table, good, NULL);
 		operand_stack_push(operand_stack, ref);
 
 		/* unlock */
-		garbage_collector_unlock(garbage_collector);
+		garbage_collector_unpause(garbage_collector);
 	}
 
 	thread_set_pc(NULL, increment_pc(2));
@@ -286,7 +286,7 @@ int dup_x1_instruction(uint32_t o) {
 	SETUP_INSTRUCTION();
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref1 = operand_stack_pop(operand_stack);
 	ref2 = operand_stack_pop(operand_stack);
@@ -296,7 +296,7 @@ int dup_x1_instruction(uint32_t o) {
 	operand_stack_push(operand_stack, ref1);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	thread_set_pc(NULL, increment_pc(1));
 	return 0;
@@ -457,13 +457,13 @@ int in_instruction(uint32_t o) {
 		buf[i] = '\0';
 
 		/* lock */
-		garbage_collector_lock(garbage_collector);
+		garbage_collector_pause(garbage_collector);
 
 		ref = class_table_new_string(class_table, buf, NULL);
 		operand_stack_push(operand_stack, ref);
 
 		/* unlock */
-		garbage_collector_unlock(garbage_collector);
+		garbage_collector_unpause(garbage_collector);
 	}
 
 	thread_set_pc(NULL, increment_pc(1));
@@ -682,13 +682,13 @@ int new_instruction(uint32_t o) {
 	mvm_disassemble_arguments(pc, 1, &vmt);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = class_table_new(class_table, vmt, NULL);
 	operand_stack_push(operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	thread_set_pc(NULL, increment_pc(2));
 	return 0;
@@ -725,13 +725,13 @@ int newint_instruction(uint32_t o) {
 	}
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = class_table_new_integer(class_table, (int32_t)value, NULL);
 	operand_stack_push(operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	thread_set_pc(NULL, increment_pc(2));
 	return 0;
@@ -765,13 +765,13 @@ int newreal_instruction(uint32_t o) {
 	value = strtof(buf, NULL);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = class_table_new_real(class_table, value, NULL);
 	operand_stack_push(operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	thread_set_pc(NULL, increment_pc(strlen(buf)+2));
 	free(buf);
@@ -810,13 +810,13 @@ int newstr_instruction(uint32_t o) {
 	buf = mvm_disassemble_string_argument(pc);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = class_table_new_string(class_table, buf, NULL);
 	operand_stack_push(operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	thread_set_pc(NULL, increment_pc(strlen(buf)+2));
 	free(buf);
@@ -927,13 +927,13 @@ int refcmp_instruction(uint32_t o) {
 	value = (ref1 == ref2) ? 1 : 0;
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	ref = class_table_new_integer(class_table, value, NULL);
 	operand_stack_push(operand_stack, ref);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	thread_set_pc(NULL, increment_pc(1));
 	return 0;

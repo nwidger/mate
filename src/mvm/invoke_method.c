@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <27 Jan 2012 at 19:04:41 by nwidger on macros.local>
+ * Time-stamp: <04 Dec 2012 at 19:38:24 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -127,12 +127,12 @@ int invoke_native_method(int i, uint32_t r) {
 	num_args = native_method_array_get_num_args(native_method_array, i);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	vm_stack_push(vm_stack, name, num_args, num_args, 0, 0, r);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	if (debug != 0) {
 		mdb_hook(enter_method_hook);
@@ -167,13 +167,13 @@ int execute_method(char *e, uint32_t a, uint32_t b, uint32_t n, uint32_t m, uint
 	vm_stack = thread_get_vm_stack(NULL);
 
 	/* lock */
-	garbage_collector_lock(garbage_collector);
+	garbage_collector_pause(garbage_collector);
 
 	old_size = vm_stack_size(vm_stack);
 	frame = vm_stack_push(vm_stack, e, n, m, a, b, r);
 
 	/* unlock */
-	garbage_collector_unlock(garbage_collector);
+	garbage_collector_unpause(garbage_collector);
 
 	thread_set_pc(NULL, a);
 
