@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Apr 2011 at 18:32:40 by nwidger on macros.local>
+ * Time-stamp: <04 Dec 2012 at 12:16:30 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -53,6 +53,7 @@ struct heap {
 };
 
 /* forward declarations */
+int heap_garbage_collect(struct heap *h);
 int heap_add_to_ref(struct heap *h, struct heap_ref *r);
 int heap_add_to_ptr(struct heap *h, struct heap_ref *r);
 struct heap_ref * heap_remove_from_ptr(struct heap *h, void *p);
@@ -219,8 +220,35 @@ int heap_resize(struct heap *h, uint64_t m) {
 	return 0;
 }
 
-void * heap_malloc(struct heap *h, int b) {
+int heap_garbage_collect(struct heap *h) {
 	int l, m;
+	
+	if (h == NULL) {
+		fprintf(stderr, "mvm: heap has not been initialized!\n");
+		mvm_halt();
+	}
+
+	/* unlock */
+	l = heap_release(h);
+	/* unlock garbage_collector */
+	m = garbage_collector_release(garbage_collector);
+
+	mvm_print("heap: calling garbage_collector\n");
+
+	if (garbage_collector_collect_now(garbage_collector) != 0)
+		mvm_halt();
+
+	mvm_print("heap: returned from garbage_collector\n");
+
+	/* lock garbage_collector */
+	garbage_collector_reacquire(garbage_collector, m);
+	/* lock */
+	heap_reacquire(h, l);
+
+	return 0;
+}
+
+void * heap_malloc(struct heap *h, int b) {
 	void *ptr;
 	struct heap_ref *r;
 
@@ -234,47 +262,26 @@ void * heap_malloc(struct heap *h, int b) {
 		mvm_halt();
 	}
 
-	/* lock */
-	heap_lock(h);
-
 	if (b > h->mem_free) {
-		/* unlock */
-		l = heap_release(h);
-		/* unlock garbage_collector */
-		m = garbage_collector_release(garbage_collector);
-
-		mvm_print("heap: calling garbage_collector\n");
-
-		if (garbage_collector_collect_now(garbage_collector) != 0)
-			mvm_halt();
-
-		mvm_print("heap: returned from garbage_collector\n");
-
-		/* lock garbage_collector */
-		garbage_collector_reacquire(garbage_collector, m);
-		/* lock */
-		heap_reacquire(h, l);
+		heap_garbage_collect(h);
 
 		if (b > h->mem_free) {
 			fprintf(stderr, "mvm: out of memory!\n");
-			/* unlock */
-			heap_unlock(h);
 			mvm_halt();
 		}
 	}
 
 	if ((ptr = (void *)malloc(b)) == NULL) {
 		perror("mvm: malloc");
-		/* unlock */
-		heap_unlock(h);
 		mvm_halt();
 	}
 
 	if ((r = heap_ref_create(0, ptr, b)) == NULL) {
-		/* unlock */
-		heap_unlock(h);
 		mvm_halt();
 	}
+
+	/* lock */
+	heap_lock(h);
 
 	/* add to ptr_buckets */
 	heap_add_to_ptr(h, r);
