@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <25 Oct 2012 at 21:38:35 by nwidger on macros.local>
+ * Time-stamp: <10 Dec 2012 at 19:21:40 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -319,7 +319,7 @@ int integer_to_string(struct object *o) {
 	}
 
 	snprintf(buf, INTEGER_TO_STRING_BUFFER_SIZE, "%" PRId32, i->value);
-	if ((ref = class_table_new_string(class_table, buf, NULL)) == 0)		
+	if ((ref = class_table_new_string(class_table, buf, NULL, 0)) == 0)
 		mvm_halt();
 
 	return ref;

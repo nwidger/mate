@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Dec 2012 at 19:38:22 by nwidger on macros.local>
+ * Time-stamp: <10 Dec 2012 at 19:21:44 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -459,7 +459,7 @@ int in_instruction(uint32_t o) {
 		/* lock */
 		garbage_collector_pause(garbage_collector);
 
-		ref = class_table_new_string(class_table, buf, NULL);
+		ref = class_table_new_string(class_table, buf, NULL, 0);
 		operand_stack_push(operand_stack, ref);
 
 		/* unlock */
@@ -812,7 +812,7 @@ int newstr_instruction(uint32_t o) {
 	/* lock */
 	garbage_collector_pause(garbage_collector);
 
-	ref = class_table_new_string(class_table, buf, NULL);
+	ref = class_table_new_string(class_table, buf, NULL, 1);
 	operand_stack_push(operand_stack, ref);
 
 	/* unlock */

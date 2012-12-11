@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <26 Sep 2012 at 19:16:43 by nwidger on macros.local>
+ * Time-stamp: <10 Dec 2012 at 19:53:47 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -125,7 +125,7 @@ int string_substr(struct object *o, struct object *p, struct object *q) {
 	strncpy(buf, s->chars+beg_index, (end_index-beg_index)+2);
 	buf[(end_index-beg_index)+1] = '\0';
 
-	if ((ref = class_table_new_string(class_table, buf, NULL)) == 0)
+	if ((ref = class_table_new_string(class_table, buf, NULL, 0)) == 0)
 		mvm_halt();
 
 	free(buf);
@@ -155,7 +155,7 @@ int string_concat(struct object *o, struct object *p) {
 	strcpy(buf, s->chars);
 	strcat(buf, t->chars);
 
-	if ((ref = class_table_new_string(class_table, buf, NULL)) == 0)
+	if ((ref = class_table_new_string(class_table, buf, NULL, 0)) == 0)
 		mvm_halt();
 
 	free(buf);
@@ -295,7 +295,7 @@ int string_hash_code(struct object *o) {
 
 	value = 0;
 	for (i = 0; i < s->length; i++)
-		value += (int32_t)s->chars[i];
+		value = (31*value) + (int32_t)s->chars[i];
 
 	if ((ref = class_table_new_integer(class_table, value, NULL)) == 0)
 		mvm_halt();
@@ -342,7 +342,7 @@ int string_to_string(struct object *o) {
 		mvm_halt();
 	}
 
-	if ((ref = class_table_new_string(class_table, s->chars, NULL)) == 0)		
+	if ((ref = class_table_new_string(class_table, s->chars, NULL, 0)) == 0)
 		mvm_halt();
 
 	return ref;

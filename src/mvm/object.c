@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Jan 2012 at 13:46:25 by nwidger on macros.local>
+ * Time-stamp: <10 Dec 2012 at 19:21:55 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -449,7 +449,7 @@ int object_to_string(struct object *o) {
 		mvm_halt();
 	}
 
-	if ((ref = class_table_new_string(class_table, "Object", NULL)) == 0)
+	if ((ref = class_table_new_string(class_table, "Object", NULL, 0)) == 0)
 		mvm_halt();
 
 	return ref;

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Dec 2010 at 17:48:27 by nwidger on macros.local>
+ * Time-stamp: <09 Dec 2012 at 20:03:12 by nwidger on macros.local>
  */
 
 #ifndef _MVM_CLASSTABLE_H
@@ -141,11 +141,12 @@ int class_table_new_integer(struct class_table *c, int32_t v, struct object **o)
  * @param c - the class_table to use
  * @param b - the new String instance will contain all characters in this C-string
  * @param o - if non-NULL, pointer to object will be saved to this variable
+ * @param s - non-zero if string is being created due to a newstr instruction
  *
  * @return reference to the new String instance, or 0 on failure
  */
 
-int class_table_new_string(struct class_table *c, char *b, struct object **o);
+int class_table_new_string(struct class_table *c, char *b, struct object **o, int s);
 
 /** creates a new instance of the predefined Table class with initial
  * capacity n and returns a reference to the new object.

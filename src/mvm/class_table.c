@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Dec 2012 at 19:38:09 by nwidger on macros.local>
+ * Time-stamp: <10 Dec 2012 at 20:14:53 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -26,6 +26,13 @@
 #include "thread.h"
 
 /* struct definitions */
+struct string_cache_record {
+	int ref;
+	char *chars;
+
+	struct string_cache_record *next;
+};
+
 struct class_table {
 	int num_classes;
 	int size;
@@ -33,11 +40,14 @@ struct class_table {
 	struct class *predefined_classes[NUM_PREDEFINED_CLASSES];
 	struct nlock *nlock;
 
+	struct string_cache_record *string_cache[CLASS_TABLE_STRING_CACHE_SIZE];
 	int integer_cache[CLASS_TABLE_INTEGER_CACHE_SIZE];
 };
 
 /* forwared declarations */
 int class_table_compare_strings(const void *s, const void *t);
+struct string_cache_record * string_cache_record_create(int r, char *c);
+void string_cache_record_destroy(struct string_cache_record *r);
 
 struct class_table * class_table_create(int n) {
 	struct class_table *c;
@@ -60,7 +70,8 @@ struct class_table * class_table_create(int n) {
 	if ((c->nlock = nlock_create()) == NULL)
 		mvm_halt();
 
-	memset(c->integer_cache, 0, sizeof(int) * CLASS_TABLE_INTEGER_CACHE_SIZE);
+	memset(c->integer_cache, 0, sizeof(int)*CLASS_TABLE_INTEGER_CACHE_SIZE);
+	memset(c->string_cache, 0, sizeof(struct string_cache_record *)*CLASS_TABLE_STRING_CACHE_SIZE);
 
 	return c;
 }
@@ -100,6 +111,7 @@ void class_table_clear(struct class_table *c) {
 		memset(c->predefined_classes, 0, sizeof(struct class *)*NUM_PREDEFINED_CLASSES);
 
 		memset(c->integer_cache, 0, sizeof(int) * CLASS_TABLE_INTEGER_CACHE_SIZE);
+		memset(c->string_cache, 0, sizeof(struct string_cache_record *) * CLASS_TABLE_STRING_CACHE_SIZE);
 
 		/* unlock */
 		class_table_unlock(c);
@@ -286,12 +298,13 @@ int class_table_new_integer(struct class_table *c, int32_t v, struct object **o)
 	return ref;
 }
 
-int class_table_new_string(struct class_table *c, char *b, struct object **o) {
-	int ref;
+int class_table_new_string(struct class_table *c, char *b, struct object **o, int s) {
 	uint32_t vmt;
 	struct object *object;
 	struct string *string;
+	int ref, i, hash, n, len;
 	struct class *string_class;
+	struct string_cache_record *r, *new_entry;
 
 	if (c == NULL) {
 		fprintf(stderr, "mvm: class table not initialized!\n");
@@ -304,18 +317,43 @@ int class_table_new_string(struct class_table *c, char *b, struct object **o) {
 	string_class = c->predefined_classes[string_type];
 	vmt = class_get_vmt(string_class);
 
-	/* lock */
-	garbage_collector_pause(garbage_collector);
+	n = 0;
+	r = NULL;
 
-	ref = class_table_new(class_table, vmt, &object);
-	heap_exclude_ref(heap, ref);
+	if (s != 0 && CLASS_TABLE_STRING_CACHE_SIZE != 0) {
+		len = strlen(b);
+		hash = 0; for (i = 0; i < len; i++) hash = (31*hash) + (int32_t)b[i];
+		hash = abs(hash);
+		
+		n = hash % CLASS_TABLE_STRING_CACHE_SIZE;
 
-	/* unlock */
-	garbage_collector_unpause(garbage_collector);
+		for (r = c->string_cache[n]; r != NULL; r = r->next) {
+			if (strcmp(b, r->chars) == 0)
+				break;
+		}
+	}
 
-	string = string_create(b);
-	heap_include_ref(heap, ref);
-	object_set_string(object, string);
+	if (r != NULL) {
+		ref = r->ref;
+	} else {
+		/* lock */
+		garbage_collector_pause(garbage_collector);
+
+		ref = class_table_new(class_table, vmt, &object);
+		heap_exclude_ref(heap, ref);
+
+		/* unlock */
+		garbage_collector_unpause(garbage_collector);
+
+		string = string_create(b);
+		if (s == 0 || CLASS_TABLE_STRING_CACHE_SIZE == 0) heap_include_ref(heap, ref);
+		object_set_string(object, string);
+		if (s != 0 && CLASS_TABLE_STRING_CACHE_SIZE != 0) {
+			new_entry = string_cache_record_create(ref, b);
+			new_entry->next = c->string_cache[n];
+			c->string_cache[n] = new_entry;
+		}
+	}
 
 	if (o != NULL)
 		*o = object;
@@ -679,4 +717,30 @@ char ** class_table_methods_array(struct class_table *c) {
 
 int class_table_compare_strings(const void *s, const void *t) {
 	return strcmp((char *)s, (char *)t);
+}
+
+
+struct string_cache_record * string_cache_record_create(int r, char *c) {
+	struct string_cache_record *rec;
+
+	if ((rec = (struct string_cache_record *)malloc(sizeof(struct string_cache_record))) == NULL)
+		mvm_halt();
+
+	rec->ref = r;
+	
+	if ((rec->chars = strdup(c)) == NULL) {
+		perror("mvm: strdup");
+		mvm_halt();
+	}
+	
+	rec->next = NULL;
+
+	return rec;
+}
+
+void string_cache_record_destroy(struct string_cache_record *rec) {
+	if (rec != NULL) {
+		free(rec->chars);
+		free(rec);
+	}
 }

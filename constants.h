@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <12 Apr 2012 at 19:48:20 by nwidger on macros.local>
+ * Time-stamp: <10 Dec 2012 at 20:13:36 by nwidger on macros.local>
  */
 
 #ifndef _MVM_CONSTANTS_H
@@ -117,6 +117,7 @@
 
 /* class table constants */
 #define CLASS_TABLE_INTEGER_CACHE_SIZE 65536
+#define CLASS_TABLE_STRING_CACHE_SIZE 512
 
 #ifdef DMP
 /* dmp constants */

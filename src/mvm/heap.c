@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Dec 2012 at 12:16:30 by nwidger on macros.local>
+ * Time-stamp: <09 Dec 2012 at 19:44:43 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -69,7 +69,7 @@ int heap_reacquire(struct heap *h, int l);
 struct heap * heap_create(uint64_t m) {
 	struct heap *h;
 
-	if (m <= 0) {
+	if (m != -1 && m <= 0) {
 		fprintf(stderr, "mvm: heap size must be greater than zero!\n");
 		mvm_halt();
 	}
@@ -79,7 +79,7 @@ struct heap * heap_create(uint64_t m) {
 		mvm_halt();
 	}
 
-	h->mem_size = m;
+	h->mem_size = m == -1 ? UINT64_MAX : m;
 	h->mem_free = m;
 
 	h->num_buckets = HEAP_NUM_BUCKETS;
