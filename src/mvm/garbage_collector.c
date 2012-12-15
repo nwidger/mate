@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Dec 2012 at 19:37:26 by nwidger on macros.local>
+ * Time-stamp: <10 Dec 2012 at 20:17:17 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -188,7 +188,7 @@ int garbage_collector_pause(struct garbage_collector *g) {
 	retval = 0;
 	if (g->type == concurrent_type) {
 		pthread_mutex_lock(&g->collecting_mutex);
-		while (g->is_running == 1 && g->is_collecting == 1) {
+		while (g->is_collecting == 1) {
 			pthread_cond_wait(&g->collecting_cond, &g->collecting_mutex);
 		}
 		pthread_mutex_unlock(&g->collecting_mutex);
@@ -198,7 +198,6 @@ int garbage_collector_pause(struct garbage_collector *g) {
 }
 
 int garbage_collector_unpause(struct garbage_collector *g) {
-
 	if (g == NULL) {
 		fprintf(stderr, "mvm: garbage collector has not been initialized!\n");
 		mvm_halt();
