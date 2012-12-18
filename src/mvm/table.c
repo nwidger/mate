@@ -1,11 +1,12 @@
 /* Niels Widger
- * Time-stamp: <29 Jan 2012 at 14:17:36 by nwidger on macros.local>
+ * Time-stamp: <17 Dec 2012 at 19:43:58 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
 
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -49,6 +50,7 @@ struct table {
 	int iterator_is_running;
 	int iterator_bucket;
 	struct table_entry *iterator_entry;
+	pthread_rwlock_t rwlock;
 
 #ifdef DMP
 	struct table_dmp *dmp;
@@ -85,6 +87,11 @@ struct table * table_create(int c, struct object *o) {
 
 	memset(t->buckets, 0, sizeof(struct table_entry *)*c);
 
+	if (pthread_rwlock_init(&t->rwlock, NULL) != 0) {
+		perror("mvm: pthread_rwlock_init");
+		mvm_halt();
+	}
+
 #ifdef DMP
 	if (dmp == NULL)
 		t->dmp = NULL;
@@ -100,6 +107,7 @@ void table_destroy(struct table *t) {
 		table_clear(t);
 		heap_free(heap, t->buckets);
 		heap_free(heap, t);
+		pthread_rwlock_destroy(&t->rwlock);
 	}
 }
 
@@ -136,6 +144,9 @@ int table_populate_ref_set(struct table *t, struct ref_set *r) {
 		mvm_halt();
 	}
 
+	/* lock */
+	pthread_rwlock_rdlock(&t->rwlock);
+
 	for (i = 0; i < t->current_capacity; i++) {
 		for (p = t->buckets[i]; p != NULL; p = p->next) {
 			if (p->key != 0)
@@ -145,6 +156,9 @@ int table_populate_ref_set(struct table *t, struct ref_set *r) {
 		}
 	}
 
+	/* unlock */
+	pthread_rwlock_unlock(&t->rwlock);
+
 	return 0;
 }
 
@@ -153,8 +167,8 @@ int table_entries_exceeds_load_factor(int e, int l, int c) {
 }
 
 int table_get(struct table *t, struct object *k) {
-	int n, hash;
 	struct table_entry *r;
+	int n, hash, value;
 
 	if (t == NULL) {
 		fprintf(stderr, "mvm: table not initialized!\n");
@@ -168,6 +182,9 @@ int table_get(struct table *t, struct object *k) {
 		table_dmp_load(t->dmp);
 #endif
 
+	/* lock */
+	pthread_rwlock_rdlock(&t->rwlock);
+
 	n = hash % t->current_capacity;
 
 	for (r = t->buckets[n]; r != NULL; r = r->next) {
@@ -176,7 +193,12 @@ int table_get(struct table *t, struct object *k) {
 			if (t->dmp != NULL)
 				table_dmp_load(t->dmp);
 #endif
-			return r->value;
+
+			value = r->value;
+
+			/* unlock */
+			pthread_rwlock_unlock(&t->rwlock);
+			return value;
 		}
 		
 #ifdef DMP
@@ -184,6 +206,9 @@ int table_get(struct table *t, struct object *k) {
 			table_dmp_load(t->dmp);
 #endif
 	}
+
+	/* unlock */
+	pthread_rwlock_unlock(&t->rwlock);
 
 	return 0;
 }
@@ -202,14 +227,18 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 		table_dmp_load(t->dmp);
 #endif
 
+	/* lock */
+	pthread_rwlock_wrlock(&t->rwlock);
+
 	/* check if iterator is running */
 	if (t->iterator_is_running == 1) {
 		fprintf(stderr, "mvm: cannot put, Table's iterator is running!\n");
 		mvm_halt();
 	}
 
-	if (t->current_capacity <= 0)
+	if (t->current_capacity <= 0) {
 		table_resize(t, TABLE_DEFAULT_INITIAL_CAPACITY);
+	}
 
 	hash = abs(table_run_hash_code(t, k));
 
@@ -264,6 +293,9 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 		table_resize(t, t->current_capacity*2);
 	}
 
+	/* unlock */
+	pthread_rwlock_unlock(&t->rwlock);
+
 	return old_value;
 }
 
@@ -280,6 +312,9 @@ int table_remove(struct table *t, struct object *k) {
 	if (t->dmp != NULL)
 		table_dmp_load(t->dmp);
 #endif
+
+	/* lock */
+	pthread_rwlock_wrlock(&t->rwlock);
 
 	/* check if iterator is running */
 	if (t->iterator_is_running == 1) {
@@ -314,8 +349,11 @@ int table_remove(struct table *t, struct object *k) {
 #endif
 	}
 
-	if (r == NULL)
+	if (r == NULL) {
+		/* unlock */
+		pthread_rwlock_unlock(&t->rwlock);
 		return 0;
+	}
 
 #ifdef DMP
 	if (t->dmp != NULL)
@@ -330,6 +368,10 @@ int table_remove(struct table *t, struct object *k) {
 	table_entry_destroy(r);
 
 	t->num_entries--;
+
+	/* unlock */
+	pthread_rwlock_unlock(&t->rwlock);
+
 	return old_value;
 }
 
@@ -347,6 +389,9 @@ int table_first_key(struct table *t) {
 		table_dmp_store(t->dmp);
 #endif
 
+	/* lock */
+	pthread_rwlock_wrlock(&t->rwlock);
+
 	for (i = 0; i < t->current_capacity; i++) {
 		if (t->buckets[i] != NULL)
 			break;
@@ -361,6 +406,9 @@ int table_first_key(struct table *t) {
 		t->iterator_bucket = i;
 		t->iterator_entry = t->buckets[i];
 	}
+
+	/* unlock */
+	pthread_rwlock_unlock(&t->rwlock);
 
 	if ((ref = class_table_new_integer(class_table, value, NULL)) == 0)
 		mvm_halt();
@@ -381,8 +429,14 @@ int table_next_key(struct table *t) {
 		table_dmp_load(t->dmp);
 #endif
 
-	if (t->iterator_is_running == 0)
+	/* lock */
+	pthread_rwlock_wrlock(&t->rwlock);
+
+	if (t->iterator_is_running == 0) {
+		/* unlock */
+		pthread_rwlock_unlock(&t->rwlock);
 		return 0;
+	}
 
 #ifdef DMP
 	if (t->dmp != NULL)
@@ -392,8 +446,11 @@ int table_next_key(struct table *t) {
 	prev = t->iterator_entry->key;
 
 	t->iterator_entry = t->iterator_entry->next;
-	if (t->iterator_entry != NULL)
+	if (t->iterator_entry != NULL) {
+		/* unlock */
+		pthread_rwlock_unlock(&t->rwlock);
 		return prev;
+	}
 
 	for (n = t->iterator_bucket+1; n < t->current_capacity; n++) {
 		if (t->buckets[n] != NULL) {
@@ -405,6 +462,9 @@ int table_next_key(struct table *t) {
 
 	if (n >= t->current_capacity)
 		t->iterator_is_running = 0;
+
+	/* unlock */
+	pthread_rwlock_unlock(&t->rwlock);
 
 	return prev;
 }
@@ -418,6 +478,9 @@ int table_resize(struct table *t, int n) {
 		fprintf(stderr, "mvm: table not initialized!\n");
 		mvm_halt();
 	}
+
+	/* lock */
+	pthread_rwlock_wrlock(&t->rwlock);
 
 	if ((new_table = table_create(n, t->object)) == NULL)
 		mvm_halt();
@@ -434,6 +497,9 @@ int table_resize(struct table *t, int n) {
 	heap_free(heap, t->buckets);
 	memcpy(t, new_table, sizeof(struct table));
 	heap_free(heap, new_table);
+
+	/* unlock */
+	pthread_rwlock_unlock(&t->rwlock);
 
 	return 0;
 }

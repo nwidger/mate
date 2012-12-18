@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <03 Apr 2011 at 16:08:32 by nwidger on macros.local>
+ * Time-stamp: <17 Dec 2012 at 19:12:52 by nwidger on macros.local>
  */
 
 #ifndef _MVM_HEAP_H
@@ -208,15 +208,26 @@ int heap_remove_thread_ref(struct heap *h, int r);
 
 int heap_dump(struct heap *h);
 
-/** acquires a lock which prevents other threads from accessing the
- * given heap.  When done, release the lock with heap_lock.
+/** acquires a write lock which prevents other threads from accessing
+ * the given heap.  When done, release the lock with heap_lock.
  *
  * @param h - the heap to lock
  *
  * @return 0 on success, non-zero on failure.
  */
 
-int heap_lock(struct heap *h);
+int heap_wrlock(struct heap *h);
+
+/** acquires a read lock which prevents other writing threads from
+ * accessing the given heap.  When done, release the lock with
+ * heap_lock.
+ *
+ * @param h - the heap to lock
+ *
+ * @return 0 on success, non-zero on failure.
+ */
+
+int heap_rdlock(struct heap *h);
 
 /** releases the lock acquired by heap_lock, allowing other threads to
  * access the given heap.
