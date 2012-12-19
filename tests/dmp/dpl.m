@@ -633,13 +633,13 @@ class DPL {
 	Object print_mutex;
 	Table runQueues;
 	
-	DPL() {
-		root = null;
-		solved = 0;
-		random_steal = 1;
-		parallel = 1;
-		num_threads = 2;
-		print_mutex = new Object();
+	DPL(Integer num_threads) {
+		this.root = null;
+		this.solved = 0;
+		this.random_steal = 1;
+		this.parallel = 1;
+		this.num_threads = num_threads;
+		this.print_mutex = new Object();
 	}
 
 	Object printSolution(Node child) {
@@ -709,7 +709,6 @@ class DPL {
 		this.parallel = 0;
 
 		if (this.parallel) {
-			this.num_threads = 2;
 			this.runQueues = new Table(num_threads);
 
 			for (i = 0; i < num_threads; i = i + 1) {
@@ -843,7 +842,7 @@ class DPL {
 Integer main() {
 	DPL dpl;
 
-	dpl = new DPL();
+	dpl = new DPL(in.toInteger());
 	
 	return dpl._main();
 }
