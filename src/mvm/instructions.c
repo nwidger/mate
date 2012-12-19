@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <10 Dec 2012 at 19:21:44 by nwidger on macros.local>
+ * Time-stamp: <18 Dec 2012 at 20:07:24 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -46,9 +46,9 @@
 	struct operand_stack *calling_frame_operand_stack;		\
 									\
         pc = thread_get_pc(NULL);					\
-        vm_stack = thread_get_vm_stack(NULL);				\
+        vm_stack = v;	                                                \
 									\
-	frame = vm_stack_peek(vm_stack);				\
+	frame = vm_stack_peek(vm_stack);                                \
 	if (frame == NULL) {						\
 		operand_stack = NULL;					\
 		local_variable_array = NULL;				\
@@ -80,7 +80,7 @@ int aconst_null_decode(uint32_t a) {
 	return 1;
 }
 
-int aconst_null_instruction(uint32_t o) {
+int aconst_null_instruction(uint32_t o, struct vm_stack *v) {
 	SETUP_INSTRUCTION();
 
 	operand_stack_push(operand_stack, 0);
@@ -102,7 +102,7 @@ int aload_decode(uint32_t a) {
 	return 2;
 }
 
-int aload_instruction(uint32_t o) {
+int aload_instruction(uint32_t o, struct vm_stack *v) {
 	int ref;
 	uint32_t index;
 
@@ -125,7 +125,7 @@ int areturn_decode(uint32_t a) {
 	return 1;
 }
 
-int areturn_instruction(uint32_t o) {
+int areturn_instruction(uint32_t o, struct vm_stack *v) {
 	int ref, n;
 	struct object *object;
 	struct integer *integer;
@@ -162,7 +162,7 @@ int astore_decode(uint32_t a) {
 	return 2;
 }
 
-int astore_instruction(uint32_t o) {
+int astore_instruction(uint32_t o, struct vm_stack *v) {
 	int ref, n;
 	uint32_t index;
 
@@ -196,7 +196,7 @@ int checkcast_decode(uint32_t a) {
 	return 2;
 }
 
-int checkcast_instruction(uint32_t o) {
+int checkcast_instruction(uint32_t o, struct vm_stack *v) {
 	int ref;
 	uint32_t vmt;
 	int32_t good, halt;
@@ -257,7 +257,7 @@ int dup_decode(uint32_t a) {
 	return 1;
 }
 
-int dup_instruction(uint32_t o) {
+int dup_instruction(uint32_t o, struct vm_stack *v) {
 	int ref;
 
 	SETUP_INSTRUCTION();
@@ -280,7 +280,7 @@ int dup_x1_decode(uint32_t a) {
 	return 1;
 }
 
-int dup_x1_instruction(uint32_t o) {
+int dup_x1_instruction(uint32_t o, struct vm_stack *v) {
 	int ref1, ref2;
 
 	SETUP_INSTRUCTION();
@@ -315,7 +315,7 @@ int getfield_decode(uint32_t a) {
 	return 2;
 }
 
-int getfield_instruction(uint32_t o) {
+int getfield_instruction(uint32_t o, struct vm_stack *v) {
 	int ref, fieldref, n;
 	uint32_t index;
 	struct object *object;
@@ -353,7 +353,7 @@ int goto_decode(uint32_t a) {
 	return 2;
 }
 
-int goto_instruction(uint32_t o) {
+int goto_instruction(uint32_t o, struct vm_stack *v) {
 	uint32_t address;
 
 	SETUP_INSTRUCTION();
@@ -382,7 +382,7 @@ int ifeq_decode(uint32_t a) {
 	return 2;
 }
 
-int ifeq_instruction(uint32_t o) {
+int ifeq_instruction(uint32_t o, struct vm_stack *v) {
 	int ref, n;
 	int32_t value;
 	uint32_t address;
@@ -417,7 +417,7 @@ int in_decode(uint32_t a) {
 	return 1;
 }
 
-int in_instruction(uint32_t o) {
+int in_instruction(uint32_t o, struct vm_stack *v) {
 	int ref, i, size;
 	char *buf, c;
 
@@ -492,7 +492,7 @@ int invokespecial_decode(uint32_t a) {
 	return 4;
 }
 
-int invokespecial_instruction(uint32_t o) {
+int invokespecial_instruction(uint32_t o, struct vm_stack *v) {
 	char *method_name;
 	int ref, i, num_methods;
 	struct object *object;
@@ -552,7 +552,7 @@ int invokenative_decode(uint32_t a) {
 	return 2;
 }
 
-int invokenative_instruction(uint32_t o) {
+int invokenative_instruction(uint32_t o, struct vm_stack *v) {
 	uint32_t index, return_address;
 
 	SETUP_INSTRUCTION();
@@ -578,7 +578,7 @@ int invokevirtual_decode(uint32_t a) {
 	return 3;
 }
 
-int invokevirtual_instruction(uint32_t o) {
+int invokevirtual_instruction(uint32_t o, struct vm_stack *v) {
 	int ref;
 	uint32_t index, num_args, return_address;
 
@@ -607,7 +607,7 @@ int monitorenter_decode(uint32_t a) {
 	return 1;
 }
 
-int monitorenter_instruction(uint32_t o) {
+int monitorenter_instruction(uint32_t o, struct vm_stack *v) {
 	int ref;
 	struct object *object;
 
@@ -636,7 +636,7 @@ int monitorexit_decode(uint32_t a) {
 	return 1;
 }
 
-int monitorexit_instruction(uint32_t o) {
+int monitorexit_instruction(uint32_t o, struct vm_stack *v) {
 	int ref;
 	struct object *object;
 
@@ -674,7 +674,7 @@ int new_decode(uint32_t a) {
 	return 2;
 }
 
-int new_instruction(uint32_t o) {
+int new_instruction(uint32_t o, struct vm_stack *v) {
 	int ref;
 	uint32_t vmt;
 
@@ -707,7 +707,7 @@ int newint_decode(uint32_t a) {
 	return 2;
 }
 
-int newint_instruction(uint32_t o) {
+int newint_instruction(uint32_t o, struct vm_stack *v) {
 	int ref;
 	uint32_t value;
 
@@ -754,7 +754,7 @@ int newreal_decode(uint32_t a) {
 	return len+2;
 }
 
-int newreal_instruction(uint32_t o) {
+int newreal_instruction(uint32_t o, struct vm_stack *v) {
 	int ref;
 	char *buf;
 	float value;
@@ -801,7 +801,7 @@ int newstr_decode(uint32_t a) {
 	return len+2;
 }
 
-int newstr_instruction(uint32_t o) {
+int newstr_instruction(uint32_t o, struct vm_stack *v) {
 	int ref;
 	char *buf;
 
@@ -832,7 +832,7 @@ int out_decode(uint32_t a) {
 	return 1;
 }
 
-int out_instruction(uint32_t o) {
+int out_instruction(uint32_t o, struct vm_stack *v) {
 	int ref, n;
 	char *chars;
 	struct object *object;
@@ -863,7 +863,7 @@ int pop_decode(uint32_t a) {
 	return 1;
 }
 
-int pop_instruction(uint32_t o) {
+int pop_instruction(uint32_t o, struct vm_stack *v) {
 	SETUP_INSTRUCTION();
 
 	operand_stack_pop(operand_stack);
@@ -885,7 +885,7 @@ int putfield_decode(uint32_t a) {
 	return 2;
 }
 
-int putfield_instruction(uint32_t o) {
+int putfield_instruction(uint32_t o, struct vm_stack *v) {
 	int ref, objectref, n;
 	uint32_t index;
 	struct object *object;
@@ -915,7 +915,7 @@ int refcmp_decode(uint32_t a) {
 	return 1;
 }
 
-int refcmp_instruction(uint32_t o) {
+int refcmp_instruction(uint32_t o, struct vm_stack *v) {
 	int32_t value;
 	int ref, ref1, ref2;
 
@@ -948,7 +948,7 @@ int return_decode(uint32_t a) {
 	return 1;
 }
 
-int return_instruction(uint32_t o) {
+int return_instruction(uint32_t o, struct vm_stack *v) {
 	SETUP_INSTRUCTION();
 
 	thread_set_pc(NULL, vm_stack_pop(vm_stack));

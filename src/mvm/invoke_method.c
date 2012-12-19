@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Dec 2012 at 19:38:24 by nwidger on macros.local>
+ * Time-stamp: <18 Dec 2012 at 20:01:31 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -193,7 +193,7 @@ int execute_method(char *e, uint32_t a, uint32_t b, uint32_t n, uint32_t m, uint
 				return 0;
 		}
 
-		if (instruction_table_execute(instruction_table, opcode) != 0)
+		if (instruction_table_execute(instruction_table, opcode, vm_stack) != 0)
 			mvm_halt();
 
 #ifdef DMP
