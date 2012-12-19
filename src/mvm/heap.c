@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <17 Dec 2012 at 19:12:45 by nwidger on macros.local>
+ * Time-stamp: <18 Dec 2012 at 19:55:00 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -361,6 +361,7 @@ int heap_free(struct heap *h, void *p) {
 
 void * heap_fetch(struct heap *h, int r) {
 	int n;
+	void *ptr;
 	struct heap_ref *p;
 
 	if (h == NULL) {
@@ -371,6 +372,8 @@ void * heap_fetch(struct heap *h, int r) {
 	if (r == 0)
 		return NULL;
 
+	ptr = NULL;
+	
 	/* lock */
 	heap_rdlock(h);
 
@@ -378,16 +381,15 @@ void * heap_fetch(struct heap *h, int r) {
 
 	for (p = h->ref_buckets[n]; p != NULL && p->ref <= r; p = p->ref_next) {
 		if (p->ref == r) {
-			/* unlock */
-			heap_unlock(h);
-			return p->ptr;
+			ptr = p->ptr;
+			break;
 		}
 	}
 
 	/* unlock */
 	heap_unlock(h);
 
-	return NULL;
+	return ptr;
 }
 
 struct object * heap_fetch_object(struct heap *h, int r) {
