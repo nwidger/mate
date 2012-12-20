@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <20 Dec 2012 at 17:14:20 by nwidger on macros.local>
+ * Time-stamp: <20 Dec 2012 at 17:17:38 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -601,12 +601,12 @@ int heap_add_to_ptr(struct heap *h, struct heap_ref *r) {
 
 	if (h->ptr_buckets[n] == NULL) {
 		h->ptr_buckets[n] = r;
-	} else if (ptr >= h->ptr_buckets[n]->ptr) {
+	} else if (ptr < h->ptr_buckets[n]->ptr) {
 		r->ptr_next = h->ptr_buckets[n];
 		h->ptr_buckets[n] = r;
 	} else {
 		for (p = h->ptr_buckets[n], q = NULL;
-		     p != NULL && ptr <= p->ptr;
+		     p != NULL && ptr > p->ptr;
 		     q = p, p = p->ptr_next);
 
 		r->ptr_next = q->ptr_next;
@@ -629,7 +629,7 @@ struct heap_ref * heap_remove_from_ptr(struct heap *h, void *p) {
 	/* remove from ptr_buckets */
 	n = (uintptr_t)p % h->num_buckets;
 	for (q = h->ptr_buckets[n], r = NULL;
-	     q != NULL && q->ptr >= p;
+	     q != NULL && q->ptr < p;
 	     r = q, q = q->ptr_next);
 
 	if (q == NULL || q->ptr != p)
