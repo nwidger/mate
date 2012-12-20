@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Dec 2012 at 10:28:36 by nwidger on macros.local>
+ * Time-stamp: <20 Dec 2012 at 18:12:09 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -390,7 +390,7 @@ void * thread_run0(void *p) {
 
 	t->state = runnable_state;
 
-	if (invoke_virtual_method_by_name(t->ref, t->pc, "run", 0) != 0)
+	if (invoke_virtual_method_by_name(t, t->ref, t->pc, "run", 0) != 0)
 		mvm_halt();
 
 #ifdef DMP
@@ -419,7 +419,7 @@ void * thread_run0_main(void *p) {
 		mdb_hook(startup_hook);
 
 	main_block_return_value = 0;
-	if (invoke_method("mainBlock", main_block_address, main_block_end,
+	if (invoke_method(t, "mainBlock", main_block_address, main_block_end,
 			  0, main_block_max_locals, 0) != 0) {
 		mvm_halt();
 	}

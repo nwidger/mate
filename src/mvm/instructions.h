@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Dec 2012 at 20:05:24 by nwidger on macros.local>
+ * Time-stamp: <20 Dec 2012 at 17:58:57 by nwidger on macros.local>
  */
 
 #include <inttypes.h>
@@ -8,39 +8,39 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "vm_stack.h"
+#include "thread.h"
 
 /* these functions implement each instruction of the maTe language.
  * returns: 0 on success, non-zero on failure
  */
 
-int aaload_instruction(uint32_t o, struct vm_stack *v);
-int aastore_instruction(uint32_t o, struct vm_stack *v);
-int aconst_null_instruction(uint32_t o, struct vm_stack *v);
-int aload_instruction(uint32_t o, struct vm_stack *v);
-int areturn_instruction(uint32_t o, struct vm_stack *v);
-int astore_instruction(uint32_t o, struct vm_stack *v);
-int checkcast_instruction(uint32_t o, struct vm_stack *v);
-int dup_instruction(uint32_t o, struct vm_stack *v);
-int dup_x1_instruction(uint32_t o, struct vm_stack *v);
-int getfield_instruction(uint32_t o, struct vm_stack *v);
-int goto_instruction(uint32_t o, struct vm_stack *v);
-int ifeq_instruction(uint32_t o, struct vm_stack *v);
-int in_instruction(uint32_t o, struct vm_stack *v);
-int invokespecial_instruction(uint32_t o, struct vm_stack *v);
-int invokenative_instruction(uint32_t o, struct vm_stack *v);
-int invokevirtual_instruction(uint32_t o, struct vm_stack *v);
-int monitorenter_instruction(uint32_t o, struct vm_stack *v);
-int monitorexit_instruction(uint32_t o, struct vm_stack *v);
-int new_instruction(uint32_t o, struct vm_stack *v);
-int newint_instruction(uint32_t o, struct vm_stack *v);
-int newreal_instruction(uint32_t o, struct vm_stack *v);
-int newstr_instruction(uint32_t o, struct vm_stack *v);
-int out_instruction(uint32_t o, struct vm_stack *v);
-int pop_instruction(uint32_t a, struct vm_stack *v);
-int putfield_instruction(uint32_t o, struct vm_stack *v);
-int refcmp_instruction(uint32_t o, struct vm_stack *v);
-int return_instruction(uint32_t o, struct vm_stack *v);
+int aaload_instruction(uint32_t o, struct thread *t);
+int aastore_instruction(uint32_t o, struct thread *t);
+int aconst_null_instruction(uint32_t o, struct thread *t);
+int aload_instruction(uint32_t o, struct thread *t);
+int areturn_instruction(uint32_t o, struct thread *t);
+int astore_instruction(uint32_t o, struct thread *t);
+int checkcast_instruction(uint32_t o, struct thread *t);
+int dup_instruction(uint32_t o, struct thread *t);
+int dup_x1_instruction(uint32_t o, struct thread *t);
+int getfield_instruction(uint32_t o, struct thread *t);
+int goto_instruction(uint32_t o, struct thread *t);
+int ifeq_instruction(uint32_t o, struct thread *t);
+int in_instruction(uint32_t o, struct thread *t);
+int invokespecial_instruction(uint32_t o, struct thread *t);
+int invokenative_instruction(uint32_t o, struct thread *t);
+int invokevirtual_instruction(uint32_t o, struct thread *t);
+int monitorenter_instruction(uint32_t o, struct thread *t);
+int monitorexit_instruction(uint32_t o, struct thread *t);
+int new_instruction(uint32_t o, struct thread *t);
+int newint_instruction(uint32_t o, struct thread *t);
+int newreal_instruction(uint32_t o, struct thread *t);
+int newstr_instruction(uint32_t o, struct thread *t);
+int out_instruction(uint32_t o, struct thread *t);
+int pop_instruction(uint32_t a, struct thread *t);
+int putfield_instruction(uint32_t o, struct thread *t);
+int refcmp_instruction(uint32_t o, struct thread *t);
+int return_instruction(uint32_t o, struct thread *t);
 
 /* these functions decode each instruction of the maTe language.
  * returns: size of decoded instruction in words

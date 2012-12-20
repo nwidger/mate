@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <24 Jun 2012 at 19:55:22 by nwidger on macros.local>
+ * Time-stamp: <20 Dec 2012 at 18:15:15 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -1219,10 +1219,13 @@ int info_function(char **t, int n) {
 	int i, index;
 	char *command;
 	uint32_t pc;
+	struct thread *thread;
 	struct vm_stack *vm_stack;
 
-	pc = thread_get_pc(NULL);
-	vm_stack = thread_get_vm_stack(NULL);
+	thread = thread_get_current();
+
+	pc = thread_get_pc(thread);
+	vm_stack = thread_get_vm_stack(thread);
 
 	repeat = 1;
 
@@ -2136,9 +2139,12 @@ uint32_t mdb_hook(enum mdb_hook h) {
 	struct breakpoint *b;
 	uint32_t pc, retval, opcode;
 	struct vm_stack *vm_stack;
+	struct thread *thread;
 
-	pc = thread_get_pc(NULL);
-	vm_stack = thread_get_vm_stack(NULL);
+	thread = thread_get_current();
+
+	pc = thread_get_pc(thread);
+	vm_stack = thread_get_vm_stack(thread);
 
 	last_hook = h;
 	enter_cli = 0;

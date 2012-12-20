@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Dec 2012 at 20:08:16 by nwidger on macros.local>
+ * Time-stamp: <20 Dec 2012 at 18:00:04 by nwidger on macros.local>
  */
 
 #ifndef _MVM_INSTRUCTIONTABLE_H
@@ -7,7 +7,7 @@
 
 #include <inttypes.h>
 
-#include "vm_stack.h"
+#include "thread.h"
 
 struct instruction_table;
 
@@ -48,18 +48,18 @@ void instruction_table_clear(struct instruction_table *i);
  */
 
 int instruction_table_add(struct instruction_table *i, char *n, uint32_t o,
-			  int (*f)(uint32_t, struct vm_stack *), int (*d)(uint32_t), int (*s)(uint32_t));
+			  int (*f)(uint32_t, struct thread *), int (*d)(uint32_t), int (*s)(uint32_t));
 
 /** executes the instruction with opcode o.
  *
  * @param i - the instruction_table to search
  * @param o - the opcode to execute
- * @param v - the vm_stack to execute on
+ * @param t - the thread to execute on
  *
  * @return return value of the instruction function
  */
 
-int instruction_table_execute(struct instruction_table *i, uint32_t o, struct vm_stack *v);
+int instruction_table_execute(struct instruction_table *i, uint32_t o, struct thread *t);
 
 /** decodes the instruction with opcode o at address a.
  *

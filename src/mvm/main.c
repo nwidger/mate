@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <09 Dec 2012 at 19:35:03 by nwidger on macros.local>
+ * Time-stamp: <20 Dec 2012 at 18:14:13 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -375,6 +375,7 @@ void mvm_clear() {
 
 void mvm_halt() {
 	uint32_t pc, opcode;
+	struct thread *thread;
 	struct vm_stack *vm_stack;
 	char *class_file, *instruction_name;
 
@@ -384,9 +385,11 @@ void mvm_halt() {
 		exit(1);
 	}
 #endif
-	
-	pc = thread_get_pc(NULL);
-	vm_stack = thread_get_vm_stack(NULL);
+
+	thread = thread_get_current();
+
+	pc = thread_get_pc(thread);
+	vm_stack = thread_get_vm_stack(thread);
 
 	if (debug != 0) {
 		mdb_hook(halt_vm_hook);

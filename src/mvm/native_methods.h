@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <09 Oct 2012 at 19:12:21 by nwidger on macros.local>
+ * Time-stamp: <20 Dec 2012 at 17:55:16 by nwidger on macros.local>
  */
 
 #ifndef _MVM_NATIVEMETHODS_H
@@ -7,80 +7,82 @@
 
 #include <inttypes.h>
 
+#include "thread.h"
+
 struct native_method_array;
 
 /* these functions implement each native method of the maTe language */
 
-int native_object_constructor(uint32_t i);
-int native_object_equals(uint32_t i);
-int native_object_hash_code(uint32_t i);
-int native_object_to_string(uint32_t i);
-int native_object_notify(uint32_t i);
-int native_object_notify_all(uint32_t i);
-int native_object_wait(uint32_t i);
-int native_object_wait_integer(uint32_t i);
+int native_object_constructor(uint32_t i, struct thread *v);
+int native_object_equals(uint32_t i, struct thread *v);
+int native_object_hash_code(uint32_t i, struct thread *v);
+int native_object_to_string(uint32_t i, struct thread *v);
+int native_object_notify(uint32_t i, struct thread *v);
+int native_object_notify_all(uint32_t i, struct thread *v);
+int native_object_wait(uint32_t i, struct thread *v);
+int native_object_wait_integer(uint32_t i, struct thread *v);
 
-int native_integer_constructor(uint32_t i);
-int native_integer_constructor_integer(uint32_t i);
-int native_integer_constructor_real(uint32_t i);
-int native_integer_add(uint32_t i);
-int native_integer_subtract(uint32_t i);
-int native_integer_multiply(uint32_t i);
-int native_integer_divide(uint32_t i);
-int native_integer_greater_than(uint32_t i);
-int native_integer_less_than(uint32_t i);
-int native_integer_greater_than_equal(uint32_t i);
-int native_integer_less_than_equal(uint32_t i);
-int native_integer_not(uint32_t i);
-int native_integer_minus(uint32_t i);
-int native_integer_equals(uint32_t i);
-int native_integer_hash_code(uint32_t i);
-int native_integer_to_string(uint32_t i);
-int native_integer_mod(uint32_t i);
-int native_integer_rand(uint32_t i);
+int native_integer_constructor(uint32_t i, struct thread *v);
+int native_integer_constructor_integer(uint32_t i, struct thread *v);
+int native_integer_constructor_real(uint32_t i, struct thread *v);
+int native_integer_add(uint32_t i, struct thread *v);
+int native_integer_subtract(uint32_t i, struct thread *v);
+int native_integer_multiply(uint32_t i, struct thread *v);
+int native_integer_divide(uint32_t i, struct thread *v);
+int native_integer_greater_than(uint32_t i, struct thread *v);
+int native_integer_less_than(uint32_t i, struct thread *v);
+int native_integer_greater_than_equal(uint32_t i, struct thread *v);
+int native_integer_less_than_equal(uint32_t i, struct thread *v);
+int native_integer_not(uint32_t i, struct thread *v);
+int native_integer_minus(uint32_t i, struct thread *v);
+int native_integer_equals(uint32_t i, struct thread *v);
+int native_integer_hash_code(uint32_t i, struct thread *v);
+int native_integer_to_string(uint32_t i, struct thread *v);
+int native_integer_mod(uint32_t i, struct thread *v);
+int native_integer_rand(uint32_t i, struct thread *v);
 
-int native_string_constructor_string(uint32_t i);
-int native_string_length(uint32_t i);
-int native_string_substr(uint32_t i);
-int native_string_to_integer(uint32_t i);
-int native_string_concat(uint32_t i);
-int native_string_greater_than(uint32_t i);
-int native_string_less_than(uint32_t i);
-int native_string_hash_code(uint32_t i);
-int native_string_equals(uint32_t i);
-int native_string_to_string(uint32_t i);
+int native_string_constructor_string(uint32_t i, struct thread *v);
+int native_string_length(uint32_t i, struct thread *v);
+int native_string_substr(uint32_t i, struct thread *v);
+int native_string_to_integer(uint32_t i, struct thread *v);
+int native_string_concat(uint32_t i, struct thread *v);
+int native_string_greater_than(uint32_t i, struct thread *v);
+int native_string_less_than(uint32_t i, struct thread *v);
+int native_string_hash_code(uint32_t i, struct thread *v);
+int native_string_equals(uint32_t i, struct thread *v);
+int native_string_to_string(uint32_t i, struct thread *v);
 
-int native_table_constructor(uint32_t i);
-int native_table_constructor_integer(uint32_t i);
-int native_table_get(uint32_t i);
-int native_table_put(uint32_t i);
-int native_table_remove(uint32_t i);
-int native_table_first_key(uint32_t i);
-int native_table_next_key(uint32_t i);
+int native_table_constructor(uint32_t i, struct thread *v);
+int native_table_constructor_integer(uint32_t i, struct thread *v);
+int native_table_get(uint32_t i, struct thread *v);
+int native_table_put(uint32_t i, struct thread *v);
+int native_table_remove(uint32_t i, struct thread *v);
+int native_table_first_key(uint32_t i, struct thread *v);
+int native_table_next_key(uint32_t i, struct thread *v);
 
-int native_thread_constructor(uint32_t i);
-int native_thread_start(uint32_t i);
-int native_thread_run(uint32_t i);
-int native_thread_join(uint32_t i);
-int native_thread_sleep(uint32_t i);
+int native_thread_constructor(uint32_t i, struct thread *v);
+int native_thread_start(uint32_t i, struct thread *v);
+int native_thread_run(uint32_t i, struct thread *v);
+int native_thread_join(uint32_t i, struct thread *v);
+int native_thread_sleep(uint32_t i, struct thread *v);
 
-int native_real_constructor(uint32_t i);
-int native_real_constructor_real(uint32_t i);
-int native_real_constructor_integer(uint32_t i);
-int native_real_add(uint32_t i);
-int native_real_subtract(uint32_t i);
-int native_real_multiply(uint32_t i);
-int native_real_divide(uint32_t i);
-int native_real_greater_than(uint32_t i);
-int native_real_less_than(uint32_t i);
-int native_real_greater_than_equal(uint32_t i);
-int native_real_less_than_equal(uint32_t i);
-int native_real_not(uint32_t i);
-int native_real_minus(uint32_t i);
-int native_real_equals(uint32_t i);
-int native_real_hash_code(uint32_t i);
-int native_real_to_string(uint32_t i);
-int native_real_square_root(uint32_t i);
+int native_real_constructor(uint32_t i, struct thread *v);
+int native_real_constructor_real(uint32_t i, struct thread *v);
+int native_real_constructor_integer(uint32_t i, struct thread *v);
+int native_real_add(uint32_t i, struct thread *v);
+int native_real_subtract(uint32_t i, struct thread *v);
+int native_real_multiply(uint32_t i, struct thread *v);
+int native_real_divide(uint32_t i, struct thread *v);
+int native_real_greater_than(uint32_t i, struct thread *v);
+int native_real_less_than(uint32_t i, struct thread *v);
+int native_real_greater_than_equal(uint32_t i, struct thread *v);
+int native_real_less_than_equal(uint32_t i, struct thread *v);
+int native_real_not(uint32_t i, struct thread *v);
+int native_real_minus(uint32_t i, struct thread *v);
+int native_real_equals(uint32_t i, struct thread *v);
+int native_real_hash_code(uint32_t i, struct thread *v);
+int native_real_to_string(uint32_t i, struct thread *v);
+int native_real_square_root(uint32_t i, struct thread *v);
 
 /** adds all necessary native methods to the given native_method_array.
  *

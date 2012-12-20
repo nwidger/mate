@@ -1,11 +1,13 @@
 /* Niels Widger
- * Time-stamp: <12 Apr 2012 at 19:37:27 by nwidger on macros.local>
+ * Time-stamp: <20 Dec 2012 at 17:54:43 by nwidger on macros.local>
  */
 
 #ifndef _MVM_NATIVEMETHODARRAY_H
 #define _MVM_NATIVEMETHODARRAY_H
 
 #include <inttypes.h>
+
+#include "thread.h"
 
 struct native_method_array;
 
@@ -55,18 +57,19 @@ int native_method_array_set(struct native_method_array *n, int i, char *s);
  * @return 0 on success, non-zero on failure
  */
 
-int native_method_array_set_method(struct native_method_array *n, char *s, int (*m)(uint32_t));
+int native_method_array_set_method(struct native_method_array *n, char *s, int (*m)(uint32_t, struct thread *));
 
 /** executes the native method at index i of the given
  * native_method_array.
  *
  * @param n - the native_method_array to access
  * @param i - the index of the native method to invoke
+ * @param s - the thread to execute on
  *
  * @return return value of the native method function, or -1 on failure
  */
 
-int native_method_array_execute(struct native_method_array *n, int i);
+int native_method_array_execute(struct native_method_array *n, int i, struct thread *t);
 
 /** returns the name of the native method at index i of the given
  * native_method_array.

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Dec 2012 at 20:01:31 by nwidger on macros.local>
+ * Time-stamp: <20 Dec 2012 at 18:13:43 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -28,14 +28,13 @@
 #include "object.h"
 #include "operand_stack.h"
 #include "symbol_table.h"
-#include "thread.h"
 #include "thread_dmp.h"
 #include "vm_stack.h"
 
 /* forward declarations */
-int execute_method(char *e, uint32_t a, uint32_t b, uint32_t n, uint32_t m, uint32_t r);
+int execute_method(struct thread *t, char *e, uint32_t a, uint32_t b, uint32_t n, uint32_t m, uint32_t r);
 
-int invoke_virtual_method_by_name(int r, uint32_t a, char *m, int n, ...) {
+int invoke_virtual_method_by_name(struct thread *t, int r, uint32_t a, char *m, int n, ...) {
 	int i, len;
 	va_list ap;
 	struct class *class;
@@ -84,13 +83,13 @@ int invoke_virtual_method_by_name(int r, uint32_t a, char *m, int n, ...) {
 		mvm_halt();
 	}
 
-	invoke_virtual_method(r, i, n+1, a);
+	invoke_virtual_method(t, r, i, n+1, a);
 
 	free(buf);
 	return 0;
 }
 
-int invoke_virtual_method(int r, int i, int n, uint32_t a) {
+int invoke_virtual_method(struct thread *t, int r, int i, int n, uint32_t a) {
 	struct class *class;
 	struct object *object;
 	char *method_name;
@@ -101,27 +100,27 @@ int invoke_virtual_method(int r, int i, int n, uint32_t a) {
 
 	if (class_method_is_native(class, i) == 1) {
 		native_index = class_get_method_field(class, i, native_index_field);
-		invoke_native_method(native_index, a);
+		invoke_native_method(t, native_index, a);
 	} else {
 		method_name = class_get_method_name(class, i);
 		method_address = class_get_method_field(class, i, address_field);
 		method_end = class_get_method_field(class, i, end_field);
 		max_locals = class_get_method_field(class, i, max_locals_field);
-		execute_method(method_name, method_address,
+		execute_method(t, method_name, method_address,
 			       method_end, n, max_locals, a);
 	}
 
 	return 0;
 }
 
-int invoke_native_method(int i, uint32_t r) {
+int invoke_native_method(struct thread *t, int i, uint32_t r) {
 	uint32_t pc;
 	int num_args;
 	char *name;
 	struct vm_stack *vm_stack;
 
-	pc = thread_get_pc(NULL);
-	vm_stack = thread_get_vm_stack(NULL);
+	pc = thread_get_pc(t);
+	vm_stack = thread_get_vm_stack(t);
 
 	name = native_method_array_get_name(native_method_array, i);
 	num_args = native_method_array_get_num_args(native_method_array, i);
@@ -140,10 +139,10 @@ int invoke_native_method(int i, uint32_t r) {
 			return 0;
 	}
 
-	if (native_method_array_execute(native_method_array, i) != 0)
+	if (native_method_array_execute(native_method_array, i, t) != 0)
 		mvm_halt();
 
-	thread_set_pc(NULL, vm_stack_pop(vm_stack));
+	thread_set_pc(t, vm_stack_pop(vm_stack));
 
 	if (debug != 0) {
 		mdb_hook(leave_method_hook);
@@ -154,17 +153,17 @@ int invoke_native_method(int i, uint32_t r) {
 	return 0;
 }
 
-int invoke_method(char *e, uint32_t a, uint32_t b, int n, int m, uint32_t r) {
-	return execute_method(e, a, b, n, m, r);
+int invoke_method(struct thread *t, char *e, uint32_t a, uint32_t b, int n, int m, uint32_t r) {
+	return execute_method(t, e, a, b, n, m, r);
 }
 
-int execute_method(char *e, uint32_t a, uint32_t b, uint32_t n, uint32_t m, uint32_t r) {
+int execute_method(struct thread *t, char *e, uint32_t a, uint32_t b, uint32_t n, uint32_t m, uint32_t r) {
 	int old_size;
 	uint32_t pc, opcode;
 	struct frame *frame;
 	struct vm_stack *vm_stack;
 
-	vm_stack = thread_get_vm_stack(NULL);
+	vm_stack = thread_get_vm_stack(t);
 
 	/* lock */
 	garbage_collector_pause(garbage_collector);
@@ -175,11 +174,11 @@ int execute_method(char *e, uint32_t a, uint32_t b, uint32_t n, uint32_t m, uint
 	/* unlock */
 	garbage_collector_unpause(garbage_collector);
 
-	thread_set_pc(NULL, a);
+	thread_set_pc(t, a);
 
 	while (vm_stack_empty(vm_stack) == 0 &&
 	       vm_stack_size(vm_stack) > old_size) {
-		pc = thread_get_pc(NULL);
+		pc = thread_get_pc(t);
 
 		frame_set_current_address(frame, pc);
 		opcode = method_area_fetch(method_area, pc);
@@ -193,14 +192,14 @@ int execute_method(char *e, uint32_t a, uint32_t b, uint32_t n, uint32_t m, uint
 				return 0;
 		}
 
-		if (instruction_table_execute(instruction_table, opcode, vm_stack) != 0)
+		if (instruction_table_execute(instruction_table, opcode, t) != 0)
 			mvm_halt();
 
 #ifdef DMP
 		if (dmp != NULL) {
 			struct thread_dmp *td;
 			
-			td = thread_get_dmp(NULL);
+			td = thread_get_dmp(t);
 			thread_dmp_execute_instruction(td, opcode);
 		}
 #endif

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Dec 2012 at 20:07:24 by nwidger on macros.local>
+ * Time-stamp: <20 Dec 2012 at 18:07:32 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -45,8 +45,8 @@
 	struct frame *calling_frame;					\
 	struct operand_stack *calling_frame_operand_stack;		\
 									\
-        pc = thread_get_pc(NULL);					\
-        vm_stack = v;	                                                \
+        pc = thread_get_pc(t);						\
+        vm_stack = thread_get_vm_stack(t);				\
 									\
 	frame = vm_stack_peek(vm_stack);                                \
 	if (frame == NULL) {						\
@@ -69,7 +69,7 @@
 
 /* forward declarations */
 int is_whitespace(char c);
-uint32_t increment_pc(int n);
+uint32_t increment_pc(int n, struct thread *t);
 
 int aconst_null_decode_size(uint32_t a) {
 	return 1;
@@ -80,12 +80,12 @@ int aconst_null_decode(uint32_t a) {
 	return 1;
 }
 
-int aconst_null_instruction(uint32_t o, struct vm_stack *v) {
+int aconst_null_instruction(uint32_t o, struct thread *t) {
 	SETUP_INSTRUCTION();
 
 	operand_stack_push(operand_stack, 0);
 
-	thread_set_pc(NULL, increment_pc(1));
+	thread_set_pc(t, increment_pc(1, t));
 	return 0;
 }
 
@@ -102,7 +102,7 @@ int aload_decode(uint32_t a) {
 	return 2;
 }
 
-int aload_instruction(uint32_t o, struct vm_stack *v) {
+int aload_instruction(uint32_t o, struct thread *t) {
 	int ref;
 	uint32_t index;
 
@@ -112,7 +112,7 @@ int aload_instruction(uint32_t o, struct vm_stack *v) {
 	ref = local_variable_array_load(local_variable_array, index);
 	operand_stack_push(operand_stack, ref);
 
-	thread_set_pc(NULL, increment_pc(2));
+	thread_set_pc(t, increment_pc(2, t));
 	return 0;
 }
 
@@ -125,7 +125,7 @@ int areturn_decode(uint32_t a) {
 	return 1;
 }
 
-int areturn_instruction(uint32_t o, struct vm_stack *v) {
+int areturn_instruction(uint32_t o, struct thread *t) {
 	int ref, n;
 	struct object *object;
 	struct integer *integer;
@@ -144,7 +144,7 @@ int areturn_instruction(uint32_t o, struct vm_stack *v) {
 	}
 
 	operand_stack_pop_n(operand_stack, n);
-	thread_set_pc(NULL, vm_stack_pop(vm_stack));
+	thread_set_pc(t, vm_stack_pop(vm_stack));
 
 	return 0;
 }
@@ -162,7 +162,7 @@ int astore_decode(uint32_t a) {
 	return 2;
 }
 
-int astore_instruction(uint32_t o, struct vm_stack *v) {
+int astore_instruction(uint32_t o, struct thread *t) {
 	int ref, n;
 	uint32_t index;
 
@@ -174,7 +174,7 @@ int astore_instruction(uint32_t o, struct vm_stack *v) {
 	local_variable_array_store(local_variable_array, index, ref);
 	operand_stack_pop_n(operand_stack, n);
 
-	thread_set_pc(NULL, increment_pc(2));
+	thread_set_pc(t, increment_pc(2, t));
 	return 0;
 }
 
@@ -196,7 +196,7 @@ int checkcast_decode(uint32_t a) {
 	return 2;
 }
 
-int checkcast_instruction(uint32_t o, struct vm_stack *v) {
+int checkcast_instruction(uint32_t o, struct thread *t) {
 	int ref;
 	uint32_t vmt;
 	int32_t good, halt;
@@ -244,7 +244,7 @@ int checkcast_instruction(uint32_t o, struct vm_stack *v) {
 		garbage_collector_unpause(garbage_collector);
 	}
 
-	thread_set_pc(NULL, increment_pc(2));
+	thread_set_pc(t, increment_pc(2, t));
 	return 0;
 }
 
@@ -257,7 +257,7 @@ int dup_decode(uint32_t a) {
 	return 1;
 }
 
-int dup_instruction(uint32_t o, struct vm_stack *v) {
+int dup_instruction(uint32_t o, struct thread *t) {
 	int ref;
 
 	SETUP_INSTRUCTION();
@@ -265,7 +265,7 @@ int dup_instruction(uint32_t o, struct vm_stack *v) {
 	ref = operand_stack_peek(operand_stack);
 	operand_stack_push(operand_stack, ref);
 
-	thread_set_pc(NULL, increment_pc(1));
+	thread_set_pc(t, increment_pc(1, t));
 	return 0;
 }
 
@@ -280,7 +280,7 @@ int dup_x1_decode(uint32_t a) {
 	return 1;
 }
 
-int dup_x1_instruction(uint32_t o, struct vm_stack *v) {
+int dup_x1_instruction(uint32_t o, struct thread *t) {
 	int ref1, ref2;
 
 	SETUP_INSTRUCTION();
@@ -298,7 +298,7 @@ int dup_x1_instruction(uint32_t o, struct vm_stack *v) {
 	/* unlock */
 	garbage_collector_unpause(garbage_collector);
 
-	thread_set_pc(NULL, increment_pc(1));
+	thread_set_pc(t, increment_pc(1, t));
 	return 0;
 }
 
@@ -315,7 +315,7 @@ int getfield_decode(uint32_t a) {
 	return 2;
 }
 
-int getfield_instruction(uint32_t o, struct vm_stack *v) {
+int getfield_instruction(uint32_t o, struct thread *t) {
 	int ref, fieldref, n;
 	uint32_t index;
 	struct object *object;
@@ -331,7 +331,7 @@ int getfield_instruction(uint32_t o, struct vm_stack *v) {
 	operand_stack_pop_n(operand_stack, n);
 	operand_stack_push(operand_stack, fieldref);
 
-	thread_set_pc(NULL, increment_pc(2));
+	thread_set_pc(t, increment_pc(2, t));
 	return 0;
 }
 
@@ -353,13 +353,13 @@ int goto_decode(uint32_t a) {
 	return 2;
 }
 
-int goto_instruction(uint32_t o, struct vm_stack *v) {
+int goto_instruction(uint32_t o, struct thread *t) {
 	uint32_t address;
 
 	SETUP_INSTRUCTION();
 	mvm_disassemble_arguments(pc, 1, &address);
 
-	thread_set_pc(NULL, address);
+	thread_set_pc(t, address);
 
 	return 0;
 }
@@ -382,7 +382,7 @@ int ifeq_decode(uint32_t a) {
 	return 2;
 }
 
-int ifeq_instruction(uint32_t o, struct vm_stack *v) {
+int ifeq_instruction(uint32_t o, struct thread *t) {
 	int ref, n;
 	int32_t value;
 	uint32_t address;
@@ -401,9 +401,9 @@ int ifeq_instruction(uint32_t o, struct vm_stack *v) {
 	operand_stack_pop_n(operand_stack, n);
 
 	if (value == 0)
-		thread_set_pc(NULL, address);
+		thread_set_pc(t, address);
 	else
-		thread_set_pc(NULL, increment_pc(2));
+		thread_set_pc(t, increment_pc(2, t));
 
 	return 0;
 }
@@ -417,7 +417,7 @@ int in_decode(uint32_t a) {
 	return 1;
 }
 
-int in_instruction(uint32_t o, struct vm_stack *v) {
+int in_instruction(uint32_t o, struct thread *t) {
 	int ref, i, size;
 	char *buf, c;
 
@@ -466,7 +466,7 @@ int in_instruction(uint32_t o, struct vm_stack *v) {
 		garbage_collector_unpause(garbage_collector);
 	}
 
-	thread_set_pc(NULL, increment_pc(1));
+	thread_set_pc(t, increment_pc(1, t));
 	free(buf);
 	return 0;
 }
@@ -492,7 +492,7 @@ int invokespecial_decode(uint32_t a) {
 	return 4;
 }
 
-int invokespecial_instruction(uint32_t o, struct vm_stack *v) {
+int invokespecial_instruction(uint32_t o, struct thread *t) {
 	char *method_name;
 	int ref, i, num_methods;
 	struct object *object;
@@ -533,8 +533,8 @@ int invokespecial_instruction(uint32_t o, struct vm_stack *v) {
 		if (debug != 0) mdb_insert_enabled_breakpoints();
 	}
 
-	return_address = increment_pc(4);
-	invoke_method(method_name, address, end, num_args, max_locals, return_address);
+	return_address = increment_pc(4, t);
+	invoke_method(t, method_name, address, end, num_args, max_locals, return_address);
 
 	return 0;
 }
@@ -552,14 +552,14 @@ int invokenative_decode(uint32_t a) {
 	return 2;
 }
 
-int invokenative_instruction(uint32_t o, struct vm_stack *v) {
+int invokenative_instruction(uint32_t o, struct thread *t) {
 	uint32_t index, return_address;
 
 	SETUP_INSTRUCTION();
 	mvm_disassemble_arguments(pc, 1, &index);
 
-	return_address = increment_pc(2);
-	invoke_native_method(index, return_address);
+	return_address = increment_pc(2, t);
+	invoke_native_method(t, index, return_address);
 
 	return 0;
 }
@@ -578,7 +578,7 @@ int invokevirtual_decode(uint32_t a) {
 	return 3;
 }
 
-int invokevirtual_instruction(uint32_t o, struct vm_stack *v) {
+int invokevirtual_instruction(uint32_t o, struct thread *t) {
 	int ref;
 	uint32_t index, num_args, return_address;
 
@@ -592,8 +592,8 @@ int invokevirtual_instruction(uint32_t o, struct vm_stack *v) {
 		mvm_halt();
 	}
 
-	return_address = increment_pc(3);
-	invoke_virtual_method(ref, index, num_args, return_address);
+	return_address = increment_pc(3, t);
+	invoke_virtual_method(t, ref, index, num_args, return_address);
 
 	return 0;
 }
@@ -607,7 +607,7 @@ int monitorenter_decode(uint32_t a) {
 	return 1;
 }
 
-int monitorenter_instruction(uint32_t o, struct vm_stack *v) {
+int monitorenter_instruction(uint32_t o, struct thread *t) {
 	int ref;
 	struct object *object;
 
@@ -623,7 +623,7 @@ int monitorenter_instruction(uint32_t o, struct vm_stack *v) {
 	object = heap_fetch_object(heap, ref);
 	object_acquire_monitor(object);
 
-	thread_set_pc(NULL, increment_pc(1));
+	thread_set_pc(t, increment_pc(1, t));
 	return 0;
 }
 
@@ -636,7 +636,7 @@ int monitorexit_decode(uint32_t a) {
 	return 1;
 }
 
-int monitorexit_instruction(uint32_t o, struct vm_stack *v) {
+int monitorexit_instruction(uint32_t o, struct thread *t) {
 	int ref;
 	struct object *object;
 
@@ -652,7 +652,7 @@ int monitorexit_instruction(uint32_t o, struct vm_stack *v) {
 	object = heap_fetch_object(heap, ref);
 	object_release_monitor(object);
 
-	thread_set_pc(NULL, increment_pc(1));
+	thread_set_pc(t, increment_pc(1, t));
 	return 0;
 }
 
@@ -674,7 +674,7 @@ int new_decode(uint32_t a) {
 	return 2;
 }
 
-int new_instruction(uint32_t o, struct vm_stack *v) {
+int new_instruction(uint32_t o, struct thread *t) {
 	int ref;
 	uint32_t vmt;
 
@@ -690,7 +690,7 @@ int new_instruction(uint32_t o, struct vm_stack *v) {
 	/* unlock */
 	garbage_collector_unpause(garbage_collector);
 
-	thread_set_pc(NULL, increment_pc(2));
+	thread_set_pc(t, increment_pc(2, t));
 	return 0;
 }
 
@@ -707,7 +707,7 @@ int newint_decode(uint32_t a) {
 	return 2;
 }
 
-int newint_instruction(uint32_t o, struct vm_stack *v) {
+int newint_instruction(uint32_t o, struct thread *t) {
 	int ref;
 	uint32_t value;
 
@@ -733,7 +733,7 @@ int newint_instruction(uint32_t o, struct vm_stack *v) {
 	/* unlock */
 	garbage_collector_unpause(garbage_collector);
 
-	thread_set_pc(NULL, increment_pc(2));
+	thread_set_pc(t, increment_pc(2, t));
 	return 0;
 }
 
@@ -754,7 +754,7 @@ int newreal_decode(uint32_t a) {
 	return len+2;
 }
 
-int newreal_instruction(uint32_t o, struct vm_stack *v) {
+int newreal_instruction(uint32_t o, struct thread *t) {
 	int ref;
 	char *buf;
 	float value;
@@ -773,7 +773,7 @@ int newreal_instruction(uint32_t o, struct vm_stack *v) {
 	/* unlock */
 	garbage_collector_unpause(garbage_collector);
 
-	thread_set_pc(NULL, increment_pc(strlen(buf)+2));
+	thread_set_pc(t, increment_pc(strlen(buf)+2, t));
 	free(buf);
 	return 0;
 }
@@ -801,7 +801,7 @@ int newstr_decode(uint32_t a) {
 	return len+2;
 }
 
-int newstr_instruction(uint32_t o, struct vm_stack *v) {
+int newstr_instruction(uint32_t o, struct thread *t) {
 	int ref;
 	char *buf;
 
@@ -818,7 +818,7 @@ int newstr_instruction(uint32_t o, struct vm_stack *v) {
 	/* unlock */
 	garbage_collector_unpause(garbage_collector);
 
-	thread_set_pc(NULL, increment_pc(strlen(buf)+2));
+	thread_set_pc(t, increment_pc(strlen(buf)+2, t));
 	free(buf);
 	return 0;
 }
@@ -832,7 +832,7 @@ int out_decode(uint32_t a) {
 	return 1;
 }
 
-int out_instruction(uint32_t o, struct vm_stack *v) {
+int out_instruction(uint32_t o, struct thread *t) {
 	int ref, n;
 	char *chars;
 	struct object *object;
@@ -850,7 +850,7 @@ int out_instruction(uint32_t o, struct vm_stack *v) {
 
 	operand_stack_pop_n(operand_stack, n);
 
-	thread_set_pc(NULL, increment_pc(1));
+	thread_set_pc(t, increment_pc(1, t));
 	return 0;
 }
 
@@ -863,12 +863,12 @@ int pop_decode(uint32_t a) {
 	return 1;
 }
 
-int pop_instruction(uint32_t o, struct vm_stack *v) {
+int pop_instruction(uint32_t o, struct thread *t) {
 	SETUP_INSTRUCTION();
 
 	operand_stack_pop(operand_stack);
 
-	thread_set_pc(NULL, increment_pc(1));
+	thread_set_pc(t, increment_pc(1, t));
 	return 0;
 }
 
@@ -885,7 +885,7 @@ int putfield_decode(uint32_t a) {
 	return 2;
 }
 
-int putfield_instruction(uint32_t o, struct vm_stack *v) {
+int putfield_instruction(uint32_t o, struct thread *t) {
 	int ref, objectref, n;
 	uint32_t index;
 	struct object *object;
@@ -902,7 +902,7 @@ int putfield_instruction(uint32_t o, struct vm_stack *v) {
 	object_store_field(object, index, ref);
 	operand_stack_pop_n(operand_stack, n);
 
-	thread_set_pc(NULL, increment_pc(2));
+	thread_set_pc(t, increment_pc(2, t));
 	return 0;
 }
 
@@ -915,7 +915,7 @@ int refcmp_decode(uint32_t a) {
 	return 1;
 }
 
-int refcmp_instruction(uint32_t o, struct vm_stack *v) {
+int refcmp_instruction(uint32_t o, struct thread *t) {
 	int32_t value;
 	int ref, ref1, ref2;
 
@@ -935,7 +935,7 @@ int refcmp_instruction(uint32_t o, struct vm_stack *v) {
 	/* unlock */
 	garbage_collector_unpause(garbage_collector);
 
-	thread_set_pc(NULL, increment_pc(1));
+	thread_set_pc(t, increment_pc(1, t));
 	return 0;
 }
 
@@ -948,10 +948,10 @@ int return_decode(uint32_t a) {
 	return 1;
 }
 
-int return_instruction(uint32_t o, struct vm_stack *v) {
+int return_instruction(uint32_t o, struct thread *t) {
 	SETUP_INSTRUCTION();
 
-	thread_set_pc(NULL, vm_stack_pop(vm_stack));
+	thread_set_pc(t, vm_stack_pop(vm_stack));
 	return 0;
 }
 
@@ -1048,6 +1048,6 @@ int is_whitespace(char c) {
 	return 0;
 }
 
-uint32_t increment_pc(int n) {
-	return thread_get_pc(NULL) + (sizeof(uint32_t)*n);
+uint32_t increment_pc(int n, struct thread *t) {
+	return thread_get_pc(t) + (sizeof(uint32_t)*n);
 }

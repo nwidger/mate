@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <19 Apr 2012 at 21:17:11 by nwidger on macros.local>
+ * Time-stamp: <20 Dec 2012 at 18:10:40 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -17,7 +17,7 @@
 struct native_method_record {
 	char *name;
 	int num_args;
-	int (*method)(uint32_t);
+	int (*method)(uint32_t, struct thread *);
 };
 
 struct native_method_array {
@@ -27,7 +27,7 @@ struct native_method_array {
 
 /* forward declarations */
 int native_method_array_compare_names(const void *n, const void *o);
-struct native_method_record * native_method_record_create(char *n, int (*m)(uint32_t));
+struct native_method_record * native_method_record_create(char *n, int (*m)(uint32_t, struct thread *));
 void native_method_record_destroy(struct native_method_record *r);
 int native_method_record_decode_num_args(char *n);
 
@@ -93,7 +93,7 @@ int native_method_array_set(struct native_method_array *n, int i, char *s) {
 	return 0;
 }
 
-int native_method_array_set_method(struct native_method_array *n, char *s, int (*m)(uint32_t)) {
+int native_method_array_set_method(struct native_method_array *n, char *s, int (*m)(uint32_t, struct thread *)) {
 	int i;
 	struct native_method_record *r;
 	
@@ -114,7 +114,7 @@ int native_method_array_set_method(struct native_method_array *n, char *s, int (
 	return 1;
 }
 
-int native_method_array_execute(struct native_method_array *n, int i) {
+int native_method_array_execute(struct native_method_array *n, int i, struct thread *t) {
 	struct native_method_record *r;
 
 	if (n == NULL) {
@@ -132,7 +132,7 @@ int native_method_array_execute(struct native_method_array *n, int i) {
 		mvm_halt();
 	}
 
-	return (*r->method)(i);
+	return (*r->method)(i, t);
 }
 
 char * native_method_array_get_name(struct native_method_array *n, int i) {
@@ -246,7 +246,7 @@ int native_method_array_compare_names(const void *n, const void *o) {
 	return strcmp((char *)n, (char *)o);
 }
 
-struct native_method_record * native_method_record_create(char *n, int (*m)(uint32_t)) {
+struct native_method_record * native_method_record_create(char *n, int (*m)(uint32_t, struct thread *)) {
 	struct native_method_record *r;
 
 	if ((r = (struct native_method_record *)malloc(sizeof(struct native_method_record))) == NULL) {

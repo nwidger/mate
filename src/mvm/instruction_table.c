@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Dec 2012 at 20:08:41 by nwidger on macros.local>
+ * Time-stamp: <20 Dec 2012 at 17:59:42 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -17,7 +17,7 @@
 /* struct definitions */
 struct instruction_record {
 	char *name;
-	int (*function)(uint32_t, struct vm_stack *);
+	int (*function)(uint32_t, struct thread *);
 	int (*decode)(uint32_t);
 	int (*size)(uint32_t);	
 };
@@ -28,7 +28,7 @@ struct instruction_table {
 };
 
 /* forward declarations */
-struct instruction_record * instruction_record_create(char *n, int (*f)(uint32_t, struct vm_stack *),
+struct instruction_record * instruction_record_create(char *n, int (*f)(uint32_t, struct thread *),
 						      int (*d)(uint32_t),
 						      int (*s)(uint32_t));
 void instruction_record_destroy(struct instruction_record *r);
@@ -72,7 +72,7 @@ void instruction_table_clear(struct instruction_table *i) {
 }
 
 int instruction_table_add(struct instruction_table *i, char *n, uint32_t o,
-			  int (*f)(uint32_t, struct vm_stack *), int (*d)(uint32_t), int (*s)(uint32_t)) {
+			  int (*f)(uint32_t, struct thread *), int (*d)(uint32_t), int (*s)(uint32_t)) {
 	if (i == NULL) {
 		fprintf(stderr, "mvm: instruction table not initialized!\n");
 		mvm_halt();
@@ -92,7 +92,7 @@ int instruction_table_add(struct instruction_table *i, char *n, uint32_t o,
 	return 0;
 }
 
-int instruction_table_execute(struct instruction_table *i, uint32_t o, struct vm_stack *v) {
+int instruction_table_execute(struct instruction_table *i, uint32_t o, struct thread *t) {
 	struct instruction_record *r;
 
 	if (i == NULL) {
@@ -110,7 +110,7 @@ int instruction_table_execute(struct instruction_table *i, uint32_t o, struct vm
 		mvm_halt();
 	}
 
-	return (*r->function)(o, v);
+	return (*r->function)(o, t);
 }
 
 int instruction_table_decode(struct instruction_table *i, int p, uint32_t o, uint32_t a) {
@@ -198,7 +198,7 @@ int instruction_table_dump(struct instruction_table *i) {
 	return 0;
 }
 
-struct instruction_record * instruction_record_create(char *n, int (*f)(uint32_t, struct vm_stack *),
+struct instruction_record * instruction_record_create(char *n, int (*f)(uint32_t, struct thread *),
 						      int (*d)(uint32_t),
 						      int (*s)(uint32_t)) {
 	struct instruction_record *r;

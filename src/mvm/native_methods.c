@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Dec 2012 at 19:38:25 by nwidger on macros.local>
+ * Time-stamp: <20 Dec 2012 at 17:55:59 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -58,7 +58,7 @@ struct native_class *native_classes;
 	struct frame *calling_frame;					\
 	struct operand_stack *calling_frame_operand_stack;		\
 									\
-        vm_stack = thread_get_vm_stack(NULL);				\
+        vm_stack = thread_get_vm_stack(t);				\
 									\
 	frame = vm_stack_peek(vm_stack);				\
 	if (frame == NULL) {						\
@@ -83,13 +83,13 @@ struct native_class *native_classes;
 uint32_t mvm_disassemble_argument(int n);
 uint32_t increment_pc(int n);
 
-int native_object_constructor(uint32_t i) {
+int native_object_constructor(uint32_t i, struct thread *t) {
 	SETUP_NATIVE_METHOD();
 
 	return 0;
 }
 
-int native_object_equals(uint32_t i) {
+int native_object_equals(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -113,7 +113,7 @@ int native_object_equals(uint32_t i) {
 	return 0;
 }
 
-int native_object_hash_code(uint32_t i) {
+int native_object_hash_code(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -135,7 +135,7 @@ int native_object_hash_code(uint32_t i) {
 	return 0;
 }
 
-int native_object_to_string(uint32_t i) {
+int native_object_to_string(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -157,7 +157,7 @@ int native_object_to_string(uint32_t i) {
 	return 0;
 }
 
-int native_object_notify(uint32_t i) {
+int native_object_notify(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -173,7 +173,7 @@ int native_object_notify(uint32_t i) {
 	return 0;
 }
 
-int native_object_notify_all(uint32_t i) {
+int native_object_notify_all(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -189,7 +189,7 @@ int native_object_notify_all(uint32_t i) {
 	return 0;
 }
 
-int native_object_wait(uint32_t i) {
+int native_object_wait(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -205,7 +205,7 @@ int native_object_wait(uint32_t i) {
 	return 0;
 }
 
-int native_object_wait_integer(uint32_t i) {
+int native_object_wait_integer(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *timeout;
 
@@ -224,7 +224,7 @@ int native_object_wait_integer(uint32_t i) {
 	return 0;
 }
 
-int native_integer_constructor(uint32_t i) {
+int native_integer_constructor(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct integer *integer;
 	struct object *this;
@@ -241,7 +241,7 @@ int native_integer_constructor(uint32_t i) {
 	return 0;
 }
 
-int native_integer_constructor_integer(uint32_t i) {
+int native_integer_constructor_integer(uint32_t i, struct thread *t) {
 	int ref, n;
 	int32_t value;
 	struct integer *integer;
@@ -264,7 +264,7 @@ int native_integer_constructor_integer(uint32_t i) {
 	return 0;
 }
 
-int native_integer_constructor_real(uint32_t i) {
+int native_integer_constructor_real(uint32_t i, struct thread *t) {
 	int ref, n;
 	float value;
 	struct real *real;
@@ -288,7 +288,7 @@ int native_integer_constructor_real(uint32_t i) {
 	return 0;
 }
 
-int native_integer_add(uint32_t i) {
+int native_integer_add(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -313,7 +313,7 @@ int native_integer_add(uint32_t i) {
 	return 0;
 }
 
-int native_integer_subtract(uint32_t i) {
+int native_integer_subtract(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -338,7 +338,7 @@ int native_integer_subtract(uint32_t i) {
 	return 0;
 }
 
-int native_integer_multiply(uint32_t i) {
+int native_integer_multiply(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -363,7 +363,7 @@ int native_integer_multiply(uint32_t i) {
 	return 0;
 }
 
-int native_integer_divide(uint32_t i) {
+int native_integer_divide(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -388,7 +388,7 @@ int native_integer_divide(uint32_t i) {
 	return 0;
 }
 
-int native_integer_greater_than(uint32_t i) {
+int native_integer_greater_than(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -413,7 +413,7 @@ int native_integer_greater_than(uint32_t i) {
 	return 0;
 }
 
-int native_integer_less_than(uint32_t i) {
+int native_integer_less_than(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -438,7 +438,7 @@ int native_integer_less_than(uint32_t i) {
 	return 0;
 }
 
-int native_integer_greater_than_equal(uint32_t i) {
+int native_integer_greater_than_equal(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -463,7 +463,7 @@ int native_integer_greater_than_equal(uint32_t i) {
 	return 0;
 }
 
-int native_integer_less_than_equal(uint32_t i) {
+int native_integer_less_than_equal(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -488,7 +488,7 @@ int native_integer_less_than_equal(uint32_t i) {
 	return 0;
 }
 
-int native_integer_not(uint32_t i) {
+int native_integer_not(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -510,7 +510,7 @@ int native_integer_not(uint32_t i) {
 	return 0;
 }
 
-int native_integer_minus(uint32_t i) {
+int native_integer_minus(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -532,7 +532,7 @@ int native_integer_minus(uint32_t i) {
 	return 0;
 }
 
-int native_integer_equals(uint32_t i) {
+int native_integer_equals(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -557,7 +557,7 @@ int native_integer_equals(uint32_t i) {
 	return 0;
 }
 
-int native_integer_hash_code(uint32_t i) {
+int native_integer_hash_code(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -579,7 +579,7 @@ int native_integer_hash_code(uint32_t i) {
 	return 0;
 }
 
-int native_integer_to_string(uint32_t i) {
+int native_integer_to_string(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -601,7 +601,7 @@ int native_integer_to_string(uint32_t i) {
 	return 0;
 }
 
-int native_integer_mod(uint32_t i) {
+int native_integer_mod(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -626,7 +626,7 @@ int native_integer_mod(uint32_t i) {
 	return 0;
 }
 
-int native_integer_rand(uint32_t i) {
+int native_integer_rand(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -648,7 +648,7 @@ int native_integer_rand(uint32_t i) {
 	return 0;
 }
 
-int native_string_constructor_string(uint32_t i) {
+int native_string_constructor_string(uint32_t i, struct thread *t) {
 	int ref, n;
 	char *chars;
 	struct string *string;
@@ -671,7 +671,7 @@ int native_string_constructor_string(uint32_t i) {
 	return 0;
 }
 
-int native_string_length(uint32_t i) {
+int native_string_length(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -693,7 +693,7 @@ int native_string_length(uint32_t i) {
 	return 0;
 }
 
-int native_string_substr(uint32_t i) {
+int native_string_substr(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *beg, *end;
 
@@ -721,7 +721,7 @@ int native_string_substr(uint32_t i) {
 	return 0;
 }
 
-int native_string_to_integer(uint32_t i) {
+int native_string_to_integer(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -743,7 +743,7 @@ int native_string_to_integer(uint32_t i) {
 	return 0;
 }
 
-int native_string_to_real(uint32_t i) {
+int native_string_to_real(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -765,7 +765,7 @@ int native_string_to_real(uint32_t i) {
 	return 0;
 }
 
-int native_string_concat(uint32_t i) {
+int native_string_concat(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -790,7 +790,7 @@ int native_string_concat(uint32_t i) {
 	return 0;
 }
 
-int native_string_greater_than(uint32_t i) {
+int native_string_greater_than(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -815,7 +815,7 @@ int native_string_greater_than(uint32_t i) {
 	return 0;
 }
 
-int native_string_less_than(uint32_t i) {
+int native_string_less_than(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -840,7 +840,7 @@ int native_string_less_than(uint32_t i) {
 	return 0;
 }
 
-int native_string_hash_code(uint32_t i) {
+int native_string_hash_code(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -862,7 +862,7 @@ int native_string_hash_code(uint32_t i) {
 	return 0;
 }
 
-int native_string_equals(uint32_t i) {
+int native_string_equals(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -887,7 +887,7 @@ int native_string_equals(uint32_t i) {
 	return 0;
 }
 
-int native_string_to_string(uint32_t i) {
+int native_string_to_string(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -909,7 +909,7 @@ int native_string_to_string(uint32_t i) {
 	return 0;
 }
 
-int native_table_constructor(uint32_t i) {
+int native_table_constructor(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 	struct table *table;
@@ -926,7 +926,7 @@ int native_table_constructor(uint32_t i) {
 	return 0;
 }
 
-int native_table_constructor_integer(uint32_t i) {
+int native_table_constructor_integer(uint32_t i, struct thread *t) {
 	int ref, n;
 	int32_t value;
 	struct object *this, *object;
@@ -950,7 +950,7 @@ int native_table_constructor_integer(uint32_t i) {
 	return 0;
 }
 
-int native_table_get(uint32_t i) {
+int native_table_get(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct table *table;
 	struct object *this, *key;
@@ -986,7 +986,7 @@ int native_table_get(uint32_t i) {
 	return 0;
 }
 
-int native_table_put(uint32_t i) {
+int native_table_put(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct table *table;
 	struct object *this, *key, *value;
@@ -1025,7 +1025,7 @@ int native_table_put(uint32_t i) {
 	return 0;
 }
 
-int native_table_remove(uint32_t i) {
+int native_table_remove(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct table *table;
 	struct object *this, *key;
@@ -1061,7 +1061,7 @@ int native_table_remove(uint32_t i) {
 	return 0;
 }
 
-int native_table_first_key(uint32_t i) {
+int native_table_first_key(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 	struct table *table;
@@ -1094,7 +1094,7 @@ int native_table_first_key(uint32_t i) {
 	return 0;
 }
 
-int native_table_next_key(uint32_t i) {
+int native_table_next_key(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 	struct table *table;
@@ -1127,7 +1127,7 @@ int native_table_next_key(uint32_t i) {
 	return 0;
 }
 
-int native_thread_constructor(uint32_t i) {
+int native_thread_constructor(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 	struct thread *thread;
@@ -1145,7 +1145,7 @@ int native_thread_constructor(uint32_t i) {
 	return 0;
 }
 
-int native_thread_start(uint32_t i) {
+int native_thread_start(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -1161,7 +1161,7 @@ int native_thread_start(uint32_t i) {
 	return 0;
 }
 
-int native_thread_run(uint32_t i) {
+int native_thread_run(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -1177,7 +1177,7 @@ int native_thread_run(uint32_t i) {
 	return 0;
 }
 
-int native_thread_join(uint32_t i) {
+int native_thread_join(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -1193,7 +1193,7 @@ int native_thread_join(uint32_t i) {
 	return 0;
 }
 
-int native_thread_sleep(uint32_t i) {
+int native_thread_sleep(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *millisec;
 
@@ -1212,7 +1212,7 @@ int native_thread_sleep(uint32_t i) {
 	return 0;
 }
 
-int native_real_constructor(uint32_t i) {
+int native_real_constructor(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct real *real;
 	struct object *this;
@@ -1229,7 +1229,7 @@ int native_real_constructor(uint32_t i) {
 	return 0;
 }
 
-int native_real_constructor_real(uint32_t i) {
+int native_real_constructor_real(uint32_t i, struct thread *t) {
 	int ref, n;
 	float value;
 	struct real *real;
@@ -1252,7 +1252,7 @@ int native_real_constructor_real(uint32_t i) {
 	return 0;
 }
 
-int native_real_constructor_integer(uint32_t i) {
+int native_real_constructor_integer(uint32_t i, struct thread *t) {
 	int ref, n;
 	int32_t value;
 	struct real *real;
@@ -1276,7 +1276,7 @@ int native_real_constructor_integer(uint32_t i) {
 	return 0;
 }
 
-int native_real_add(uint32_t i) {
+int native_real_add(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -1301,7 +1301,7 @@ int native_real_add(uint32_t i) {
 	return 0;
 }
 
-int native_real_subtract(uint32_t i) {
+int native_real_subtract(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -1326,7 +1326,7 @@ int native_real_subtract(uint32_t i) {
 	return 0;
 }
 
-int native_real_multiply(uint32_t i) {
+int native_real_multiply(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -1351,7 +1351,7 @@ int native_real_multiply(uint32_t i) {
 	return 0;
 }
 
-int native_real_divide(uint32_t i) {
+int native_real_divide(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -1376,7 +1376,7 @@ int native_real_divide(uint32_t i) {
 	return 0;
 }
 
-int native_real_greater_than(uint32_t i) {
+int native_real_greater_than(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -1401,7 +1401,7 @@ int native_real_greater_than(uint32_t i) {
 	return 0;
 }
 
-int native_real_less_than(uint32_t i) {
+int native_real_less_than(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -1426,7 +1426,7 @@ int native_real_less_than(uint32_t i) {
 	return 0;
 }
 
-int native_real_greater_than_equal(uint32_t i) {
+int native_real_greater_than_equal(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -1451,7 +1451,7 @@ int native_real_greater_than_equal(uint32_t i) {
 	return 0;
 }
 
-int native_real_less_than_equal(uint32_t i) {
+int native_real_less_than_equal(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -1476,7 +1476,7 @@ int native_real_less_than_equal(uint32_t i) {
 	return 0;
 }
 
-int native_real_not(uint32_t i) {
+int native_real_not(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -1498,7 +1498,7 @@ int native_real_not(uint32_t i) {
 	return 0;
 }
 
-int native_real_minus(uint32_t i) {
+int native_real_minus(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -1520,7 +1520,7 @@ int native_real_minus(uint32_t i) {
 	return 0;
 }
 
-int native_real_equals(uint32_t i) {
+int native_real_equals(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this, *object;
 
@@ -1545,7 +1545,7 @@ int native_real_equals(uint32_t i) {
 	return 0;
 }
 
-int native_real_hash_code(uint32_t i) {
+int native_real_hash_code(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -1567,7 +1567,7 @@ int native_real_hash_code(uint32_t i) {
 	return 0;
 }
 
-int native_real_to_string(uint32_t i) {
+int native_real_to_string(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 
@@ -1589,7 +1589,7 @@ int native_real_to_string(uint32_t i) {
 	return 0;
 }
 
-int native_real_square_root(uint32_t i) {
+int native_real_square_root(uint32_t i, struct thread *t) {
 	int ref, n;
 	struct object *this;
 

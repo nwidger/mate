@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <17 Dec 2012 at 19:43:58 by nwidger on macros.local>
+ * Time-stamp: <20 Dec 2012 at 18:11:53 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -513,20 +513,23 @@ int table_run_hash_code(struct table *t, struct object *o) {
 	struct vm_stack *vm_stack;
 	struct frame *frame;
 	struct operand_stack *operand_stack;
+	struct thread *thread;
 
 	if (t == NULL) {
 		fprintf(stderr, "mvm: table not initialized!\n");
 		mvm_halt();
 	}
 
-	pc = thread_get_pc(NULL);
-	vm_stack = thread_get_vm_stack(NULL);
+	thread = thread_get_current();
+
+	pc = thread_get_pc(thread);
+	vm_stack = thread_get_vm_stack(thread);
 	
 	frame = vm_stack_peek(vm_stack);
 	operand_stack = frame_get_operand_stack(frame);
 	operand_stack_push(operand_stack, object_get_ref(o));
 
-	invoke_virtual_method_by_name(object_get_ref(o), pc, "hashCode", 0);
+	invoke_virtual_method_by_name(thread, object_get_ref(o), pc, "hashCode", 0);
 
 	ref = operand_stack_peek(operand_stack);
 	object = heap_fetch_object(heap, ref);
@@ -547,21 +550,24 @@ int table_run_equals(struct table *t, struct object *o, struct object *p) {
 	struct vm_stack *vm_stack;
 	struct frame *frame;
 	struct operand_stack *operand_stack;
+	struct thread *thread;
 
 	if (t == NULL) {
 		fprintf(stderr, "mvm: table not initialized!\n");
 		mvm_halt();
 	}
 
-	pc = thread_get_pc(NULL);
-	vm_stack = thread_get_vm_stack(NULL);
+	thread = thread_get_current();
+
+	pc = thread_get_pc(thread);
+	vm_stack = thread_get_vm_stack(thread);
 
 	frame = vm_stack_peek(vm_stack);
 	operand_stack = frame_get_operand_stack(frame);
 	operand_stack_push(operand_stack, object_get_ref(o));
 	operand_stack_push(operand_stack, object_get_ref(p));
 
-	invoke_virtual_method_by_name(object_get_ref(o), pc, "equals", 1, "Object");
+	invoke_virtual_method_by_name(thread, object_get_ref(o), pc, "equals", 1, "Object");
 
 	ref = operand_stack_peek(operand_stack);
 	object = heap_fetch_object(heap, ref);
