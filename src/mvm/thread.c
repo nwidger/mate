@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Dec 2012 at 20:28:04 by nwidger on macros.local>
+ * Time-stamp: <23 Dec 2012 at 20:41:29 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -346,7 +346,7 @@ int thread_pthread_create(struct thread *t, void * (*s)(void *)) {
 	}
 
 	errno = 0;
-	mvm_print("thread %" PRIu32 ": printing bound CPUs:\n", thread_get_ref(NULL));
+	mvm_print("thread %" PRIu32 ": printing bound CPUs:\n", t->ref);
 
 	for(i = 0; i < CPU_SETSIZE; i++) {
 		if (CPU_ISSET(i, &cpuset))
