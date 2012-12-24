@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Dec 2012 at 09:59:08 by nwidger on macros.local>
+ * Time-stamp: <23 Dec 2012 at 20:51:10 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -51,12 +51,12 @@ struct operand_stack * operand_stack_create() {
 void operand_stack_destroy(struct operand_stack *s) {
 	if (s != NULL) {
 		/* lock */
-		operand_stack_lock(s);
+		/* operand_stack_lock(s); */
 
 		operand_stack_clear(s);
 
 		/* unlock */
-		operand_stack_unlock(s);
+		/* operand_stack_unlock(s); */
 
 		nlock_destroy(s->nlock);
 		free(s);
@@ -66,12 +66,12 @@ void operand_stack_destroy(struct operand_stack *s) {
 void operand_stack_clear(struct operand_stack *s) {
 	if (s != NULL) {
 		/* lock */
-		operand_stack_lock(s);
+		/* operand_stack_lock(s); */
 
 		operand_stack_pop_n(s, operand_stack_size(s));
 
 		/* unlock */
-		operand_stack_unlock(s);
+		/* operand_stack_unlock(s); */
 	}
 }
 
@@ -84,11 +84,11 @@ int operand_stack_push(struct operand_stack *s, int r) {
 	}
 
 	/* lock */
-	operand_stack_lock(s);
+	/* operand_stack_lock(s); */
 
 	if ((o = operand_record_create(r, s->head)) == NULL) {
 		/* unlock */
-		operand_stack_unlock(s);
+		/* operand_stack_unlock(s); */
 		mvm_halt();
 	}
 
@@ -96,7 +96,7 @@ int operand_stack_push(struct operand_stack *s, int r) {
 	s->size++;
 
 	/* unlock */
-	operand_stack_unlock(s);
+	/* operand_stack_unlock(s); */
 
 	return r;
 }
@@ -110,7 +110,7 @@ int operand_stack_peek(struct operand_stack *s) {
 	}
 
 	/* lock */
-	operand_stack_lock(s);
+	/* operand_stack_lock(s); */
 
 	if (operand_stack_empty(s) == 1)
 		return 0;
@@ -118,7 +118,7 @@ int operand_stack_peek(struct operand_stack *s) {
 	ref = s->head->ref;
 
 	/* unlock */
-	operand_stack_unlock(s);
+	/* operand_stack_unlock(s); */
 
 	return ref;
 }
@@ -133,12 +133,12 @@ int operand_stack_peek_n(struct operand_stack *s, int n) {
 	}
 
 	/* lock */
-	operand_stack_lock(s);
+	/* operand_stack_lock(s); */
 
 	if (n < 0 || n >= s->size) {
 		fprintf(stderr, "mvm: invalid operand stack index!\n");
 		/* unlock */
-		operand_stack_unlock(s);
+		/* operand_stack_unlock(s); */
 		mvm_halt();
 	}
 
@@ -146,7 +146,7 @@ int operand_stack_peek_n(struct operand_stack *s, int n) {
 	ref = o->ref;
 
 	/* unlock */
-	operand_stack_unlock(s);
+	/* operand_stack_unlock(s); */
 
 	return ref;
 }
@@ -161,12 +161,12 @@ int operand_stack_pop(struct operand_stack *s) {
 	}
 
 	/* lock */
-	operand_stack_lock(s);
+	/* operand_stack_lock(s); */
 
 	if (s->size <= 0) {
 		fprintf(stderr, "mvm: operand stack underflow!\n");
 		/* unlock */
-		operand_stack_unlock(s);
+		/* operand_stack_unlock(s); */
 		mvm_halt();
 	}
 
@@ -178,7 +178,7 @@ int operand_stack_pop(struct operand_stack *s) {
 	s->size--;
 
 	/* unlock */
-	operand_stack_unlock(s);
+	/* operand_stack_unlock(s); */
 
 	return ref;
 }
@@ -192,12 +192,12 @@ int operand_stack_pop_n(struct operand_stack *s, int n) {
 	}
 
 	/* lock */
-	operand_stack_lock(s);
+	/* operand_stack_lock(s); */
 
 	if (n < 0 || n > s->size) {
 		fprintf(stderr, "mvm: invalid operand stack index!\n");
 		/* unlock */
-		operand_stack_unlock(s);
+		/* operand_stack_unlock(s); */
 		mvm_halt();
 	}
 
@@ -207,7 +207,7 @@ int operand_stack_pop_n(struct operand_stack *s, int n) {
 		ref = operand_stack_pop(s);
 
 	/* unlock */
-	operand_stack_unlock(s);
+	/* operand_stack_unlock(s); */
 
 	return ref;
 }
@@ -221,12 +221,12 @@ int operand_stack_empty(struct operand_stack *s) {
 	}
 
 	/* lock */
-	operand_stack_lock(s);
+	/* operand_stack_lock(s); */
 
 	empty = s->size == 0;
 
 	/* unlock */
-	operand_stack_unlock(s);
+	/* operand_stack_unlock(s); */
 
 	return empty;
 }
@@ -240,12 +240,12 @@ int operand_stack_size(struct operand_stack *s) {
 	}
 
 	/* lock */
-	operand_stack_lock(s);
+	/* operand_stack_lock(s); */
 
 	size = s->size;
 
 	/* unlock */
-	operand_stack_unlock(s);
+	/* operand_stack_unlock(s); */
 
 	return size;
 }
@@ -259,19 +259,19 @@ int operand_stack_reverse(struct operand_stack *s, int n) {
 	}
 
 	/* lock */
-	operand_stack_lock(s);
+	/* operand_stack_lock(s); */
 
 	if (n > s->size) {
 		fprintf(stderr, "mvm: too many operands to reverse!\n");
 		/* unlock */
-		operand_stack_unlock(s);
+		/* operand_stack_unlock(s); */
 		mvm_halt();
 	}
 
 	if ((args = (int *)malloc(sizeof(int)*n)) == NULL) {
 		perror("mvm: malloc");
 		/* unlock */
-		operand_stack_unlock(s);
+		/* operand_stack_unlock(s); */
 		mvm_halt();
 	}
 
@@ -281,7 +281,7 @@ int operand_stack_reverse(struct operand_stack *s, int n) {
 		operand_stack_push(s, args[i]);
 
 	/* unlock */
-	operand_stack_unlock(s);
+	/* operand_stack_unlock(s); */
 
 	free(args);
 	return 0;

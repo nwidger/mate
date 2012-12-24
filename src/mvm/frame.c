@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Dec 2012 at 12:57:19 by nwidger on macros.local>
+ * Time-stamp: <23 Dec 2012 at 20:51:15 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -75,14 +75,14 @@ struct frame * frame_create(char *e, int n, int m, uint32_t s,
 void frame_destroy(struct frame *f) {
 	if (f != NULL) {
 		/* lock */
-		frame_lock(f);
+		/* frame_lock(f); */
 
 		frame_clear(f);
 		operand_stack_destroy(f->operand_stack);
 		local_variable_array_destroy(f->local_variable_array);
 
 		/* unlock */
-		frame_unlock(f);
+		/* frame_unlock(f); */
 
 		nlock_destroy(f->nlock);
 		free(f->method_name);
@@ -93,13 +93,13 @@ void frame_destroy(struct frame *f) {
 void frame_clear(struct frame *f) {
 	if (f != NULL) {
 		/* lock */
-		frame_lock(f);
+		/* frame_lock(f); */
 
 		operand_stack_clear(f->operand_stack);
 		local_variable_array_clear(f->local_variable_array);
 
 		/* unlock */
-		frame_unlock(f);
+		/* frame_unlock(f); */
 	}
 }
 
@@ -112,12 +112,12 @@ struct operand_stack * frame_get_operand_stack(struct frame *f) {
 	}
 
 	/* lock */
-	frame_lock(f);
+	/* frame_lock(f); */
 
 	operand_stack = f->operand_stack;
 
 	/* unlock */
-	frame_unlock(f);
+	/* frame_unlock(f); */
 
 	return operand_stack;
 }
@@ -131,12 +131,12 @@ struct local_variable_array * frame_get_local_variable_array(struct frame *f) {
 	}
 
 	/* lock */
-	frame_lock(f);
+	/* frame_lock(f); */
 
 	local_variable_array = f->local_variable_array;
 
 	/* unlock */
-	frame_unlock(f);
+	/* frame_unlock(f); */
 
 	return local_variable_array;
 }
@@ -150,12 +150,12 @@ struct frame * frame_get_calling_frame(struct frame *f) {
 	}
 
 	/* lock */
-	frame_lock(f);
+	/* frame_lock(f); */
 
 	calling_frame = f->calling_frame;
 
 	/* unlock */
-	frame_unlock(f);
+	/* frame_unlock(f); */
 
 	return calling_frame;
 }
@@ -169,12 +169,12 @@ uint32_t frame_get_start_address(struct frame *f) {
 	}
 
 	/* lock */
-	frame_lock(f);
+	/* frame_lock(f); */
 
 	start_address = f->start_address;
 
 	/* unlock */
-	frame_unlock(f);
+	/* frame_unlock(f); */
 
 	return start_address;
 }
@@ -188,12 +188,12 @@ uint32_t frame_get_end_address(struct frame *f) {
 	}
 
 	/* lock */
-	frame_lock(f);
+	/* frame_lock(f); */
 
 	end_address = f->end_address;
 
 	/* unlock */
-	frame_unlock(f);
+	/* frame_unlock(f); */
 
 	return end_address;
 }
@@ -207,12 +207,12 @@ uint32_t frame_get_current_address(struct frame *f) {
 	}
 
 	/* lock */
-	frame_lock(f);
+	/* frame_lock(f); */
 
 	current_address = f->current_address;
 
 	/* unlock */
-	frame_unlock(f);
+	/* frame_unlock(f); */
 
 	return current_address;
 }
@@ -226,12 +226,12 @@ uint32_t frame_get_return_address(struct frame *f) {
 	}
 
 	/* lock */
-	frame_lock(f);
+	/* frame_lock(f); */
 
 	return_address = f->return_address;
 
 	/* unlock */
-	frame_unlock(f);
+	/* frame_unlock(f); */
 
 	return return_address;
 }
@@ -245,13 +245,13 @@ int frame_set_current_address(struct frame *f, uint32_t c) {
 	}
 
 	/* lock */
-	frame_lock(f);
+	/* frame_lock(f); */
 
 	old_current = f->current_address;
 	f->current_address = c;
 
 	/* unlock */
-	frame_unlock(f);
+	/* frame_unlock(f); */
 
 	return old_current;
 }
@@ -266,12 +266,12 @@ int frame_copy_arguments(struct frame *f, struct frame *c, int n) {
 	}
 
 	/* lock */
-	frame_lock(f);
+	/* frame_lock(f); */
 
 	if (n < 0) {
 		fprintf(stderr, "mvm: argument count must be >= 0!\n");
 		/* unlock */
-		frame_unlock(f);
+		/* frame_unlock(f); */
 		mvm_halt();
 	}
 
@@ -286,7 +286,7 @@ int frame_copy_arguments(struct frame *f, struct frame *c, int n) {
 	operand_stack_pop_n(calling_frame_operand_stack, n);
 
 	/* unlock */
-	frame_unlock(f);
+	/* frame_unlock(f); */
 
 	return 0;
 }
@@ -300,12 +300,12 @@ char * frame_get_method_name(struct frame *f) {
 	}
 
 	/* lock */
-	frame_lock(f);
+	/* frame_lock(f); */
 
 	method_name = f->method_name;
 
 	/* unlock */
-	frame_unlock(f);
+	/* frame_unlock(f); */
 
 	return method_name;
 }

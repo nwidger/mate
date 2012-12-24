@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Dec 2012 at 10:50:38 by nwidger on macros.local>
+ * Time-stamp: <23 Dec 2012 at 20:51:04 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -52,13 +52,13 @@ struct local_variable_array * local_variable_array_create(int m) {
 void local_variable_array_destroy(struct local_variable_array *l) {
 	if (l != NULL) {
 		/* lock */
-		local_variable_array_lock(l);
+		/* local_variable_array_lock(l); */
 
 		local_variable_array_clear(l);
 		free(l->locals);
 
 		/* unlock */
-		local_variable_array_unlock(l);
+		/* local_variable_array_unlock(l); */
 
 		nlock_destroy(l->nlock);
 		free(l);
@@ -68,12 +68,12 @@ void local_variable_array_destroy(struct local_variable_array *l) {
 void local_variable_array_clear(struct local_variable_array *l) {
 	if (l != NULL) {
 		/* lock */
-		local_variable_array_lock(l);
+		/* local_variable_array_lock(l); */
 
 		memset(l->locals, 0, sizeof(int)*l->size);
 
 		/* unlock */
-		local_variable_array_unlock(l);
+		/* local_variable_array_unlock(l); */
 	}
 }
 
@@ -86,12 +86,12 @@ int local_variable_array_size(struct local_variable_array *l) {
 	}
 
 	/* lock */
-	local_variable_array_lock(l);
+	/* local_variable_array_lock(l); */
 
 	size = l->size;
 
 	/* unlock */
-	local_variable_array_unlock(l);
+	/* local_variable_array_unlock(l); */
 
 	return size;
 }
@@ -105,7 +105,7 @@ int local_variable_array_load(struct local_variable_array *l, int i) {
 	}
 
 	/* lock */
-	local_variable_array_lock(l);
+	/* local_variable_array_lock(l); */
 
 	if (i < 0 || i >= l->size) {
 		fprintf(stderr, "mvm: locals index out of bounds!\n");
@@ -115,7 +115,7 @@ int local_variable_array_load(struct local_variable_array *l, int i) {
 	ref = l->locals[i];
 
 	/* unlock */
-	local_variable_array_unlock(l);
+	/* local_variable_array_unlock(l); */
 
 	return ref;
 }
@@ -129,7 +129,7 @@ int local_variable_array_store(struct local_variable_array *l, int i, int r) {
 	}
 
 	/* lock */
-	local_variable_array_lock(l);
+	/* local_variable_array_lock(l); */
 
 	if (i < 0 || i >= l->size) {
 		fprintf(stderr, "mvm: locals index out of bounds!\n");
@@ -140,7 +140,7 @@ int local_variable_array_store(struct local_variable_array *l, int i, int r) {
 	l->locals[i] = r;
 
 	/* unlock */
-	local_variable_array_unlock(l);
+	/* local_variable_array_unlock(l); */
 
 	return tmp;
 }

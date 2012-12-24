@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <10 Dec 2012 at 20:14:53 by nwidger on macros.local>
+ * Time-stamp: <23 Dec 2012 at 20:53:00 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -79,12 +79,12 @@ struct class_table * class_table_create(int n) {
 void class_table_destroy(struct class_table *c) {
 	if (c != NULL) {
 		/* lock */
-		class_table_lock(c);
+		/* class_table_lock(c); */
 
 		class_table_clear(c);
 
 		/* unlock */
-		class_table_unlock(c);
+		/* class_table_unlock(c); */
 
 		nlock_destroy(c->nlock);
 		free(c->classes);
@@ -97,7 +97,7 @@ void class_table_clear(struct class_table *c) {
 
 	if (c != NULL) {
 		/* lock */
-		class_table_lock(c);
+		/* class_table_lock(c); */
 
 		for (i = 0; i < c->size; i++) {
 			if (c->classes[i] != NULL) {
@@ -114,7 +114,7 @@ void class_table_clear(struct class_table *c) {
 		memset(c->string_cache, 0, sizeof(struct string_cache_record *) * CLASS_TABLE_STRING_CACHE_SIZE);
 
 		/* unlock */
-		class_table_unlock(c);
+		/* class_table_unlock(c); */
 	}
 }
 
@@ -125,12 +125,12 @@ int class_table_add(struct class_table *c, enum class_type t, struct class *n) {
 	}
 
 	/* lock */
-	class_table_lock(c);
+	/* class_table_lock(c); */
 
 	if (c->num_classes >= c->size) {
 		fprintf(stderr, "mvm: class table full!\n");
 		/* unlock */
-		class_table_unlock(c);
+		/* class_table_unlock(c); */
 		mvm_halt();
 	}
 
@@ -140,7 +140,7 @@ int class_table_add(struct class_table *c, enum class_type t, struct class *n) {
 	c->classes[c->num_classes++] = n;
 
 	/* unlock */
-	class_table_unlock(c);
+	/* class_table_unlock(c); */
 
 	return 0;
 }
@@ -154,18 +154,18 @@ struct class * class_table_find(struct class_table *c, uint32_t v) {
 	}
 
 	/* lock */
-	class_table_lock(c);
+	/* class_table_lock(c); */
 
 	for (i = 0; i < c->num_classes; i++) {
 		if (class_get_vmt(c->classes[i]) == v) {
 			/* unlock */
-			class_table_unlock(c);
+			/* class_table_unlock(c); */
 			return c->classes[i];
 		}
 	}
 
 	/* unlock */
-	class_table_unlock(c);
+	/* class_table_unlock(c); */
 
 	return NULL;
 }
@@ -179,12 +179,12 @@ struct class * class_table_find_predefined(struct class_table *c, enum class_typ
 	}
 
 	/* lock */
-	class_table_lock(c);
+	/* class_table_lock(c); */
 
 	class = (t == user_type) ? NULL : c->predefined_classes[t];
 
 	/* unlock */
-	class_table_unlock(c);
+	/* class_table_unlock(c); */
 
 	return class;
 }
@@ -201,11 +201,11 @@ int class_table_new(struct class_table *c, uint32_t v, struct object **o) {
 	}
 
 	/* lock */
-	class_table_lock(c);
+	/* class_table_lock(c); */
 
 	if ((class = class_table_find(c, v)) == NULL) {
 		/* unlock */
-		class_table_unlock(c);
+		/* class_table_unlock(c); */
 		mvm_halt();
 	}
 
@@ -213,7 +213,7 @@ int class_table_new(struct class_table *c, uint32_t v, struct object **o) {
 
 	if ((ref = object_create(class, num_fields, &object)) == 0) {
 		/* unlock */
-		class_table_unlock(c);
+		/* class_table_unlock(c); */
 		mvm_halt();
 	}
 
@@ -221,7 +221,7 @@ int class_table_new(struct class_table *c, uint32_t v, struct object **o) {
 		*o = object;
 
 	/* unlock */
-	class_table_unlock(c);
+	/* class_table_unlock(c); */
 
 	return ref;
 }
@@ -238,7 +238,7 @@ int class_table_new_object(struct class_table *c, struct object **o) {
 	}
 
 	/* lock */
-	class_table_lock(c);
+	/* class_table_lock(c); */
 
 	object_class = c->predefined_classes[object_type];
 	vmt = class_get_vmt(object_class);
@@ -248,7 +248,7 @@ int class_table_new_object(struct class_table *c, struct object **o) {
 		*o = object;
 
 	/* unlock */
-	class_table_unlock(c);
+	/* class_table_unlock(c); */
 
 	return ref;
 }
@@ -266,7 +266,7 @@ int class_table_new_integer(struct class_table *c, int32_t v, struct object **o)
 	}
 
 	/* lock */
-	class_table_lock(c);
+	/* class_table_lock(c); */
 
 	if (v >= 0 && v <= CLASS_TABLE_INTEGER_CACHE_SIZE && c->integer_cache[(int)v] != 0) {
 		ref = c->integer_cache[(int)v];
@@ -293,7 +293,7 @@ int class_table_new_integer(struct class_table *c, int32_t v, struct object **o)
 		*o = object;
 
 	/* unlock */
-	class_table_unlock(c);
+	/* class_table_unlock(c); */
 
 	return ref;
 }
@@ -312,7 +312,7 @@ int class_table_new_string(struct class_table *c, char *b, struct object **o, in
 	}
 
 	/* lock */
-	class_table_lock(c);
+	/* class_table_lock(c); */
 
 	string_class = c->predefined_classes[string_type];
 	vmt = class_get_vmt(string_class);
@@ -359,7 +359,7 @@ int class_table_new_string(struct class_table *c, char *b, struct object **o, in
 		*o = object;
 
 	/* unlock */
-	class_table_unlock(c);
+	/* class_table_unlock(c); */
 
 	return ref;
 }
@@ -377,7 +377,7 @@ int class_table_new_table(struct class_table *c, int n, struct object **o) {
 	}
 
 	/* lock */
-	class_table_lock(c);
+	/* class_table_lock(c); */
 
 	table_class = c->predefined_classes[table_type];
 	vmt = class_get_vmt(table_class);
@@ -399,7 +399,7 @@ int class_table_new_table(struct class_table *c, int n, struct object **o) {
 		*o = object;
 
 	/* unlock */
-	class_table_unlock(c);
+	/* class_table_unlock(c); */
 
 	return ref;
 }
@@ -417,7 +417,7 @@ int class_table_new_thread(struct class_table *c, struct object **o) {
 	}
 
 	/* lock */
-	class_table_lock(c);
+	/* class_table_lock(c); */
 
 	thread_class = c->predefined_classes[thread_type];
 	vmt = class_get_vmt(thread_class);
@@ -441,7 +441,7 @@ int class_table_new_thread(struct class_table *c, struct object **o) {
 		*o = object;
 
 	/* unlock */
-	class_table_unlock(c);
+	/* class_table_unlock(c); */
 
 	return ref;
 }
@@ -459,7 +459,7 @@ int class_table_new_real(struct class_table *c, float v, struct object **o) {
 	}
 
 	/* lock */
-	class_table_lock(c);
+	/* class_table_lock(c); */
 
 	real_class = c->predefined_classes[real_type];
 	vmt = class_get_vmt(real_class);
@@ -481,7 +481,7 @@ int class_table_new_real(struct class_table *c, float v, struct object **o) {
 		*o = object;
 
 	/* unlock */
-	class_table_unlock(c);
+	/* class_table_unlock(c); */
 
 	return ref;
 }
@@ -497,7 +497,7 @@ int class_table_analyze(struct class_table *c) {
 	}
 
 	/* lock */
-	class_table_lock(c);
+	/* class_table_lock(c); */
 
 	for (i = 0; i < c->num_classes; i++) {
 		class = c->classes[i];
@@ -510,7 +510,7 @@ int class_table_analyze(struct class_table *c) {
 		if (super_class == NULL) {
 			fprintf(stderr, "mvm: invalid super class!\n");
 			/* unlock */
-			class_table_unlock(c);
+			/* class_table_unlock(c); */
 			mvm_halt();
 		}
 
@@ -518,7 +518,7 @@ int class_table_analyze(struct class_table *c) {
 	}
 
 	/* unlock */
-	class_table_unlock(c);
+	/* class_table_unlock(c); */
 
 	return 0;
 }
@@ -557,7 +557,7 @@ void class_table_dump(struct class_table *c) {
 		return;
 
 	/* lock */
-	class_table_lock(c);
+	/* class_table_lock(c); */
 
 	for (i = 0; i < c->num_classes; i++) {
 		class = c->classes[i];
@@ -588,7 +588,7 @@ void class_table_dump(struct class_table *c) {
 	}
 
 	/* unlock */
-	class_table_unlock(c);
+	/* class_table_unlock(c); */
 }
 
 void class_table_decode(struct class_table *c) {
@@ -603,7 +603,7 @@ void class_table_decode(struct class_table *c) {
 	}
 
 	/* lock */
-	class_table_lock(c);
+	/* class_table_lock(c); */
 
 	fprintf(stderr, "%d\n", c->num_classes);
 
@@ -635,7 +635,7 @@ void class_table_decode(struct class_table *c) {
 	}
 
 	/* unlock */
-	class_table_unlock(c);
+	/* class_table_unlock(c); */
 }
 
 char ** class_table_classes_array(struct class_table *c) {
@@ -648,7 +648,7 @@ char ** class_table_classes_array(struct class_table *c) {
 	}
 
 	/* lock */
-	class_table_lock(c);
+	/* class_table_lock(c); */
 
 	if ((buf = (char **)malloc(sizeof(char *)*(c->num_classes+1))) == NULL) {
 		perror("mvm: malloc");
@@ -667,7 +667,7 @@ char ** class_table_classes_array(struct class_table *c) {
 	qsort(buf, c->num_classes, sizeof(char *), class_table_compare_strings);
 
 	/* unlock */
-	class_table_unlock(c);
+	/* class_table_unlock(c); */
 
 	return buf;
 }
@@ -683,7 +683,7 @@ char ** class_table_methods_array(struct class_table *c) {
 	}
 
 	/* lock */
-	class_table_lock(c);
+	/* class_table_lock(c); */
 
 	size = 0;
 	for (i = 0; i < c->num_classes; i++)
@@ -710,7 +710,7 @@ char ** class_table_methods_array(struct class_table *c) {
 	qsort(buf, size, sizeof(char *), class_table_compare_strings);
 
 	/* unlock */
-	class_table_unlock(c);
+	/* class_table_unlock(c); */
 
 	return buf;
 }

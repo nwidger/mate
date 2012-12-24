@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 May 2011 at 18:15:44 by nwidger on macros.local>
+ * Time-stamp: <23 Dec 2012 at 20:53:49 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -60,12 +60,12 @@ struct method_area * method_area_create() {
 void method_area_destroy(struct method_area *m) {
 	if (m != NULL) {
 		/* lock */
-		method_area_lock(m);
+		/* method_area_lock(m); */
 
 		method_area_clear(m);
 
 		/* unlock */
-		method_area_unlock(m);
+		/* method_area_unlock(m); */
 
 		nlock_destroy(m->nlock);
 		free(m);
@@ -75,7 +75,7 @@ void method_area_destroy(struct method_area *m) {
 void method_area_clear(struct method_area *m) {
 	if (m != NULL) {
 		/* lock */
-		method_area_lock(m);
+		/* method_area_lock(m); */
 
 		m->class_file = NULL;
 
@@ -91,7 +91,7 @@ void method_area_clear(struct method_area *m) {
 		m->size = 0;
 
 		/* unlock */
-		method_area_unlock(m);
+		/* method_area_unlock(m); */
 	}
 }
 
@@ -104,12 +104,12 @@ int method_area_load_class_file(struct method_area *m, char *c) {
 	}
 
 	/* lock */
-	method_area_lock(m);
+	/* method_area_lock(m); */
 
 	if (m->class_file != NULL) {
 		fprintf(stderr, "mvm: class file already loaded!\n");
 		/* unlock */
-		method_area_unlock(m);
+		/* method_area_unlock(m); */
 		mvm_halt();
 	}
 
@@ -120,7 +120,7 @@ int method_area_load_class_file(struct method_area *m, char *c) {
 		fprintf(stderr, "mvm: %s: %s\n", m->class_file, strerror(errno));
 		m->class_file = NULL;
 		/* unlock */
-		method_area_unlock(m);
+		/* method_area_unlock(m); */
 		mvm_halt();
 	}
 
@@ -132,7 +132,7 @@ int method_area_load_class_file(struct method_area *m, char *c) {
 		fprintf(stderr, "mvm: %s: %s\n", m->class_file, strerror(errno));
 		m->class_file = NULL;
 		/* unlock */
-		method_area_unlock(m);
+		/* method_area_unlock(m); */
 		mvm_halt();
 	}
 
@@ -142,12 +142,12 @@ int method_area_load_class_file(struct method_area *m, char *c) {
 		m->class_file = NULL;
 		close(m->fd);
 		/* unlock */
-		method_area_unlock(m);
+		/* method_area_unlock(m); */
 		mvm_halt();
 	}
 
 	/* unlock */
-	method_area_unlock(m);
+	/* method_area_unlock(m); */
 
 	return 0;
 }
@@ -161,26 +161,26 @@ uint32_t method_area_fetch(struct method_area *m, uint32_t a) {
 	}
 
 	/* lock */
-	method_area_lock(m);
+	/* method_area_lock(m); */
 
 	if (m->class_file == NULL) {
 		fprintf(stderr, "mvm: no class file loaded!\n");
 		/* unlock */
-		method_area_unlock(m);
+		/* method_area_unlock(m); */
 		mvm_halt();
 	}
 
 	if (method_area_address_is_valid(m, a) == 0) {
 		fprintf(stderr, "mvm: invalid address %" PRIu32 "\n", a);
 		/* unlock */
-		method_area_unlock(m);
+		/* method_area_unlock(m); */
 		mvm_halt();
 	}
 
 	word = ntohl(*((uint32_t *)((m->code)+a)));
 
 	/* unlock */
-	method_area_unlock(m);
+	/* method_area_unlock(m); */
 
 	return word;
 }
@@ -194,19 +194,19 @@ int method_area_write(struct method_area *m, uint32_t a, uint32_t n) {
 	}
 
 	/* lock */
-	method_area_lock(m);
+	/* method_area_lock(m); */
 
 	if (m->class_file == NULL) {
 		fprintf(stderr, "mvm: no class file loaded!\n");
 		/* unlock */
-		method_area_unlock(m);
+		/* method_area_unlock(m); */
 		mvm_halt();
 	}
 
 	if (method_area_address_is_valid(m, a) == 0) {
 		fprintf(stderr, "mvm: invalid address %" PRIu32 "\n", a);
 		/* unlock */
-		method_area_unlock(m);
+		/* method_area_unlock(m); */
 		mvm_halt();
 	}
 
@@ -214,7 +214,7 @@ int method_area_write(struct method_area *m, uint32_t a, uint32_t n) {
 	*((uint32_t *)((m->code)+a)) = htonl(n);
 
 	/* unlock */
-	method_area_unlock(m);
+	/* method_area_unlock(m); */
 	
 	return word;
 }
@@ -228,12 +228,12 @@ int method_area_address_is_valid(struct method_area *m, uint32_t a) {
 	}
 
 	/* lock */
-	method_area_lock(m);
+	/* method_area_lock(m); */
 
 	retval = (a <= ((m->size)-sizeof(uint32_t)));
 
 	/* unlock */
-	method_area_unlock(m);
+	/* method_area_unlock(m); */
 	
 	return retval;
 }
@@ -247,19 +247,19 @@ int method_area_size(struct method_area *m) {
 	}
 
 	/* lock */
-	method_area_lock(m);
+	/* method_area_lock(m); */
 
 	if (m->class_file == NULL) {
 		fprintf(stderr, "mvm: no class file loaded!\n");
 		/* unlock */
-		method_area_unlock(m);
+		/* method_area_unlock(m); */
 		mvm_halt();
 	}
 
 	size = m->size;
 
 	/* unlock */
-	method_area_unlock(m);
+	/* method_area_unlock(m); */
 
 	return size;
 }
@@ -273,12 +273,12 @@ char * method_area_get_class_file(struct method_area *m) {
 	}
 
 	/* lock */
-	method_area_lock(m);
+	/* method_area_lock(m); */
 
 	class_file = m->class_file;
 
 	/* unlock */
-	method_area_unlock(m);
+	/* method_area_unlock(m); */
 
 	return class_file;
 }
@@ -297,12 +297,12 @@ struct class_table * method_area_generate_class_table(struct method_area *m) {
 	}
 
 	/* lock */
-	method_area_lock(m);
+	/* method_area_lock(m); */
 
 	if (m->class_file == NULL) {
 		fprintf(stderr, "mvm: no class file loaded!\n");
 		/* unlock */
-		method_area_unlock(m);
+		/* method_area_unlock(m); */
 		mvm_halt();
 	}
 
@@ -312,7 +312,7 @@ struct class_table * method_area_generate_class_table(struct method_area *m) {
 	if ((c = class_table_create(num_classes)) == NULL) {
 		fprintf(stderr, "mvm: error creating class table!\n");
 		/* unlock */
-		method_area_unlock(m);
+		/* method_area_unlock(m); */
 		mvm_halt();
 	}
 
@@ -359,7 +359,7 @@ struct class_table * method_area_generate_class_table(struct method_area *m) {
 		if ((cl = class_create(class_name, vmt, num_methods)) == NULL) {
 			fprintf(stderr, "mvm: error creating class!\n");
 			/* unlock */
-			method_area_unlock(m);
+			/* method_area_unlock(m); */
 			mvm_halt();
 		}
 
@@ -389,7 +389,7 @@ struct class_table * method_area_generate_class_table(struct method_area *m) {
 	if (class_table_analyze(c) != 0) {
 		fprintf(stderr, "mvm: error analyzing class table!\n");
 		/* unlock */
-		method_area_unlock(m);
+		/* method_area_unlock(m); */
 		mvm_halt();
 	}
 
@@ -398,7 +398,7 @@ struct class_table * method_area_generate_class_table(struct method_area *m) {
 #endif
 
 	/* unlock */
-	method_area_unlock(m);
+	/* method_area_unlock(m); */
 
 	return c;
 }
@@ -412,19 +412,19 @@ uint32_t method_area_get_main_block_address(struct method_area *m) {
 	}
 
 	/* lock */
-	method_area_lock(m);
+	/* method_area_lock(m); */
 
 	if (m->class_file == NULL) {
 		fprintf(stderr, "mvm: no class file loaded!\n");
 		/* unlock */
-		method_area_unlock(m);
+		/* method_area_unlock(m); */
 		mvm_halt();
 	}
 
 	address = method_area_fetch(m, MAIN_BLOCK_DEC_ADDRESS);
 
 	/* unlock */
-	method_area_unlock(m);
+	/* method_area_unlock(m); */
 
 	return address;
 }
@@ -438,19 +438,19 @@ uint32_t method_area_get_main_block_max_locals(struct method_area *m) {
 	}
 
 	/* lock */
-	method_area_lock(m);
+	/* method_area_lock(m); */
 
 	if (m->class_file == NULL) {
 		fprintf(stderr, "mvm: no class file loaded!\n");
 		/* unlock */
-		method_area_unlock(m);
+		/* method_area_unlock(m); */
 		mvm_halt();
 	}
 
 	locals = method_area_fetch(m, MAIN_BLOCK_DEC_ADDRESS+sizeof(uint32_t));
 
 	/* unlock */
-	method_area_unlock(m);
+	/* method_area_unlock(m); */
 
 	return locals;
 }
@@ -465,11 +465,11 @@ int method_area_read_string(struct method_area *m, uint32_t a, char **b) {
 	}
 
 	/* lock */
-	method_area_lock(m);
+	/* method_area_lock(m); */
 
 	if (b == NULL) {
 		/* unlock */
-		method_area_unlock(m);
+		/* method_area_unlock(m); */
 		return 0;
 	}
 
@@ -477,7 +477,7 @@ int method_area_read_string(struct method_area *m, uint32_t a, char **b) {
 	if ((buf = (char *)malloc(sizeof(char)*size)) == NULL) {
 		perror("mvm: malloc");
 		/* unlock */
-		method_area_unlock(m);
+		/* method_area_unlock(m); */
 		mvm_halt();
 	}
 
@@ -492,7 +492,7 @@ int method_area_read_string(struct method_area *m, uint32_t a, char **b) {
 			if ((buf = (char *)realloc(buf, sizeof(char)*size)) == NULL) {
 				perror("mvm: realloc");
 				/* unlock */
-				method_area_unlock(m);
+				/* method_area_unlock(m); */
 				mvm_halt();
 			}
 		}
@@ -503,7 +503,7 @@ int method_area_read_string(struct method_area *m, uint32_t a, char **b) {
 	*b = buf;
 
 	/* unlock */
-	method_area_unlock(m);
+	/* method_area_unlock(m); */
 
 	return i;
 }
