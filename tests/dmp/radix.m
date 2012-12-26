@@ -120,7 +120,7 @@ class Sort {
 
     tary = new TupleTable(n);
 
-    dout("determining max");
+    // dout("determining max");
     max = 0;
 
     if (1) {			// parallel
@@ -130,7 +130,7 @@ class Sort {
 
       maxers = new Table(numCounters);
 
-      dout("dolling out numbers");
+      // dout("dolling out numbers");
       i = 0;
       beg = 0;
       end = 0;
@@ -146,7 +146,7 @@ class Sort {
 	      
 	      rem = rem - (end - beg);
 
-	      dout("maxer " + i.toString() + " beg=" + beg.toString() + " end=" + end.toString());
+	      // dout("maxer " + i.toString() + " beg=" + beg.toString() + " end=" + end.toString());
 	      m = new Maxer(beg, end, nbits, ary, tary);
 	      maxers.put(i, m);
 
@@ -154,16 +154,16 @@ class Sort {
       }
 
       numMaxers = i;
-      dout("done dolling out numbers");
+      // dout("done dolling out numbers");
 
       for (i = 0; i < numMaxers; i = i + 1) {
-	      dout("starting maxer " + i.toString());
+	      // dout("starting maxer " + i.toString());
 	      m = (Maxer)maxers.get(i);
 	      m.start();
       }
 
       for (i = 0; i < numMaxers; i = i + 1) {
-	      dout("joining maxer " + i.toString());
+	      // dout("joining maxer " + i.toString());
 	      m = (Maxer)maxers.get(i);
 	      m.join();
 
@@ -184,7 +184,7 @@ class Sort {
     }
 
     max = max + 1;
-    dout("done determining max");
+    // dout("done determining max");
 
     C = new IntegerTable(max);
 
@@ -192,7 +192,7 @@ class Sort {
       Counter c;
       Table counters;
 
-      dout("dolling out numbers");
+      // dout("dolling out numbers");
       counters = new Table(numCounters);
 
       i = 0;
@@ -217,11 +217,11 @@ class Sort {
       }
 
       numCounters = i;
-      dout("done dolling out numbers");
+      // dout("done dolling out numbers");
 
       for (i = 0; i < numCounters; i = i + 1) {
 	c = (Counter)counters.get(i);
-	dout("starting thread " + (i+1).toString());
+	// dout("starting thread " + (i+1).toString());
 	c.start();
       }
 
@@ -229,9 +229,9 @@ class Sort {
 	c = (Counter)counters.get(i);
 
 	c.join();
-	dout("joined thread " + (i+1).toString());
+	// dout("joined thread " + (i+1).toString());
 
-	dout("aggregating totals");
+	// dout("aggregating totals");
 
 	ii = c.C.firstKey();
 	for (ii = c.C.nextKey(); ii != null; ii = c.C.nextKey()) {
@@ -242,7 +242,7 @@ class Sort {
 	  C.put(temp1, temp2 + temp3);
 	}
 
-	dout("done aggregating");
+	// dout("done aggregating");
       }
     } else {			// serial
       for (i = 0; i < n; i = i + 1) {
@@ -252,7 +252,7 @@ class Sort {
       }
     }
 
-    dout("doing rest");
+    // dout("doing rest");
 
     sum = 0;
     C2 = new IntegerTable(max);
@@ -291,7 +291,7 @@ class Sort {
       ary.put(temp2, t.value);
     }
 
-    dout("done doing rest");
+    // dout("done doing rest");
 
     return 0;
   }
