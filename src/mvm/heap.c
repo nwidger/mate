@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <26 Dec 2012 at 16:40:13 by nwidger on macros.local>
+ * Time-stamp: <26 Dec 2012 at 17:19:44 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -359,6 +359,29 @@ int heap_free(struct heap *h, void *p) {
 	return 0;
 }
 
+inline static int heap_hash_ref(int r) {
+	switch(sizeof(r)) {
+	case 8: /* 64-bit int */
+		r = (~r) + (r << 21); // r = (r << 21) - r - 1;
+		r = r ^ (r >> 24);
+		r = (r + (r << 3)) + (r << 8); // r * 265
+		r = r ^ (r >> 14);
+		r = (r + (r << 2)) + (r << 4); // r * 21
+		r = r ^ (r >> 28);
+		r = r + (r << 31);
+		break;
+	case 4: /* 32-bit int */
+		r = (r ^ 61) ^ (r >> 16);
+		r = r + (r << 3);
+		r = r ^ (r >> 4);
+		r = r * 0x27d4eb2d;
+		r = r ^ (r >> 15);
+		break;
+	}
+	
+	return r;
+}
+
 void * heap_fetch(struct heap *h, int r) {
 	int n;
 	void *ptr;
@@ -377,7 +400,7 @@ void * heap_fetch(struct heap *h, int r) {
 	/* lock */
 	heap_rdlock(h);
 
-	n = r % h->num_buckets;
+	n = heap_hash_ref(r) % h->num_buckets;
 
 	for (p = h->ref_buckets[n]; p != NULL && p->ref <= r; p = p->ref_next) {
 		if (p->ref == r) {
@@ -566,7 +589,7 @@ int heap_add_to_ref(struct heap *h, struct heap_ref *r) {
 	}
 
 	ref = r->ref;
-	n = ref % h->num_buckets;
+	n = heap_hash_ref(ref) % h->num_buckets;
 
 	if (h->ref_buckets[n] == NULL) {
 		h->ref_buckets[n] = r;
@@ -658,7 +681,7 @@ struct heap_ref * heap_remove_from_ref(struct heap *h, int e) {
 	ref = e;
 
 	/* remove from ref_buckets */
-	n = ref % h->num_buckets;
+	n = heap_hash_ref(ref) % h->num_buckets;
 	for (q = h->ref_buckets[n], r = NULL;
 	     q != NULL && q->ref < ref;
 	     r = q, q = q->ref_next);
