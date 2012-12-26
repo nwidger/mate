@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <26 Dec 2012 at 16:32:57 by nwidger on macros.local>
+ * Time-stamp: <26 Dec 2012 at 16:35:38 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -601,11 +601,11 @@ int heap_add_to_ptr(struct heap *h, struct heap_ref *r) {
 
 	if (h->ptr_buckets[n] == NULL) {
 		h->ptr_buckets[n] = r;
-		fprintf(stderr, "%s: %d: adding to head of empty h->ptr_buckets[n]\n", __FUNCTION__, __LINE__);
+		fprintf(stderr, "%s: %d: adding %p, to head of empty h->ptr_buckets[%d]\n", __FUNCTION__, __LINE__, r, n);
 	} else if (ptr < h->ptr_buckets[n]->ptr) {
 		r->ptr_next = h->ptr_buckets[n];
 		h->ptr_buckets[n] = r;
-		fprintf(stderr, "%s: %d: adding to head of h->ptr_buckets[n]\n", __FUNCTION__, __LINE__);
+		fprintf(stderr, "%s: %d: adding %p to head of h->ptr_buckets[%d]\n", __FUNCTION__, __LINE__, r, n);
 	} else {
 		for (p = h->ptr_buckets[n], q = NULL;
 		     p != NULL && ptr > p->ptr;
@@ -613,7 +613,7 @@ int heap_add_to_ptr(struct heap *h, struct heap_ref *r) {
 
 		r->ptr_next = q->ptr_next;
 		q->ptr_next = r;
-		fprintf(stderr, "%s: %d: appending h->ptr_buckets[n]\n", __FUNCTION__, __LINE__);
+		fprintf(stderr, "%s: %d: appending %p h->ptr_buckets[%d]\n", __FUNCTION__, __LINE__, r, n);
 	}
 
 	return 0;
