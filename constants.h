@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <10 Dec 2012 at 20:13:36 by nwidger on macros.local>
+ * Time-stamp: <26 Dec 2012 at 17:23:52 by nwidger on macros.local>
  */
 
 #ifndef _MVM_CONSTANTS_H
@@ -76,7 +76,7 @@
 
 /* heap constants */
 #define HEAP_DEFAULT_SIZE 67108864 /* 64MB */
-#define HEAP_NUM_BUCKETS 16384
+#define HEAP_NUM_BUCKETS 65536
 
 /* method area constants */
 #define METHOD_AREA_INITIAL_BUFFER_SIZE 5
