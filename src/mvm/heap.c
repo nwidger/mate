@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <26 Dec 2012 at 17:19:44 by nwidger on macros.local>
+ * Time-stamp: <27 Dec 2012 at 12:28:23 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -55,6 +55,8 @@ struct heap {
 };
 
 /* forward declarations */
+inline static int heap_hash_ptr(void *p);
+inline static int heap_hash_ref(uintptr_t r);
 void * heap_malloc_aux(struct heap *h, int b, int l);
 int heap_garbage_collect(struct heap *h);
 int heap_add_to_ref(struct heap *h, struct heap_ref *r);
@@ -359,7 +361,11 @@ int heap_free(struct heap *h, void *p) {
 	return 0;
 }
 
-inline static int heap_hash_ref(int r) {
+inline static int heap_hash_ptr(void *p) {
+	uintptr_t r;
+
+	r = (uintptr_t)p;
+	
 	switch(sizeof(r)) {
 	case 8: /* 64-bit int */
 		r = (~r) + (r << 21); // r = (r << 21) - r - 1;
@@ -379,7 +385,11 @@ inline static int heap_hash_ref(int r) {
 		break;
 	}
 	
-	return r;
+	return abs(r);
+}
+
+inline static int heap_hash_ref(uintptr_t r) {
+	return heap_hash_ptr((void *)r);
 }
 
 void * heap_fetch(struct heap *h, int r) {
@@ -620,7 +630,7 @@ int heap_add_to_ptr(struct heap *h, struct heap_ref *r) {
 	}
 
 	ptr = r->ptr;
-	n = ((uintptr_t)ptr * 2654435761) % h->num_buckets;
+	n = heap_hash_ptr(ptr) % h->num_buckets;
 
 	if (h->ptr_buckets[n] == NULL) {
 		h->ptr_buckets[n] = r;
@@ -653,7 +663,7 @@ struct heap_ref * heap_remove_from_ptr(struct heap *h, void *p) {
 	}
 
 	/* remove from ptr_buckets */
-	n = ((uintptr_t)p * 2654435761) % h->num_buckets;
+	n = heap_hash_ptr(p) % h->num_buckets;
 	for (q = h->ptr_buckets[n], r = NULL;
 	     q != NULL && q->ptr < p;
 	     r = q, q = q->ptr_next);
