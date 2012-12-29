@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <20 Dec 2012 at 18:14:13 by nwidger on macros.local>
+ * Time-stamp: <28 Dec 2012 at 22:07:20 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -622,8 +622,10 @@ int main(int argc, char *argv[]) {
 	main_block_max_locals = method_area_get_main_block_max_locals(method_area);
 
 	do {
-		mvm_clear();
-		restart = 0;
+		if (restart != 0) {
+			mvm_clear();
+			restart = 0;
+		}
 
 		class_table_new_thread(class_table, &object);
 		thread_start_main(object);

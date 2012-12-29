@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <27 Dec 2012 at 12:28:23 by nwidger on macros.local>
+ * Time-stamp: <28 Dec 2012 at 14:50:03 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -846,13 +846,30 @@ int heap_wrlock(struct heap *h) {
 }
 
 int heap_rdlock(struct heap *h) {
+	int err;
+	
 	if (h == NULL) {
 		fprintf(stderr, "mvm: heap not initialized!\n");
 		mvm_halt();
 	}
 
 	/* lock */
-	pthread_rwlock_rdlock(&h->rwlock);
+	err = pthread_rwlock_tryrdlock(&h->rwlock);
+
+	switch (err) {
+	case 0:			/* acquired lock */
+	case EDEADLK:		/* we already own the lock */
+		break;
+	case EBUSY:		/* someone else owns the lock, block */
+		if ((err = pthread_rwlock_rdlock(&h->rwlock)) != 0) {
+			fprintf(stderr, "mvm: pthread_rwlock_rdlock: %s\n", strerror(err));
+			mvm_halt();
+		}
+		break;
+	default:
+		fprintf(stderr, "mvm: pthread_rwlock_tryrdlock: %s\n", strerror(err));
+		mvm_halt();
+	}
 
 	return 0;
 }
