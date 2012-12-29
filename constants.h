@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <26 Dec 2012 at 17:23:52 by nwidger on macros.local>
+ * Time-stamp: <29 Dec 2012 at 17:19:42 by nwidger on macros.local>
  */
 
 #ifndef _MVM_CONSTANTS_H
@@ -114,6 +114,7 @@
 /* predefined table constants */
 #define TABLE_DEFAULT_INITIAL_CAPACITY 16
 #define TABLE_DEFAULT_LOAD_FACTOR 0.75
+/* #define TABLE_USE_RWLOCK */
 
 /* class table constants */
 #define CLASS_TABLE_INTEGER_CACHE_SIZE 65536

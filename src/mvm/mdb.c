@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <20 Dec 2012 at 18:15:15 by nwidger on macros.local>
+ * Time-stamp: <29 Dec 2012 at 17:19:23 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -2244,6 +2244,8 @@ int mdb_command_processor() {
 
 	/* ignore SIGINT */
 	mdb_sigint(SIG_IGN);
+
+	resume = 0;
 
 	do {
 		if ((line = readline("(mdb) ")) == NULL)

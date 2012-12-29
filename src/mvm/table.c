@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <20 Dec 2012 at 18:11:53 by nwidger on macros.local>
+ * Time-stamp: <29 Dec 2012 at 17:18:57 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -50,7 +50,10 @@ struct table {
 	int iterator_is_running;
 	int iterator_bucket;
 	struct table_entry *iterator_entry;
+
+#ifdef TABLE_USE_RWLOCK
 	pthread_rwlock_t rwlock;
+#endif
 
 #ifdef DMP
 	struct table_dmp *dmp;
@@ -87,10 +90,12 @@ struct table * table_create(int c, struct object *o) {
 
 	memset(t->buckets, 0, sizeof(struct table_entry *)*c);
 
+#ifdef TABLE_USE_RWLOCK
 	if (pthread_rwlock_init(&t->rwlock, NULL) != 0) {
 		perror("mvm: pthread_rwlock_init");
 		mvm_halt();
 	}
+#endif
 
 #ifdef DMP
 	if (dmp == NULL)
@@ -107,7 +112,9 @@ void table_destroy(struct table *t) {
 		table_clear(t);
 		heap_free(heap, t->buckets);
 		heap_free(heap, t);
+#ifdef TABLE_USE_RWLOCK
 		pthread_rwlock_destroy(&t->rwlock);
+#endif
 	}
 }
 
@@ -144,8 +151,10 @@ int table_populate_ref_set(struct table *t, struct ref_set *r) {
 		mvm_halt();
 	}
 
+#ifdef TABLE_USE_RWLOCK
 	/* lock */
 	pthread_rwlock_rdlock(&t->rwlock);
+#endif
 
 	for (i = 0; i < t->current_capacity; i++) {
 		for (p = t->buckets[i]; p != NULL; p = p->next) {
@@ -156,8 +165,10 @@ int table_populate_ref_set(struct table *t, struct ref_set *r) {
 		}
 	}
 
+#ifdef TABLE_USE_RWLOCK
 	/* unlock */
 	pthread_rwlock_unlock(&t->rwlock);
+#endif
 
 	return 0;
 }
@@ -182,8 +193,10 @@ int table_get(struct table *t, struct object *k) {
 		table_dmp_load(t->dmp);
 #endif
 
+#ifdef TABLE_USE_RWLOCK
 	/* lock */
 	pthread_rwlock_rdlock(&t->rwlock);
+#endif
 
 	n = hash % t->current_capacity;
 
@@ -196,8 +209,10 @@ int table_get(struct table *t, struct object *k) {
 
 			value = r->value;
 
+#ifdef TABLE_USE_RWLOCK
 			/* unlock */
 			pthread_rwlock_unlock(&t->rwlock);
+#endif
 			return value;
 		}
 		
@@ -207,8 +222,10 @@ int table_get(struct table *t, struct object *k) {
 #endif
 	}
 
+#ifdef TABLE_USE_RWLOCK
 	/* unlock */
 	pthread_rwlock_unlock(&t->rwlock);
+#endif
 
 	return 0;
 }
@@ -227,8 +244,10 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 		table_dmp_load(t->dmp);
 #endif
 
+#ifdef TABLE_USE_RWLOCK
 	/* lock */
 	pthread_rwlock_wrlock(&t->rwlock);
+#endif
 
 	/* check if iterator is running */
 	if (t->iterator_is_running == 1) {
@@ -293,8 +312,10 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 		table_resize(t, t->current_capacity*2);
 	}
 
+#ifdef TABLE_USE_RWLOCK
 	/* unlock */
 	pthread_rwlock_unlock(&t->rwlock);
+#endif
 
 	return old_value;
 }
@@ -313,8 +334,10 @@ int table_remove(struct table *t, struct object *k) {
 		table_dmp_load(t->dmp);
 #endif
 
+#ifdef TABLE_USE_RWLOCK
 	/* lock */
 	pthread_rwlock_wrlock(&t->rwlock);
+#endif
 
 	/* check if iterator is running */
 	if (t->iterator_is_running == 1) {
@@ -350,8 +373,10 @@ int table_remove(struct table *t, struct object *k) {
 	}
 
 	if (r == NULL) {
+#ifdef TABLE_USE_RWLOCK
 		/* unlock */
 		pthread_rwlock_unlock(&t->rwlock);
+#endif
 		return 0;
 	}
 
@@ -369,8 +394,10 @@ int table_remove(struct table *t, struct object *k) {
 
 	t->num_entries--;
 
+#ifdef TABLE_USE_RWLOCK
 	/* unlock */
 	pthread_rwlock_unlock(&t->rwlock);
+#endif
 
 	return old_value;
 }
@@ -389,8 +416,10 @@ int table_first_key(struct table *t) {
 		table_dmp_store(t->dmp);
 #endif
 
+#ifdef TABLE_USE_RWLOCK
 	/* lock */
 	pthread_rwlock_wrlock(&t->rwlock);
+#endif
 
 	for (i = 0; i < t->current_capacity; i++) {
 		if (t->buckets[i] != NULL)
@@ -407,8 +436,10 @@ int table_first_key(struct table *t) {
 		t->iterator_entry = t->buckets[i];
 	}
 
+#ifdef TABLE_USE_RWLOCK
 	/* unlock */
 	pthread_rwlock_unlock(&t->rwlock);
+#endif
 
 	if ((ref = class_table_new_integer(class_table, value, NULL)) == 0)
 		mvm_halt();
@@ -429,12 +460,16 @@ int table_next_key(struct table *t) {
 		table_dmp_load(t->dmp);
 #endif
 
+#ifdef TABLE_USE_RWLOCK
 	/* lock */
 	pthread_rwlock_wrlock(&t->rwlock);
+#endif
 
 	if (t->iterator_is_running == 0) {
+#ifdef TABLE_USE_RWLOCK
 		/* unlock */
 		pthread_rwlock_unlock(&t->rwlock);
+#endif
 		return 0;
 	}
 
@@ -447,8 +482,10 @@ int table_next_key(struct table *t) {
 
 	t->iterator_entry = t->iterator_entry->next;
 	if (t->iterator_entry != NULL) {
+#ifdef TABLE_USE_RWLOCK
 		/* unlock */
 		pthread_rwlock_unlock(&t->rwlock);
+#endif
 		return prev;
 	}
 
@@ -463,8 +500,10 @@ int table_next_key(struct table *t) {
 	if (n >= t->current_capacity)
 		t->iterator_is_running = 0;
 
+#ifdef TABLE_USE_RWLOCK
 	/* unlock */
 	pthread_rwlock_unlock(&t->rwlock);
+#endif
 
 	return prev;
 }
@@ -479,8 +518,10 @@ int table_resize(struct table *t, int n) {
 		mvm_halt();
 	}
 
+#ifdef TABLE_USE_RWLOCK
 	/* lock */
 	pthread_rwlock_wrlock(&t->rwlock);
+#endif
 
 	if ((new_table = table_create(n, t->object)) == NULL)
 		mvm_halt();
@@ -498,8 +539,10 @@ int table_resize(struct table *t, int n) {
 	memcpy(t, new_table, sizeof(struct table));
 	heap_free(heap, new_table);
 
+#ifdef TABLE_USE_RWLOCK
 	/* unlock */
 	pthread_rwlock_unlock(&t->rwlock);
+#endif
 
 	return 0;
 }
