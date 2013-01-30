@@ -22,9 +22,7 @@ class Barrier {
 	this.lock.notifyAll();
 	return null;
       }
-    }
 
-    synchronized(this.lock) {
       Integer g;
 	
       g = this.G;

@@ -22,9 +22,14 @@ class MDRealTable {
   }
 
   Real get(Integer k1, Integer k2) {
+    Integer key;
     Object value;
 
-    value = t.get(makeKey(k1, k2));
+    key = makeKey(k1, k2);
+
+    synchronized(t) {
+      value = t.get(key);
+    }
 
     if (value == null)
       return 0.0;
@@ -34,8 +39,13 @@ class MDRealTable {
 
   Real put(Integer k1, Integer k2, Real value) {
     Object prev;
+    Integer key;
 
-    prev = t.put(makeKey(k1, k2), value);
+    key = makeKey(k1, k2);
+
+    synchronized(t) {
+      prev = t.put(key, value);
+    }
 
     if (prev == null)
       return 0.0;
@@ -44,9 +54,14 @@ class MDRealTable {
   }
 
   Real remove(Integer k1, Integer k2) {
+    Integer key;
     Object value;
 
-    value = t.remove(makeKey(k1, k2));
+    key = makeKey(k1, k2);
+
+    synchronized(t) {
+      value = t.remove(key);
+    }
 
     if (value == null)
       return 0.0;
@@ -55,13 +70,21 @@ class MDRealTable {
   }
 
   Integer firstKey() {
-    return t.firstKey();
+    Integer key;
+
+    synchronized(t) {
+      key = t.firstKey();
+    }
+
+    return key;
   }
 
   Integer nextKey() {
     Object key;
 
-    key = t.nextKey();
+    synchronized(t) {
+      key = t.nextKey();
+    }
 
     if (key == null)
       return null;
