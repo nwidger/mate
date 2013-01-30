@@ -1,13 +1,13 @@
 class Barrier {
   Integer P;
   Integer Q;
-  Integer go;
+  Integer G;
   Object lock;
   
   Barrier(Integer P) {
     this.P = P;
     this.Q = P;
-    this.go = 0;
+    this.G = 0;
     this.lock = new Object();
   }
 
@@ -17,18 +17,21 @@ class Barrier {
 
       if (this.Q.equals(0)) {
 	this.Q = this.P;
-	this.go = 1;
+	this.G = this.G + 1;
+	// out "inc G to " + this.G.toString() + newline;
+	this.lock.notifyAll();
 	return null;
       }
-
-      this.go = 0;
     }
 
-    for (;;) {
-      synchronized(this.lock) {
-	if (this.go) {
-	  break;
-	}
+    synchronized(this.lock) {
+      Integer g;
+	
+      g = this.G;
+	
+      while (g.equals(this.G)) {
+	this.lock.wait();
+	// out "woke up, g = " + g.toString() + " G = " + this.G.toString() + newline;
       }
     }
 

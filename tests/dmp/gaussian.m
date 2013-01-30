@@ -1,6 +1,7 @@
 #include "IntegerTable.m"
 #include "MDRealTable.m"
 #include "Timer.m"
+#include "Barrier.m"
 
 // This maTe program completely solves a system of linear equations using
 // (1) gaussian elimination with partial pivoting and (2) back substitution.
@@ -9,188 +10,268 @@
 // argument. (If not given, the default size is 32.) A random matrix of that
 // size is generated and then solved.
 
+class Worker extends Thread {
+	Integer id;
+	Integer num_threads;
+	Barrier barrier;
+
+	Integer N;
+	MDRealTable a;
+	
+	Worker(Integer id, Integer num_threads, Barrier barrier, Integer N, MDRealTable a) {
+		this.id = id;
+		this.num_threads = num_threads;
+		this.barrier = barrier;
+
+		this.N = N;
+		this.a = a;
+	}
+
+	Object run() {
+		Integer i, j, k;
+
+		for (k = 0; k < (N - 1); k = k + 1) {
+			out "thread " + id.toString() + ": first part k = " + k.toString() + newline;
+			if (id.equals(k.mod(num_threads))) {
+				for (j = (k+1); j < N; j = j + 1) {
+					a.put(k, j, a.get(k, j) / a.get(k, k));
+				}
+				a.put(k, k, 1.0);
+			}
+			
+			out "thread " + id.toString() + ": first barrier k = " + k.toString() + newline;
+			barrier.await();
+			
+			out "thread " + id.toString() + ": second part k = " + k.toString() + newline;
+			for (i = (k+1); i < N; i = i + 1) {
+				if ((i.mod(num_threads)).equals(id)) {
+					for (j = (k+1); j < N; j = j + 1) {
+						a.put(i, j, a.get(i, j) - (a.get(i, k) * a.get(k, j)));
+					}
+					a.put(i, k, 0.0);
+				}
+			}
+			
+			out "thread " + id.toString() + ": second barrier k = " + k.toString() + newline;
+			barrier.await();
+		}
+	}
+}
+
 class Gaussian {
-  Integer N;
-  MDRealTable a;
-  Timer timer;
-  Real EPSILON;
-  IntegerTable pivot, marked;
+	Integer parallel;
+	Integer num_threads;
 
-  Gaussian() {
-    this(32);
-  }
+	Integer N;
+	MDRealTable a;
+	Timer timer;
+	Real EPSILON;
+	IntegerTable pivot, marked;
 
-  Gaussian(Integer N) {
-    this.N = N;
-    EPSILON = 1.0e-20;
-    timer = new Timer();
-
-    a = new MDRealTable(N, N+1);
-    pivot = new IntegerTable(N);
-    marked = new IntegerTable(N);
-
-    initialize_system();
-  }
-
-  Object doit() {
-    start_timer();
-    if (gaussian_elimination()) {
-      back_substitution();
-      stop_timer();
-      check_results();
-    } else {
-      out "No solution?" + newline;
-    }
-
-    return null;
-  }
-
-  Real abs(Real x) {
-    if (x < 0.0)
-      return -x;
-    else
-      return x;
-  }
-
-  // cook up a system where ans.get(i) will be i
-  Object initialize_system() {
-    Real d;
-    Integer i, j, iN, r;
-
-    r = 0;
-
-    for (i = 0; i < N; i = i + 1) {
-      iN = i*N;
-      marked.put(i, 0);
-      a.put(i, N, 0.0);
-      for (j = 0; j < N; j = j + 1) {
-	d = new Real(r.rand().mod(100)) / 100.0;
-	a.put(i, j, d);
-	a.put(i, N, a.get(i, N) + (new Real(j) * a.get(i, j)));
-      }
-    }
-
-    return null;
-  }
-
-  // reduce the matrix using partial pivoting
-  Integer gaussian_elimination() {
-    Integer i, j, k, picked, pickedN, jN;
-    Real tmp;
-
-    picked = -1;
-
-    for (i = 0; i < (N - 1); i = i + 1) {
-      tmp = 0.0;
-      for (j = 0; j < N; j = j + 1) {
-	jN = j*N;
-	if (marked.get(j).equals(0) && abs(a.get(j, i)) > tmp) {
-	  tmp = abs(a.get(j, i));
-	  picked = j;
+	Gaussian() {
+		this(32);
 	}
-      }
 
-      pickedN = picked*N;
+	Gaussian(Integer N) {
+		this.parallel = 1;
+		
+		this.N = N;
+		this.num_threads = N;
 
-      marked.put(picked, 1); // Mark pivot row
-      pivot.put(picked, i);  // Remember permuted position
+		EPSILON = 1.0e-20;
+		timer = new Timer();
 
-      if (abs(a.get(picked, i)) < EPSILON) {
-	out "Exits on iteration " + i.toString() + newline;
-	return 0;
-      }
+		a = new MDRealTable(N, N+1);
+		pivot = new IntegerTable(N);
+		marked = new IntegerTable(N);
 
-      for (j = 0; j < N; j = j + 1) {
-	if (marked.get(j).equals(0)) {
-	  jN = j*N;
-	  tmp = a.get(j, i) / a.get(picked, i);
-	  for (k = i; k < (N+1); k = k + 1) {
-	    Real olda, newa;
-	    olda = a.get(j, k);
-	    a.put(j, k, a.get(j, k) - (a.get(picked, k) * tmp));
-	    newa = a.get(j, k);
-	  }
+		initialize_system();
 	}
-      }
-    }
-    for (i = 0; i < N; i = i + 1) {
-      if (marked.get(i).equals(0)) {
-	pivot.put(i, N-1);
-      }
-    }
-    return 1;
-  }
 
-  // solve the (logical) upper triangular matrix
-  Object back_substitution() {
-    Real coeff;
-    Integer i, j, jN;
+	Object doit() {
+		start_timer();
+		out "running gaussian_elimination" + newline;
+		if (gaussian_elimination()) {
+			out "running back_substitution" + newline;
+			back_substitution();
+			out "running stop_timer" + newline;
+			stop_timer();
+			out "running check_results" + newline;
+			check_results();
+		} else {
+			out "No solution?" + newline;
+		}
 
-    for (i = N-1; i >= 0; i = i - 1) {
-      for (j = 0; !pivot.get(j).equals(i); j = j + 1) { }
-      jN = j*N;
-      coeff = a.get(j, N) / a.get(j, i);
-      for (j = 0; j < N; j = j + 1) {
-	jN = j*N;
-	if (pivot.get(j) < i)
-	  a.put(j, N, a.get(j, N) - (coeff * a.get(j, i)));
-      }
-    }
+		return null;
+	}
 
-    return null;
-  }
+	Real abs(Real x) {
+		if (x < 0.0)
+			return -x;
+		else
+			return x;
+	}
 
-  // ans.get(i) should be (roughly) i
-  // to get ans I still need to divide by the non-zero column's coefficient
-  // might end up with -0.0 so I must special-case that
-  Object check_results() {
-    Integer i;
+	// cook up a system where ans.get(i) will be i
+	Object initialize_system() {
+		Real d;
+		Integer i, j, r;
 
-    for (i = 0; i < N; i = i + 1) {
-      Real ans;
+		r = 0;
 
-      ans = a.get(i, N) / a.get(i, pivot.get(i));
-      if ((pivot.get(i).equals(0)) && (ans < 0.0)) ans = -ans;
-      if (abs(ans - new Real(pivot.get(i))) > 0.01) {
-	out "Error on iteration " + i.toString() +
-	  ": " + new Real(pivot.get(i)).toString() + " " + ans.toString() + newline;
-      }
-    }
+		for (i = 0; i < N; i = i + 1) {
+			marked.put(i, 0);
+			a.put(i, N, 0.0);
+			for (j = 0; j < N; j = j + 1) {
+				d = new Real(r.rand().mod(100)) / 100.0;
+				a.put(i, j, d);
+				a.put(i, N, a.get(i, N) + (new Real(j) * a.get(i, j)));
+			}
+		}
 
-    out "Done." + newline;
+		return null;
+	}
 
-    return null;
-  }
+	Integer gaussian_elimination() {
+		if (!this.parallel) {
+			return serial_gaussian_elimination();
+		} else {
+			Integer i;
+			Worker worker;
+			Table workers;
+			Barrier barrier;
 
-  Object start_timer() {
-    timer.start_timer();
-  }
+			barrier = new Barrier(this.num_threads);
+			workers = new Table(this.num_threads);
+			
+			for (i = 0; i < this.num_threads; i = i + 1) {
+				worker = new Worker(i, this.num_threads, barrier, N, a);
+				workers.put(i, worker);
+				worker.start();
+			}
 
-  Object stop_timer() {
-    Real dtime;
+			for (i = 0; i < this.num_threads; i = i + 1) {
+				worker = (Worker)workers.get(i);
+				worker.join();
+			}
 
-    timer.stop_timer();
-    dtime = new Real(timer.millisecs) / 1000.0;
-    timer.join();
+			return 1;
+		}
+	}
+	
+	// reduce the matrix using partial pivoting
+	Integer serial_gaussian_elimination() {
+		Integer i, j, k, picked;
+		Real tmp;
 
-    out "## Elapsed time: " + dtime.toString() + " seconds" + newline;
-  }
+		picked = -1;
+
+		for (i = 0; i < (N - 1); i = i + 1) {
+			tmp = 0.0;
+			for (j = 0; j < N; j = j + 1) {
+				if (marked.get(j).equals(0) && abs(a.get(j, i)) > tmp) {
+					tmp = abs(a.get(j, i));
+					picked = j;
+				}
+			}
+
+			marked.put(picked, 1); // Mark pivot row
+			pivot.put(picked, i);  // Remember permuted position
+
+			if (abs(a.get(picked, i)) < EPSILON) {
+				out "Exits on iteration " + i.toString() + newline;
+				return 0;
+			}
+
+			for (j = 0; j < N; j = j + 1) {
+				if (marked.get(j).equals(0)) {
+					tmp = a.get(j, i) / a.get(picked, i);
+					for (k = i; k < (N+1); k = k + 1) {
+						Real olda, newa;
+						olda = a.get(j, k);
+						a.put(j, k, a.get(j, k) - (a.get(picked, k) * tmp));
+						newa = a.get(j, k);
+					}
+				}
+			}
+		}
+
+		for (i = 0; i < N; i = i + 1) {
+			if (marked.get(i).equals(0)) {
+				pivot.put(i, N-1);
+			}
+		}
+
+		return 1;
+	}
+
+	// solve the (logical) upper triangular matrix
+	Object back_substitution() {
+		Real coeff;
+		Integer i, j;
+
+		for (i = N-1; i >= 0; i = i - 1) {
+			for (j = 0; !pivot.get(j).equals(i); j = j + 1) { }
+			coeff = a.get(j, N) / a.get(j, i);
+			for (j = 0; j < N; j = j + 1) {
+				if (pivot.get(j) < i)
+					a.put(j, N, a.get(j, N) - (coeff * a.get(j, i)));
+			}
+		}
+
+		return null;
+	}
+
+	// ans.get(i) should be (roughly) i
+	// to get ans I still need to divide by the non-zero column's coefficient
+	// might end up with -0.0 so I must special-case that
+	Object check_results() {
+		Integer i;
+
+		for (i = 0; i < N; i = i + 1) {
+			Real ans;
+
+			ans = a.get(i, N) / a.get(i, pivot.get(i));
+			if ((pivot.get(i).equals(0)) && (ans < 0.0)) ans = -ans;
+			if (abs(ans - new Real(pivot.get(i))) > 0.01) {
+				out "Error on iteration " + i.toString() +
+					": " + new Real(pivot.get(i)).toString() + " " + ans.toString() + newline;
+			}
+		}
+
+		out "Done." + newline;
+
+		return null;
+	}
+
+	Object start_timer() {
+		timer.start_timer();
+	}
+
+	Object stop_timer() {
+		Real dtime;
+
+		timer.stop_timer();
+		dtime = new Real(timer.millisecs) / 1000.0;
+
+		out "## Elapsed time: " + dtime.toString() + " seconds" + newline;
+	}
 }
 
 Integer main() {
-  String s;
-  Gaussian g;
-  Integer solution;
+	String s;
+	Gaussian g;
+	Integer solution;
 
-  if ((s = in) == null) {
-    g = new Gaussian();
-  } else {
-    g = new Gaussian(s.toInteger());
-  }
+	if ((s = in) == null) {
+		g = new Gaussian();
+	} else {
+		g = new Gaussian(s.toInteger());
+	}
 
-  out "Matrix size is " + g.N.toString() + newline;
+	out "Matrix size is " + g.N.toString() + newline;
 
-  g.doit();
+	g.doit();
 
-  return 0;
+	return 0;
 }

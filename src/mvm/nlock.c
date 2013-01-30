@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <29 Jan 2012 at 14:15:53 by nwidger on macros.local>
+ * Time-stamp: <22 Jan 2013 at 20:35:26 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -266,8 +266,8 @@ int nlock_notify(struct nlock *n) {
 		mvm_halt();
 	}
 
-	pthread_cond_signal(&n->cond);
 	n->notifies++;
+	pthread_cond_signal(&n->cond);
 
 	return 0;
 }
@@ -278,8 +278,8 @@ int nlock_notify_all(struct nlock *n) {
 		mvm_halt();
 	}
 
-	pthread_cond_broadcast(&n->cond);
 	n->notifies++;
+	pthread_cond_broadcast(&n->cond);
 
 	return 0;
 }
