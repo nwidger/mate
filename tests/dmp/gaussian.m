@@ -10,51 +10,126 @@
 // argument. (If not given, the default size is 32.) A random matrix of that
 // size is generated and then solved.
 
+class GBarrier extends Barrier {
+	Integer done;
+	Table workers;
+
+	Integer picked;
+	Real tmp;
+
+	GBarrier(Integer P, Table workers) {
+		super(P);
+		this.done = 0;
+		this.workers = workers;
+		this.picked = -1;
+		this.tmp = 0.0;
+	}
+}
+
 class Worker extends Thread {
 	Integer id;
 	Integer num_threads;
-	Barrier barrier;
+	GBarrier barrier;
 
 	Integer N;
 	MDRealTable a;
-	
-	Worker(Integer id, Integer num_threads, Barrier barrier, Integer N, MDRealTable a) {
+
+	IntegerTable marked;
+	IntegerTable pivot;
+
+	Real EPSILON;
+
+	Worker(Integer id, Integer num_threads, GBarrier barrier, Integer N, MDRealTable a, IntegerTable marked, IntegerTable pivot, Real EPSILON) {
 		this.id = id;
 		this.num_threads = num_threads;
 		this.barrier = barrier;
 
 		this.N = N;
 		this.a = a;
+
+		this.marked = marked;
+		this.pivot = pivot;
+
+		this.EPSILON = EPSILON;
+	}
+
+	Real abs(Real x) {
+		if (x < 0.0)
+			return -x;
+		else
+			return x;
 	}
 
 	Object run() {
-		Integer i, j, k;
+		Integer i, j, k, picked;
+		Real tmp;
 
-		for (k = 0; k < (N - 1); k = k + 1) {
-			out "thread " + id.toString() + ": first part k = " + k.toString() + newline;
-			if (id.equals(k.mod(num_threads))) {
-				for (j = (k+1); j < N; j = j + 1) {
-					a.put(k, j, a.get(k, j) / a.get(k, k));
-				}
-				a.put(k, k, 1.0);
-			}
-			
-			out "thread " + id.toString() + ": first barrier k = " + k.toString() + newline;
+		picked = -1;
+
+		for (i = 0; i < (N - 1); i = i + 1) {
 			barrier.await();
-			
-			out "thread " + id.toString() + ": second part k = " + k.toString() + newline;
-			for (i = (k+1); i < N; i = i + 1) {
-				if ((i.mod(num_threads)).equals(id)) {
-					for (j = (k+1); j < N; j = j + 1) {
-						a.put(i, j, a.get(i, j) - (a.get(i, k) * a.get(k, j)));
+
+			tmp = 0.0;
+			if (id.equals(0)) {
+				tmp = 0.0;
+				for (j = 0; j < N; j = j + 1) {
+					if (marked.get(j).equals(0) && abs(a.get(j, i)) > tmp) {
+						tmp = abs(a.get(j, i));
+						picked = j;
 					}
-					a.put(i, k, 0.0);
+				}
+
+				this.barrier.tmp = tmp;
+				this.barrier.picked = picked;
+
+				marked.put(this.barrier.picked, 1); // Mark pivot row
+				pivot.put(this.barrier.picked, i); // Remember permuted position
+
+				if (abs(a.get(this.barrier.picked, i)) < EPSILON) {
+					out "Exits on iteration " + i.toString() + newline;
+					this.barrier.done = 1;
+				}
+			}
+
+			barrier.await();
+
+			if (this.barrier.done) {
+				return null;
+			}
+
+			tmp = this.barrier.tmp;
+			picked = this.barrier.picked;
+			
+			for (j = 0; j < N; j = j + 1) {
+				if (id.equals(j.mod(num_threads))) {
+					if (marked.get(j).equals(0)) {
+						tmp = a.get(j, i) / a.get(picked, i);
+						for (k = i; k < (N+1); k = k + 1) {
+							Real olda, newa;
+							olda = a.get(j, k);
+							a.put(j, k, a.get(j, k) - (a.get(picked, k) * tmp));
+							newa = a.get(j, k);
+						}
+					}
 				}
 			}
 			
-			out "thread " + id.toString() + ": second barrier k = " + k.toString() + newline;
 			barrier.await();
+
+			if (id.equals(0)) {
+				this.barrier.tmp = 0.0;
+			}
 		}
+
+		for (i = 0; i < N; i = i + 1) {
+			if (id.equals(i.mod(num_threads))) {
+				if (marked.get(i).equals(0)) {
+					pivot.put(i, N-1);
+				}
+			}
+		}
+
+		return null;
 	}
 }
 
@@ -139,13 +214,13 @@ class Gaussian {
 			Integer i;
 			Worker worker;
 			Table workers;
-			Barrier barrier;
+			GBarrier barrier;
 
-			barrier = new Barrier(this.num_threads);
+			barrier = new GBarrier(this.num_threads, workers);
 			workers = new Table(this.num_threads);
 			
 			for (i = 0; i < this.num_threads; i = i + 1) {
-				worker = new Worker(i, this.num_threads, barrier, N, a);
+				worker = new Worker(i, this.num_threads, barrier, N, a, marked, pivot, EPSILON);
 				workers.put(i, worker);
 				worker.start();
 			}
