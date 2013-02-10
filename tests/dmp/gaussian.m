@@ -150,6 +150,8 @@ class Gaussian {
 		
 		this.N = N;
 
+		this.parallel = 0;
+		
 		if (!this.num_threads.equals(0)) {
 			this.parallel = 1;
 		}
