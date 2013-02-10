@@ -242,11 +242,16 @@ class Gaussian {
 		Integer i, j, k, picked;
 		Real tmp;
 
+		out "in serial_gaussian_elimination" + newline;
+
 		picked = -1;
 
 		for (i = 0; i < (N - 1); i = i + 1) {
+			out "outer loop, i = " + i.toString() + newline;
+
 			tmp = 0.0;
 			for (j = 0; j < N; j = j + 1) {
+				out "first inner loop, j = " + j.toString() + newline;
 				if (marked.get(j).equals(0) && abs(a.get(j, i)) > tmp) {
 					tmp = abs(a.get(j, i));
 					picked = j;
@@ -262,9 +267,11 @@ class Gaussian {
 			}
 
 			for (j = 0; j < N; j = j + 1) {
+				out "second inner loop, j = " + j.toString() + newline;
 				if (marked.get(j).equals(0)) {
 					tmp = a.get(j, i) / a.get(picked, i);
 					for (k = i; k < (N+1); k = k + 1) {
+						out "inner inner loop, k = " + k.toString() + newline;
 						Real olda, newa;
 						olda = a.get(j, k);
 						a.put(j, k, a.get(j, k) - (a.get(picked, k) * tmp));
@@ -275,6 +282,7 @@ class Gaussian {
 		}
 
 		for (i = 0; i < N; i = i + 1) {
+			out "final loop, i = " + i.toString() + newline;
 			if (marked.get(i).equals(0)) {
 				pivot.put(i, N-1);
 			}
