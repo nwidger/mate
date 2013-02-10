@@ -141,15 +141,18 @@ class Gaussian {
 	Real EPSILON;
 	IntegerTable pivot, marked;
 
-	Gaussian(Integer parallel) {
-		this(parallel, 32);
+	Gaussian(Integer num_threads) {
+		this(num_threads, 32);
 	}
 
-	Gaussian(Integer parallel, Integer N) {
-		this.parallel = parallel;
+	Gaussian(Integer num_threads, Integer N) {
+		this.num_threads = num_threads;
 		
 		this.N = N;
-		this.num_threads = N;
+
+		if (!this.num_threads.equals(0)) {
+			this.parallel = 1;
+		}
 
 		EPSILON = 1.0e-20;
 		timer = new Timer();
@@ -334,20 +337,20 @@ class Gaussian {
 Integer main() {
 	String s;
 	Gaussian g;
-	Integer parallel, solution;
+	Integer num_threads, solution;
 
 	s = in;
 
 	if (s == null) {
-		out "Usage: <parallel 0/1> [<N>]" + newline;
+		out "Usage: <num_threads> [<N>]" + newline;
 	}
 
-	parallel = s.toInteger();
+	num_threads = s.toInteger();
 
 	if ((s = in) == null) {
-		g = new Gaussian(parallel);
+		g = new Gaussian(num_threads);
 	} else {
-		g = new Gaussian(parallel, s.toInteger());
+		g = new Gaussian(num_threads, s.toInteger());
 	}
 
 	out "Matrix size is " + g.N.toString() + newline;
