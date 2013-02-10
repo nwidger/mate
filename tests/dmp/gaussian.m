@@ -141,12 +141,12 @@ class Gaussian {
 	Real EPSILON;
 	IntegerTable pivot, marked;
 
-	Gaussian() {
-		this(32);
+	Gaussian(Integer parallel) {
+		this(parallel, 32);
 	}
 
-	Gaussian(Integer N) {
-		this.parallel = 1;
+	Gaussian(Integer parallel, Integer N) {
+		this.parallel = parallel;
 		
 		this.N = N;
 		this.num_threads = N;
@@ -334,12 +334,20 @@ class Gaussian {
 Integer main() {
 	String s;
 	Gaussian g;
-	Integer solution;
+	Integer parallel, solution;
+
+	s = in;
+
+	if (s == null) {
+		out "Usage: <parallel 0/1> [<N>]" + newline;
+	}
+
+	parallel = s.toInteger();
 
 	if ((s = in) == null) {
-		g = new Gaussian();
+		g = new Gaussian(parallel);
 	} else {
-		g = new Gaussian(s.toInteger());
+		g = new Gaussian(parallel, s.toInteger());
 	}
 
 	out "Matrix size is " + g.N.toString() + newline;
