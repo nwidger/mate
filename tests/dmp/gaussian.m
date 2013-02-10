@@ -67,6 +67,10 @@ class Worker extends Thread {
 		picked = -1;
 
 		for (i = 0; i < (N - 1); i = i + 1) {
+			if (id.equals(0)) {
+				out "i = " + i.toString() + newline;
+			}
+			
 			tmp = 0.0;
 			if (id.equals(0)) {
 				tmp = 0.0;
