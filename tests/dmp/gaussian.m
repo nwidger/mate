@@ -163,13 +163,13 @@ class Gaussian {
 
 	Object doit() {
 		start_timer();
-		out "running gaussian_elimination" + newline;
+		// out "running gaussian_elimination" + newline;
 		if (gaussian_elimination()) {
-			out "running back_substitution" + newline;
+			// out "running back_substitution" + newline;
 			back_substitution();
-			out "running stop_timer" + newline;
+			// out "running stop_timer" + newline;
 			stop_timer();
-			out "running check_results" + newline;
+			// out "running check_results" + newline;
 			check_results();
 		} else {
 			out "No solution?" + newline;
