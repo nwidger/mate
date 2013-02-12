@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <20 Dec 2012 at 17:54:43 by nwidger on macros.local>
+ * Time-stamp: <11 Feb 2013 at 19:55:09 by nwidger on macros.local>
  */
 
 #ifndef _MVM_NATIVEMETHODARRAY_H
@@ -64,7 +64,7 @@ int native_method_array_set_method(struct native_method_array *n, char *s, int (
  *
  * @param n - the native_method_array to access
  * @param i - the index of the native method to invoke
- * @param s - the thread to execute on
+ * @param t - the thread to execute on
  *
  * @return return value of the native method function, or -1 on failure
  */

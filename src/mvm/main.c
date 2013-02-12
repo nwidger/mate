@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Dec 2012 at 22:07:20 by nwidger on macros.local>
+ * Time-stamp: <11 Feb 2013 at 20:15:23 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -237,7 +237,7 @@ int mvm_initialize(uint64_t h) {
 
 	retval = stat(class_file, &stat_buf);
 	
-	if ((retval != 0 && !S_ISREG(stat_buf.st_mode)) || access(class_file, F_OK) != 0) {
+	if (retval != 0 || !S_ISREG(stat_buf.st_mode) || access(class_file, F_OK) != 0) {
 		len = strlen(class_file);
 		if ((buf = (char *)malloc(len + strlen(".class") + 1)) == NULL) {
 			perror("malloc");
