@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Feb 2013 at 15:07:08 by nwidger on macros.local>
+ * Time-stamp: <23 Feb 2013 at 15:12:01 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -479,7 +479,9 @@ int invokespecial_decode(uint32_t a) {
 	char *label;
 	uint32_t address, num_args, max_locals;
 
-	mvm_disassemble_arguments(a, 3, &address, &num_args, &max_locals);
+	address = mvm_disassemble_argument(a, 0);
+	num_args = mvm_disassemble_argument(a, 1);
+	max_locals = mvm_disassemble_argument(a, 2);
 
 	if ((label = symbol_table_find_label(symbol_table, address)) != NULL) {
 		fprintf(stderr, "  %s $%s %" PRIu32 " %" PRIu32 "\n",
@@ -501,7 +503,9 @@ int invokespecial_instruction(uint32_t o, struct thread *t) {
 		num_args, max_locals;
 
 	SETUP_INSTRUCTION();
-	mvm_disassemble_arguments(pc, 3, &address, &num_args, &max_locals);
+	address = mvm_disassemble_argument(pc, 0);
+	num_args = mvm_disassemble_argument(pc, 1);
+	max_locals = mvm_disassemble_argument(pc, 2);
 
 	ref = operand_stack_peek_n(operand_stack, num_args-1);
 
@@ -571,7 +575,8 @@ int invokevirtual_decode_size(uint32_t a) {
 int invokevirtual_decode(uint32_t a) {
 	uint32_t index, num_args;
 
-	mvm_disassemble_arguments(a, 2, &index, &num_args);
+	index = mvm_disassemble_argument(a, 0);
+	num_args = mvm_disassemble_argument(a, 1);
 
 	fprintf(stderr, "  %s %" PRIu32 " %" PRIu32 "\n",
 		INVOKEVIRTUAL_NAME, index, num_args);
@@ -583,7 +588,8 @@ int invokevirtual_instruction(uint32_t o, struct thread *t) {
 	uint32_t index, num_args, return_address;
 
 	SETUP_INSTRUCTION();
-	mvm_disassemble_arguments(pc, 2, &index, &num_args);
+	index = mvm_disassemble_argument(pc, 0);
+	num_args = mvm_disassemble_argument(pc, 1);
 
 	ref = operand_stack_peek_n(operand_stack, num_args-1);
 
