@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <20 Dec 2012 at 18:07:32 by nwidger on macros.local>
+ * Time-stamp: <23 Feb 2013 at 15:07:08 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -96,7 +96,7 @@ int aload_decode_size(uint32_t a) {
 int aload_decode(uint32_t a) {
 	uint32_t index;
 
-	mvm_disassemble_arguments(a, 1, &index);
+	index = mvm_disassemble_argument(a, 0);
 
 	fprintf(stderr, "  %s %" PRIu32 "\n", ALOAD_NAME, index);
 	return 2;
@@ -107,7 +107,7 @@ int aload_instruction(uint32_t o, struct thread *t) {
 	uint32_t index;
 
 	SETUP_INSTRUCTION();
-	mvm_disassemble_arguments(pc, 1, &index);
+	index = mvm_disassemble_argument(pc, 0);
 
 	ref = local_variable_array_load(local_variable_array, index);
 	operand_stack_push(operand_stack, ref);
@@ -156,7 +156,7 @@ int astore_decode_size(uint32_t a) {
 int astore_decode(uint32_t a) {
 	uint32_t index;
 
-	mvm_disassemble_arguments(a, 1, &index);
+	index = mvm_disassemble_argument(a, 0);
 
 	fprintf(stderr, "  %s %" PRIu32 "\n", ASTORE_NAME, index);
 	return 2;
@@ -167,7 +167,7 @@ int astore_instruction(uint32_t o, struct thread *t) {
 	uint32_t index;
 
 	SETUP_INSTRUCTION();
-	mvm_disassemble_arguments(pc, 1, &index);
+	index = mvm_disassemble_argument(pc, 0);
 	n = 0;
 
 	ref = operand_stack_peek_n(operand_stack, n++);
@@ -187,7 +187,7 @@ int checkcast_decode(uint32_t a) {
 	char *class_name;
 	struct class *to_class;
 
-	mvm_disassemble_arguments(a, 1, &vmt);
+	vmt = mvm_disassemble_argument(a, 0);
 
 	to_class = class_table_find(class_table, vmt);
 	class_name = class_get_name(to_class);
@@ -205,7 +205,7 @@ int checkcast_instruction(uint32_t o, struct thread *t) {
 	struct object *object;
 
 	SETUP_INSTRUCTION();
-	mvm_disassemble_arguments(pc, 1, &vmt);
+	vmt = mvm_disassemble_argument(pc, 0);
 
 	to_class = class_table_find(class_table, vmt);
 
@@ -309,7 +309,7 @@ int getfield_decode_size(uint32_t a) {
 int getfield_decode(uint32_t a) {
 	uint32_t index;
 
-	mvm_disassemble_arguments(a, 1, &index);
+	index = mvm_disassemble_argument(a, 0);
 
 	fprintf(stderr, "  %s %" PRIu32 "\n", GETFIELD_NAME, index);
 	return 2;
@@ -321,7 +321,7 @@ int getfield_instruction(uint32_t o, struct thread *t) {
 	struct object *object;
 
 	SETUP_INSTRUCTION();
-	mvm_disassemble_arguments(pc, 1, &index);
+	index = mvm_disassemble_argument(pc, 0);
 	n = 0;
 
 	ref = operand_stack_peek_n(operand_stack, n++);
@@ -343,7 +343,7 @@ int goto_decode(uint32_t a) {
 	char *label;
 	uint32_t address;
 
-	mvm_disassemble_arguments(a, 1, &address);
+	address = mvm_disassemble_argument(a, 0);
 
 	if ((label = symbol_table_find_label(symbol_table, address)) != NULL)
 		fprintf(stderr, "  %s $%s\n", GOTO_NAME, label);
@@ -357,7 +357,7 @@ int goto_instruction(uint32_t o, struct thread *t) {
 	uint32_t address;
 
 	SETUP_INSTRUCTION();
-	mvm_disassemble_arguments(pc, 1, &address);
+	address = mvm_disassemble_argument(pc, 0);
 
 	thread_set_pc(t, address);
 
@@ -372,7 +372,7 @@ int ifeq_decode(uint32_t a) {
 	char *label;
 	uint32_t address;
 
-	mvm_disassemble_arguments(a, 1, &address);
+	address = mvm_disassemble_argument(a, 0);
 
 	if ((label = symbol_table_find_label(symbol_table, address)) != NULL)
 		fprintf(stderr, "  %s $%s\n", IFEQ_NAME, label);
@@ -390,7 +390,7 @@ int ifeq_instruction(uint32_t o, struct thread *t) {
 	struct integer *integer;
 
 	SETUP_INSTRUCTION();
-	mvm_disassemble_arguments(pc, 1, &address);
+	address = mvm_disassemble_argument(pc, 0);
 	n = 0;
 
 	ref = operand_stack_peek_n(operand_stack, n++);
@@ -546,7 +546,7 @@ int invokenative_decode_size(uint32_t a) {
 int invokenative_decode(uint32_t a) {
 	uint32_t index;
 
-	mvm_disassemble_arguments(a, 1, &index);
+	index = mvm_disassemble_argument(a, 0);
 
 	fprintf(stderr, "  %s %" PRIu32 "\n", INVOKENATIVE_NAME, index);
 	return 2;
@@ -556,7 +556,7 @@ int invokenative_instruction(uint32_t o, struct thread *t) {
 	uint32_t index, return_address;
 
 	SETUP_INSTRUCTION();
-	mvm_disassemble_arguments(pc, 1, &index);
+	index = mvm_disassemble_argument(pc, 0);
 
 	return_address = increment_pc(2, t);
 	invoke_native_method(t, index, return_address);
@@ -665,7 +665,7 @@ int new_decode(uint32_t a) {
 	char *class_name;
 	struct class *class;
 
-	mvm_disassemble_arguments(a, 1, &vmt);
+	vmt = mvm_disassemble_argument(a, 0);
 
 	class = class_table_find(class_table, vmt);
 	class_name = class_get_name(class);
@@ -679,7 +679,7 @@ int new_instruction(uint32_t o, struct thread *t) {
 	uint32_t vmt;
 
 	SETUP_INSTRUCTION();
-	mvm_disassemble_arguments(pc, 1, &vmt);
+	vmt = mvm_disassemble_argument(pc, 0);
 
 	/* lock */
 	garbage_collector_pause(garbage_collector);
@@ -701,7 +701,7 @@ int newint_decode_size(uint32_t a) {
 int newint_decode(uint32_t a) {
 	uint32_t value;
 
-	mvm_disassemble_arguments(a, 1, &value);
+	value = mvm_disassemble_argument(a, 0);
 
 	fprintf(stderr, "  %s %" PRIu32 "\n", NEWINT_NAME, value);
 	return 2;
@@ -712,7 +712,7 @@ int newint_instruction(uint32_t o, struct thread *t) {
 	uint32_t value;
 
 	SETUP_INSTRUCTION();
-	mvm_disassemble_arguments(pc, 1, &value);
+	value = mvm_disassemble_argument(pc, 0);
 
 	if (value < INTEGER_MIN_INTEGER) {
 		fprintf(stderr, "mvm: integer literal is too small!");
@@ -879,7 +879,7 @@ int putfield_decode_size(uint32_t a) {
 int putfield_decode(uint32_t a) {
 	uint32_t index;
 
-	mvm_disassemble_arguments(a, 1, &index);
+	index = mvm_disassemble_argument(a, 0);
 
 	fprintf(stderr, "  %s %" PRIu32 "\n", PUTFIELD_NAME, index);
 	return 2;
@@ -891,7 +891,7 @@ int putfield_instruction(uint32_t o, struct thread *t) {
 	struct object *object;
 
 	SETUP_INSTRUCTION();
-	mvm_disassemble_arguments(pc, 1, &index);
+	index = mvm_disassemble_argument(pc, 0);
 	n = 0;
 
 	ref = operand_stack_peek_n(operand_stack, n++);
