@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <24 Feb 2013 at 17:55:31 by nwidger on macros.local>
+ * Time-stamp: <24 Feb 2013 at 17:57:24 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -758,7 +758,9 @@ int heap_dump(struct heap *h) {
 			
 			fprintf(stderr, "\n");
 		}
+	}
 
+	for (i = 0; i < h->num_buckets; i++) {
 		fprintf(stderr, "ptr bucket %d =\n", i);
 		
 		for (r = h->ptr_buckets[i]; r != NULL; r = r->ptr_next) {
