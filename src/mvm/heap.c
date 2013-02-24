@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Dec 2012 at 14:50:03 by nwidger on macros.local>
+ * Time-stamp: <24 Feb 2013 at 17:55:31 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -742,7 +742,24 @@ int heap_dump(struct heap *h) {
 	heap_rdlock(h);
 
 	for (i = 0; i < h->num_buckets; i++) {
-		fprintf(stderr, "bucket %d =\n", i);
+		fprintf(stderr, "ref bucket %d =\n", i);
+		
+		for (r = h->ref_buckets[i]; r != NULL; r = r->ref_next) {
+			fprintf(stderr, "               ");
+			
+			if (r->ref == 0) {
+				fprintf(stderr, "size=%d ref=%d ptr=%p",
+					r->size, r->ref, r->ptr);
+			} else {
+				object = (struct object *)r->ptr;
+				fprintf(stderr, "size=%d ", r->size);
+				object_dump(object, 0);
+			}
+			
+			fprintf(stderr, "\n");
+		}
+
+		fprintf(stderr, "ptr bucket %d =\n", i);
 		
 		for (r = h->ptr_buckets[i]; r != NULL; r = r->ptr_next) {
 			fprintf(stderr, "               ");
