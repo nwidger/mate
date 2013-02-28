@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Dec 2012 at 20:53:49 by nwidger on macros.local>
+ * Time-stamp: <24 Feb 2013 at 12:14:08 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -32,6 +32,7 @@ struct method_area {
 	int fd;
 	uint8_t *code;
 	int size;
+	int max_address;
 	struct nlock *nlock;
 };
 
@@ -50,6 +51,7 @@ struct method_area * method_area_create() {
 	m->fd = 0;
 	m->code = NULL;
 	m->size = 0;
+	m->max_address = 0;
 
 	if ((m->nlock = nlock_create()) == NULL)
 		mvm_halt();
@@ -126,6 +128,7 @@ int method_area_load_class_file(struct method_area *m, char *c) {
 
 	/* grab class file size in bytes */
 	m->size = file_stat.st_size;
+	m->max_address = m->size - sizeof(uint32_t);
 
 	/* open class file */
 	if ((m->fd = open(m->class_file, O_RDONLY)) == -1) {
@@ -230,7 +233,7 @@ int method_area_address_is_valid(struct method_area *m, uint32_t a) {
 	/* lock */
 	/* method_area_lock(m); */
 
-	retval = (a <= ((m->size)-sizeof(uint32_t)));
+	retval = a <= m->max_address;
 
 	/* unlock */
 	/* method_area_unlock(m); */
