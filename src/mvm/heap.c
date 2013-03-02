@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <24 Feb 2013 at 17:57:24 by nwidger on macros.local>
+ * Time-stamp: <02 Mar 2013 at 00:08:50 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -23,14 +23,15 @@
 #include "ref_set.h"
 
 /* struct definitions */
-struct free_ref {
-	int ref;
-	struct free_ref *next;
+struct free_bucket {
+	int size;
+	struct heap_ref *head;
 };
 
 struct heap_ref {
 	int ref;
 	int size;
+	int fromfree;
 	void *ptr;
 	struct heap_ref *ref_next;
 	struct heap_ref *ptr_next;
@@ -44,10 +45,8 @@ struct heap {
 	struct heap_ref **ref_buckets;
 	struct heap_ref **ptr_buckets;
 
-	struct heap_ref *last_malloc;
-
 	int next_ref;
-	struct free_ref *free_list;
+	struct free_bucket *free_buckets;
 
 	struct ref_set *excluded_set;
 	struct ref_set *thread_set;
@@ -57,17 +56,17 @@ struct heap {
 /* forward declarations */
 inline static int heap_hash_ptr(void *p);
 inline static int heap_hash_ref(uintptr_t r);
-void * heap_malloc_aux(struct heap *h, int b, int l);
+struct heap_ref * heap_malloc_aux(struct heap *h, int b, int l);
 int heap_garbage_collect(struct heap *h);
+int heap_add_to_free(struct heap *h, struct heap_ref *r);
 int heap_add_to_ref(struct heap *h, struct heap_ref *r);
 int heap_add_to_ptr(struct heap *h, struct heap_ref *r);
 struct heap_ref * heap_remove_from_ptr(struct heap *h, void *p);
 struct heap_ref * heap_remove_from_ref(struct heap *h, int e);
+struct heap_ref * heap_remove_from_free(struct heap *h, int size);
 int heap_generate_ref(struct heap *h);
 struct heap_ref * heap_ref_create(int r, void *p, int s);
 void heap_ref_destroy(struct heap_ref *r);
-struct free_ref * free_ref_create(int r, struct free_ref *n);
-void free_ref_destroy(struct free_ref *f);
 int heap_release(struct heap *h);
 int heap_reacquire(struct heap *h, int l);
 
@@ -101,10 +100,13 @@ struct heap * heap_create(uint64_t m) {
 		mvm_halt();
 	}
 
-	h->last_malloc = NULL;
+	if ((h->free_buckets = (struct free_bucket *)
+	     calloc(HEAP_NUM_FREE_BUCKETS, sizeof(struct free_bucket))) == NULL) {
+		perror("mvm: malloc");
+		mvm_halt();
+	}
 
 	h->next_ref = 1;
-	h->free_list = NULL;
 
 	if ((h->excluded_set = ref_set_create()) == NULL)
 		mvm_halt();
@@ -128,6 +130,7 @@ void heap_destroy(struct heap *h) {
 		pthread_rwlock_destroy(&h->rwlock);
 		free(h->ref_buckets);
 		free(h->ptr_buckets);
+		free(h->free_buckets);
 		free(h);
 	}
 }
@@ -135,7 +138,6 @@ void heap_destroy(struct heap *h) {
 void heap_clear(struct heap *h) {
 	int i;
 	struct heap_ref *r, *s;
-	struct free_ref *f, *g;
 
 	if (h != NULL) {
 		for (i = 0; i < h->num_buckets; i++) {
@@ -152,16 +154,18 @@ void heap_clear(struct heap *h) {
 		memset(h->ptr_buckets, 0,
 		       sizeof(struct heap_ref *)*h->num_buckets);
 
-		h->last_malloc = NULL;
-
-		f = h->free_list;
-		while (f != NULL) {
-			g = f;
-			f = f->next;
-			free_ref_destroy(g);
+		for (i = 0; i < HEAP_NUM_FREE_BUCKETS; i++) {
+			r = h->free_buckets[i].head;
+			while (r != NULL) {
+				s = r;
+				r = r->ref_next;
+				free(s);
+			}
 		}
 
-		h->free_list = NULL;
+		memset(h->free_buckets, 0,
+		       sizeof(struct heap_ref *)*HEAP_NUM_FREE_BUCKETS);
+
 		h->next_ref = 1;
 
 		ref_set_clear(h->excluded_set);
@@ -235,10 +239,15 @@ int heap_garbage_collect(struct heap *h) {
 }
 
 void * heap_malloc(struct heap *h, int b) {
-	return heap_malloc_aux(h, b, 1);
+	struct heap_ref *r;
+
+	r = heap_malloc_aux(h, b, 1);
+	r->fromfree = 0;
+
+	return r->ptr;
 }
 
-void * heap_malloc_aux(struct heap *h, int b, int l) {
+struct heap_ref * heap_malloc_aux(struct heap *h, int b, int l) {
 	void *ptr;
 	struct heap_ref *r;
 
@@ -261,24 +270,25 @@ void * heap_malloc_aux(struct heap *h, int b, int l) {
 		}
 	}
 
-	if ((ptr = (void *)malloc(b)) == NULL) {
-		perror("mvm: malloc");
-		mvm_halt();
-	}
-
-	if ((r = heap_ref_create(0, ptr, b)) == NULL) {
-		mvm_halt();
-	}
-
 	if (l != 0) {
 		/* lock */
 		heap_wrlock(h);
 	}
 
+	if ((r = heap_remove_from_free(heap, b)) == NULL) {
+		if ((ptr = (void *)malloc(b)) == NULL) {
+			perror("mvm: malloc");
+			mvm_halt();
+		}
+
+		if ((r = heap_ref_create(0, ptr, b)) == NULL) {
+			mvm_halt();
+		}
+	}
+
 	/* add to ptr_buckets */
 	heap_add_to_ptr(h, r);
 
-	h->last_malloc = r;
 	h->mem_free -= b;
 
 	if (l != 0) {
@@ -286,12 +296,13 @@ void * heap_malloc_aux(struct heap *h, int b, int l) {
 		heap_unlock(h);
 	}
 
-	return ptr;
+	return r;
 }
 
 void * heap_malloc_ref(struct heap *h, int b, int *r) {
 	void *p;
 	int ref;
+	struct heap_ref *hr;
 
 	if (h == NULL) {
 		fprintf(stderr, "mvm: heap has not been initialized!\n");
@@ -301,17 +312,22 @@ void * heap_malloc_ref(struct heap *h, int b, int *r) {
 	/* lock */
 	heap_wrlock(h);
 
-	if ((p = heap_malloc_aux(h, b, 0)) == NULL) {
+	if ((hr = heap_malloc_aux(h, b, 0)) == NULL) {
 		mvm_halt();
 	}
 
-	ref = heap_generate_ref(h);
+	p = hr->ptr;
 
-	h->last_malloc->ref = ref;
+	if (!hr->fromfree) {
+		ref = heap_generate_ref(h);
+		hr->ref = ref;
+	} else {
+		ref = hr->ref;
+		hr->fromfree = 0;
+	}
 
 	/* add to ref_buckets */
-	heap_add_to_ref(h, h->last_malloc);
-	h->last_malloc = NULL;
+	heap_add_to_ref(h, hr);
 
 	if (r != NULL)
 		*r = ref;
@@ -346,14 +362,19 @@ int heap_free(struct heap *h, void *p) {
 	ref = q->ref;
 
 	if (ref != 0) {
-		/* add to free list */
-		h->free_list = free_ref_create(ref, h->free_list);
 		/* remove from ref_buckets */
 		heap_remove_from_ref(h, ref);
 	}
 
+	/* add to free list */
+	if (heap_add_to_free(heap, q) == 0) {
+		/* added to free buckets successfully */
+	} else {
+		/* free bucket is full, really free */
+		heap_ref_destroy(q);
+	}
+
 	h->mem_free += q->size;
-	heap_ref_destroy(q);
 
 	/* unlock */
 	heap_unlock(h);
@@ -634,11 +655,9 @@ int heap_add_to_ptr(struct heap *h, struct heap_ref *r) {
 
 	if (h->ptr_buckets[n] == NULL) {
 		h->ptr_buckets[n] = r;
-		/* fprintf(stderr, "%s: %d: adding %p, to head of empty h->ptr_buckets[%d]\n", __FUNCTION__, __LINE__, r, n); */
 	} else if (ptr < h->ptr_buckets[n]->ptr) {
 		r->ptr_next = h->ptr_buckets[n];
 		h->ptr_buckets[n] = r;
-		/* fprintf(stderr, "%s: %d: adding %p to head of h->ptr_buckets[%d]\n", __FUNCTION__, __LINE__, r, n); */
 	} else {
 		for (p = h->ptr_buckets[n], q = NULL;
 		     p != NULL && ptr > p->ptr;
@@ -646,8 +665,46 @@ int heap_add_to_ptr(struct heap *h, struct heap_ref *r) {
 
 		r->ptr_next = q->ptr_next;
 		q->ptr_next = r;
-		/* fprintf(stderr, "%s: %d: appending %p h->ptr_buckets[%d]\n", __FUNCTION__, __LINE__, r, n); */
 	}
+
+	return 0;
+}
+
+/* caller MUST acquire wrlock */
+int heap_add_to_free(struct heap *h, struct heap_ref *r) {
+	int n, size;
+	struct heap_ref *s, *t;
+
+	if (h == NULL) {
+		fprintf(stderr, "mvm: heap has not been initialized!\n");
+		mvm_halt();
+	}
+
+	size = r->size;
+	n = size % HEAP_NUM_FREE_BUCKETS;
+
+	if (h->free_buckets[n].size >= HEAP_MAX_FREE_BUCKET_SIZE) {
+		return 1;
+	}
+
+	r->ref_next = NULL;
+	r->ptr_next = NULL;
+
+	if (h->free_buckets[n].head == NULL) {
+		h->free_buckets[n].head = r;
+	} else if (size <= h->free_buckets[n].head->size) {
+		r->ptr_next = h->free_buckets[n].head;
+		h->free_buckets[n].head = r;
+	} else {
+		for (s = h->free_buckets[n].head, t = NULL;
+		     s != NULL && size > s->size;
+		     t = s, s = s->ptr_next);
+
+		r->ptr_next = t->ptr_next;
+		t->ptr_next = r;
+	}
+
+	h->free_buckets[n].size++;
 
 	return 0;
 }
@@ -707,23 +764,50 @@ struct heap_ref * heap_remove_from_ref(struct heap *h, int e) {
 }
 
 /* caller MUST acquire wrlock */
-int heap_generate_ref(struct heap *h) {
-	int ref;
-	struct free_ref *f;
+struct heap_ref * heap_remove_from_free(struct heap *h, int size) {
+	int n;
+	struct heap_ref *q, *r;
 
 	if (h == NULL) {
 		fprintf(stderr, "mvm: heap has not been initialized!\n");
 		mvm_halt();
 	}
 
-	if (h->free_list == NULL) {
-		ref = h->next_ref++;
+	/* remove from free_buckets */
+	n = size % HEAP_NUM_FREE_BUCKETS;
+	for (q = h->free_buckets[n].head, r = NULL;
+	     q != NULL && q->size < size;
+	     r = q, q = q->ptr_next);
+
+	if (q == NULL || q->size != size) {
+		q = NULL;
+	} else if (q == h->free_buckets[n].head) {
+		h->free_buckets[n].head = q->ptr_next;
+		h->free_buckets[n].size--;
 	} else {
-		ref = h->free_list->ref;
-		f = h->free_list;
-		h->free_list = h->free_list->next;
-		free_ref_destroy(f);
+		r->ptr_next = q->ptr_next;
+		h->free_buckets[n].size--;
 	}
+
+	if (q != NULL) {
+		q->fromfree = 1;
+		q->ref_next = NULL;
+		q->ptr_next = NULL;
+	}
+
+	return q;
+}
+
+/* caller MUST acquire wrlock */
+int heap_generate_ref(struct heap *h) {
+	int ref;
+
+	if (h == NULL) {
+		fprintf(stderr, "mvm: heap has not been initialized!\n");
+		mvm_halt();
+	}
+
+	ref = h->next_ref++;
 
 	return ref;
 }
@@ -802,6 +886,7 @@ struct heap_ref * heap_ref_create(int r, void *p, int s) {
         q->ref = r;
 	q->ptr = p;
 	q->size = s;
+	q->fromfree = 0;
 	q->ref_next = NULL;
 	q->ptr_next = NULL;
 
@@ -814,25 +899,6 @@ void heap_ref_destroy(struct heap_ref *r) {
 			free(r->ptr);
 		free(r);
 	}
-}
-
-struct free_ref * free_ref_create(int r, struct free_ref *n) {
-	struct free_ref *f;
-
-	if ((f = (struct free_ref *)malloc(sizeof(struct free_ref))) == NULL) {
-		perror("mvm: malloc");
-		mvm_halt();
-	}
-
-	f->ref = r;
-	f->next = n;
-
-	return f;
-}
-
-void free_ref_destroy(struct free_ref *f) {
-	if (f != NULL)
-		free(f);
 }
 
 int heap_wrlock(struct heap *h) {
