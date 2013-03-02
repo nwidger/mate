@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <02 Mar 2013 at 00:08:50 by nwidger on macros.local>
+ * Time-stamp: <02 Mar 2013 at 10:40:22 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -28,10 +28,14 @@ struct free_bucket {
 	struct heap_ref *head;
 };
 
+struct free_ref {
+	int ref;
+	struct free_ref *next;
+};
+
 struct heap_ref {
 	int ref;
 	int size;
-	int fromfree;
 	void *ptr;
 	struct heap_ref *ref_next;
 	struct heap_ref *ptr_next;
@@ -46,6 +50,7 @@ struct heap {
 	struct heap_ref **ptr_buckets;
 
 	int next_ref;
+	struct free_ref *free_list;
 	struct free_bucket *free_buckets;
 
 	struct ref_set *excluded_set;
@@ -67,6 +72,8 @@ struct heap_ref * heap_remove_from_free(struct heap *h, int size);
 int heap_generate_ref(struct heap *h);
 struct heap_ref * heap_ref_create(int r, void *p, int s);
 void heap_ref_destroy(struct heap_ref *r);
+struct free_ref * free_ref_create(int r, struct free_ref *n);
+void free_ref_destroy(struct free_ref *f);
 int heap_release(struct heap *h);
 int heap_reacquire(struct heap *h, int l);
 
@@ -107,6 +114,7 @@ struct heap * heap_create(uint64_t m) {
 	}
 
 	h->next_ref = 1;
+	h->free_list = NULL;
 
 	if ((h->excluded_set = ref_set_create()) == NULL)
 		mvm_halt();
@@ -138,6 +146,7 @@ void heap_destroy(struct heap *h) {
 void heap_clear(struct heap *h) {
 	int i;
 	struct heap_ref *r, *s;
+	struct free_ref *f, *g;
 
 	if (h != NULL) {
 		for (i = 0; i < h->num_buckets; i++) {
@@ -153,6 +162,15 @@ void heap_clear(struct heap *h) {
 		       sizeof(struct heap_ref *)*h->num_buckets);
 		memset(h->ptr_buckets, 0,
 		       sizeof(struct heap_ref *)*h->num_buckets);
+
+		f = h->free_list;
+		while (f != NULL) {
+			g = f;
+			f = f->next;
+			free_ref_destroy(g);
+		}
+
+		h->free_list = NULL;
 
 		for (i = 0; i < HEAP_NUM_FREE_BUCKETS; i++) {
 			r = h->free_buckets[i].head;
@@ -242,7 +260,6 @@ void * heap_malloc(struct heap *h, int b) {
 	struct heap_ref *r;
 
 	r = heap_malloc_aux(h, b, 1);
-	r->fromfree = 0;
 
 	return r->ptr;
 }
@@ -317,14 +334,7 @@ void * heap_malloc_ref(struct heap *h, int b, int *r) {
 	}
 
 	p = hr->ptr;
-
-	if (!hr->fromfree) {
-		ref = heap_generate_ref(h);
-		hr->ref = ref;
-	} else {
-		ref = hr->ref;
-		hr->fromfree = 0;
-	}
+	ref = hr->ref = heap_generate_ref(h);
 
 	/* add to ref_buckets */
 	heap_add_to_ref(h, hr);
@@ -362,6 +372,8 @@ int heap_free(struct heap *h, void *p) {
 	ref = q->ref;
 
 	if (ref != 0) {
+		/* add to free list */
+		h->free_list = free_ref_create(ref, h->free_list);
 		/* remove from ref_buckets */
 		heap_remove_from_ref(h, ref);
 	}
@@ -687,6 +699,7 @@ int heap_add_to_free(struct heap *h, struct heap_ref *r) {
 		return 1;
 	}
 
+	r->ref = 0;
 	r->ref_next = NULL;
 	r->ptr_next = NULL;
 
@@ -790,7 +803,6 @@ struct heap_ref * heap_remove_from_free(struct heap *h, int size) {
 	}
 
 	if (q != NULL) {
-		q->fromfree = 1;
 		q->ref_next = NULL;
 		q->ptr_next = NULL;
 	}
@@ -801,13 +813,21 @@ struct heap_ref * heap_remove_from_free(struct heap *h, int size) {
 /* caller MUST acquire wrlock */
 int heap_generate_ref(struct heap *h) {
 	int ref;
+	struct free_ref *f;
 
 	if (h == NULL) {
 		fprintf(stderr, "mvm: heap has not been initialized!\n");
 		mvm_halt();
 	}
 
-	ref = h->next_ref++;
+	if (h->free_list == NULL) {
+		ref = h->next_ref++;
+	} else {
+		ref = h->free_list->ref;
+		f = h->free_list;
+		h->free_list = h->free_list->next;
+		free_ref_destroy(f);
+	}
 
 	return ref;
 }
@@ -886,7 +906,6 @@ struct heap_ref * heap_ref_create(int r, void *p, int s) {
         q->ref = r;
 	q->ptr = p;
 	q->size = s;
-	q->fromfree = 0;
 	q->ref_next = NULL;
 	q->ptr_next = NULL;
 
@@ -899,6 +918,25 @@ void heap_ref_destroy(struct heap_ref *r) {
 			free(r->ptr);
 		free(r);
 	}
+}
+
+struct free_ref * free_ref_create(int r, struct free_ref *n) {
+	struct free_ref *f;
+
+	if ((f = (struct free_ref *)malloc(sizeof(struct free_ref))) == NULL) {
+		perror("mvm: malloc");
+		mvm_halt();
+	}
+
+	f->ref = r;
+	f->next = n;
+
+	return f;
+}
+
+void free_ref_destroy(struct free_ref *f) {
+	if (f != NULL)
+		free(f);
 }
 
 int heap_wrlock(struct heap *h) {
