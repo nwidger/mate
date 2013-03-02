@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <17 Dec 2012 at 19:12:52 by nwidger on macros.local>
+ * Time-stamp: <02 Mar 2013 at 11:16:30 by nwidger on macros.local>
  */
 
 #ifndef _MVM_HEAP_H
@@ -10,6 +10,19 @@
 struct object;
 struct heap;
 struct ref_set;
+
+struct free_bucket {
+	int size;
+	struct heap_ref *head;
+};
+
+struct heap_ref {
+	int ref;
+	int size;
+	void *ptr;
+	struct heap_ref *ref_next;
+	struct heap_ref *ptr_next;
+};
 
 /** creates a new heap of size m bytes.
  *
@@ -238,5 +251,9 @@ int heap_rdlock(struct heap *h);
  */
 
 int heap_unlock(struct heap *h);
+
+int heap_enable_force_malloc(struct heap *h);
+
+int heap_disable_force_malloc(struct heap *h);
 
 #endif

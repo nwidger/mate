@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Dec 2012 at 20:41:29 by nwidger on macros.local>
+ * Time-stamp: <02 Mar 2013 at 11:13:01 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -16,6 +16,7 @@
 #include <unistd.h>
 
 #include "class_table.h"
+#include "constants.h"
 #include "globals.h"
 #include "heap.h"
 #include "integer.h"
@@ -39,6 +40,8 @@ struct thread {
 
 	uint32_t pc;
 	struct vm_stack *vm_stack;
+
+	struct free_bucket *free_buckets;
 
 #ifdef DMP
 	struct thread_dmp *dmp;
@@ -68,6 +71,12 @@ struct thread * thread_create() {
 	t->state = new_state;
 	t->pc = 0;
 
+	if ((t->free_buckets = (struct free_bucket *)
+	     calloc(THREAD_NUM_FREE_BUCKETS, sizeof(struct free_bucket))) == NULL) {
+		perror("mvm: malloc");
+		mvm_halt();
+	}
+
 	if ((t->vm_stack = vm_stack_create()) == NULL)
 		mvm_halt();
 
@@ -87,10 +96,14 @@ void thread_destroy(struct thread *t) {
 		thread_clear(t);
 		vm_stack_destroy(t->vm_stack);
 		heap_free(heap, t);
+		free(t->free_buckets);
 	}
 }
 
 void thread_clear(struct thread *t) {
+	int i;
+	struct heap_ref *r, *s;
+
 	if (t == NULL)
 		return;
 
@@ -109,6 +122,18 @@ void thread_clear(struct thread *t) {
 	t->pc = 0;
 
 	vm_stack_clear(t->vm_stack);
+
+	for (i = 0; i < THREAD_NUM_FREE_BUCKETS; i++) {
+		r = t->free_buckets[i].head;
+		while (r != NULL) {
+			s = r;
+			r = r->ref_next;
+			free(s);
+		}
+	}
+
+	memset(t->free_buckets, 0,
+	       sizeof(struct heap_ref *)*THREAD_NUM_FREE_BUCKETS);
 }
 
 #ifdef DMP
@@ -486,4 +511,76 @@ void * thread_run0_main(void *p) {
 	heap_include_ref(heap, t->ref);
 	heap_remove_thread_ref(heap, t->ref);
 	pthread_exit(0);
+}
+
+int thread_add_to_free(struct thread *t, struct heap_ref *r) {
+	int n, size;
+	struct heap_ref *s, *u;
+
+	if (t == NULL) {
+		fprintf(stderr, "mvm: thread has not been initialized!\n");
+		mvm_halt();
+	}
+
+	size = r->size;
+	n = size % THREAD_NUM_FREE_BUCKETS;
+
+	if (t->free_buckets[n].size >= THREAD_MAX_FREE_BUCKET_SIZE) {
+		return 1;
+	}
+
+	r->ref = 0;
+	r->ref_next = NULL;
+	r->ptr_next = NULL;
+
+	if (t->free_buckets[n].head == NULL) {
+		t->free_buckets[n].head = r;
+	} else if (size <= t->free_buckets[n].head->size) {
+		r->ptr_next = t->free_buckets[n].head;
+		t->free_buckets[n].head = r;
+	} else {
+		for (s = t->free_buckets[n].head, u = NULL;
+		     s != NULL && size > s->size;
+		     u = s, s = s->ptr_next);
+
+		r->ptr_next = u->ptr_next;
+		u->ptr_next = r;
+	}
+
+	t->free_buckets[n].size++;
+
+	return 0;
+}
+
+struct heap_ref * thread_remove_from_free(struct thread *t, int size) {
+	int n;
+	struct heap_ref *q, *r;
+
+	if (t == NULL) {
+		fprintf(stderr, "mvm: heap has not been initialized!\n");
+		mvm_halt();
+	}
+
+	/* remove from free_buckets */
+	n = size % THREAD_NUM_FREE_BUCKETS;
+	for (q = t->free_buckets[n].head, r = NULL;
+	     q != NULL && q->size < size;
+	     r = q, q = q->ptr_next);
+
+	if (q == NULL || q->size != size) {
+		q = NULL;
+	} else if (q == t->free_buckets[n].head) {
+		t->free_buckets[n].head = q->ptr_next;
+		t->free_buckets[n].size--;
+	} else {
+		r->ptr_next = q->ptr_next;
+		t->free_buckets[n].size--;
+	}
+
+	if (q != NULL) {
+		q->ref_next = NULL;
+		q->ptr_next = NULL;
+	}
+
+	return q;
 }

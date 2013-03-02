@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <11 Feb 2013 at 20:15:23 by nwidger on macros.local>
+ * Time-stamp: <02 Mar 2013 at 11:16:16 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -627,7 +627,10 @@ int main(int argc, char *argv[]) {
 			restart = 0;
 		}
 
+		heap_enable_force_malloc(heap);
 		class_table_new_thread(class_table, &object);
+		heap_disable_force_malloc(heap);
+
 		thread_start_main(object);
 		thread_join_main(object);
 	} while (restart != 0);
