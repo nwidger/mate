@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <02 Mar 2013 at 11:15:58 by nwidger on macros.local>
+ * Time-stamp: <04 Mar 2013 at 20:25:20 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -352,7 +352,6 @@ int heap_free(struct heap *h, void *p) {
 	/* unlock */
 	heap_unlock(h);
 
-
 	/* add to free list */
 	if ((t = thread_get_current()) == NULL ||
 	    thread_add_to_free(t, q) != 0) {
@@ -397,6 +396,7 @@ inline static int heap_hash_ref(uintptr_t r) {
 void * heap_fetch(struct heap *h, int r) {
 	int n;
 	void *ptr;
+	struct thread *t;
 	struct heap_ref *p;
 
 	if (h == NULL) {
@@ -408,15 +408,22 @@ void * heap_fetch(struct heap *h, int r) {
 		return NULL;
 
 	ptr = NULL;
+	t = thread_get_current();
+
+	/* check thread ref cache */
+	if (t != NULL && (ptr = thread_fetch_ref(t, r)) != NULL) {
+		return ptr;
+	}
+
+	n = heap_hash_ref(r) % h->num_buckets;
 	
 	/* lock */
 	heap_rdlock(h);
 
-	n = heap_hash_ref(r) % h->num_buckets;
-
 	for (p = h->ref_buckets[n]; p != NULL && p->ref <= r; p = p->ref_next) {
 		if (p->ref == r) {
 			ptr = p->ptr;
+			if (t != NULL) { thread_add_to_ref(t, p); }
 			break;
 		}
 	}

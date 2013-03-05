@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <10 Dec 2012 at 19:21:55 by nwidger on macros.local>
+ * Time-stamp: <04 Mar 2013 at 20:21:37 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -93,7 +93,12 @@ int object_create(struct class *c, uint32_t n, struct object **o) {
 }
 
 void object_destroy(struct object *o) {
+	struct thread *t;
+
 	if (o != NULL) {
+		if ((t = thread_get_current()) != NULL)
+			thread_remove_from_ref(t, o->ref);
+
 		object_clear(o);
 		object_destroy_predefined_type(o);
 		nlock_destroy(o->monitor);
