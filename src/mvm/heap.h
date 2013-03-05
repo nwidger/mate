@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Mar 2013 at 20:17:17 by nwidger on macros.local>
+ * Time-stamp: <04 Mar 2013 at 20:39:21 by nwidger on macros.local>
  */
 
 #ifndef _MVM_HEAP_H
@@ -22,7 +22,6 @@ struct heap_ref {
 	void *ptr;
 	struct heap_ref *ref_next;
 	struct heap_ref *ptr_next;
-	struct heap_ref *cache_next;
 };
 
 /** creates a new heap of size m bytes.
