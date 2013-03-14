@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Mar 2013 at 20:21:37 by nwidger on macros.local>
+ * Time-stamp: <12 Mar 2013 at 19:57:37 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -102,6 +102,10 @@ void object_destroy(struct object *o) {
 		object_clear(o);
 		object_destroy_predefined_type(o);
 		nlock_destroy(o->monitor);
+#ifdef DMP
+		if (o->dmp != NULL)
+			object_dmp_destroy(o->dmp);
+#endif
 		heap_free(heap, o);
 	}
 }
@@ -110,6 +114,10 @@ void object_clear(struct object *o) {
 	if (o != NULL) {
 		o->class = NULL;
 		memset(o->fields, 0, sizeof(uint32_t)*o->num_fields);
+#ifdef DMP
+		if (o->dmp != NULL)
+			object_dmp_clear(o->dmp);
+#endif
 	}
 }
 

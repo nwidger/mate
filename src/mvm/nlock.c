@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <22 Jan 2013 at 20:35:26 by nwidger on macros.local>
+ * Time-stamp: <12 Mar 2013 at 20:00:50 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -98,13 +98,20 @@ void nlock_destroy(struct nlock *n) {
 	if (n != NULL) {
 		pthread_mutex_destroy(&n->mutex);
 		pthread_cond_destroy(&n->cond);
+#ifdef DMP
+		if (n->dmp != NULL)
+			nlock_dmp_destroy(n->dmp);
+#endif
 		free(n);
 	}
 }
 
 void nlock_clear(struct nlock *n) {
 	if (n != NULL) {
-		
+#ifdef DMP
+		if (n->dmp != NULL)
+			nlock_dmp_clear(n->dmp);
+#endif
 	}
 }
 

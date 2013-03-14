@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Mar 2013 at 20:42:34 by nwidger on macros.local>
+ * Time-stamp: <14 Mar 2013 at 19:40:48 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -99,10 +99,13 @@ struct thread * thread_create() {
 
 void thread_destroy(struct thread *t) {
 	if (t != NULL) {
-		thread_set_current(NULL);
 		thread_clear(t);
 		vm_stack_destroy(t->vm_stack);
 		free(t->ref_buckets);
+#ifdef DMP	
+		if (t->dmp != NULL)
+			thread_dmp_destroy(t->dmp);
+#endif
 		heap_free(heap, t);
 		free(t->free_buckets);
 	}
@@ -142,6 +145,11 @@ void thread_clear(struct thread *t) {
 			free(s);
 		}
 	}
+
+#ifdef DMP	
+		if (t->dmp != NULL)
+			thread_dmp_clear(t->dmp);
+#endif
 
 	memset(t->free_buckets, 0,
 	       sizeof(struct heap_ref *)*THREAD_NUM_FREE_BUCKETS);
