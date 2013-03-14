@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <09 Dec 2012 at 20:03:12 by nwidger on macros.local>
+ * Time-stamp: <10 Mar 2013 at 10:59:27 by nwidger on macros.local>
  */
 
 #ifndef _MVM_CLASSTABLE_H
@@ -95,6 +95,17 @@ struct class * class_table_find(struct class_table *c, uint32_t v);
  */
 
 struct class * class_table_find_predefined(struct class_table *c, enum class_type t);
+
+/** find a class by name.
+ *
+ * @param c - the class_table to search
+ * @param n - name of the class to find.
+ *
+ * @return pointer to class if found, NULL otherwise.
+ * @see class_type
+ */
+
+struct class * class_table_find_by_name(struct class_table *c, char *n);
 
 /** instantiates a new object whose class type has the given vmt, and
  * returns a reference to the new object.  To create an instance of a

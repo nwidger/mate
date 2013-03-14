@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Dec 2012 at 20:53:00 by nwidger on macros.local>
+ * Time-stamp: <10 Mar 2013 at 10:58:50 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -158,6 +158,31 @@ struct class * class_table_find(struct class_table *c, uint32_t v) {
 
 	for (i = 0; i < c->num_classes; i++) {
 		if (class_get_vmt(c->classes[i]) == v) {
+			/* unlock */
+			/* class_table_unlock(c); */
+			return c->classes[i];
+		}
+	}
+
+	/* unlock */
+	/* class_table_unlock(c); */
+
+	return NULL;
+}
+
+struct class * class_table_find_by_name(struct class_table *c, char *n) {
+	int i;
+
+	if (c == NULL) {
+		fprintf(stderr, "mvm: class table not initialized!\n");
+		mvm_halt();
+	}
+
+	/* lock */
+	/* class_table_lock(c); */
+
+	for (i = 0; i < c->num_classes; i++) {
+		if (strcmp(n, class_get_name(c->classes[i])) == 0) {
 			/* unlock */
 			/* class_table_unlock(c); */
 			return c->classes[i];
