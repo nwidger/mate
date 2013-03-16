@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <24 Feb 2013 at 12:14:08 by nwidger on macros.local>
+ * Time-stamp: <16 Mar 2013 at 11:17:11 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -330,22 +330,6 @@ struct class_table * method_area_generate_class_table(struct method_area *m) {
 		n = method_area_read_string(m, d, &class_name);
 		d += sizeof(uint32_t)*n;
 
-		/* class type */
-		if (strcmp(class_name, OBJECT_PREDEFINED_CLASS_NAME) == 0)
-			type = object_type;
-		else if (strcmp(class_name, INTEGER_PREDEFINED_CLASS_NAME) == 0)
-			type = integer_type;
-		else if (strcmp(class_name, STRING_PREDEFINED_CLASS_NAME) == 0)
-			type = string_type;
-		else if (strcmp(class_name, TABLE_PREDEFINED_CLASS_NAME) == 0)
-			type = table_type;
-		else if (strcmp(class_name, THREAD_PREDEFINED_CLASS_NAME) == 0)
-			type = thread_type;
-		else if (strcmp(class_name, REAL_PREDEFINED_CLASS_NAME) == 0)
-			type = real_type;
-		else
-			type = user_type;
-
 		/* super_vmt */
 		super_vmt = method_area_fetch(m, p);
 		p += sizeof(uint32_t);
@@ -367,6 +351,23 @@ struct class_table * method_area_generate_class_table(struct method_area *m) {
 		}
 
 		class_set_super_vmt(cl, super_vmt);
+
+		/* class type */
+		if (strcmp(class_name, OBJECT_PREDEFINED_CLASS_NAME) == 0)
+			type = object_type;
+		else if (strcmp(class_name, INTEGER_PREDEFINED_CLASS_NAME) == 0)
+			type = integer_type;
+		else if (strcmp(class_name, STRING_PREDEFINED_CLASS_NAME) == 0)
+			type = string_type;
+		else if (strcmp(class_name, TABLE_PREDEFINED_CLASS_NAME) == 0)
+			type = table_type;
+		else if (strcmp(class_name, THREAD_PREDEFINED_CLASS_NAME) == 0)
+			type = thread_type;
+		else if (strcmp(class_name, REAL_PREDEFINED_CLASS_NAME) == 0)
+			type = real_type;
+		else
+			type = user_type;
+
 		class_set_num_fields(cl, num_fields);
 
 		/* methods */

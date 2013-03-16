@@ -56,6 +56,14 @@ class String extends Object {
 }
 
 class Table extends Object {
+        Object lock;
+        Integer num_entries;
+        Real load_factor;
+        Integer current_capacity;
+        Integer iterator_is_running;
+        Integer iterator_bucket;
+        Integer iterator_entry;
+
 	native Table();
 	native Table(Integer n);
 	native Object get(Object key);

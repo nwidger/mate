@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <07 Mar 2013 at 18:36:51 by nwidger on macros.local>
+ * Time-stamp: <16 Mar 2013 at 11:16:40 by nwidger on macros.local>
  */
 
 #ifndef _MVM_CONSTANTS_H

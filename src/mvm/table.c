@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <14 Mar 2013 at 19:48:28 by nwidger on macros.local>
+ * Time-stamp: <16 Mar 2013 at 10:52:20 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -7,6 +7,7 @@
 #endif
 
 #include <errno.h>
+#include <inttypes.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,6 +23,7 @@
 #include "invoke_method.h"
 #include "object.h"
 #include "operand_stack.h"
+#include "real.h"
 #include "ref_set.h"
 #include "string.h"
 #include "table.h"
@@ -36,32 +38,31 @@
 /* enums */
 /* field indices for table entry objects */
 enum entry_field {
-	key_field   = 0,
-	value_field = 1,
-	next_field  = 2,
+	key_field	= 0,
+	value_field	= 1,
+	next_field	= 2
+};
+
+/* field indices for Table objects */
+enum table_field {
+	lock_field                      = 0,
+	num_entries_field		= 1,
+	load_factor_field		= 2,
+	current_capacity_field		= 3,
+	iterator_is_running_field	= 4,
+	iterator_bucket_field		= 5,
+	iterator_entry_field		= 6
 };
 
 /* struct definitions */
 struct table_entry {
 	int ref;
-	pthread_rwlock_t rwlock;
+	int lock;
 };
 
 struct table {
 	struct object *object;
-
-	int num_entries;
-	float load_factor;
-	int current_capacity;
 	struct table_entry *buckets;
-
-	int iterator_is_running;
-	int iterator_bucket;
-	int iterator_entry;
-
-#ifdef TABLE_USE_RWLOCK
-	pthread_rwlock_t rwlock;
-#endif
 
 #ifdef DMP
 	struct table_dmp *dmp;
@@ -74,44 +75,46 @@ int table_resize(struct table *t, int n);
 int table_run_hash_code(struct table *t, struct object *o);
 int table_run_equals(struct table *t, struct object *o, struct object *p);
 int table_dump(struct table *t);
-int table_wrlock(struct table *t);
-int table_rdlock(struct table *t);
+int table_lock(struct table *t);
 int table_unlock(struct table *t);
 
 struct table * table_create(int c, struct object *o) {
-	int i;
+	int i, ref;
 	struct table *t;
+	struct class *object_class;
 
 	if ((t = (struct table *)heap_malloc(heap, sizeof(struct table))) == NULL)
 		mvm_halt();
 
 	t->object = o;
 
-	t->num_entries = 0;
-	t->current_capacity = c;
-	t->load_factor = TABLE_DEFAULT_LOAD_FACTOR;
+	object_class = class_table_find_predefined(class_table, object_type);
+	ref = class_table_new(class_table, class_get_vmt(object_class), NULL);
+	object_store_field(t->object, lock_field, ref);
 
-	t->iterator_is_running = 0;
-	t->iterator_bucket = 0;
-	t->iterator_entry = 0;
+	ref = class_table_new_integer(class_table, 0, NULL);
+	object_store_field(t->object, num_entries_field, ref);
+	object_store_field(t->object, iterator_is_running_field, ref);
+	object_store_field(t->object, iterator_bucket_field, ref);
+	object_store_field(t->object, iterator_entry_field, ref);
 
-	if ((t->buckets = (struct table_entry *)heap_malloc(heap, sizeof(struct table_entry)*c)) == NULL)
+	ref = class_table_new_integer(class_table, c, NULL);
+	object_store_field(t->object, current_capacity_field, ref);
+
+	ref = class_table_new_real(class_table, TABLE_DEFAULT_LOAD_FACTOR, NULL);
+	object_store_field(t->object, load_factor_field, ref);
+
+	if ((t->buckets = (struct table_entry *)heap_malloc(heap, sizeof(struct table_entry)*(c+1))) == NULL)
 		mvm_halt();
 
-	for (i = 0; i < t->current_capacity; i++) {
+	for (i = 0; i < c; i++) {
 		t->buckets[i].ref = 0;
-		if (pthread_rwlock_init(&t->buckets[i].rwlock, NULL) != 0) {
-			perror("mvm: pthread_rwlock_init");
-			mvm_halt();
-		}
+		t->buckets[i].lock = 0;
 	}
 
-#ifdef TABLE_USE_RWLOCK
-	if (pthread_rwlock_init(&t->rwlock, NULL) != 0) {
-		perror("mvm: pthread_rwlock_init");
-		mvm_halt();
-	}
-#endif
+	/* ref of -1 is sentinel for end of buckets */
+	t->buckets[c].ref = -1;
+	t->buckets[c].lock = -1;
 
 #ifdef DMP
 	if (dmp == NULL)
@@ -124,37 +127,19 @@ struct table * table_create(int c, struct object *o) {
 }
 
 void table_destroy(struct table *t) {
-	int i;
-	
 	if (t != NULL) {
 		table_clear(t);
-
-		for (i = 0; i < t->current_capacity; i++)
-			pthread_rwlock_destroy(&t->buckets[i].rwlock);
-
 		heap_free(heap, t->buckets);
 #ifdef DMP
 		if (t->dmp != NULL)
 			table_dmp_destroy(t->dmp);
-#endif
-#ifdef TABLE_USE_RWLOCK
-		pthread_rwlock_destroy(&t->rwlock);
 #endif
 		heap_free(heap, t);
 	}
 }
 
 void table_clear(struct table *t) {
-	int i;
-
 	if (t != NULL) {
-		for (i = 0; i < t->current_capacity; i++)
-			t->buckets[i].ref = 0;
-
-		t->num_entries = 0;
-		t->iterator_is_running = 0;
-		t->iterator_bucket = 0;
-		t->iterator_entry = 0;
 #ifdef DMP
 		if (t->dmp != NULL)
 			table_dmp_clear(t->dmp);
@@ -162,27 +147,133 @@ void table_clear(struct table *t) {
 	}
 }
 
-int table_populate_ref_set(struct table *t, struct ref_set *r) {
+int32_t table_get_integer_field(struct table *t, enum table_field f) {
+	int ref;
+	int32_t value;
 	struct object *object;
-	struct table_entry *bucket;
-	int i, ref, current_capacity;
+	struct integer *integer;
 
 	if (t == NULL) {
 		fprintf(stderr, "mvm: table not initialized!\n");
 		mvm_halt();
 	}
 
-	/* lock */
-	table_rdlock(t);
-	current_capacity = t->current_capacity;
-	table_unlock(t);
-	/* unlock */
+	switch (f) {
+	case num_entries_field:
+	case current_capacity_field:
+	case iterator_is_running_field:
+	case iterator_bucket_field:
+	case iterator_entry_field:
+		break;
+	default:
+		fprintf(stderr, "mvm: invalid integer table field!\n");
+		mvm_halt();
+	}
 
-	for (i = 0; i < current_capacity; i++) {
+	ref = object_load_field(t->object, f);
+	object = heap_fetch_object(heap, ref);
+	integer = object_get_integer(object);
+	value = integer_get_value(integer);
+
+	return value;
+}
+
+int table_set_integer_field(struct table *t, enum table_field f, int32_t v) {
+	int ref;
+
+	if (t == NULL) {
+		fprintf(stderr, "mvm: table not initialized!\n");
+		mvm_halt();
+	}
+
+	ref = class_table_new_integer(class_table, v, NULL);
+	object_store_field(t->object, f, ref);
+
+	return 0;
+}
+
+float table_get_real_field(struct table *t, enum table_field f) {
+	int ref;
+	float value;
+	struct real *real;
+	struct object *object;
+
+	if (t == NULL) {
+		fprintf(stderr, "mvm: table not initialized!\n");
+		mvm_halt();
+	}
+
+	switch (f) {
+	case load_factor_field:
+		break;
+	default:
+		fprintf(stderr, "mvm: invalid real table field!\n");
+		mvm_halt();
+	}
+
+	ref = object_load_field(t->object, f);
+	object = heap_fetch_object(heap, ref);
+	real = object_get_real(object);
+	value = real_get_value(real);
+
+	return value;
+}
+
+int table_set_real_field(struct table *t, enum table_field f, float v) {
+	int ref;
+
+	if (t == NULL) {
+		fprintf(stderr, "mvm: table not initialized!\n");
+		mvm_halt();
+	}
+
+	ref = class_table_new_real(class_table, v, NULL);
+	object_store_field(t->object, f, ref);
+
+	return 0;
+}
+
+struct table_entry * table_get_bucket(struct table *t, int i, struct object **l) {
+	struct class *object_class;
+	struct table_entry *bucket;
+
+	if (t == NULL) {
+		fprintf(stderr, "mvm: table not initialized!\n");
+		mvm_halt();
+	}
+
+	bucket = &t->buckets[i];
+
+	if (bucket->ref == -1)
+		return NULL;
+
+	if (bucket->lock == 0) {
+		object_class = class_table_find_predefined(class_table, object_type);
+		bucket->lock = class_table_new(class_table, class_get_vmt(object_class), NULL);
+	}
+
+	if (l != NULL)
+		*l = heap_fetch_object(heap, bucket->lock);
+	
+	return bucket;
+}
+
+int table_populate_ref_set(struct table *t, struct ref_set *r) {
+	int i, lock, ref;
+	struct object *object;
+	struct table_entry *bucket;
+
+	if (t == NULL) {
+		fprintf(stderr, "mvm: table not initialized!\n");
+		mvm_halt();
+	}
+
+	for (i = 0; t->buckets[i].ref != -1; i++) {
 		bucket = &t->buckets[i];
+		lock = bucket->lock;
 
-		/* lock */
-		pthread_rwlock_rdlock(&bucket->rwlock);
+		if (lock != 0)
+			ref_set_add(r, lock);
 
 		ref = bucket->ref;
 
@@ -191,9 +282,6 @@ int table_populate_ref_set(struct table *t, struct ref_set *r) {
 			object = heap_fetch_object(heap, ref);
 			object_populate_ref_set(object, r);
 		}
-
-		/* unlock */
-		pthread_rwlock_unlock(&bucket->rwlock);
 	}
 
 	return 0;
@@ -205,7 +293,7 @@ int table_entries_exceeds_load_factor(int e, int l, int c) {
 
 int table_get(struct table *t, struct object *k) {
 	struct table_entry *bucket;
-	struct object *entry, *key;
+	struct object *entry, *key, *lock;
 	int n, hash, entry_ref, key_ref, value_ref;
 
 	if (t == NULL) {
@@ -216,16 +304,12 @@ int table_get(struct table *t, struct object *k) {
 	value_ref = 0;
 	hash = abs(table_run_hash_code(t, k));
 
-	/* lock */
-	table_rdlock(t);
-	n = hash % t->current_capacity;
-	table_unlock(t);
-	/* unlock */
+	n = hash % table_get_integer_field(t, current_capacity_field);
 
-	bucket = &t->buckets[n];
+	bucket = table_get_bucket(t, n, &lock);
 
 	/* lock */
-	pthread_rwlock_rdlock(&bucket->rwlock);
+	object_acquire_monitor(lock);
 
 	entry_ref = bucket->ref;
 
@@ -242,7 +326,7 @@ int table_get(struct table *t, struct object *k) {
 	}
 
 	/* unlock */
-	pthread_rwlock_unlock(&bucket->rwlock);
+	object_release_monitor(lock);
 
 	return value_ref;
 }
@@ -250,23 +334,17 @@ int table_get(struct table *t, struct object *k) {
 int table_put(struct table *t, struct object *k, struct object *v) {
 	struct class *object_class;
 	struct table_entry *bucket;
-	struct object *prev, *curr, *key, *new;
+	struct object *prev, *curr, *key, *new, *lock;
 	int prev_ref, curr_ref, key_ref, new_ref, hash, n, head, old_value,
-		iterator_is_running, current_capacity;
+		current_capacity;
 
 	if (t == NULL) {
 		fprintf(stderr, "mvm: table not initialized!\n");
 		mvm_halt();
 	}
 
-	/* lock */
-	table_rdlock(t);
-	iterator_is_running = t->iterator_is_running;
-	table_unlock(t);
-	/* unlock */
-
 	/* check if iterator is running */
-	if (iterator_is_running == 1) {
+	if (table_get_integer_field(t, iterator_is_running_field) == 1) {
 		fprintf(stderr, "mvm: cannot put, Table's iterator is running!\n");
 		mvm_halt();
 	}
@@ -274,8 +352,8 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 	hash = abs(table_run_hash_code(t, k));
 
 	/* lock */
-	table_rdlock(t);
-	current_capacity = t->current_capacity;
+	table_lock(t);
+	current_capacity = table_get_integer_field(t, current_capacity_field);
 	table_unlock(t);
 	/* unlock */
 
@@ -286,10 +364,10 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 	old_value = 0;
 	prev_ref = 0;
 
-	bucket = &t->buckets[n];
+	bucket = table_get_bucket(t, n, &lock);
 
 	/* lock */
-	pthread_rwlock_wrlock(&bucket->rwlock);
+	object_acquire_monitor(lock);
 
 	curr_ref = bucket->ref;
 
@@ -314,11 +392,12 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 
 	if (curr_ref == 0) {
 		/* lock */
-		table_wrlock(t);
+		table_lock(t);
 
 		head = bucket->ref;
 		bucket->ref = new_ref;
-		t->num_entries++;
+		table_set_integer_field(t, num_entries_field, 
+					table_get_integer_field(t, num_entries_field) + 1);
 
 		/* unlock */
 		table_unlock(t);
@@ -329,7 +408,7 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 		object_store_field(new, next_field, object_load_field(curr, next_field));
 
 		/* lock */
-		table_rdlock(t);
+		table_lock(t);
 		head = bucket->ref;
 		table_unlock(t);
 		/* unlock */
@@ -339,7 +418,7 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 			object_store_field(prev, next_field, new_ref);
 		} else {
 			/* lock */
-			table_wrlock(t);
+			table_lock(t);
 			bucket->ref = new_ref;
 			table_unlock(t);
 			/* unlock */
@@ -347,12 +426,12 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 	}
 
 	/* unlock */
-	pthread_rwlock_unlock(&bucket->rwlock);
+	object_release_monitor(lock);
 
-	if (table_entries_exceeds_load_factor(t->num_entries,
-					      t->load_factor,
-					      t->current_capacity)) {
-		table_resize(t, t->current_capacity*2);
+	if (table_entries_exceeds_load_factor(table_get_integer_field(t, num_entries_field),
+					      table_get_real_field(t, load_factor_field),
+					      table_get_integer_field(t, current_capacity_field))) {
+		table_resize(t, table_get_integer_field(t, current_capacity_field)*2);
 	}
 
 	return old_value;
@@ -360,23 +439,17 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 
 int table_remove(struct table *t, struct object *k) {
 	struct table_entry *bucket;
-	struct object *curr, *prev, *key;
+	struct object *curr, *prev, *key, *lock;
 	int hash, n, old_value, curr_ref, prev_ref, key_ref,
-		iterator_is_running, current_capacity;
+		current_capacity;
 
 	if (t == NULL) {
 		fprintf(stderr, "mvm: table not initialized!\n");
 		mvm_halt();
 	}
 
-	/* lock */
-	table_rdlock(t);
-	iterator_is_running = t->iterator_is_running;
-	table_unlock(t);
-	/* unlock */
-
 	/* check if iterator is running */
-	if (iterator_is_running == 1) {
+	if (table_get_integer_field(t, iterator_is_running_field) == 1) {
 		fprintf(stderr, "mvm: cannot remove, Table's iterator is running!\n");
 		mvm_halt();
 	}
@@ -384,8 +457,8 @@ int table_remove(struct table *t, struct object *k) {
 	hash = abs(table_run_hash_code(t, k));
 
 	/* lock */
-	table_rdlock(t);
-	current_capacity = t->current_capacity;
+	table_lock(t);
+	current_capacity = table_get_integer_field(t, current_capacity_field);
 	table_unlock(t);
 	/* unlock */
 
@@ -393,10 +466,11 @@ int table_remove(struct table *t, struct object *k) {
 	old_value = 0;
 	prev_ref = 0;
 
-	bucket = &t->buckets[n];
+	bucket = table_get_bucket(t, n, &lock);
 
 	/* lock */
-	pthread_rwlock_rdlock(&bucket->rwlock);
+	object_acquire_monitor(lock);
+
 	curr_ref = bucket->ref;
 
 	for (; curr_ref != 0; prev_ref = curr_ref, curr_ref = object_load_field(curr, next_field)) {
@@ -422,11 +496,11 @@ int table_remove(struct table *t, struct object *k) {
 	}
 
 	/* unlock */
-	pthread_rwlock_unlock(&bucket->rwlock);
+	object_release_monitor(lock);
 
 	/* lock */
-	table_wrlock(t);
-	t->num_entries--;
+	table_lock(t);
+	table_set_integer_field(t, num_entries_field, table_get_integer_field(t, num_entries_field) - 1);
 	table_unlock(t);
 	/* unlock */
 
@@ -435,6 +509,7 @@ int table_remove(struct table *t, struct object *k) {
 
 int table_first_key(struct table *t) {
 	int32_t value;
+	struct object *lock;
 	struct table_entry *bucket;
 	int entry_ref, ref, i, current_capacity;
 
@@ -444,35 +519,37 @@ int table_first_key(struct table *t) {
 	}
 
 	/* lock */
-	table_rdlock(t);
-	current_capacity = t->current_capacity;
+	table_lock(t);
+	current_capacity = table_get_integer_field(t, current_capacity_field);
 	table_unlock(t);
 	/* unlock */
 
 	for (i = 0; i < current_capacity; i++) {
-		bucket = &t->buckets[i];
+		bucket = table_get_bucket(t, i, &lock);
 
 		/* lock */
-		pthread_rwlock_rdlock(&bucket->rwlock);
+		object_acquire_monitor(lock);
+
 		entry_ref = bucket->ref;
-		pthread_rwlock_unlock(&bucket->rwlock);
+
 		/* unlock */
+		object_release_monitor(lock);
 
 		if (entry_ref != 0)
 			break;
 	}
 
 	/* lock */
-	table_wrlock(t);
+	table_lock(t);
 
 	if (i >= current_capacity) {
 		value = 1;
-		t->iterator_is_running = 0;
+		table_set_integer_field(t, iterator_is_running_field, 0);
 	} else {
 		value = 0;
-		t->iterator_is_running = 1;
-		t->iterator_bucket = i;
-		t->iterator_entry = entry_ref;
+		table_set_integer_field(t, iterator_is_running_field, 1);
+		table_set_integer_field(t, iterator_bucket_field, i);
+		table_set_integer_field(t, iterator_entry_field, entry_ref);
 	}
 
 	/* unlock */
@@ -485,28 +562,22 @@ int table_first_key(struct table *t) {
 }
 
 int table_next_key(struct table *t) {
-	struct object *entry;
 	struct table_entry *bucket;
-	int n, entry_ref, prev_ref, iterator_is_running, current_capacity;
+	struct object *entry, *lock;
+	int n, entry_ref, prev_ref, current_capacity;
 
 	if (t == NULL) {
 		fprintf(stderr, "mvm: table not initialized!\n");
 		mvm_halt();
 	}
 
-	/* lock */
-	table_rdlock(t);
-	iterator_is_running = t->iterator_is_running;
-	table_unlock(t);
-	/* unlock */
-
-	if (iterator_is_running == 0)
+	if (table_get_integer_field(t, iterator_is_running_field) == 0)
 		return 0;
 
 
 	/* lock */
-	table_rdlock(t);
-	entry_ref = t->iterator_entry;
+	table_lock(t);
+	entry_ref = table_get_integer_field(t, iterator_entry_field);
 	table_unlock(t);
 	/* unlock */
 
@@ -515,8 +586,8 @@ int table_next_key(struct table *t) {
 	entry_ref = object_load_field(entry, next_field);
 
 	/* lock */
-	table_wrlock(t);
-	t->iterator_entry = entry_ref;
+	table_lock(t);
+	table_set_integer_field(t, iterator_entry_field, entry_ref);
 	table_unlock(t);
 	/* unlock */
 
@@ -525,26 +596,28 @@ int table_next_key(struct table *t) {
 	}
 
 	/* lock */
-	table_rdlock(t);
-	current_capacity = t->current_capacity;
-	n = t->iterator_bucket + 1;
+	table_lock(t);
+	current_capacity = table_get_integer_field(t, current_capacity_field);
+	n = table_get_integer_field(t, iterator_bucket_field) + 1;
 	table_unlock(t);
 	/* unlock */
 
 	for (; n < current_capacity; n++) {
-		bucket = &t->buckets[n];
+		bucket = table_get_bucket(t, n, &lock);
 
 		/* lock */
-		pthread_rwlock_rdlock(&bucket->rwlock);
+		object_acquire_monitor(lock);
+
 		entry_ref = bucket->ref;
-		pthread_rwlock_unlock(&bucket->rwlock);
+
 		/* unlock */
+		object_release_monitor(lock);
 
 		if (entry_ref != 0) {
 			/* lock */
-			table_wrlock(t);
-			t->iterator_bucket = n;
-			t->iterator_entry = entry_ref;
+			table_lock(t);
+			table_set_integer_field(t, iterator_bucket_field, n);
+			table_set_integer_field(t, iterator_entry_field, entry_ref);
 			table_unlock(t);
 			/* unlock */
 
@@ -554,8 +627,8 @@ int table_next_key(struct table *t) {
 
 	if (n >= current_capacity) {
 		/* lock */
-		table_wrlock(t);
-		t->iterator_is_running = 0;
+		table_lock(t);
+		table_set_integer_field(t, iterator_is_running_field, 0);
 		table_unlock(t);
 		/* unlock */
 	}
@@ -566,8 +639,8 @@ int table_next_key(struct table *t) {
 int table_resize(struct table *t, int n) {
 	struct table *new_table;
 	struct table_entry *bucket;
-	struct object *entry, *key, *value;
 	int i, entry_ref, key_ref, value_ref;
+	struct object *entry, *key, *value, *lock;
 
 	if (t == NULL) {
 		fprintf(stderr, "mvm: table not initialized!\n");
@@ -575,16 +648,19 @@ int table_resize(struct table *t, int n) {
 	}
 
 	/* lock */
-	table_wrlock(t);
+	table_lock(t);
 
 	if ((new_table = table_create(n, t->object)) == NULL)
 		mvm_halt();
 
-	for (i = 0; i < t->current_capacity; i++ ) {
-		bucket = &t->buckets[i];
+	for (i = 0; ; i++) {
+		bucket = table_get_bucket(t, i, &lock);
+
+		if (bucket == NULL)
+			break;
 
 		/* lock */
-		pthread_rwlock_wrlock(&bucket->rwlock);
+		object_acquire_monitor(lock);
 
 		for (entry_ref = bucket->ref; entry_ref != 0; entry_ref = object_load_field(entry, next_field)) {
 			entry = heap_fetch_object(heap, entry_ref);
@@ -599,7 +675,7 @@ int table_resize(struct table *t, int n) {
 		}
 
 		/* unlock */
-		pthread_rwlock_unlock(&bucket->rwlock);
+		object_release_monitor(lock);
 	}
 
 	object_set_table(t->object, new_table);
@@ -689,8 +765,8 @@ int table_run_equals(struct table *t, struct object *o, struct object *p) {
 
 int table_dump(struct table *t) {
 	struct table_entry *bucket;
-	struct object *entry, *key, *value;
 	int i, entry_ref, key_ref, value_ref;
+	struct object *entry, *key, *value, *lock;
 
 	if (t == NULL) {
 		fprintf(stderr, "mvm: table not initialized!\n");
@@ -698,19 +774,22 @@ int table_dump(struct table *t) {
 	}
 
 	/* lock */
-	table_rdlock(t);
+	table_lock(t);
 
-	fprintf(stderr, "num_entries = %d\n", t->num_entries);
-	fprintf(stderr, "load_factor = %f\n", t->load_factor);
-	fprintf(stderr, "current_capacity = %d\n", t->current_capacity);
+	fprintf(stderr, "num_entries = %d\n", table_get_integer_field(t, num_entries_field));
+	fprintf(stderr, "load_factor = %f\n", table_get_real_field(t, load_factor_field));
+	fprintf(stderr, "current_capacity = %d\n", table_get_integer_field(t, current_capacity_field));
 
-	for (i = 0; i < t->current_capacity; i++) {
-		bucket = &t->buckets[i];
+	for (i = 0; ; i++) {
+		bucket = table_get_bucket(t, i, &lock);
 
-		fprintf(stderr, "bucket %d =\n", i);
+		if (bucket == NULL)
+			break;
 
 		/* lock */
-		pthread_rwlock_rdlock(&bucket->rwlock);
+		object_acquire_monitor(lock);
+
+		fprintf(stderr, "bucket %d =\n", i);
 
 		for (entry_ref = bucket->ref; entry_ref != 0; entry_ref = object_load_field(entry, next_field)) {
 			entry = heap_fetch_object(heap, entry_ref);
@@ -729,7 +808,7 @@ int table_dump(struct table *t) {
 		}
 
 		/* unlock */
-		pthread_rwlock_unlock(&bucket->rwlock);
+		object_release_monitor(lock);
 	}
 
 	/* unlock */
@@ -738,9 +817,9 @@ int table_dump(struct table *t) {
 	return 0;
 }
 
-int table_wrlock(struct table *t) {
-#ifdef TABLE_USE_RWLOCK
-	int err;
+int table_lock(struct table *t) {
+	int ref;
+	struct object *object;
 
 	if (t == NULL) {
 		fprintf(stderr, "mvm: table not initialized!\n");
@@ -748,69 +827,26 @@ int table_wrlock(struct table *t) {
 	}
 
 	/* lock */
-	err = pthread_rwlock_trywrlock(&t->rwlock);
-
-	switch (err) {
-	case 0:			/* acquired lock */
-	case EDEADLK:		/* we already own the lock */
-		break;
-	case EBUSY:		/* someone else owns the lock, block */
-		if ((err = pthread_rwlock_wrlock(&t->rwlock)) != 0) {
-			fprintf(stderr, "mvm: pthread_rwlock_wrlock: %s\n", strerror(err));
-			mvm_halt();
-		}
-		break;
-	default:
-		fprintf(stderr, "mvm: pthread_rwlock_trywrlock: %s\n", strerror(err));
-		mvm_halt();
-	}
-#endif
-
-	return 0;
-}
-
-int table_rdlock(struct table *t) {
-#ifdef TABLE_USE_RWLOCK
-	int err;
-
-	if (t == NULL) {
-		fprintf(stderr, "mvm: table not initialized!\n");
-		mvm_halt();
-	}
-
-	/* lock */
-	err = pthread_rwlock_tryrdlock(&t->rwlock);
-
-	switch (err) {
-	case 0:			/* acquired lock */
-	case EDEADLK:		/* we already own the lock */
-		break;
-	case EBUSY:		/* someone else owns the lock, block */
-		if ((err = pthread_rwlock_rdlock(&t->rwlock)) != 0) {
-			fprintf(stderr, "mvm: pthread_rwlock_rdlock: %s\n", strerror(err));
-			mvm_halt();
-		}
-		break;
-	default:
-		fprintf(stderr, "mvm: pthread_rwlock_tryrdlock: %s\n", strerror(err));
-		mvm_halt();
-	}
-
-#endif
+	ref = object_load_field(t->object, lock_field);
+	object = heap_fetch_object(heap, ref);
+	object_acquire_monitor(object);
 
 	return 0;
 }
 
 int table_unlock(struct table *t) {
-#ifdef TABLE_USE_RWLOCK
+	int ref;
+	struct object *object;
+
 	if (t == NULL) {
 		fprintf(stderr, "mvm: table not initialized!\n");
 		mvm_halt();
 	}
 
-	/* lock */
-	pthread_rwlock_unlock(&t->rwlock);
-#endif
+	/* unlock */
+	ref = object_load_field(t->object, lock_field);
+	object = heap_fetch_object(heap, ref);
+	object_release_monitor(object);
 
 	return 0;
 }

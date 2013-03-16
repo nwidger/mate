@@ -1,7 +1,7 @@
 %{
 
 /* Niels Widger
- * Time-stamp: <26 Apr 2012 at 19:22:38 by nwidger on macros.local>
+ * Time-stamp: <16 Mar 2013 at 11:16:18 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -59,7 +59,8 @@ extern struct native_class *native_classes;
 %type <nclass> ClassDeclaration
 
 %type <nmethod> ClassBodyDeclarations
-%type <nmethod> ClassBodyDeclaration
+%type <nmethod> ClassMethodDeclarations
+%type <nmethod> ClassMethodDeclaration
 
 %type <str> OperatorDeclarator
 
@@ -117,19 +118,48 @@ ClassDeclaration
 	;
 
 ClassBodyDeclarations
-	: ClassBodyDeclaration ClassBodyDeclarations
+	: ClassFieldDeclarations ClassMethodDeclarations
 	{
-	  $$ = $1;
-	  native_method_set_next($$, $2);
+	  $$ = $2;
 	}
-	| ClassBodyDeclaration
+	| ClassMethodDeclarations
 	{
 	  $$ = $1;
-	  native_method_set_next($$, NULL);
 	}
 	;
 
-ClassBodyDeclaration
+ClassFieldDeclarations
+	: ClassFieldDeclaration ClassFieldDeclarations
+	{
+	
+	}
+	| ClassFieldDeclaration
+	{
+
+	}
+	;
+
+ClassFieldDeclaration
+	: IDENTIFIER IDENTIFIER ';'
+	{
+
+	}
+	;
+
+ClassMethodDeclarations
+	: ClassMethodDeclaration ClassMethodDeclarations
+	{ 
+	  $$ = $1;
+          native_method_set_next($$, $2);
+	}
+	| ClassMethodDeclaration
+	{
+	  $$ = $1;
+          native_method_set_next($$, NULL);
+	}
+	;
+
+ClassMethodDeclaration
         : NATIVE IDENTIFIER FormalParameters ';'
 	{
           /* constructor */
