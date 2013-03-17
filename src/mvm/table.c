@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <16 Mar 2013 at 13:18:01 by nwidger on macros.local>
+ * Time-stamp: <17 Mar 2013 at 18:42:28 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -76,7 +76,7 @@ float table_get_real_field(struct table *t, enum table_field f);
 int table_set_real_field(struct table *t, enum table_field f, float v);
 struct table_entry * table_acquire_bucket(struct table *t, int i);
 struct table_entry * table_release_bucket(struct table *t, int i);
-int table_entries_exceeds_load_factor(int e, int l, int c);
+int table_entries_exceeds_load_factor(int e, float l, int c);
 int table_resize(struct table *t, int n);
 int table_run_hash_code(struct table *t, struct object *o);
 int table_run_equals(struct table *t, struct object *o, struct object *p);
@@ -84,7 +84,7 @@ int table_dump(struct table *t);
 int table_lock(struct table *t);
 int table_unlock(struct table *t);
 
-struct table * table_create(int c, struct object *o) {
+struct table * table_create(int c, struct object *o, int r) {
 	int ref;
 	struct table *t;
 	struct class *object_class;
@@ -94,9 +94,13 @@ struct table * table_create(int c, struct object *o) {
 
 	t->object = o;
 
-	object_class = class_table_find_predefined(class_table, object_type);
-	ref = class_table_new(class_table, class_get_vmt(object_class), NULL);
-	object_store_field(t->object, lock_field, ref);
+	if (r != 0) {
+		object_store_field(t->object, lock_field, object_load_field(o, lock_field));
+	} else {
+		object_class = class_table_find_predefined(class_table, object_type);
+		ref = class_table_new(class_table, class_get_vmt(object_class), NULL);
+		object_store_field(t->object, lock_field, ref);
+	}
 
 	ref = class_table_new_integer(class_table, 0, NULL);
 	object_store_field(t->object, num_entries_field, ref);
@@ -177,7 +181,7 @@ int table_populate_ref_set(struct table *t, struct ref_set *r) {
 	return 0;
 }
 
-int table_entries_exceeds_load_factor(int e, int l, int c) {
+int table_entries_exceeds_load_factor(int e, float l, int c) {
 	return (e * l) > c;
 }
 
@@ -588,7 +592,7 @@ int table_resize(struct table *t, int n) {
 		mvm_halt();
 	}
 
-	if ((new_table = table_create(n, t->object)) == NULL)
+	if ((new_table = table_create(n, t->object, 1)) == NULL)
 		mvm_halt();
 
 	for (i = 0; ; i++) {
