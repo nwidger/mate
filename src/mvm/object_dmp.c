@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <01 Feb 2012 at 21:42:55 by nwidger on macros.local>
+ * Time-stamp: <18 Mar 2013 at 20:43:36 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -224,7 +224,7 @@ int object_dmp_default_chown_aux(struct object_dmp *od, int n, int d) {
 	od->attr.owner = n;
 
 	object = od->object;
-	fields = ref_set_create();
+	fields = ref_set_create(1);
 	object_populate_ref_set(object, fields);
 
 	ref_set_iterator_init(fields);

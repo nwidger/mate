@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Mar 2013 at 20:13:06 by nwidger on macros.local>
+ * Time-stamp: <18 Mar 2013 at 20:55:17 by nwidger on macros.local>
  */
 
 #ifndef _MVM_THREAD_H
@@ -8,6 +8,7 @@
 struct object;
 struct thread;
 struct heap_ref;
+struct ref_set;
 
 #ifdef DMP
 struct thread_dmp;
@@ -70,3 +71,8 @@ struct heap_ref * thread_remove_from_free(struct thread *t, int size);
 void * thread_fetch_ref(struct thread *t, int r);
 int thread_add_to_ref(struct thread *t, struct heap_ref *r);
 struct heap_ref * thread_remove_from_ref(struct thread *t, int e);
+
+int thread_exclude_ref(struct thread *t, int r);
+int thread_include_ref(struct thread *t, int r);
+
+struct ref_set * thread_remove_excluded(struct thread *t, struct ref_set *r);

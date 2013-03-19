@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <17 Mar 2013 at 18:42:17 by nwidger on macros.local>
+ * Time-stamp: <18 Mar 2013 at 20:47:00 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -281,6 +281,7 @@ int class_table_new_object(struct class_table *c, struct object **o) {
 int class_table_new_integer(struct class_table *c, int32_t v, struct object **o) {
 	int ref;
 	uint32_t vmt;
+	struct thread *thread;
 	struct object *object;
 	struct integer *integer;
 	struct class *integer_class;
@@ -299,17 +300,19 @@ int class_table_new_integer(struct class_table *c, int32_t v, struct object **o)
 		integer_class = c->predefined_classes[integer_type];
 		vmt = class_get_vmt(integer_class);
 
+		thread = thread_get_current();
+
 		/* lock */
 		garbage_collector_pause(garbage_collector);
 
 		ref = class_table_new(class_table, vmt, &object);
-		heap_exclude_ref(heap, ref);
+		thread_exclude_ref(thread, ref);
 
 		/* unlock */
 		garbage_collector_unpause(garbage_collector);
 
 		integer = integer_create(v);
-		if (v < 0 || v > CLASS_TABLE_INTEGER_CACHE_SIZE) heap_include_ref(heap, ref);
+		if (v < 0 || v > CLASS_TABLE_INTEGER_CACHE_SIZE) thread_include_ref(thread, ref);
 		object_set_integer(object, integer);
 		if (v >= 0 && v <= CLASS_TABLE_INTEGER_CACHE_SIZE) c->integer_cache[(int)v] = ref;
 	}
@@ -327,6 +330,7 @@ int class_table_new_string(struct class_table *c, char *b, struct object **o, in
 	uint32_t vmt;
 	struct object *object;
 	struct string *string;
+	struct thread *thread;
 	int ref, i, hash, n, len;
 	struct class *string_class;
 	struct string_cache_record *r, *new_entry;
@@ -361,17 +365,19 @@ int class_table_new_string(struct class_table *c, char *b, struct object **o, in
 	if (r != NULL) {
 		ref = r->ref;
 	} else {
+		thread = thread_get_current();
+
 		/* lock */
 		garbage_collector_pause(garbage_collector);
 
 		ref = class_table_new(class_table, vmt, &object);
-		heap_exclude_ref(heap, ref);
+		thread_exclude_ref(thread, ref);
 
 		/* unlock */
 		garbage_collector_unpause(garbage_collector);
 
 		string = string_create(b);
-		if (s == 0 || CLASS_TABLE_STRING_CACHE_SIZE == 0) heap_include_ref(heap, ref);
+		if (s == 0 || CLASS_TABLE_STRING_CACHE_SIZE == 0) thread_include_ref(thread, ref);
 		object_set_string(object, string);
 		if (s != 0 && CLASS_TABLE_STRING_CACHE_SIZE != 0) {
 			new_entry = string_cache_record_create(ref, b);
@@ -392,8 +398,9 @@ int class_table_new_string(struct class_table *c, char *b, struct object **o, in
 int class_table_new_table(struct class_table *c, int n, struct object **o) {
 	int ref;
 	uint32_t vmt;
-	struct object *object;
 	struct table *table;
+	struct object *object;
+	struct thread *thread;
 	struct class *table_class;
 
 	if (c == NULL) {
@@ -404,6 +411,8 @@ int class_table_new_table(struct class_table *c, int n, struct object **o) {
 	/* lock */
 	/* class_table_lock(c); */
 
+	thread = thread_get_current();
+
 	table_class = c->predefined_classes[table_type];
 	vmt = class_get_vmt(table_class);
 
@@ -411,13 +420,13 @@ int class_table_new_table(struct class_table *c, int n, struct object **o) {
 	garbage_collector_pause(garbage_collector);
 
 	ref = class_table_new(class_table, vmt, &object);
-	heap_exclude_ref(heap, ref);
+	thread_exclude_ref(thread, ref);
 
 	/* unlock */
 	garbage_collector_unpause(garbage_collector);
 
 	table = table_create(n, object, 0);
-	heap_include_ref(heap, ref);
+	thread_include_ref(thread, ref);
 	object_set_table(object, table);
 
 	if (o != NULL)
@@ -474,8 +483,9 @@ int class_table_new_thread(struct class_table *c, struct object **o) {
 int class_table_new_real(struct class_table *c, float v, struct object **o) {
 	int ref;
 	uint32_t vmt;
-	struct object *object;
 	struct real *real;
+	struct object *object;
+	struct thread *thread;
 	struct class *real_class;
 
 	if (c == NULL) {
@@ -486,6 +496,8 @@ int class_table_new_real(struct class_table *c, float v, struct object **o) {
 	/* lock */
 	/* class_table_lock(c); */
 
+	thread = thread_get_current();
+
 	real_class = c->predefined_classes[real_type];
 	vmt = class_get_vmt(real_class);
 
@@ -493,13 +505,13 @@ int class_table_new_real(struct class_table *c, float v, struct object **o) {
 	garbage_collector_pause(garbage_collector);
 
 	ref = class_table_new(class_table, vmt, &object);
-	heap_exclude_ref(heap, ref);
+	thread_exclude_ref(thread, ref);
 
 	/* unlock */
 	garbage_collector_unpause(garbage_collector);
 
 	real = real_create(v);
-	heap_include_ref(heap, ref);
+	thread_include_ref(thread, ref);
 	object_set_real(object, real);
 
 	if (o != NULL)

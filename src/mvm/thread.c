@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <14 Mar 2013 at 19:40:48 by nwidger on macros.local>
+ * Time-stamp: <18 Mar 2013 at 20:54:00 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -24,6 +24,7 @@
 #include "mdb.h"
 #include "object.h"
 #include "operand_stack.h"
+#include "ref_set.h"
 #include "thread.h"
 #include "vm_stack.h"
 
@@ -43,6 +44,7 @@ struct thread {
 
 	struct heap_ref *ref_buckets;
 	struct free_bucket *free_buckets;
+	struct ref_set *excluded_set;
 
 #ifdef DMP
 	struct thread_dmp *dmp;
@@ -87,6 +89,9 @@ struct thread * thread_create() {
 	if ((t->vm_stack = vm_stack_create()) == NULL)
 		mvm_halt();
 
+	if ((t->excluded_set = ref_set_create(0)) == NULL)
+		mvm_halt();
+
 #ifdef DMP	
 	if (dmp == NULL)
 		t->dmp = NULL;
@@ -102,6 +107,7 @@ void thread_destroy(struct thread *t) {
 		thread_clear(t);
 		vm_stack_destroy(t->vm_stack);
 		free(t->ref_buckets);
+		ref_set_destroy(t->excluded_set);
 #ifdef DMP	
 		if (t->dmp != NULL)
 			thread_dmp_destroy(t->dmp);
@@ -146,9 +152,11 @@ void thread_clear(struct thread *t) {
 		}
 	}
 
+	ref_set_clear(t->excluded_set);
+
 #ifdef DMP	
-		if (t->dmp != NULL)
-			thread_dmp_clear(t->dmp);
+	if (t->dmp != NULL)
+		thread_dmp_clear(t->dmp);
 #endif
 
 	memset(t->free_buckets, 0,
@@ -666,4 +674,49 @@ struct heap_ref * thread_remove_from_ref(struct thread *t, int e) {
 	}
 
 	return 0;
+}
+
+int thread_exclude_ref(struct thread *t, int r) {
+	if (t == NULL) {
+		fprintf(stderr, "mvm: thread has not been initialized!\n");
+		mvm_halt();
+	}
+
+	if (r != 0)
+		ref_set_add(t->excluded_set, r);
+
+	return 0;
+}
+
+int thread_include_ref(struct thread *t, int r) {
+	if (t == NULL) {
+		fprintf(stderr, "mvm: thread has not been initialized!\n");
+		mvm_halt();
+	}
+
+	if (r != 0)
+		ref_set_remove(t->excluded_set, r);
+
+	return 0;
+}
+
+struct ref_set * thread_remove_excluded(struct thread *t, struct ref_set *r) {
+	int ref;
+	struct ref_set *s;
+	
+	if (t == NULL) {
+		fprintf(stderr, "mvm: thread has not been initialized!\n");
+		mvm_halt();
+	}
+
+	s = ref_set_create(0);
+	ref_set_iterator_init(r);
+
+	while ((ref = ref_set_iterator_next(r)) != 0) {
+		if (ref_set_contains(t->excluded_set, ref) == 0) {
+			ref_set_add(s, ref);
+		}
+	}
+
+	return s;
 }

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <29 Dec 2012 at 17:19:23 by nwidger on macros.local>
+ * Time-stamp: <18 Mar 2013 at 20:42:33 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -1313,7 +1313,7 @@ void mdb_dump_threads() {
 	struct ref_set *threads;
 	struct vm_stack *vm_stack;
 
-	threads = ref_set_create();
+	threads = ref_set_create(0);
 	heap_populate_thread_set(heap, threads);
 	i = ref_set_size(threads);
 

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <10 Apr 2011 at 20:33:32 by nwidger on macros.local>
+ * Time-stamp: <18 Mar 2013 at 20:41:59 by nwidger on macros.local>
  */
 
 #ifndef _MVM_REFSET_H
@@ -9,10 +9,12 @@ struct ref_set;
 
 /** creates a new, empty ref set.
  *
+ * @param l - non-zero if ref_set should use a lock
+ * 
  * @return pointer to new ref_set, or NULL on failure
  */
 
-struct ref_set * ref_set_create();
+struct ref_set * ref_set_create(int l);
 
 /** destroys the given ref_set.
  *

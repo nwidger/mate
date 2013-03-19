@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Jan 2012 at 13:00:25 by nwidger on macros.local>
+ * Time-stamp: <18 Mar 2013 at 20:43:25 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -40,16 +40,16 @@ struct ref_set {
 };
 
 /* forward declarations */
-struct ref_set * ref_set_create_n(int n);
+struct ref_set * ref_set_create_n(int n, int l);
 int ref_set_resize(struct ref_set *h, int n);
 struct ref_set_record * ref_set_record_create(int r);
 void ref_set_record_destroy(struct ref_set_record *r);
 
-struct ref_set * ref_set_create() {
-	return ref_set_create_n(REF_SET_DEFAULT_INITIAL_CAPACITY);
+struct ref_set * ref_set_create(int l) {
+	return ref_set_create_n(REF_SET_DEFAULT_INITIAL_CAPACITY, l);
 }
 
-struct ref_set * ref_set_create_n(int n) {
+struct ref_set * ref_set_create_n(int n, int l) {
 	struct ref_set *h;
 
 	if ((h = (struct ref_set *)malloc(sizeof(struct ref_set))) == NULL) {
@@ -57,8 +57,12 @@ struct ref_set * ref_set_create_n(int n) {
 		mvm_halt();
 	}
 
-	if ((h->nlock = nlock_create()) == NULL)
-		mvm_halt();
+	if (l == 0) {
+		h->nlock = NULL;
+	} else {
+		if ((h->nlock = nlock_create()) == NULL)
+			mvm_halt();
+	}
 
 	h->current_capacity = n;
 	h->load_factor = REF_SET_DEFAULT_LOAD_FACTOR;
@@ -88,7 +92,8 @@ void ref_set_destroy(struct ref_set *h) {
 		/* unlock */
 		ref_set_unlock(h);
 
-		nlock_destroy(h->nlock);
+		if (h->nlock != NULL)
+			nlock_destroy(h->nlock);
 		free(h->buckets);
 		free(h);
 	}
@@ -332,6 +337,7 @@ int ref_set_iterator_next(struct ref_set *h) {
 }
 
 int ref_set_resize(struct ref_set *h, int n) {
+	int locking;
 	struct ref_set *new_set;
 	struct ref_set_record *p;
 
@@ -343,7 +349,9 @@ int ref_set_resize(struct ref_set *h, int n) {
 	/* lock */
 	ref_set_lock(h);
 
-	if ((new_set = ref_set_create_n(n)) == NULL) {
+	locking = h->nlock != NULL;
+
+	if ((new_set = ref_set_create_n(n, locking)) == NULL) {
 		/* unlock */
 		ref_set_unlock(h);
 		mvm_halt();
@@ -367,7 +375,8 @@ int ref_set_resize(struct ref_set *h, int n) {
 	h->list_head = new_set->list_head;
 	h->list_tail = new_set->list_tail;
 
-	nlock_destroy(new_set->nlock);
+	if (locking)
+		nlock_destroy(new_set->nlock);
 	free(new_set);
 
 	/* unlock */
@@ -457,8 +466,10 @@ int ref_set_lock(struct ref_set *h) {
 		mvm_halt();
 	}
 
-	/* lock */
-	nlock_lock(h->nlock);
+	if (h->nlock != NULL) {
+		/* lock */
+		nlock_lock(h->nlock);
+	}
 
 	return 0;
 }
@@ -469,8 +480,10 @@ int ref_set_unlock(struct ref_set *h) {
 		mvm_halt();
 	}
 
-	/* unlock */
-	nlock_unlock(h->nlock);
+	if (h->nlock != NULL) {
+		/* unlock */
+		nlock_unlock(h->nlock);
+	}
 
 	return 0;
 }

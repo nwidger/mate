@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Mar 2013 at 20:34:07 by nwidger on macros.local>
+ * Time-stamp: <18 Mar 2013 at 20:42:10 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -97,10 +97,10 @@ struct heap * heap_create(uint64_t m) {
 	h->next_ref = 1;
 	h->free_list = NULL;
 
-	if ((h->excluded_set = ref_set_create()) == NULL)
+	if ((h->excluded_set = ref_set_create(1)) == NULL)
 		mvm_halt();
 
-	if ((h->thread_set = ref_set_create()) == NULL)
+	if ((h->thread_set = ref_set_create(1)) == NULL)
 		mvm_halt();
 	
 	if (pthread_rwlock_init(&h->rwlock, NULL) != 0) {
@@ -202,15 +202,10 @@ int heap_resize(struct heap *h, uint64_t m) {
 }
 
 int heap_garbage_collect(struct heap *h) {
-	int m;
-	
 	if (h == NULL) {
 		fprintf(stderr, "mvm: heap has not been initialized!\n");
 		mvm_halt();
 	}
-
-	/* unlock garbage_collector */
-	m = garbage_collector_release(garbage_collector);
 
 	mvm_print("heap: calling garbage_collector\n");
 
@@ -218,9 +213,6 @@ int heap_garbage_collect(struct heap *h) {
 		mvm_halt();
 
 	mvm_print("heap: returned from garbage_collector\n");
-
-	/* lock garbage_collector */
-	garbage_collector_reacquire(garbage_collector, m);
 
 	return 0;
 }

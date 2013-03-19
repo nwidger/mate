@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <31 Oct 2012 at 19:09:58 by nwidger on macros.local>
+ * Time-stamp: <18 Mar 2013 at 20:43:32 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -105,7 +105,7 @@ struct dmp * dmp_create(struct object_dmp_attr *a,
 
 	d->mode = parallel_mode;
 
-	d->thread_set = ref_set_create();
+	d->thread_set = ref_set_create(1);
 
 	d->first = 0;
 	d->barrier = barrier_create(0);

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <10 Dec 2012 at 20:17:17 by nwidger on macros.local>
+ * Time-stamp: <18 Mar 2013 at 20:56:47 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -340,11 +340,11 @@ int tricolor_garbage_collector(struct garbage_collector *g) {
 
 	mvm_print("garbage_collector: collection started\n");
 
-	threads = ref_set_create();
+	threads = ref_set_create(0);
 
-	g->white = ref_set_create();
-	g->grey = ref_set_create();
-	g->black = ref_set_create();
+	g->white = ref_set_create(0);
+	g->grey = ref_set_create(0);
+	g->black = ref_set_create(0);
 
 	/* lock */
 	garbage_collector_lock(g);
@@ -366,6 +366,10 @@ int tricolor_garbage_collector(struct garbage_collector *g) {
 
 		if (thread_get_state(thread) == terminated_state)
 			continue;
+
+		tmp = thread_remove_excluded(thread, g->white);
+		ref_set_destroy(g->white);
+		g->white = tmp;
 
 		vm_stack = thread_get_vm_stack(thread);
 		vm_stack_lock(vm_stack);
@@ -408,7 +412,7 @@ int tricolor_garbage_collector(struct garbage_collector *g) {
 	garbage_collector_unlock(g);
 
 	/* blacken grey references until grey set is empty */
-	tmp = ref_set_create();
+	tmp = ref_set_create(0);
 
 	while (ref_set_size(g->grey) > 0) {
 		ref_set_iterator_init(g->grey);
