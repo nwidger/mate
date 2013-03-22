@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <17 Mar 2013 at 18:42:28 by nwidger on macros.local>
+ * Time-stamp: <21 Mar 2013 at 20:25:07 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -207,11 +207,6 @@ int table_get(struct table *t, struct object *k) {
 	/* lock */
 	bucket = table_acquire_bucket(t, n);
 
-#ifdef DMP
-	if (t->dmp != NULL)
-		table_dmp_load(t->dmp);
-#endif
-
 	entry_ref = bucket->ref;
 
 	for (; entry_ref != 0; entry_ref = object_load_field(entry, next_field)) {
@@ -273,11 +268,6 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 
 	/* lock */
 	bucket = table_acquire_bucket(t, n);
-
-#ifdef DMP
-	if (t->dmp != NULL)
-		table_dmp_load(t->dmp);
-#endif
 
 	curr_ref = bucket->ref;
 
@@ -396,11 +386,6 @@ int table_remove(struct table *t, struct object *k) {
 	/* lock */
 	bucket = table_acquire_bucket(t, n);
 
-#ifdef DMP
-	if (t->dmp != NULL)
-		table_dmp_load(t->dmp);
-#endif
-
 	curr_ref = bucket->ref;
 
 	for (; curr_ref != 0; prev_ref = curr_ref, curr_ref = object_load_field(curr, next_field)) {
@@ -463,11 +448,6 @@ int table_first_key(struct table *t) {
 
 		if (bucket == NULL)
 			break;
-
-#ifdef DMP
-		if (t->dmp != NULL)
-			table_dmp_load(t->dmp);
-#endif
 
 		entry_ref = bucket->ref;
 
@@ -553,11 +533,6 @@ int table_next_key(struct table *t) {
 		if (bucket == NULL)
 			break;
 
-#ifdef DMP
-		if (t->dmp != NULL)
-			table_dmp_load(t->dmp);
-#endif
-
 		entry_ref = bucket->ref;
 
 		/* unlock */
@@ -601,10 +576,7 @@ int table_resize(struct table *t, int n) {
 
 		if (bucket == NULL)
 			break;
-#ifdef DMP
-		if (t->dmp != NULL)
-			table_dmp_load(t->dmp);
-#endif
+
 		for (entry_ref = bucket->ref; entry_ref != 0; entry_ref = object_load_field(entry, next_field)) {
 			entry = heap_fetch_object(heap, entry_ref);
 
@@ -875,15 +847,15 @@ struct table_entry * table_acquire_bucket(struct table *t, int i) {
 		mvm_halt();
 	}
 
-	bucket = &t->buckets[i];
-
-	if (bucket->ref == -1)
-		return NULL;
-
 #ifdef DMP
 	if (t->dmp != NULL)
 		table_dmp_load(t->dmp);
 #endif
+
+	bucket = &t->buckets[i];
+
+	if (bucket->ref == -1)
+		return NULL;
 
 	if (bucket->lock != 0) {
 		ref = bucket->lock;
@@ -900,6 +872,11 @@ struct table_entry * table_acquire_bucket(struct table *t, int i) {
 
 	object_acquire_monitor(lock);
 
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_load(t->dmp);
+#endif
+
 	return bucket;
 }
 
@@ -913,12 +890,12 @@ struct table_entry * table_release_bucket(struct table *t, int i) {
 		mvm_halt();
 	}
 
-	bucket = &t->buckets[i];
-
 #ifdef DMP
 	if (t->dmp != NULL)
 		table_dmp_load(t->dmp);
 #endif
+
+	bucket = &t->buckets[i];
 
 	ref = bucket->lock;
 	object = heap_fetch_object(heap, ref);
