@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Mar 2013 at 20:55:17 by nwidger on macros.local>
+ * Time-stamp: <20 Mar 2013 at 19:15:43 by nwidger on macros.local>
  */
 
 #ifndef _MVM_THREAD_H
@@ -24,7 +24,7 @@ enum thread_state {
 	/** the thread is blocked waiting for a monitor */
 	blocked_state		= 2,
 	/** the thread has exited */
-	terminated_state	= 5
+	terminated_state	= 3
 };
 
 #endif
