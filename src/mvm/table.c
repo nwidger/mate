@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Mar 2013 at 20:25:07 by nwidger on macros.local>
+ * Time-stamp: <21 Mar 2013 at 20:40:18 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -77,7 +77,7 @@ int table_set_real_field(struct table *t, enum table_field f, float v);
 struct table_entry * table_acquire_bucket(struct table *t, int i);
 struct table_entry * table_release_bucket(struct table *t, int i);
 int table_entries_exceeds_load_factor(int e, float l, int c);
-int table_resize(struct table *t, int n);
+int table_resize(struct table *t, int n, struct table **nt);
 int table_run_hash_code(struct table *t, struct object *o);
 int table_run_equals(struct table *t, struct object *o, struct object *p);
 int table_dump(struct table *t);
@@ -94,9 +94,7 @@ struct table * table_create(int c, struct object *o, int r) {
 
 	t->object = o;
 
-	if (r != 0) {
-		object_store_field(t->object, lock_field, object_load_field(o, lock_field));
-	} else {
+	if (r == 0) {
 		object_class = class_table_find_predefined(class_table, object_type);
 		ref = class_table_new(class_table, class_get_vmt(object_class), NULL);
 		object_store_field(t->object, lock_field, ref);
@@ -256,7 +254,7 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 	table_lock(t);
 
 	if (table_get_integer_field(t, current_capacity_field) <= 0)
-		table_resize(t, TABLE_DEFAULT_INITIAL_CAPACITY);
+		table_resize(t, TABLE_DEFAULT_INITIAL_CAPACITY, &t);
 
 	n = hash % table_get_integer_field(t, current_capacity_field);
 
@@ -341,7 +339,7 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 	if (table_entries_exceeds_load_factor(table_get_integer_field(t, num_entries_field),
 					      table_get_real_field(t, load_factor_field),
 					      table_get_integer_field(t, current_capacity_field))) {
-		table_resize(t, table_get_integer_field(t, current_capacity_field)*2);
+		table_resize(t, table_get_integer_field(t, current_capacity_field)*2, &t);
 	}
 
 	/* unlock */
@@ -549,14 +547,13 @@ int table_next_key(struct table *t) {
 		}
 	}
 
-	if (bucket == NULL) {
+	if (bucket == NULL)
 		table_set_integer_field(t, iterator_is_running_field, 0);
-	}
 
 	return prev_ref;
 }
 
-int table_resize(struct table *t, int n) {
+int table_resize(struct table *t, int n, struct table **nt) {
 	struct table *new_table;
 	struct table_entry *bucket;
 	int i, entry_ref, key_ref, value_ref;
@@ -595,6 +592,9 @@ int table_resize(struct table *t, int n) {
 
 	object_set_table(t->object, new_table);
 	table_destroy(t);
+
+	if (nt != NULL)
+		*nt = new_table;
 
 	return 0;
 }
