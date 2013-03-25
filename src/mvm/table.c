@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Mar 2013 at 20:40:18 by nwidger on macros.local>
+ * Time-stamp: <25 Mar 2013 at 19:13:33 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -730,6 +730,11 @@ int table_lock(struct table *t) {
 	object = heap_fetch_object(heap, ref);
 	object_acquire_monitor(object);
 
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_load(t->dmp);
+#endif
+
 	return 0;
 }
 
@@ -746,6 +751,11 @@ int table_unlock(struct table *t) {
 	ref = object_load_field(t->object, lock_field);
 	object = heap_fetch_object(heap, ref);
 	object_release_monitor(object);
+
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_load(t->dmp);
+#endif
 
 	return 0;
 }
@@ -778,6 +788,10 @@ int32_t table_get_integer_field(struct table *t, enum table_field f) {
 	integer = object_get_integer(object);
 	value = integer_get_value(integer);
 
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_load(t->dmp);
+#endif
 	return value;
 }
 
@@ -791,6 +805,11 @@ int table_set_integer_field(struct table *t, enum table_field f, int32_t v) {
 
 	ref = class_table_new_integer(class_table, v, NULL);
 	object_store_field(t->object, f, ref);
+
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_load(t->dmp);
+#endif
 
 	return 0;
 }
@@ -819,6 +838,11 @@ float table_get_real_field(struct table *t, enum table_field f) {
 	real = object_get_real(object);
 	value = real_get_value(real);
 
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_load(t->dmp);
+#endif
+
 	return value;
 }
 
@@ -832,6 +856,11 @@ int table_set_real_field(struct table *t, enum table_field f, float v) {
 
 	ref = class_table_new_real(class_table, v, NULL);
 	object_store_field(t->object, f, ref);
+
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_load(t->dmp);
+#endif
 
 	return 0;
 }
