@@ -138,7 +138,7 @@ class Main {
   Integer mod(Integer a, Integer n) {
     if (a < 0) a = -a;
     if (n < 0) n = -n;
-    return a - (n * (a/n));
+    return a.mod(n);
   }
 
   Object usage() {
