@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <27 Mar 2013 at 20:26:01 by nwidger on macros.local>
+ * Time-stamp: <28 Mar 2013 at 20:49:51 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -485,6 +485,11 @@ int table_resize(struct table *t, int n, struct table **nt) {
 	/* lock */
 	table_lock(t);
 
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_load(t->dmp);
+#endif
+	
 	if ((new_table = table_create(n, t->object, 1)) == NULL)
 		mvm_halt();
 
@@ -510,6 +515,11 @@ int table_resize(struct table *t, int n, struct table **nt) {
 		/* unlock */
 		table_release_bucket(t, i);
 	}
+
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_load(t->dmp);
+#endif
 
 	object_set_table(t->object, new_table);
 	table_destroy(t);
@@ -649,6 +659,11 @@ int table_lock(struct table *t) {
 		mvm_halt();
 	}
 
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_load(t->dmp);
+#endif
+
 	/* lock */
 	ref = object_load_field(t->object, lock_field);
 	object = heap_fetch_object(heap, ref);
@@ -665,6 +680,11 @@ int table_unlock(struct table *t) {
 		fprintf(stderr, "mvm: table not initialized!\n");
 		mvm_halt();
 	}
+
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_load(t->dmp);
+#endif
 
 	/* unlock */
 	ref = object_load_field(t->object, lock_field);
@@ -697,6 +717,11 @@ int32_t table_get_integer_field(struct table *t, enum table_field f) {
 		mvm_halt();
 	}
 
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_load(t->dmp);
+#endif
+
 	ref = object_load_field(t->object, f);
 	object = heap_fetch_object(heap, ref);
 	integer = object_get_integer(object);
@@ -712,6 +737,11 @@ int table_set_integer_field(struct table *t, enum table_field f, int32_t v) {
 		fprintf(stderr, "mvm: table not initialized!\n");
 		mvm_halt();
 	}
+
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_load(t->dmp);
+#endif
 
 	ref = class_table_new_integer(class_table, v, NULL);
 	object_store_field(t->object, f, ref);
@@ -738,6 +768,11 @@ float table_get_real_field(struct table *t, enum table_field f) {
 		mvm_halt();
 	}
 
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_load(t->dmp);
+#endif
+
 	ref = object_load_field(t->object, f);
 	object = heap_fetch_object(heap, ref);
 	real = object_get_real(object);
@@ -753,6 +788,11 @@ int table_set_real_field(struct table *t, enum table_field f, float v) {
 		fprintf(stderr, "mvm: table not initialized!\n");
 		mvm_halt();
 	}
+
+#ifdef DMP
+	if (t->dmp != NULL)
+		table_dmp_load(t->dmp);
+#endif
 
 	ref = class_table_new_real(class_table, v, NULL);
 	object_store_field(t->object, f, ref);

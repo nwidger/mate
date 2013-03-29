@@ -3,13 +3,14 @@
 #+STARTUP: hidestars
 #
 # Niels Widger
-# Time-stamp: <21 Mar 2013 at 20:46:15 by nwidger on macros.local>
+# Time-stamp: <28 Mar 2013 at 20:57:43 by nwidger on macros.local>
 
 * mc
 * mas
 * mvm
-** add DMP load/stores to table_get/set_integer_field and table_get/set_real_field
-   since object_load/store_field could cause a dmp_thread_block
+** is it okay to use an object pointer in table_XXX and then use it after returning 
+   from a function that may have dmp_thread_block'd?  I.e. entry pointer in table_get
+   for loop after table_run_equals
 * mdb
 * spec
 * general
