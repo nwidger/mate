@@ -3,7 +3,7 @@
 #+STARTUP: hidestars
 #
 # Niels Widger
-# Time-stamp: <28 Mar 2013 at 20:57:43 by nwidger on macros.local>
+# Time-stamp: <28 Mar 2013 at 21:11:24 by nwidger on macros.local>
 
 * mc
 * mas
@@ -11,6 +11,7 @@
 ** is it okay to use an object pointer in table_XXX and then use it after returning 
    from a function that may have dmp_thread_block'd?  I.e. entry pointer in table_get
    for loop after table_run_equals
+** run actual getfield/aload instruction functions to get/set table fields
 * mdb
 * spec
 * general

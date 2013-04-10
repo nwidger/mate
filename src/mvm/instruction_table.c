@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <20 Dec 2012 at 17:59:42 by nwidger on macros.local>
+ * Time-stamp: <28 Mar 2013 at 21:04:49 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -13,6 +13,8 @@
 #include "globals.h"
 #include "instruction_table.h"
 #include "mdb.h"
+#include "thread.h"
+#include "thread_dmp.h"
 
 /* struct definitions */
 struct instruction_record {
@@ -93,6 +95,7 @@ int instruction_table_add(struct instruction_table *i, char *n, uint32_t o,
 }
 
 int instruction_table_execute(struct instruction_table *i, uint32_t o, struct thread *t) {
+	int retval;
 	struct instruction_record *r;
 
 	if (i == NULL) {
@@ -110,7 +113,18 @@ int instruction_table_execute(struct instruction_table *i, uint32_t o, struct th
 		mvm_halt();
 	}
 
-	return (*r->function)(o, t);
+	retval = (*r->function)(o, t);
+
+#ifdef DMP
+	if (dmp != NULL) {
+		struct thread_dmp *td;
+			
+		td = thread_get_dmp(t);
+		thread_dmp_execute_instruction(td, o);
+	}
+#endif
+
+	return retval;
 }
 
 int instruction_table_decode(struct instruction_table *i, int p, uint32_t o, uint32_t a) {

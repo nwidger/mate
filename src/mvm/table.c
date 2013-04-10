@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Mar 2013 at 20:49:51 by nwidger on macros.local>
+ * Time-stamp: <09 Apr 2013 at 20:43:04 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -85,7 +85,7 @@ int table_dump(struct table *t);
 int table_lock(struct table *t);
 int table_unlock(struct table *t);
 
-struct table * table_create(int c, struct object *o, int r) {
+struct table * table_create(int c, struct object *o) {
 	int ref;
 	struct table *t;
 	struct class *object_class;
@@ -95,7 +95,9 @@ struct table * table_create(int c, struct object *o, int r) {
 
 	t->object = o;
 
-	if (r == 0) {
+	ref = object_load_field(t->object, lock_field);
+
+	if (ref == 0) {
 		object_class = class_table_find_predefined(class_table, object_type);
 		ref = class_table_new(class_table, class_get_vmt(object_class), NULL);
 		object_store_field(t->object, lock_field, ref);
@@ -485,12 +487,7 @@ int table_resize(struct table *t, int n, struct table **nt) {
 	/* lock */
 	table_lock(t);
 
-#ifdef DMP
-	if (t->dmp != NULL)
-		table_dmp_load(t->dmp);
-#endif
-	
-	if ((new_table = table_create(n, t->object, 1)) == NULL)
+	if ((new_table = table_create(n, t->object)) == NULL)
 		mvm_halt();
 
 	for (i = 0; ; i++) {
@@ -515,11 +512,6 @@ int table_resize(struct table *t, int n, struct table **nt) {
 		/* unlock */
 		table_release_bucket(t, i);
 	}
-
-#ifdef DMP
-	if (t->dmp != NULL)
-		table_dmp_load(t->dmp);
-#endif
 
 	object_set_table(t->object, new_table);
 	table_destroy(t);
@@ -659,11 +651,6 @@ int table_lock(struct table *t) {
 		mvm_halt();
 	}
 
-#ifdef DMP
-	if (t->dmp != NULL)
-		table_dmp_load(t->dmp);
-#endif
-
 	/* lock */
 	ref = object_load_field(t->object, lock_field);
 	object = heap_fetch_object(heap, ref);
@@ -680,11 +667,6 @@ int table_unlock(struct table *t) {
 		fprintf(stderr, "mvm: table not initialized!\n");
 		mvm_halt();
 	}
-
-#ifdef DMP
-	if (t->dmp != NULL)
-		table_dmp_load(t->dmp);
-#endif
 
 	/* unlock */
 	ref = object_load_field(t->object, lock_field);
@@ -717,11 +699,6 @@ int32_t table_get_integer_field(struct table *t, enum table_field f) {
 		mvm_halt();
 	}
 
-#ifdef DMP
-	if (t->dmp != NULL)
-		table_dmp_load(t->dmp);
-#endif
-
 	ref = object_load_field(t->object, f);
 	object = heap_fetch_object(heap, ref);
 	integer = object_get_integer(object);
@@ -738,10 +715,17 @@ int table_set_integer_field(struct table *t, enum table_field f, int32_t v) {
 		mvm_halt();
 	}
 
-#ifdef DMP
-	if (t->dmp != NULL)
-		table_dmp_load(t->dmp);
-#endif
+	switch (f) {
+	case num_entries_field:
+	case current_capacity_field:
+	case iterator_is_running_field:
+	case iterator_bucket_field:
+	case iterator_entry_field:
+		break;
+	default:
+		fprintf(stderr, "mvm: invalid integer table field!\n");
+		mvm_halt();
+	}
 
 	ref = class_table_new_integer(class_table, v, NULL);
 	object_store_field(t->object, f, ref);
@@ -768,11 +752,6 @@ float table_get_real_field(struct table *t, enum table_field f) {
 		mvm_halt();
 	}
 
-#ifdef DMP
-	if (t->dmp != NULL)
-		table_dmp_load(t->dmp);
-#endif
-
 	ref = object_load_field(t->object, f);
 	object = heap_fetch_object(heap, ref);
 	real = object_get_real(object);
@@ -789,10 +768,13 @@ int table_set_real_field(struct table *t, enum table_field f, float v) {
 		mvm_halt();
 	}
 
-#ifdef DMP
-	if (t->dmp != NULL)
-		table_dmp_load(t->dmp);
-#endif
+	switch (f) {
+	case load_factor_field:
+		break;
+	default:
+		fprintf(stderr, "mvm: invalid real table field!\n");
+		mvm_halt();
+	}
 
 	ref = class_table_new_real(class_table, v, NULL);
 	object_store_field(t->object, f, ref);
@@ -849,8 +831,6 @@ int table_acquire_bucket(struct table *t, int i, int *r) {
 }
 
 int table_update_bucket(struct table *t, int i, int r) {
-	int ref;
-	struct object *lock;
 	struct table_entry *bucket;
 
 	if (t == NULL) {
@@ -860,19 +840,10 @@ int table_update_bucket(struct table *t, int i, int r) {
 
 #ifdef DMP
 	if (t->dmp != NULL)
-		table_dmp_load(t->dmp);
-#endif
-
-	bucket = &t->buckets[i];
-
-	ref = bucket->lock;
-	lock = heap_fetch_object(heap, ref);
-
-#ifdef DMP
-	if (t->dmp != NULL)
 		table_dmp_store(t->dmp);
 #endif
 
+	bucket = &t->buckets[i];
 	bucket->ref = r;
 
 	return 0;

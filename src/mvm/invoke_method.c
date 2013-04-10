@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <20 Dec 2012 at 18:13:43 by nwidger on macros.local>
+ * Time-stamp: <28 Mar 2013 at 21:04:29 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -28,7 +28,6 @@
 #include "object.h"
 #include "operand_stack.h"
 #include "symbol_table.h"
-#include "thread_dmp.h"
 #include "vm_stack.h"
 
 /* forward declarations */
@@ -194,15 +193,6 @@ int execute_method(struct thread *t, char *e, uint32_t a, uint32_t b, uint32_t n
 
 		if (instruction_table_execute(instruction_table, opcode, t) != 0)
 			mvm_halt();
-
-#ifdef DMP
-		if (dmp != NULL) {
-			struct thread_dmp *td;
-			
-			td = thread_get_dmp(t);
-			thread_dmp_execute_instruction(td, opcode);
-		}
-#endif
 
 		if (debug != 0 && restart != 0)
 			return 0;
