@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Apr 2013 at 20:50:38 by nwidger on macros.local>
+ * Time-stamp: <08 May 2013 at 20:37:44 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -204,7 +204,7 @@ int table_get(struct table *t, struct object *k) {
 int table_put(struct table *t, struct object *k, struct object *v) {
 	struct class *object_class;
 	struct object *curr, *key, *new;
-	int head_ref, prev_ref, curr_ref, next_ref, key_ref, new_ref, hash, n, old_value;
+	int head_ref, curr_ref, next_ref, key_ref, new_ref, hash, n, old_value;
 
 	if (t == NULL) {
 		fprintf(stderr, "mvm: table not initialized!\n");
@@ -228,12 +228,11 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 	n = hash % table_get_integer_field(t, current_capacity_field);
 
 	old_value = 0;
-	prev_ref = 0;
 
 	/* lock */
 	table_acquire_bucket(t, n, &head_ref);
 
-	for (curr_ref = head_ref; curr_ref != 0; prev_ref = curr_ref, curr_ref = next_ref) {
+	for (curr_ref = head_ref; curr_ref != 0; curr_ref = next_ref) {
 		curr = heap_fetch_object(heap, curr_ref);
 
 		key_ref = object_load_field(curr, key_field);
@@ -568,7 +567,7 @@ int table_run_equals(struct table *t, struct object *o, struct object *p) {
 
 int table_dump(struct table *t) {
 	struct object *entry, *key, *value, *buckets;
-	int i, entry_ref, next_ref, key_ref, value_ref, buckets_ref, current_capacity;
+	int i, entry_ref, next_ref, key_ref, value_ref, buckets_ref;
 
 	if (t == NULL) {
 		fprintf(stderr, "mvm: table not initialized!\n");
@@ -579,7 +578,6 @@ int table_dump(struct table *t) {
 	fprintf(stderr, "load_factor = %f\n", table_get_real_field(t, load_factor_field));
 	fprintf(stderr, "current_capacity = %d\n", table_get_integer_field(t, current_capacity_field));
 
-	current_capacity = table_get_integer_field(t, current_capacity_field);
 	buckets_ref = object_load_field(t->object, buckets_field);
 	buckets = heap_fetch_object(heap, buckets_ref);
 
