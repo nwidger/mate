@@ -63,6 +63,7 @@ class Table extends Object {
         Integer iterator_is_running;
         Integer iterator_bucket;
         Integer iterator_entry;
+        Object buckets;
 
 	native Table();
 	native Table(Integer n);

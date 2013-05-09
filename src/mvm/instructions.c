@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Feb 2013 at 15:12:01 by nwidger on macros.local>
+ * Time-stamp: <01 May 2013 at 21:15:32 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -102,18 +102,25 @@ int aload_decode(uint32_t a) {
 	return 2;
 }
 
-int aload_instruction(uint32_t o, struct thread *t) {
+int aload_execute(uint32_t o, struct thread *t, uint32_t index) {
 	int ref;
-	uint32_t index;
 
 	SETUP_INSTRUCTION();
-	index = mvm_disassemble_argument(pc, 0);
 
 	ref = local_variable_array_load(local_variable_array, index);
 	operand_stack_push(operand_stack, ref);
 
 	thread_set_pc(t, increment_pc(2, t));
 	return 0;
+}
+
+int aload_instruction(uint32_t o, struct thread *t) {
+	uint32_t pc, index;
+
+	pc = thread_get_pc(t);
+	index = mvm_disassemble_argument(pc, 0);
+
+	return aload_execute(o, t, index);
 }
 
 int areturn_decode_size(uint32_t a) {
@@ -162,12 +169,10 @@ int astore_decode(uint32_t a) {
 	return 2;
 }
 
-int astore_instruction(uint32_t o, struct thread *t) {
+int astore_execute(uint32_t o, struct thread *t, uint32_t index) {
 	int ref, n;
-	uint32_t index;
 
 	SETUP_INSTRUCTION();
-	index = mvm_disassemble_argument(pc, 0);
 	n = 0;
 
 	ref = operand_stack_peek_n(operand_stack, n++);
@@ -176,6 +181,15 @@ int astore_instruction(uint32_t o, struct thread *t) {
 
 	thread_set_pc(t, increment_pc(2, t));
 	return 0;
+}
+
+int astore_instruction(uint32_t o, struct thread *t) {
+	uint32_t pc, index;
+
+	pc = thread_get_pc(t);
+	index = mvm_disassemble_argument(pc, 0);
+
+	return astore_execute(o, t, index);
 }
 
 int checkcast_decode_size(uint32_t a) {
@@ -196,16 +210,14 @@ int checkcast_decode(uint32_t a) {
 	return 2;
 }
 
-int checkcast_instruction(uint32_t o, struct thread *t) {
+int checkcast_execute(uint32_t o, struct thread *t, uint32_t vmt) {
 	int ref;
-	uint32_t vmt;
 	int32_t good, halt;
 	struct class *from_class, *to_class;
 	struct integer *integer;
 	struct object *object;
 
 	SETUP_INSTRUCTION();
-	vmt = mvm_disassemble_argument(pc, 0);
 
 	to_class = class_table_find(class_table, vmt);
 
@@ -246,6 +258,15 @@ int checkcast_instruction(uint32_t o, struct thread *t) {
 
 	thread_set_pc(t, increment_pc(2, t));
 	return 0;
+}
+
+int checkcast_instruction(uint32_t o, struct thread *t) {
+	uint32_t pc, vmt;
+
+	pc = thread_get_pc(t);
+	vmt = mvm_disassemble_argument(pc, 0);
+
+	return checkcast_execute(o, t, vmt);
 }
 
 int dup_decode_size(uint32_t a) {
@@ -315,13 +336,11 @@ int getfield_decode(uint32_t a) {
 	return 2;
 }
 
-int getfield_instruction(uint32_t o, struct thread *t) {
+int getfield_execute(uint32_t o, struct thread *t, uint32_t index) {
 	int ref, fieldref, n;
-	uint32_t index;
 	struct object *object;
 
 	SETUP_INSTRUCTION();
-	index = mvm_disassemble_argument(pc, 0);
 	n = 0;
 
 	ref = operand_stack_peek_n(operand_stack, n++);
@@ -333,6 +352,15 @@ int getfield_instruction(uint32_t o, struct thread *t) {
 
 	thread_set_pc(t, increment_pc(2, t));
 	return 0;
+}
+
+int getfield_instruction(uint32_t o, struct thread *t) {
+	uint32_t pc, index;
+
+	pc = thread_get_pc(t);
+	index = mvm_disassemble_argument(pc, 0);
+
+	return getfield_execute(o, t, index);
 }
 
 int goto_decode_size(uint32_t a) {
@@ -353,15 +381,21 @@ int goto_decode(uint32_t a) {
 	return 2;
 }
 
-int goto_instruction(uint32_t o, struct thread *t) {
-	uint32_t address;
-
+int goto_execute(uint32_t o, struct thread *t, uint32_t address) {
 	SETUP_INSTRUCTION();
-	address = mvm_disassemble_argument(pc, 0);
 
 	thread_set_pc(t, address);
 
 	return 0;
+}
+
+int goto_instruction(uint32_t o, struct thread *t) {
+	uint32_t pc, address;
+
+	pc = thread_get_pc(t);
+	address = mvm_disassemble_argument(pc, 0);
+
+	return goto_execute(o, t, address);
 }
 
 int ifeq_decode_size(uint32_t a) {
@@ -382,15 +416,13 @@ int ifeq_decode(uint32_t a) {
 	return 2;
 }
 
-int ifeq_instruction(uint32_t o, struct thread *t) {
+int ifeq_execute(uint32_t o, struct thread *t, uint32_t address) {
 	int ref, n;
 	int32_t value;
-	uint32_t address;
 	struct object *object;
 	struct integer *integer;
 
 	SETUP_INSTRUCTION();
-	address = mvm_disassemble_argument(pc, 0);
 	n = 0;
 
 	ref = operand_stack_peek_n(operand_stack, n++);
@@ -406,6 +438,15 @@ int ifeq_instruction(uint32_t o, struct thread *t) {
 		thread_set_pc(t, increment_pc(2, t));
 
 	return 0;
+}
+
+int ifeq_instruction(uint32_t o, struct thread *t) {
+	uint32_t pc, address;
+
+	pc = thread_get_pc(t);
+	address = mvm_disassemble_argument(pc, 0);
+
+	return ifeq_execute(o, t, address);
 }
 
 int in_decode_size(uint32_t a) {
@@ -494,18 +535,14 @@ int invokespecial_decode(uint32_t a) {
 	return 4;
 }
 
-int invokespecial_instruction(uint32_t o, struct thread *t) {
+int invokespecial_execute(uint32_t o, struct thread *t, uint32_t address, uint32_t num_args, uint32_t max_locals) {
 	char *method_name;
 	int ref, i, num_methods;
 	struct object *object;
 	struct class *class;
-	uint32_t address, end, return_address,
-		num_args, max_locals;
+	uint32_t end, return_address;
 
 	SETUP_INSTRUCTION();
-	address = mvm_disassemble_argument(pc, 0);
-	num_args = mvm_disassemble_argument(pc, 1);
-	max_locals = mvm_disassemble_argument(pc, 2);
 
 	ref = operand_stack_peek_n(operand_stack, num_args-1);
 
@@ -543,6 +580,18 @@ int invokespecial_instruction(uint32_t o, struct thread *t) {
 	return 0;
 }
 
+int invokespecial_instruction(uint32_t o, struct thread *t) {
+	uint32_t pc, address, num_args, max_locals;
+
+	pc = thread_get_pc(t);
+
+	address = mvm_disassemble_argument(pc, 0);
+	num_args = mvm_disassemble_argument(pc, 1);
+	max_locals = mvm_disassemble_argument(pc, 2);
+
+	return invokespecial_execute(o, t, address, num_args, max_locals);
+}
+
 int invokenative_decode_size(uint32_t a) {
 	return 2;
 }
@@ -556,16 +605,24 @@ int invokenative_decode(uint32_t a) {
 	return 2;
 }
 
-int invokenative_instruction(uint32_t o, struct thread *t) {
-	uint32_t index, return_address;
+int invokenative_execute(uint32_t o, struct thread *t, uint32_t index) {
+	uint32_t return_address;
 
 	SETUP_INSTRUCTION();
-	index = mvm_disassemble_argument(pc, 0);
 
 	return_address = increment_pc(2, t);
 	invoke_native_method(t, index, return_address);
 
 	return 0;
+}
+
+int invokenative_instruction(uint32_t o, struct thread *t) {
+	uint32_t pc, index;
+
+	pc = thread_get_pc(t);
+	index = mvm_disassemble_argument(pc, 0);
+
+	return invokenative_execute(o, t, index);
 }
 
 int invokevirtual_decode_size(uint32_t a) {
@@ -583,13 +640,11 @@ int invokevirtual_decode(uint32_t a) {
 	return 3;
 }
 
-int invokevirtual_instruction(uint32_t o, struct thread *t) {
+int invokevirtual_execute(uint32_t o, struct thread *t, uint32_t index, uint32_t num_args) {
 	int ref;
-	uint32_t index, num_args, return_address;
+	uint32_t return_address;
 
 	SETUP_INSTRUCTION();
-	index = mvm_disassemble_argument(pc, 0);
-	num_args = mvm_disassemble_argument(pc, 1);
 
 	ref = operand_stack_peek_n(operand_stack, num_args-1);
 
@@ -602,6 +657,16 @@ int invokevirtual_instruction(uint32_t o, struct thread *t) {
 	invoke_virtual_method(t, ref, index, num_args, return_address);
 
 	return 0;
+}
+
+int invokevirtual_instruction(uint32_t o, struct thread *t) {
+	uint32_t pc, index, num_args;
+
+	pc = thread_get_pc(t);
+	index = mvm_disassemble_argument(pc, 0);
+	num_args = mvm_disassemble_argument(pc, 1);
+
+	return invokevirtual_execute(o, t, index, num_args);
 }
 
 int monitorenter_decode_size(uint32_t a) {
@@ -680,12 +745,10 @@ int new_decode(uint32_t a) {
 	return 2;
 }
 
-int new_instruction(uint32_t o, struct thread *t) {
+int new_execute(uint32_t o, struct thread *t, uint32_t vmt) {
 	int ref;
-	uint32_t vmt;
 
 	SETUP_INSTRUCTION();
-	vmt = mvm_disassemble_argument(pc, 0);
 
 	/* lock */
 	garbage_collector_pause(garbage_collector);
@@ -698,6 +761,15 @@ int new_instruction(uint32_t o, struct thread *t) {
 
 	thread_set_pc(t, increment_pc(2, t));
 	return 0;
+}
+
+int new_instruction(uint32_t o, struct thread *t) {
+	uint32_t pc, vmt;
+
+	pc = thread_get_pc(t);
+	vmt = mvm_disassemble_argument(pc, 0);
+
+	return new_execute(o, t, vmt);
 }
 
 int newint_decode_size(uint32_t a) {
@@ -713,12 +785,10 @@ int newint_decode(uint32_t a) {
 	return 2;
 }
 
-int newint_instruction(uint32_t o, struct thread *t) {
+int newint_execute(uint32_t o, struct thread *t, uint32_t value) {
 	int ref;
-	uint32_t value;
 
 	SETUP_INSTRUCTION();
-	value = mvm_disassemble_argument(pc, 0);
 
 	if (value < INTEGER_MIN_INTEGER) {
 		fprintf(stderr, "mvm: integer literal is too small!");
@@ -741,6 +811,15 @@ int newint_instruction(uint32_t o, struct thread *t) {
 
 	thread_set_pc(t, increment_pc(2, t));
 	return 0;
+}
+
+int newint_instruction(uint32_t o, struct thread *t) {
+	uint32_t pc, value;
+
+	pc = thread_get_pc(t);
+	value = mvm_disassemble_argument(pc, 0);
+
+	return newint_execute(o, t, value);
 }
 
 int newreal_decode_size(uint32_t a) {
@@ -891,13 +970,11 @@ int putfield_decode(uint32_t a) {
 	return 2;
 }
 
-int putfield_instruction(uint32_t o, struct thread *t) {
+int putfield_execute(uint32_t o, struct thread *t, uint32_t index) {
 	int ref, objectref, n;
-	uint32_t index;
 	struct object *object;
 
 	SETUP_INSTRUCTION();
-	index = mvm_disassemble_argument(pc, 0);
 	n = 0;
 
 	ref = operand_stack_peek_n(operand_stack, n++);
@@ -910,6 +987,15 @@ int putfield_instruction(uint32_t o, struct thread *t) {
 
 	thread_set_pc(t, increment_pc(2, t));
 	return 0;
+}
+
+int putfield_instruction(uint32_t o, struct thread *t) {
+	uint32_t pc, index;
+
+	pc = thread_get_pc(t);
+	index = mvm_disassemble_argument(pc, 0);
+
+	return putfield_execute(o, t, index);
 }
 
 int refcmp_decode_size(uint32_t a) {
