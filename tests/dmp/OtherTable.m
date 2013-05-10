@@ -4,17 +4,19 @@ class TableEntry {
 	TableEntry next;
 
 	TableEntry() {
-		key = null;
-		value = null;
-		next = null;
+		this.key = null;
+		this.value = null;
+		this.next = null;
 	}
 }
 
-class Buckets {
-	TableEntry bucket;
+class Bucket {
+	TableEntry entry;
+	Bucket next;
 
-	Buckets() {
-		bucket = null;
+	Bucket() {
+		this.entry = null;
+		this.next = null;
 	}
 }
 
@@ -26,13 +28,16 @@ class OtherTable {
         Integer iterator_is_running;
         Integer iterator_bucket;
         TableEntry iterator_entry;
-        Buckets buckets;
+        Bucket buckets;
 
 	OtherTable() {
-		this(0);
+		this(16);
 	}
 
 	OtherTable(Integer n) {
+		Integer i;
+		Bucket prev, bucket;
+
 		this.lock = new Object();
 		this.num_entries = 0;
 		this.load_factor = 0.75;
@@ -40,9 +45,34 @@ class OtherTable {
 		this.iterator_is_running = 0;
 		this.iterator_bucket = 0;
 		this.iterator_entry = null;
-		this.buckets = new Buckets();
+		this.buckets = new Bucket();
+
+		prev = null;
+		for (i = 0; i < n; i = i + 1) {
+			bucket = new Bucket();
+			if (prev != null) bucket.next = prev;
+			prev = bucket;
+		}
+
+		this.buckets = bucket;
 	}
-	
+
+	Bucket acquireBucket(Integer n) {
+		Integer i;
+		Bucket bucket;
+
+		i = 0;
+		
+		for (bucket = this.buckets; bucket != null; bucket = bucket.next) {
+			if (i.equals(n))
+				return bucket;
+
+			i = i + 1;
+		}
+
+		return null;
+	}
+
 	Object get(Object key) {
 		Object value;
 		Integer n, hash;
@@ -55,7 +85,7 @@ class OtherTable {
 		n = hash.mod(this.current_capacity);
 
 		synchronized (this.lock) {
-			for (entry = this.buckets.bucket; entry != null; entry = entry.next) {
+			for (entry = this.acquireBucket(n).entry; entry != null; entry = entry.next) {
 				if (key.equals(entry.key)) {
 					value = entry.value;
 					break;
@@ -91,7 +121,7 @@ class OtherTable {
 			n = hash.mod(this.current_capacity);
 
 			old_value = null;
-			head = this.buckets.bucket;
+			head = this.acquireBucket(n).entry;
 
 			for (curr = head; curr != null; curr = curr.next) {
 				if (key.equals(curr.key))
@@ -109,7 +139,7 @@ class OtherTable {
 				newh.value = value;
 				newh.next = head;
 
-				this.buckets.bucket = newh;
+				this.acquireBucket(n).entry = newh;
 				this.num_entries = this.num_entries + 1;
 			}
 
@@ -140,7 +170,7 @@ class OtherTable {
 			old_value = null;
 			prev = null;
 			
-			head = this.buckets.bucket;
+			head = this.acquireBucket(n).entry;
 
 			curr = head;
 			while (curr != null) {
@@ -155,7 +185,7 @@ class OtherTable {
 
 			if (curr != null) {
 				if (curr == head) {
-					this.buckets.bucket = curr.next;
+					this.acquireBucket(n).entry = curr.next;
 				} else {
 					prev.next = curr.next;
 				}
@@ -173,7 +203,7 @@ class OtherTable {
 
 		synchronized (this.lock) {
 			for (i = 0; i < this.current_capacity; i = i + 1) {
-				if (this.buckets.bucket != null)
+				if (this.acquireBucket(i).entry != null)
 					break;
 			}
 
@@ -210,7 +240,7 @@ class OtherTable {
 				return prev;
 
 			for (n = this.iterator_bucket + 1; n < this.current_capacity; n = n + 1) {
-				entry = this.buckets.bucket;
+				entry = this.acquireBucket(n).entry;
 
 				if (entry != null) {
 					this.iterator_bucket = n;
@@ -235,7 +265,7 @@ class OtherTable {
 			new_table = new OtherTable(n);
 
 			for (i = 0; i < this.current_capacity; i = i + 1) {
-				entry = this.buckets.bucket;
+				entry = this.acquireBucket(i).entry;
 				new_table.put(entry.key, entry.value);
 			}
 
@@ -250,18 +280,4 @@ class OtherTable {
 
 		return null;
 	}
-}
-
-Integer main() {
-	OtherTable t;
-
-	t = new OtherTable(1);
-
-	t.put("key", "value");
-	out "key 'key' -> value '" + t.get("key").toString() + "'" + newline;
-
-	t.put("key1", "value1");
-	out "key 'key1' -> value '" + t.get("key1").toString() + "'" + newline;
-
-	return 0;
 }
