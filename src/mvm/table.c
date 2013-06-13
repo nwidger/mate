@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <12 Jun 2013 at 20:13:51 by nwidger on macros.local>
+ * Time-stamp: <12 Jun 2013 at 20:30:02 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -664,19 +664,7 @@ int table_wrlock(struct table *t) {
 	}
 
 	/* lock */
-	err = pthread_rwlock_trywrlock(&t->rwlock);
-
-	switch (err) {
-	case 0:			/* acquired lock */
-	case EDEADLK:		/* we already own the lock */
-		break;
-	case EBUSY:		/* someone else owns the lock, block */
-		if ((err = pthread_rwlock_wrlock(&t->rwlock)) != 0) {
-			fprintf(stderr, "mvm: pthread_rwlock_wrlock: %s\n", strerror(err));
-			mvm_halt();
-		}
-		break;
-	default:
+	if ((err = pthread_rwlock_trywrlock(&t->rwlock)) != 0) {
 		fprintf(stderr, "mvm: pthread_rwlock_trywrlock: %s\n", strerror(err));
 		mvm_halt();
 	}
@@ -695,23 +683,10 @@ int table_rdlock(struct table *t) {
 	}
 
 	/* lock */
-	err = pthread_rwlock_tryrdlock(&t->rwlock);
-
-	switch (err) {
-	case 0:			/* acquired lock */
-	case EDEADLK:		/* we already own the lock */
-		break;
-	case EBUSY:		/* someone else owns the lock, block */
-		if ((err = pthread_rwlock_rdlock(&t->rwlock)) != 0) {
-			fprintf(stderr, "mvm: pthread_rwlock_rdlock: %s\n", strerror(err));
-			mvm_halt();
-		}
-		break;
-	default:
+	if ((err = pthread_rwlock_tryrdlock(&t->rwlock)) != 0) {
 		fprintf(stderr, "mvm: pthread_rwlock_tryrdlock: %s\n", strerror(err));
 		mvm_halt();
 	}
-
 #endif
 
 	return 0;
