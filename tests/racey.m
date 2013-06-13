@@ -1,3 +1,7 @@
+#include "dmp/OtherTable.m"
+
+//#define Table OtherTable
+
 // RACEY: a program print a result which is very sensitive to the
 // ordering between processors (races).
 //
