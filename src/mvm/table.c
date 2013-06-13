@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <12 Jun 2013 at 20:30:02 by nwidger on macros.local>
+ * Time-stamp: <12 Jun 2013 at 20:31:10 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -664,8 +664,8 @@ int table_wrlock(struct table *t) {
 	}
 
 	/* lock */
-	if ((err = pthread_rwlock_trywrlock(&t->rwlock)) != 0) {
-		fprintf(stderr, "mvm: pthread_rwlock_trywrlock: %s\n", strerror(err));
+	if ((err = pthread_rwlock_wrlock(&t->rwlock)) != 0) {
+		fprintf(stderr, "mvm: pthread_rwlock_wrlock: %s\n", strerror(err));
 		mvm_halt();
 	}
 #endif
@@ -683,8 +683,8 @@ int table_rdlock(struct table *t) {
 	}
 
 	/* lock */
-	if ((err = pthread_rwlock_tryrdlock(&t->rwlock)) != 0) {
-		fprintf(stderr, "mvm: pthread_rwlock_tryrdlock: %s\n", strerror(err));
+	if ((err = pthread_rwlock_rdlock(&t->rwlock)) != 0) {
+		fprintf(stderr, "mvm: pthread_rwlock_rdlock: %s\n", strerror(err));
 		mvm_halt();
 	}
 #endif
