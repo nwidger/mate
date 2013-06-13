@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <12 Jun 2013 at 20:31:10 by nwidger on macros.local>
+ * Time-stamp: <12 Jun 2013 at 20:36:19 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -63,7 +63,7 @@ struct table {
 
 /* forward declarations */
 int table_entries_exceeds_load_factor(int e, int l, int c);
-int table_resize(struct table *t, int n);
+int table_resize(struct table *t, int n, struct table **nt);
 int table_run_hash_code(struct table *t, struct object *o);
 int table_run_equals(struct table *t, struct object *o, struct object *p);
 int table_dump(struct table *t);
@@ -261,7 +261,7 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 	table_rdlock(t);
 
 	if (t->current_capacity <= 0) {
-		table_resize(t, TABLE_DEFAULT_INITIAL_CAPACITY);
+		table_resize(t, TABLE_DEFAULT_INITIAL_CAPACITY, &t);
 	}
 
 	/* unlock */
@@ -315,7 +315,7 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 	if (table_entries_exceeds_load_factor(t->num_entries,
 					      t->load_factor,
 					      t->current_capacity)) {
-		table_resize(t, t->current_capacity*2);
+		table_resize(t, t->current_capacity*2, &t);
 	}
 
 	/* unlock */
@@ -494,7 +494,7 @@ int table_next_key(struct table *t) {
 	return prev;
 }
 
-int table_resize(struct table *t, int n) {
+int table_resize(struct table *t, int n, struct table **nt) {
 	int i;
 	struct table_entry *r;
 	struct table *new_table;
@@ -522,6 +522,9 @@ int table_resize(struct table *t, int n) {
 	heap_free(heap, t->buckets);
 	memcpy(t, new_table, sizeof(struct table));
 	heap_free(heap, new_table);
+
+	if (nt != NULL)
+		*nt = new_table;
 
 	/* unlock */
 	table_unlock(t);
