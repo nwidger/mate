@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <12 Jun 2013 at 20:36:19 by nwidger on macros.local>
+ * Time-stamp: <14 Jun 2013 at 22:12:25 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -295,6 +295,9 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 	     table_entry_create(object_get_ref(k), object_get_ref(v))) == NULL) {
 		mvm_halt();
 	}
+
+	/* lock */
+	table_wrlock(t);
 
 	if (r == NULL) {
 		new_entry->next = t->buckets[n];
