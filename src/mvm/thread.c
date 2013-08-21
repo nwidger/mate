@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Mar 2013 at 20:54:00 by nwidger on macros.local>
+ * Time-stamp: <20 Aug 2013 at 21:06:59 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -462,6 +462,11 @@ int thread_sleep(struct object *o, struct object *p) {
 			mvm_halt();
 		}
 	}
+
+#ifdef DMP
+	if (t->dmp != NULL)
+		thread_dmp_thread_sleep(t->dmp);
+#endif
 
 	return 0;
 }

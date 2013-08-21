@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <23 Dec 2012 at 20:27:46 by nwidger on macros.local>
+ * Time-stamp: <20 Aug 2013 at 21:05:53 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -294,6 +294,18 @@ int thread_dmp_thread_join(struct thread_dmp *td) {
 	return (*td->attr.ops->thread_join)(td);
 }
 
+int thread_dmp_thread_sleep(struct thread_dmp *td) {
+	if (td == NULL) {
+		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
+		mvm_halt();
+	}
+
+	if (td->attr.ops->thread_sleep == NULL)
+		return 0;
+
+	return (*td->attr.ops->thread_sleep)(td);
+}
+
 int thread_dmp_execute_instruction(struct thread_dmp *td, uint32_t o) {
 	if (td == NULL) {
 		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
@@ -312,6 +324,7 @@ struct thread_dmp_ops thread_dmp_default_ops = {
 	thread_dmp_default_thread_start,
 	thread_dmp_default_thread_destruction,
 	thread_dmp_default_thread_join,
+	thread_dmp_default_thread_sleep,
 	thread_dmp_default_execute_instruction
 };
 
@@ -393,6 +406,13 @@ int thread_dmp_default_thread_join(struct thread_dmp *td) {
 		mvm_print("thread %" PRIu32 ": thread to join still not destroyed, blocking...\n", thread_get_ref(NULL));
 		dmp_thread_block(dmp, ud);
 	}
+
+	return 0;
+}
+
+int thread_dmp_default_thread_sleep(struct thread_dmp *td) {
+	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_sleep, blocking...\n", thread_get_ref(NULL));
+	dmp_thread_block(dmp, td);
 
 	return 0;
 }
