@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <21 Oct 2012 at 10:37:18 by nwidger on macros.local>
+ * Time-stamp: <22 Aug 2013 at 18:53:16 by nwidger on macros.local>
  */
 
 #ifndef _MVM_DMP_H
@@ -51,6 +51,7 @@ struct thread_dmp * dmp_create_thread_dmp(struct dmp *d, struct thread *t);
 struct nlock_dmp * dmp_create_nlock_dmp(struct dmp *d, struct nlock *n);
 struct table_dmp * dmp_create_table_dmp(struct dmp *d, struct table *t, struct object_dmp *od);
 int dmp_thread_block(struct dmp *d, struct thread_dmp *td);
+int dmp_thread_block_toggles_mode(struct dmp *d);
 int dmp_shm_read(struct dmp *d, int c, int r, enum dmp_thread_action *ta, enum dmp_owner_action *oa);
 int dmp_shm_write(struct dmp *d, int c, int r, enum dmp_thread_action *ta, enum dmp_owner_action *oa);
 

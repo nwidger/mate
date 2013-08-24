@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <20 Aug 2013 at 21:03:41 by nwidger on macros.local>
+ * Time-stamp: <22 Aug 2013 at 19:17:47 by nwidger on macros.local>
  */
 
 #ifndef _MVM_THREAD_DMP_H
@@ -55,7 +55,7 @@ struct thread_dmp_ops {
 	int  (*thread_start)(struct thread_dmp *td);
 	int  (*thread_destruction)(struct thread_dmp *td);
 	int  (*thread_join)(struct thread_dmp *td);
-	int  (*thread_sleep)(struct thread_dmp *td);
+	int  (*thread_sleep)(struct thread_dmp *td, int32_t m);
 	int  (*execute_instruction)(struct thread_dmp *td, uint32_t o);
 };
 
@@ -87,7 +87,7 @@ int thread_dmp_thread_creation(struct thread_dmp *td);
 int thread_dmp_thread_start(struct thread_dmp *td);
 int thread_dmp_thread_destruction(struct thread_dmp *td);
 int thread_dmp_thread_join(struct thread_dmp *td);
-int thread_dmp_thread_sleep(struct thread_dmp *td);
+int thread_dmp_thread_sleep(struct thread_dmp *td, int32_t m);
 int thread_dmp_execute_instruction(struct thread_dmp *td, uint32_t o);
 
 /* default ops */
@@ -101,6 +101,6 @@ int thread_dmp_default_thread_creation(struct thread_dmp *td);
 int thread_dmp_default_thread_start(struct thread_dmp *td);
 int thread_dmp_default_thread_destruction(struct thread_dmp *td);
 int thread_dmp_default_thread_join(struct thread_dmp *td);
-int thread_dmp_default_thread_sleep(struct thread_dmp *td);
+int thread_dmp_default_thread_sleep(struct thread_dmp *td, int32_t m);
 int thread_dmp_default_execute_instruction(struct thread_dmp *td, uint32_t o);
 #endif

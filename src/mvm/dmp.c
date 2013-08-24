@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <18 Mar 2013 at 20:43:32 by nwidger on macros.local>
+ * Time-stamp: <22 Aug 2013 at 18:58:28 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -595,6 +595,20 @@ int dmp_thread_block(struct dmp *d, struct thread_dmp *td) {
 	thread_dmp_set_state(td, running_state);
 
 	return 0;
+}
+
+int dmp_thread_block_toggles_mode(struct dmp *d) {
+	int waiting, parties;
+
+	if (d == NULL) {
+		fprintf(stderr, "mvm: dmp not initialized!\n");
+		mvm_halt();
+	}
+
+	waiting = barrier_get_waiting(d->barrier);
+	parties = barrier_get_parties(d->barrier);
+
+	return (parties - waiting) == 1;
 }
 
 void * dmp_barrier_parallel_hook(int i, void *a) {

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <20 Aug 2013 at 21:05:53 by nwidger on macros.local>
+ * Time-stamp: <24 Aug 2013 at 11:29:23 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -11,11 +11,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "constants.h"
 #include "dmp.h"
 #include "globals.h"
 #include "heap.h"
+#include "stall_time.h"
 #include "thread.h"
 #include "thread_dmp.h"
 
@@ -294,7 +296,7 @@ int thread_dmp_thread_join(struct thread_dmp *td) {
 	return (*td->attr.ops->thread_join)(td);
 }
 
-int thread_dmp_thread_sleep(struct thread_dmp *td) {
+int thread_dmp_thread_sleep(struct thread_dmp *td, int32_t m) {
 	if (td == NULL) {
 		fprintf(stderr, "mvm: thread_dmp not initialized!\n");
 		mvm_halt();
@@ -303,7 +305,7 @@ int thread_dmp_thread_sleep(struct thread_dmp *td) {
 	if (td->attr.ops->thread_sleep == NULL)
 		return 0;
 
-	return (*td->attr.ops->thread_sleep)(td);
+	return (*td->attr.ops->thread_sleep)(td, m);
 }
 
 int thread_dmp_execute_instruction(struct thread_dmp *td, uint32_t o) {
@@ -410,9 +412,41 @@ int thread_dmp_default_thread_join(struct thread_dmp *td) {
 	return 0;
 }
 
-int thread_dmp_default_thread_sleep(struct thread_dmp *td) {
-	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_sleep, blocking...\n", thread_get_ref(NULL));
-	dmp_thread_block(dmp, td);
+int thread_dmp_default_thread_sleep(struct thread_dmp *td, int32_t m) {
+	int block;
+	time_type stop, start;
+	int32_t remaining, incr;
+
+	mvm_print("thread %" PRIu32 ": in thread_dmp_default_thread_sleep m = %" PRIi32 "\n", thread_get_ref(NULL), m);
+
+	incr = 10;
+
+	for (block = 0, remaining = m * 1000; remaining > 0; block = 0, remaining -= incr) {
+		if (remaining > 0 && dmp_thread_block_toggles_mode(dmp)) {
+			block = 1;
+			mvm_print("thread %" PRIu32 ": last thread to block, sleep deferred, blocking...\n", thread_get_ref(NULL));
+		} else if (dmp_get_mode(dmp) == serial_mode) {
+			block = 1;
+			mvm_print("thread %" PRIu32 ": in serial mode, sleep deferred, blocking...\n", thread_get_ref(NULL));
+		}
+
+		if (block) {
+			get_time(&start);
+			dmp_thread_block(dmp, td);
+			get_time(&stop);
+
+			if ((remaining -= stall_time(&start, &stop) * 1000000) <= 0) {
+				break;
+			}
+		}
+
+		while (usleep(incr) != 0) {
+			if (errno != EINTR) {
+				perror("mvm: usleep");
+				mvm_halt();
+			}
+		}
+	}
 
 	return 0;
 }
