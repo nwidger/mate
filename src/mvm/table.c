@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <14 Jun 2013 at 22:12:25 by nwidger on macros.local>
+ * Time-stamp: <03 Sep 2013 at 20:50:53 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -37,6 +37,7 @@
 struct table_entry {
 	int key;
 	int value;
+	int hash;
 	struct table_entry *next;
 };
 
@@ -62,12 +63,13 @@ struct table {
 };
 
 /* forward declarations */
+int table_put_aux(struct table *t, struct object *k, struct object *v, int hash);
 int table_entries_exceeds_load_factor(int e, int l, int c);
 int table_resize(struct table *t, int n, struct table **nt);
 int table_run_hash_code(struct table *t, struct object *o);
 int table_run_equals(struct table *t, struct object *o, struct object *p);
 int table_dump(struct table *t);
-struct table_entry * table_entry_create(int k, int v);
+struct table_entry * table_entry_create(int k, int v, int h);
 void table_entry_destroy(struct table_entry *r);
 int table_wrlock(struct table *t);
 int table_rdlock(struct table *t);
@@ -225,8 +227,7 @@ int table_get(struct table *t, struct object *k) {
 }
 
 int table_put(struct table *t, struct object *k, struct object *v) {
-	int value, hash, n, old_value;
-	struct table_entry *new_entry, *r, *s;
+	int hash;
 
 	if (t == NULL) {
 		fprintf(stderr, "mvm: table not initialized!\n");
@@ -271,11 +272,18 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 	if (t->dmp != NULL)
 		table_dmp_load(t->dmp);
 #endif
-	
+
+	return table_put_aux(t, k, v, hash);
+}
+
+int table_put_aux(struct table *t, struct object *k, struct object *v, int hash) {
+	int value, n, old_value;
+	struct table_entry *new_entry, *r;
+
 	n = hash % t->current_capacity;
 	old_value = 0;
 
-	for (s = NULL, r = t->buckets[n]; r != NULL; s = r, r = r->next) {
+	for (r = t->buckets[n]; r != NULL; r = r->next) {
 		value = table_run_equals(t, k, heap_fetch_object(heap, r->key));
 		if (value == 1)
 			break;
@@ -290,35 +298,31 @@ int table_put(struct table *t, struct object *k, struct object *v) {
 	if (t->dmp != NULL)
 		table_dmp_store(t->dmp);
 #endif
-	
-	if ((new_entry =
-	     table_entry_create(object_get_ref(k), object_get_ref(v))) == NULL) {
-		mvm_halt();
-	}
 
 	/* lock */
 	table_wrlock(t);
 
-	if (r == NULL) {
+	if (r != NULL) {
+		old_value = r->value;
+		r->key = object_get_ref(k);
+		r->value = object_get_ref(v);
+		r->hash = hash;
+	} else {
+		if ((new_entry =
+		     table_entry_create(object_get_ref(k), object_get_ref(v), hash)) == NULL) {
+			mvm_halt();
+		}
+
 		new_entry->next = t->buckets[n];
 		t->buckets[n] = new_entry;
 		t->num_entries++;
-	} else {
-		old_value = r->value;
-		new_entry->next = r->next;
-
-		if (r == t->buckets[n])
-			t->buckets[n] = new_entry;
-		else
-			s->next = new_entry;
-
-		table_entry_destroy(r);
 	}
 
 	if (table_entries_exceeds_load_factor(t->num_entries,
 					      t->load_factor,
 					      t->current_capacity)) {
 		table_resize(t, t->current_capacity*2, &t);
+		object_set_table(t->object, t);
 	}
 
 	/* unlock */
@@ -515,9 +519,10 @@ int table_resize(struct table *t, int n, struct table **nt) {
 
 	for (i = 0; i < t->current_capacity; i++ ) {
 		for (r = t->buckets[i]; r != NULL; r = r->next) {
-			table_put(new_table,
-				  heap_fetch_object(heap, r->key),
-				  heap_fetch_object(heap, r->value));
+			table_put_aux(new_table,
+				      heap_fetch_object(heap, r->key),
+				      heap_fetch_object(heap, r->value),
+				      r->hash);
 		}
 	}
 
@@ -528,6 +533,8 @@ int table_resize(struct table *t, int n, struct table **nt) {
 
 	if (nt != NULL)
 		*nt = new_table;
+
+	object_set_table(t->object, t);
 
 	/* unlock */
 	table_unlock(t);
@@ -642,7 +649,7 @@ int table_dump(struct table *t) {
 	return 0;
 }
 
-struct table_entry * table_entry_create(int k, int v) {
+struct table_entry * table_entry_create(int k, int v, int h) {
 	struct table_entry *r;
 
 	if ((r = (struct table_entry *)heap_malloc(heap, sizeof(struct table_entry))) == NULL)
@@ -650,6 +657,7 @@ struct table_entry * table_entry_create(int k, int v) {
 
 	r->key = k;
 	r->value = v;
+	r->hash = h;
 
 	return r;
 }
