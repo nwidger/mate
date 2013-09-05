@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <16 Jun 2013 at 18:00:45 by nwidger on macros.local>
+ * Time-stamp: <04 Sep 2013 at 20:17:19 by nwidger on macros.local>
  */
 
 #ifndef _MVM_CONSTANTS_H
@@ -135,7 +135,7 @@
 
 #define THREAD_DMP_DEFAULT_REDUCED_SERIAL_MODE full_mode
 #define THREAD_DMP_DEFAULT_LOCK_COUNT          0
-#define THREAD_DMP_DEFAULT_QUANTUM_SIZE        1000
+#define THREAD_DMP_DEFAULT_QUANTUM_SIZE        100000
 #define THREAD_DMP_DEFAULT_INSTRUCTION_COUNTER 0
 
 /** for accessing owner fields */

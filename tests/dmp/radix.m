@@ -1,7 +1,7 @@
 #include "BinaryInteger.m"
 #include "BinaryIntegerTable.m"
 #include "IntegerTable.m"
-#include "Timer.m"
+// #include "Timer.m"
 #include "Tuple.m"
 #include "TupleTable.m"
 
@@ -351,11 +351,11 @@ Integer main() {
 
   s = new Sort(numCounters);
 
-  Timer timer;
+  // Timer timer;
 
-  timer = new Timer();
+  // timer = new Timer();
 
-  timer.start_timer();
+  // timer.start_timer();
 
   // if (s.doCountingSort(ary, n, nbits).equals(1)) {
   if (s.doRadixSort(ary, n, nbits).equals(1)) {
@@ -363,13 +363,13 @@ Integer main() {
     return 1;
   }
 
-  timer.stop_timer();
+  // timer.stop_timer();
 
   // for (i = 0; i < n; i = i + 1) {
   //   out ary.get(i).toString() + newline;
   // }
 
-  out "Total time: " + (new Real(timer.millisecs) / 1000.0).toString() + " sec" + newline;
+  // out "Total time: " + (new Real(timer.millisecs) / 1000.0).toString() + " sec" + newline;
 
   return 0;
 }

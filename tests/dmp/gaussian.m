@@ -1,6 +1,6 @@
 #include "IntegerTable.m"
 #include "MDRealTable.m"
-#include "Timer.m"
+// #include "Timer.m"
 #include "Barrier.m"
 
 // This maTe program completely solves a system of linear equations using
@@ -141,7 +141,7 @@ class Gaussian {
 
 	Integer N;
 	MDRealTable a;
-	Timer timer;
+	// Timer timer;
 	Real EPSILON;
 	IntegerTable pivot, marked;
 
@@ -161,7 +161,7 @@ class Gaussian {
 		}
 
 		EPSILON = 1.0e-20;
-		timer = new Timer();
+		// timer = new Timer();
 
 		a = new MDRealTable(N, N+1);
 		pivot = new IntegerTable(N);
@@ -171,13 +171,13 @@ class Gaussian {
 	}
 
 	Object doit() {
-		start_timer();
+		// start_timer();
 		// out "running gaussian_elimination" + newline;
 		if (gaussian_elimination()) {
 			// out "running back_substitution" + newline;
 			back_substitution();
 			// out "running stop_timer" + newline;
-			stop_timer();
+			// stop_timer();
 			// out "running check_results" + newline;
 			check_results();
 		} else {
@@ -334,18 +334,18 @@ class Gaussian {
 		return null;
 	}
 
-	Object start_timer() {
-		timer.start_timer();
-	}
+	// Object start_timer() {
+	// 	timer.start_timer();
+	// }
 
-	Object stop_timer() {
-		Real dtime;
+	// Object stop_timer() {
+	// 	Real dtime;
 
-		timer.stop_timer();
-		dtime = new Real(timer.millisecs) / 1000.0;
+	// 	timer.stop_timer();
+	// 	dtime = new Real(timer.millisecs) / 1000.0;
 
-		out "## Elapsed time: " + dtime.toString() + " seconds" + newline;
-	}
+	// 	out "## Elapsed time: " + dtime.toString() + " seconds" + newline;
+	// }
 }
 
 Integer main() {
