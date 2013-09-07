@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <27 Jan 2012 at 20:22:33 by nwidger on macros.local>
+ * Time-stamp: <26 Aug 2013 at 18:36:24 by nwidger on macros.local>
  */
 
 #ifndef _MVM_NLOCK_DMP_H
@@ -12,7 +12,8 @@ struct nlock_dmp_ops;
 /* struct definitions */
 struct nlock_dmp_ops {
 	int  (*lock)(struct nlock_dmp *nd);
-	int  (*unlock)(struct nlock_dmp *nd);	
+	int  (*unlock)(struct nlock_dmp *nd);
+	int  (*timedwait)(struct nlock_dmp *nd);
 };
 
 struct nlock_dmp_attr {
@@ -26,6 +27,7 @@ struct nlock * nlock_dmp_get_nlock(struct nlock_dmp *nd);
 int nlock_dmp_set_nlock(struct nlock_dmp *nd, struct nlock *n);
 int nlock_dmp_lock(struct nlock_dmp *nd);
 int nlock_dmp_unlock(struct nlock_dmp *nd);
+int nlock_dmp_timedwait(struct nlock_dmp *nd);
 
 /* default ops */
 extern struct nlock_dmp_ops nlock_dmp_default_ops;
@@ -36,5 +38,6 @@ extern struct nlock_dmp_attr nlock_dmp_default_attr;
 /* default functions */
 int nlock_dmp_default_lock(struct nlock_dmp *nd);
 int nlock_dmp_default_unlock(struct nlock_dmp *nd);
+int nlock_dmp_default_timedwait(struct nlock_dmp *nd);
 
 #endif

@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <28 Jan 2012 at 19:54:51 by nwidger on macros.local>
+ * Time-stamp: <07 Sep 2013 at 15:20:42 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "constants.h"
 #include "dmp.h"
@@ -90,10 +91,23 @@ int nlock_dmp_unlock(struct nlock_dmp *nd) {
 	return (*nd->attr.ops->unlock)(nd);
 }
 
+int nlock_dmp_timedwait(struct nlock_dmp *nd) {
+	if (nd == NULL) {
+		fprintf(stderr, "mvm: nlock_dmp not initialized!\n");
+		mvm_halt();
+	}
+
+	if (nd->attr.ops->timedwait == NULL)
+		return 0;
+
+	return (*nd->attr.ops->timedwait)(nd);
+}
+
 /* default ops */
 struct nlock_dmp_ops nlock_dmp_default_ops = {
 	nlock_dmp_default_lock,
-	nlock_dmp_default_unlock
+	nlock_dmp_default_unlock,
+	nlock_dmp_default_timedwait
 };
 
 /* default attr */
@@ -103,7 +117,11 @@ struct nlock_dmp_attr nlock_dmp_default_attr = {
 
 /* default functions */
 int nlock_dmp_default_lock(struct nlock_dmp *nd) {
+	int tries, left;
 	struct thread_dmp *td;
+
+	tries = 5;
+	left = dmp_get_mode(dmp) == parallel_mode ? tries : 0;
 
 	td = thread_get_dmp(NULL);
 
@@ -113,12 +131,16 @@ int nlock_dmp_default_lock(struct nlock_dmp *nd) {
 			break;
 		}
 
-		if (dmp_get_mode(dmp) == serial_mode) {
-			mvm_print("thread %" PRIu32 ": cannot get monitor in serial mode, blocking\n", thread_get_ref(NULL));
+		if (dmp_get_mode(dmp) == serial_mode || dmp_thread_block_toggles_mode(dmp)) {
+			mvm_print("thread %" PRIu32 ": cannot get monitor in serial mode or last thread to block, blocking\n", thread_get_ref(NULL));
 			dmp_thread_block(dmp, td);
+			/* now in parallel mode, refill tries */
+			if (dmp_get_mode(dmp) == parallel_mode) left = tries;
+		} else if (dmp_get_mode(dmp) == parallel_mode && --left == 0) {
+			mvm_print("thread %" PRIu32 ": cannot get monitor after %d tries in parallel mode, blocking\n", thread_get_ref(NULL), tries);
+			dmp_thread_block(dmp, td);
+			left = 0; /* now in serial mode, empty tries */
 		}
-
-		thread_dmp_execute_instruction(td, MONITORENTER_OPCODE);
 	}
 
 	return 0;
@@ -136,6 +158,22 @@ int nlock_dmp_default_unlock(struct nlock_dmp *nd) {
 	if (mode == reduced_mode && lock_count == 0 &&
 	    dmp_get_mode(dmp) == serial_mode) {
 			mvm_print("thread %" PRIu32 ": unlocked last monitor in reduced serial mode, blocking\n", thread_get_ref(NULL));
+		dmp_thread_block(dmp, td);
+	}
+
+	return 0;
+}
+
+int nlock_dmp_default_timedwait(struct nlock_dmp *nd) {
+	enum dmp_mode mode;
+	struct thread_dmp *td;
+
+	td = thread_get_dmp(NULL);
+
+	mode = dmp_get_mode(dmp);
+
+	if (mode == serial_mode || dmp_thread_block_toggles_mode(dmp)) {
+		mvm_print("thread %" PRIu32 ": in timedwait and serial mode or last thread to block, blocking\n", thread_get_ref(NULL));
 		dmp_thread_block(dmp, td);
 	}
 

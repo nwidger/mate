@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <12 Mar 2013 at 20:00:50 by nwidger on macros.local>
+ * Time-stamp: <27 Aug 2013 at 19:22:39 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -15,6 +15,7 @@
 
 #include "globals.h"
 #include "nlock.h"
+#include "stall_time.h"
 
 #ifdef DMP
 #include "dmp.h"
