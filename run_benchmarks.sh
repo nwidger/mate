@@ -1,5 +1,6 @@
 #!/bin/bash
 
+ulimit -t 1800
 trap "{ exit 1; }" SIGINT SIGTERM
 
 pushd tests/dmp
