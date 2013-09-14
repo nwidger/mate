@@ -3,7 +3,7 @@
 #+STARTUP: hidestars
 #
 # Niels Widger
-# Time-stamp: <28 Mar 2013 at 21:11:24 by nwidger on macros.local>
+# Time-stamp: <11 Sep 2013 at 20:17:21 by nwidger on macros.local>
 
 * mc
 * mas
@@ -17,27 +17,28 @@
 * general
 
 * evaluation
-** quantum sizes: 1000, 5000 and 10000
+** quantum sizes: 1000, 10000 and 100000
 ** full and reduced serial mode
 ** ownership table granularity - 1, 5 and 10 depth
+** 2, 4, 8 and 16 threads
 
-1,000 instruction quantum, full serial mode, 1 ownership table depth	 = -p -Q1000 -g1
-1,000 instruction quantum, full serial mode, 5 ownership table depth	 = -p -Q1000 -g5
-1,000 instruction quantum, full serial mode, 10 ownership table depth	 = -p -Q1000 -g10
-1,000 instruction quantum, reduced serial mode, 1 ownership table depth	 = -pr -Q1000 -g1
-1,000 instruction quantum, reduced serial mode, 5 ownership table depth	 = -pr -Q1000 -g5
-1,000 instruction quantum, reduced serial mode, 10 ownership table depth = -pr -Q1000 -g10
+1,000 instruction quantum, full serial mode, 1 ownership table depth	   = -p  -Q1000 -g1
+1,000 instruction quantum, full serial mode, 5 ownership table depth	   = -p  -Q1000 -g5
+1,000 instruction quantum, full serial mode, 10 ownership table depth	   = -p  -Q1000 -g10
+1,000 instruction quantum, reduced serial mode, 1 ownership table depth	   = -pr -Q1000 -g1
+1,000 instruction quantum, reduced serial mode, 5 ownership table depth	   = -pr -Q1000 -g5
+1,000 instruction quantum, reduced serial mode, 10 ownership table depth   = -pr -Q1000 -g10
 
-5,000 instruction quantum, full serial mode, 1 ownership table depth     = -p -Q5000 -g1	 
-5,000 instruction quantum, full serial mode, 5 ownership table depth	 = -p -Q5000 -g5	
-5,000 instruction quantum, full serial mode, 10 ownership table depth	 = -p -Q5000 -g10
-5,000 instruction quantum, reduced serial mode, 1 ownership table depth	 = -pr -Q5000 -g1
-5,000 instruction quantum, reduced serial mode, 5 ownership table depth	 = -pr -Q5000 -g5
-5,000 instruction quantum, reduced serial mode, 10 ownership table depth = -pr -Q5000 -g10
+10,000 instruction quantum, full serial mode, 1 ownership table depth      = -p  -Q10000 -g1	 
+10,000 instruction quantum, full serial mode, 5 ownership table depth	   = -p  -Q10000 -g5	
+10,000 instruction quantum, full serial mode, 10 ownership table depth	   = -p  -Q10000 -g10
+10,000 instruction quantum, reduced serial mode, 1 ownership table depth   = -pr -Q10000 -g1
+10,000 instruction quantum, reduced serial mode, 5 ownership table depth   = -pr -Q10000 -g5
+10,000 instruction quantum, reduced serial mode, 10 ownership table depth  = -pr -Q10000 -g10
 
-10,000 instruction quantum, full serial mode, 1 ownership table depth     = -p -Q10000 -g1	
-10,000 instruction quantum, full serial mode, 5 ownership table depth	  = -p -Q10000 -g5	
-10,000 instruction quantum, full serial mode, 10 ownership table depth	  = -p -Q10000 -g10
-10,000 instruction quantum, reduced serial mode, 1 ownership table depth  = -pr -Q10000 -g1
-10,000 instruction quantum, reduced serial mode, 5 ownership table depth  = -pr -Q10000 -g5
-10,000 instruction quantum, reduced serial mode, 10 ownership table depth = -pr -Q10000 -g10
+100,000 instruction quantum, full serial mode, 1 ownership table depth     = -p  -Q100000 -g1	
+100,000 instruction quantum, full serial mode, 5 ownership table depth	   = -p  -Q100000 -g5	
+100,000 instruction quantum, full serial mode, 10 ownership table depth	   = -p  -Q100000 -g10
+100,000 instruction quantum, reduced serial mode, 1 ownership table depth  = -pr -Q100000 -g1
+100,000 instruction quantum, reduced serial mode, 5 ownership table depth  = -pr -Q100000 -g5
+100,000 instruction quantum, reduced serial mode, 10 ownership table depth = -pr -Q100000 -g10

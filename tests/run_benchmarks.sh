@@ -1,24 +1,22 @@
 #!/bin/bash
 
-ulimit -t 1800
 trap "{ exit 1; }" SIGINT SIGTERM
+pushd dmp
 
-pushd tests/dmp
-
-for class in radix.class jacobi.class dpl.class
+for class in radix jacobi dpl
 do
-    if [ "$class" == "radix.class" ];
+    if [ "$class" == "radix" ];
     then
 	input="ints-16bits-500.dat"
-    elif [ "$class" == "jacobi.class" ];
+    elif [ "$class" == "jacobi" ];
     then
 	input=""
-    elif [ "$class" == "dpl.class" ];
+    elif [ "$class" == "dpl" ];
     then
 	input="dpl/uf20-91/uf20-01.cnf"
     fi
 
-    cmd="time echo $threads | cat - $input | mvm $class"
+    cmd="timeout 1800 time echo $threads | cat - $input | mvm ${class}.class"
     echo "RUNNING: $cmd"
     eval $cmd > "nondmp_${class}.log" 2>&1
 
@@ -41,7 +39,7 @@ do
 		do
 		    g_arg="-g$depth"
 
-		    cmd="time echo $threads | cat - $input | mvm -p $q_arg $r_arg $g_arg $class"
+		    cmd="timeout 1800 time echo $threads | cat - $input | mvm -p $q_arg $r_arg $g_arg ${class}.class"
 		    echo "RUNNING: $cmd"
 		    output="dmp_${class}_${quantum}_${serial_mode}_${depth}.log"
 		    eval $cmd > $output 2>&1
