@@ -1,6 +1,6 @@
 #!/bin/bash
 
-trap "{ exit 1; }" SIGINT SIGTERM
+trap "{ rm -f deleteme.log; set +x; exit 1; }" SIGINT SIGTERM
 pushd dmp
 
 for class in radix jacobi dpl
@@ -16,12 +16,19 @@ do
 	input="dpl/uf20-91/uf20-01.cnf"
     fi
 
-    cmd="timeout 1800 time echo $threads | cat - $input | mvm ${class}.class"
-    echo "RUNNING: $cmd"
-    eval $cmd > "nondmp_${class}.log" 2>&1
-
     for threads in 2 4 8 16;
     do
+	echo $threads > deleteme.log
+
+	if [ "$input" != "" ];
+	then
+	    cat $input >> deleteme.log
+	fi
+
+	set -x
+	/usr/bin/time -p mvm ${class}.class < deleteme.log &> "nondmp_${class}_${threads}.log"
+	set +x
+
 	for quantum in 1000 10000 100000;
 	do
 	    q_arg="-Q $quantum"
@@ -39,14 +46,20 @@ do
 		do
 		    g_arg="-g$depth"
 
-		    cmd="timeout 1800 time echo $threads | cat - $input | mvm -p $q_arg $r_arg $g_arg ${class}.class"
-		    echo "RUNNING: $cmd"
-		    output="dmp_${class}_${quantum}_${serial_mode}_${depth}.log"
-		    eval $cmd > $output 2>&1
+		    output="dmp_${class}_${threads}_${quantum}_${serial_mode}_${depth}.log"
+		    set -x
+		    /usr/bin/time -p mvm -Dp $q_arg $r_arg $g_arg ${class}.class < deleteme.log &> "$output"
+		    set +x
+
+		    t=$(grep real "$output" | awk '{ print $2 }')
+		    printf "%-40s %s\n" $output $t >> results.log
 		done
 	    done
 	done
     done
 done
 
+rm -f deleteme.log
+
 popd
+
