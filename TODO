@@ -3,7 +3,7 @@
 #+STARTUP: hidestars
 #
 # Niels Widger
-# Time-stamp: <11 Sep 2013 at 20:17:21 by nwidger on macros.local>
+# Time-stamp: <17 Sep 2013 at 18:38:25 by nwidger on macros.local>
 
 * mc
 * mas
@@ -42,3 +42,104 @@
 100,000 instruction quantum, reduced serial mode, 1 ownership table depth  = -pr -Q100000 -g1
 100,000 instruction quantum, reduced serial mode, 5 ownership table depth  = -pr -Q100000 -g5
 100,000 instruction quantum, reduced serial mode, 10 ownership table depth = -pr -Q100000 -g10
+
+* outline
+
+** abstract
+
+** introduction
+
+*** thesis goals
+
+*** outline
+
+** background
+
+*** previous work
+
+**** deterministic shared memory multiprocessing (dmp)
+
+**** coredet
+
+**** kendo
+
+**** grace
+
+**** deterministic parallel java
+
+** implementation
+
+*** language work
+
+    for loop, >=, <=, !=, && and || operators
+
+    predefined class class, both compiler and VM parse it to load
+    predefined classes, their methods and determine their native
+    method indices
+
+*** real class
+
+*** threading model
+
+**** VM work
+
+***** linux cpu affinity (for dmp)
+
+***** integer/string cache
+
+***** per-thread object ref cache
+
+***** reduce usage of mutex's in VM structs to improve multithreaded performance
+
+***** add monitor to each object using nlocks and new monitorenter/monitorexit instructions
+
+**** language work
+
+***** thread class
+
+***** wait/notify object methods
+
+***** synchronized blocks
+
+*** dmp
+
+**** overall desgin
+
+     each object gets own dmp struct with function pointers for each hook
+
+**** object dmp
+
+     object_dmp_load, object_dmp_store, object_dmp_chown
+
+**** thread dmp
+
+     thread_dmp_thread_creation, thread_dmp_thread_start,
+     thread_dmp_thread_destruction, thread_dmp_thread_join,
+     thread_dmp_thread_sleep, thread_dmp_execute_instruction
+
+**** nlock dmp
+
+     nlock_dmp_default_lock, nlock_dmp_default_unlock,
+     nlock_dmp_default_timedwait
+
+**** table_dmp
+
+     table_dmp_load, table_dmp_store
+
+     discuss attempt to implement table entirely with objects
+
+**** dmp stats -D option
+
+** results
+
+*** tests performed
+
+**** radix sort
+
+**** jacobi
+
+**** DPL boolean satisfiabilty
+
+** conclusion
+
+*** future work
