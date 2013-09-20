@@ -1,0 +1,53 @@
+\chapter{INTRODUCTION}
+
+Nondeterministic execution is an unfortunate side effect of existing
+multicore and multiprocessor systems.  Nondeterminism in parallel
+programs can arise from many different factors such as differences in
+thread scheduling, cache state and I/O delays.  Nondeterministic
+execution leads to an array of problems:
+
+\begin{itemize}
+\item it causes programs to produce different output when executed
+  with the same inputs
+
+\item makes concurrency bugs such as race conditions hard to reproduce
+
+\item creates bugs that lie dormant in multithreaded code for years
+  before an input and thread interleaving are executed that causes
+  them to be discovered
+
+\item makes unit testing of multithreaded code difficult and less
+  conclusive
+
+\item causes major frustrations to programmers wishing to enjoy the
+  benefits of parallel programming
+\end{itemize}
+
+However, recent research has shown that deterministic execution of
+parallel programs is possible on today's hardware, and can be achieved
+with overhead small enough that it is sufficient for debugging
+purposes and, depending on the application, even for deployment.
+
+A program is said to execute deterministically if it always produces
+the same output given the same inputs.  Deterministic execution offers
+several advantages such as more reliable testing, reproducible bugs
+and more useful crash reports.  The overhead required to ensure
+deterministic execution can be reduced if certain assumptions about
+the program are made.  Strong determinism guarantees a deterministic
+ordering of all shared memory accesses for a given input.  Weak
+determinism guarantees a deterministic ordering of all lock
+acquisitions for a given input.  Weak determinism yields deterministic
+execution only if the program is data-race free, while strong
+determinism makes no assumptions about program correctness.  Strong
+determinism is concerned with all accesses to shared memory whereas
+weak determinism requires that only lock operations are watched.
+Because of this, the overhead to enforce strong determinism is higher
+than weak determinism.
+
+Most research in deterministic execution has been in the form of
+run-time frameworks for C/C++ code that requires code to be recompiled
+before it can be executed deterministically.  In contrast, my thesis
+involved applying existing deterministic execution techniques to a
+Java-like language that is executed in a virtual machine.  I believed
+is that these techniques can be applied with lower overhead in a
+virtual machine setting than in a compiled language.

@@ -1,0 +1,91 @@
+\documentclass[11pt]{report}
+\usepackage{unhthesis}
+\usepackage{graphics}
+
+%------------------------------------------------------------------------------
+%  Preliminary Pages - Fill in the `blanks' noted.
+%------------------------------------------------------------------------------
+
+\begin{document}
+			% TITLE PAGE
+							%======================
+\title{DETERMINISTIC EXECUTION IN A JAVA-LIKE LANGUAGE} % Your title
+\author{Niels Widger}					% Your name
+\prevdegrees{B.S., University of New Hampshire (2009)}	% Your old degree
+\major{Computer Science}				% Your new major
+\degree{Master of Science}				% Your new degree
+\degreemonth{December}					% When awarded.
+\degreeyear{2013}					%
+\thesisdate{\today}					% Date of document.
+\DOCUMENTtype{THESIS}				% or DISSERTATION
+\Documenttype{Thesis}				% or Dissertation
+\documenttype{thesis}				% or dissertation
+\maketitle
+							% COPYRIGHT PAGE
+							%======================
+%\copyrightyear{2007}					% Delete these
+%\makecopyright						% if no copyright
+							% page.
+
+							% APPROVAL PAGE
+							%======================
+\supervisor{Philip Hatcher,}{Professor of Computer Science}
+\committee{Michel Charpentier,}{Associate Professor of Computer Science}
+\committee{Robert Russell,}{Associate Professor of Computer Science}
+\makeapproval						%
+
+			% ACK. PAGE
+							%======================
+\begin{acknowledgments}
+  I would like to thank Professor Hatcher for all of his help
+  throughout this entire project.  I would also like to thank my
+  committee for their guidance and advice.
+\end{acknowledgments}
+
+
+			% OTHER PAGES
+							%======================
+\tableofcontents					% Always needed...
+\listoftables						% Delete if no tables.
+\addcontentsline{toc}{section}{LIST OF TABLES}
+\listoffigures						% Delete if no figures.
+\addcontentsline{toc}{section}{LIST OF FIGURES}
+
+%------------------------------------------------------------------------------
+%  Document body - Place text into individual include files, such as
+%                  as "chap1.tex", or replace each "\include{}" statement
+%                  with your actual document text.
+%------------------------------------------------------------------------------
+
+%% begin code environment
+\newcommand{\bnncode}{
+	\begin{tabbing}
+	00. nn\=nn\=nn\=nn\=nn\=nn\=nn\=nn\=nn\=nn\kill
+}
+
+%% end code environment
+\newcommand{\ecode}{\end{tabbing}}
+
+\newcounter{lnctr}
+\setcounter{lnctr}{0}
+\newcommand{\codeln}{%
+  \addtocounter{lnctr}{1}%
+  \arabic{lnctr}}
+
+			% ABSTRACT PAGE
+							%======================
+\include{abstract}
+
+\pagenumbering{arabic}
+			% CHAPTERS
+							%======================
+\include{introduction}
+\include{background}
+\include{implementation}
+\include{results}
+\include{conclusions}
+\addcontentsline{toc}{chapter}{BIBLIOGRAPHY}
+\bibliographystyle{plain}
+\bibliography{sources}
+
+\end{document}

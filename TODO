@@ -3,7 +3,7 @@
 #+STARTUP: hidestars
 #
 # Niels Widger
-# Time-stamp: <17 Sep 2013 at 18:38:25 by nwidger on macros.local>
+# Time-stamp: <19 Sep 2013 at 18:26:32 by nwidger on macros.local>
 
 * mc
 * mas
@@ -43,19 +43,28 @@
 100,000 instruction quantum, reduced serial mode, 5 ownership table depth  = -pr -Q100000 -g5
 100,000 instruction quantum, reduced serial mode, 10 ownership table depth = -pr -Q100000 -g10
 
+
 * outline
 
 ** abstract
+
+   take from proposal
 
 ** introduction
 
 *** thesis goals
 
+    take from proposal
+
 *** outline
+
+    use this outline
 
 ** background
 
 *** previous work
+
+    this can come from the proposal
 
 **** deterministic shared memory multiprocessing (dmp)
 
@@ -71,27 +80,57 @@
 
 *** language work
 
-    for loop, >=, <=, !=, && and || operators
+**** for benchmarks
 
-    predefined class class, both compiler and VM parse it to load
-    predefined classes, their methods and determine their native
-    method indices
+     for loop, >=, <=, !=, && and || operators
 
-*** real class
+     predefined class class, both compiler and VM parse it to load
+     predefined classes, their methods and determine their native
+     method indices
+
+*** VM work
+
+**** real class
 
 *** threading model
 
 **** VM work
 
-***** linux cpu affinity (for dmp)
+***** implement thread struct containing its own VM stack, use libpthread to create OS thread for each
 
-***** integer/string cache
+***** use pthread_set/getspecific to store pointer to thread struct to determine running thread at any time
 
-***** per-thread object ref cache
+***** make garbage collector with multiple threads
 
-***** reduce usage of mutex's in VM structs to improve multithreaded performance
+      use thread ref_set in heap to prevent threads from being garbage collected
+
+***** linux cpu affinity code when dmp is on
 
 ***** add monitor to each object using nlocks and new monitorenter/monitorexit instructions
+
+***** perfomance
+
+****** global integer/string cache
+
+****** per-thread object ref cache reduces contention of (shared) heap accesses
+
+****** per-thread free object ref cache reduces contention of (shared) heap accesses
+
+****** per-thread free object cache reduces contention of (shared) heap allocations
+
+****** reduce usage of mutex's in VM structs to improve multithreaded performance
+
+******* vital for good performance in shared data structures aka
+
+	1. heap
+
+	2. class table
+
+	3. instruction table
+
+	4. native method array
+
+	5. method area (mmap'd class file)
 
 **** language work
 
@@ -101,38 +140,106 @@
 
 ***** synchronized blocks
 
+***** add monitorenter/monitorexit instruction to compiler/assembler
+
 *** dmp
 
-**** overall desgin
+**** design
 
-     each object gets own dmp struct with function pointers for each hook
+***** goals
 
-**** object dmp
+    1. turn dmp on/off with VM CLI switch, no recompiling maTe source or the maTe VM.
 
-     object_dmp_load, object_dmp_store, object_dmp_chown
+    2. flexible enough to allow different handling for each thread/object
 
-**** thread dmp
+    3. minimize performance hit when running with dmp off (in both time/memory)
 
-     thread_dmp_thread_creation, thread_dmp_thread_start,
-     thread_dmp_thread_destruction, thread_dmp_thread_join,
-     thread_dmp_thread_sleep, thread_dmp_execute_instruction
+    4. hooks into dmp code from VM are self-contained
 
-**** nlock dmp
+    5. no changes to compiler/assembler
 
-     nlock_dmp_default_lock, nlock_dmp_default_unlock,
-     nlock_dmp_default_timedwait
+***** dmp
 
-**** table_dmp
+      1. Global dmp interface creates object_dmp/thread_dmp/nlock_dmp/table_dmp
 
-     table_dmp_load, table_dmp_store
+	 Provides central location to pass different attributes to
+	 different threads/objects, although currently everyone is
+	 given the same attributes.  Attributes contain any persistent
+	 data the DMP module needs as well as a jump table for the
+	 various actions.
 
-     discuss attempt to implement table entirely with objects
+       2. Global dmp interface provides barrier for threads to block
+
+	  When a thread reaches the end of its quantum, a call to
+	  $dmp_thread_block$ is made.
+
+       3. Global dmp interface provides default ownership table policy
+          actions for reads/writes
+
+	  Separate function for shared memory reads and writes.  Takes
+	  the ref of the current owner and the ref of the thread
+	  trying to access it, returns a thread action and an
+	  ownership action.  Thread action is either block or proceed.
+	  Ownership action is either no action, shared action or
+	  private action.  The current uses the same ownership table
+	  policy for all threads/objects, however this could be
+	  modified.
+	  
+       4. Each object gets own dmp struct with function pointers for
+          each hook
+
+      dmp_create_object_dmp, dmp_create_thread_dmp,
+      dmp_create_nlock_dmp, dmp_create_table_dmp, dmp_thread_block,
+      dmp_shm_read, dmp_shm_write
+
+***** object dmp
+
+      object_dmp_load, object_dmp_store, object_dmp_chown
+
+****** attributes
+
+       owner, depth, ops
+
+***** thread dmp
+
+      thread_dmp_thread_creation, thread_dmp_thread_start,
+      thread_dmp_thread_destruction, thread_dmp_thread_join,
+      thread_dmp_thread_sleep, thread_dmp_execute_instruction
+
+****** attributes
+
+       serial_mode, lock_count, quantum_size, instruction_counter, ops
+
+***** nlock dmp
+
+      nlock_dmp_default_lock, nlock_dmp_default_unlock,
+      nlock_dmp_default_timedwait
+
+****** attributes
+
+       ops
+
+***** table_dmp
+
+****** attributes
+
+       ops
+
+      table_dmp_load, table_dmp_store
+
+      discuss attempt to implement table entirely with objects
 
 **** dmp stats -D option
 
 ** results
 
+*** racey
+
 *** tests performed
+
+    take evaluation from proposal
+
+    Data sharing characteristics?  Amount of parallelism?
 
 **** radix sort
 
@@ -142,4 +249,30 @@
 
 ** conclusion
 
+   My conclusion would say that implementing DMP inside a VM is still
+   a sound idea, but that I no longer think it's going to beat out the
+   performance of DMP implemented as a runtime-library for compiled
+   languages such as C/C++.  I would also conclude that implementing
+   an efficient multithreaded VM in and of itself is difficult,
+   especially when starting with a VM that was initially designed to
+   be only single-threaded.  My conclusion would discuss my ownership
+   table granularity idea and how experimental results did not find it
+   to be particularly effective in reducing the amount of time threads
+   block due to ownership changes.  I definitely found that the Table
+   class, being the most complex native class and also the only
+   built-in data structure, was one of the most difficult parts of the
+   VM to get working with DMP.
+
+   maTe the language and maTe the vm was designed to be entirely
+   single-threaded.  This assumption was used through the
+   implementation of the vm and caused a lot of grief during the
+   implementation phase of this thesis.
+
 *** future work
+
+    use predictive algorithm to learn memory access patterns as
+    program runs.  Change ownership of objects in such as way as to
+    increase the number of shared reads and private read/writes.
+
+    would be nice to make debugger work when running with more than
+    one thread

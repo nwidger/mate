@@ -1,0 +1,72 @@
+\chapter{RESULTS}
+\label{RESULTS}
+
+Evaluation of DMP implemented in the maTe virtual machine will be
+performed by analyzing its performance on a number of benchmark
+programs and comparing it to an implementation of the maTe virtual
+machine without DMP.
+
+The following three benchmarks will be used:
+
+\begin{itemize}
+\item lu - The LU program factors a dense matrix into the product of a
+  lower triangular and an upper triangular matrix
+
+\item ocean - The OCEAN program simulates large-scale ocean movements
+  based on eddy and boundary currents
+
+\item fmm - The FMM application implements a parallel adaptive Fast
+  Multipole Method to simulate the interaction of a system of bodies
+  (N-body problem)
+\end{itemize}
+
+These three benchmarks were the best, worst and average performers for
+DMP using an ownership table in the DMP and CoreDet papers.  Therefore
+they are good choices to evaluate how well our DMP implementation is
+when compared to others.  Two more benchmarks will be implemented:
+
+\begin{itemize}
+\item parallel radix sort - Multithreaded radix sort
+
+\item parallel fibonnaci - Multithreaded fibonnaci generator
+\end{itemize}
+
+Comparison of my results and those from the DMP/CoreDet papers will
+not be a true ``apples-to-apples'' comparison.  The implementations of
+the benchmarks used by DMP \cite{dmp} and CoreDet \cite{coredet} were
+implemented using highly-tuned C/C++ code whereas for my thesis I will
+be implementing the benchmarks in maTe.  However, my thesis is that
+DMP executed in a virtual machine can be done with lower overhead.
+Overhead is relative to the particular execution environment being
+used, therefore the success of my thesis rests on showing that the
+relative performance penalty of a maTe program with DMP on is less
+than that of executing a C/C++ program with DMP on.
+
+All five benchmarks will be implemented in maTe and run across a range
+of parameters.  The parameters will be:
+
+\begin{itemize}
+\item quantum size - 1000, 10000, and 100000 instructions
+
+\item full serial mode or reduce serial mode
+
+\item ownership table granularity - 1, 5 and 10 depth
+\end{itemize}
+
+However, before running any benchmarks, the implementation should be
+tested to ensure it is truly deterministic.  Therefore Racey
+\cite{racey}, a deterministic stress test, will be run 10000 times for
+each configuration to ensure the correctness of the implementation.
+After gathering data from running the benchmarks, the results will be
+compared using the following metrics:
+
+\begin{itemize}
+\item overhead - measure difference in execution time when compared to
+  a non-DMP virtual machine.
+
+\item scalability - measure performance gained by executing benchmarks
+  using increasing number of threads (2, 4, 8 and 16 threads)
+
+\item sensitivity - measure difference in performance when parameters
+  are changed
+\end{itemize}
