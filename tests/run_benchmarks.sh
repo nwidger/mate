@@ -3,6 +3,14 @@
 trap "{ rm -f deleteme.log; set +x; exit 1; }" SIGINT SIGTERM
 pushd dmp
 
+rm -f results.log
+
+echo "#+STARTUP: showall"
+echo "#+STARTUP: hidestars"
+echo ""
+echo "| dmp    | class  | threads | quantum | serial  | depth |   time |"
+echo "|--------+--------+---------+---------+---------+-------+--------|"
+
 for class in radix jacobi dpl
 do
     if [ "$class" == "radix" ];
@@ -25,9 +33,14 @@ do
 	    cat $input >> deleteme.log
 	fi
 
+	output="nondmp_${class}_${threads}.log"
 	set -x
-	/usr/bin/time -p mvm ${class}.class < deleteme.log &> "nondmp_${class}_${threads}.log"
+	/usr/bin/time -p mvm ${class}.class < deleteme.log &> "$output"
 	set +x
+
+	t=$(grep real "$output" | awk '{ print $2 }')
+	printf "| %-6s | %-6s | %7s | %7s | %-7s | %5s | %6s |\n" \
+	    nondmp $class $threads x x x $t >> results.log
 
 	for quantum in 1000 10000 100000;
 	do
@@ -52,7 +65,9 @@ do
 		    set +x
 
 		    t=$(grep real "$output" | awk '{ print $2 }')
-		    printf "%-40s %s\n" $output $t >> results.log
+		    printf "| %-6s | %-6s | %7s | %7s | %-7s | %5s | %6s |\n" \
+			dmp $class $threads $quantum $serial_mode $depth $t >> results.log
+
 		done
 	    done
 	done
