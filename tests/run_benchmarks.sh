@@ -5,11 +5,11 @@ pushd dmp
 
 rm -f results.log
 
-echo "#+STARTUP: showall"
-echo "#+STARTUP: hidestars"
-echo ""
-echo "| dmp    | class  | threads | quantum | serial  | depth |   time |"
-echo "|--------+--------+---------+---------+---------+-------+--------|"
+echo "#+STARTUP: showall"                                                  >> results.log
+echo "#+STARTUP: hidestars"                                                >> results.log
+echo ""                                                                    >> results.log
+echo "| dmp    | class  | threads | quantum | serial  | depth |   time |"  >> results.log
+echo "|--------+--------+---------+---------+---------+-------+--------|"  >> results.log
 
 for class in radix jacobi dpl
 do
