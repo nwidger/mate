@@ -1,14 +1,28 @@
 #!/bin/bash
 
+moving_average() {
+    local n=$1
+    local t=$2
+    local avg=$3
+
+    if [ $n -eq 1 ];
+    then
+	avg=$t
+    else
+	avg=$(echo "scale=2; $avg + ($t - ($avg / $n))" | bc -q)
+    fi
+
+    echo $avg
+}
+
 trap "{ rm -f deleteme.log; set +x; exit 1; }" SIGINT SIGTERM
 pushd dmp
 
 rm -f results.log
 
-echo "#+STARTUP: showall"                                                  >> results.log
-echo "#+STARTUP: hidestars"                                                >> results.log
-echo ""                                                                    >> results.log
-echo "| dmp    | class  | threads | quantum | serial  | depth |   time |"  >> results.log
+echo "|--------+--------+---------+---------+---------+-------+--------|"  >> results.log
+printf "| %-6s | %-6s | %7s | %7s | %-7s | %5s | %6s |\n" \
+    dmp class threads quantum serial depth avg >> results.log
 echo "|--------+--------+---------+---------+---------+-------+--------|"  >> results.log
 
 for class in radix jacobi dpl
@@ -33,14 +47,21 @@ do
 	    cat $input >> deleteme.log
 	fi
 
-	output="nondmp_${class}_${threads}.log"
-	set -x
-	/usr/bin/time -p mvm ${class}.class < deleteme.log &> "$output"
-	set +x
+	avg=0.0
 
-	t=$(grep real "$output" | awk '{ print $2 }')
+	for n in 1 2 3 4 5 6 7 8 9 10;
+	do
+	    output="nondmp_${n}_${class}_${threads}.log"
+	    set -x
+	    /usr/bin/time -p mvm ${class}.class < deleteme.log &> "$output"
+	    set +x
+
+	    t=$(grep real "$output" | awk '{ print $2 }')
+	    avg=$(moving_average $n $t $avg)
+	done
+
 	printf "| %-6s | %-6s | %7s | %7s | %-7s | %5s | %6s |\n" \
-	    nondmp $class $threads x x x $t >> results.log
+	    nondmp $class $threads x x x $avg >> results.log
 
 	for quantum in 1000 10000 100000;
 	do
@@ -59,15 +80,21 @@ do
 		do
 		    g_arg="-g$depth"
 
-		    output="dmp_${class}_${threads}_${quantum}_${serial_mode}_${depth}.log"
-		    set -x
-		    /usr/bin/time -p mvm -Dp $q_arg $r_arg $g_arg ${class}.class < deleteme.log &> "$output"
-		    set +x
+		    avg=0.0
 
-		    t=$(grep real "$output" | awk '{ print $2 }')
+		    for n in 1 2 3 4 5 6 7 8 9 10;
+		    do
+			output="dmp_${n}_${class}_${threads}_${quantum}_${serial_mode}_${depth}.log"
+			set -x
+			/usr/bin/time -p mvm -Dp $q_arg $r_arg $g_arg ${class}.class < deleteme.log &> "$output"
+			set +x
+
+			t=$(grep real "$output" | awk '{ print $2 }')
+			avg=$(moving_average $n $t $avg)
+		    done
+
 		    printf "| %-6s | %-6s | %7s | %7s | %-7s | %5s | %6s |\n" \
-			dmp $class $threads $quantum $serial_mode $depth $t >> results.log
-
+			dmp $class $threads $quantum $serial_mode $depth $avg >> results.log
 		done
 	    done
 	done
