@@ -9,7 +9,7 @@ moving_average() {
     then
 	avg=$t
     else
-	avg=$(echo "scale=2; $avg + ($t - ($avg / $n))" | bc -q)
+	avg=$(echo "scale=2; $avg + (($t - $avg) / $n)" | bc -q 2> /dev/null)
     fi
 
     echo $avg
