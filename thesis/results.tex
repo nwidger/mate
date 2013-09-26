@@ -70,3 +70,43 @@ compared using the following metrics:
 \item sensitivity - measure difference in performance when parameters
   are changed
 \end{itemize}
+
+\subsection{Characterization}
+
+\subsubsection{Radix}
+
+This benchmark performs a parallel radix search implemented by
+repeatedly running counting sort starting with an 8 bit mask.  The
+input array contained 500 16-bit random integers between the values of
+103 and 65326.  The standard radix search algorithm was parallelized in two places:
+
+* Determining the maximum - evenly distribute numbers to N worker
+threads.  Each thread iterates over its portion of the shared array
+and determines its largest value.  Iterate over each thread's maximum
+to determine global maximum.
+
+* Masking each number - evenly distribute numbers to N worker threads.
+Each thread iterates over its portion of the shared array, masking
+each number and placing the result in new array.
+
+Neither of these segments requires synchronization as the threads are
+working on disjoint portions of the array.  There are no synchronized
+blocks in the maTe source code of this benchmark.
+
+After the Counters are finished, the masked numbers are aggregated
+into a single array.  From this point on the counting sort is finished
+in a serial fashion.
+
+\subsubsection{Jacobi}
+
+Uses two ``2-dimensional'' global Tables, one for the original values
+and another for the final values.  A worker thread is created for each
+row in the table, and each worker runs the Jacobi algorithm on the
+cells in its assigned row.  The worker threads each read/write to the
+shared original/new global Tables, using synchronized blocks to manage
+thread contention.  When each thread finishes it returns the change in
+temperature.  When all threads have finished, the maximum change
+across all threads is stored.  This whole process is repeated for 20
+iterations.
+
+\subsubsection{DPL}
