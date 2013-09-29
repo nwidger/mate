@@ -40,6 +40,11 @@ do
 
     for threads in 2 4 8 16;
     do
+	if [[ "$class" == "jacobi" && $threads -gt 2 ]];
+	then
+	    continue
+	fi
+
 	echo $threads > deleteme.log
 
 	if [ "$input" != "" ];

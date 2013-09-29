@@ -1,51 +1,40 @@
 \chapter{RESULTS}
 \label{RESULTS}
 
-Evaluation of DMP implemented in the maTe virtual machine will be
+Evaluation of DMP implemented in the maTe virtual machine was
 performed by analyzing its performance on a number of benchmark
 programs and comparing it to an implementation of the maTe virtual
 machine without DMP.
 
-The following three benchmarks will be used:
-
-\begin{itemize}
-\item lu - The LU program factors a dense matrix into the product of a
-  lower triangular and an upper triangular matrix
-
-\item ocean - The OCEAN program simulates large-scale ocean movements
-  based on eddy and boundary currents
-
-\item fmm - The FMM application implements a parallel adaptive Fast
-  Multipole Method to simulate the interaction of a system of bodies
-  (N-body problem)
-\end{itemize}
-
-These three benchmarks were the best, worst and average performers for
-DMP using an ownership table in the DMP and CoreDet papers.  Therefore
-they are good choices to evaluate how well our DMP implementation is
-when compared to others.  Two more benchmarks will be implemented:
+The following three benchmarks were implemented:
 
 \begin{itemize}
 \item parallel radix sort - Multithreaded radix sort
 
-\item parallel fibonnaci - Multithreaded fibonnaci generator
+\item jacobi - uses the Jacobi method to compute temperature changes
+  on a 20x25 plate.
+
+\item parallel DPLL - Multithreaded boolean satisfiability using DPLL
+  algorithm
 \end{itemize}
 
-Comparison of my results and those from the DMP/CoreDet papers will
+Comparison of my results with those from the DMP/CoreDet papers will
 not be a true ``apples-to-apples'' comparison.  The implementations of
 the benchmarks used by DMP \cite{dmp} and CoreDet \cite{coredet} were
-implemented using highly-tuned C/C++ code whereas for my thesis I will
-be implementing the benchmarks in maTe.  However, my thesis is that
-DMP executed in a virtual machine can be done with lower overhead.
+implemented using highly-tuned C/C++ code whereas for my thesis I
+implemented benchmarks in maTe.  However, my thesis is that DMP
+executed in a virtual machine can be done with lower overhead.
 Overhead is relative to the particular execution environment being
 used, therefore the success of my thesis rests on showing that the
 relative performance penalty of a maTe program with DMP on is less
 than that of executing a C/C++ program with DMP on.
 
-All five benchmarks will be implemented in maTe and run across a range
-of parameters.  The parameters will be:
+All three benchmarks were implemented in maTe and run across a range
+of parameters.  The parameters were:
 
 \begin{itemize}
+\item threads - 2, 4, 8 or 16 threads
+
 \item quantum size - 1000, 10000, and 100000 instructions
 
 \item full serial mode or reduce serial mode
@@ -53,12 +42,14 @@ of parameters.  The parameters will be:
 \item ownership table granularity - 1, 5 and 10 depth
 \end{itemize}
 
-However, before running any benchmarks, the implementation should be
-tested to ensure it is truly deterministic.  Therefore Racey
-\cite{racey}, a deterministic stress test, will be run 10000 times for
-each configuration to ensure the correctness of the implementation.
-After gathering data from running the benchmarks, the results will be
-compared using the following metrics:
+The $jacobi$ benchmark uses a fixed number of threads, and so this
+benchmark not include the threads parameter.
+
+Before running any benchmarks, I tested my implementation of DMP to
+ensure it was truly deterministic by running Racey \cite{racey}, a
+deterministic stress test, 10000 times for each configuration.  The
+results gathered from running the benchmarks will be compared using
+the following metrics:
 
 \begin{itemize}
 \item overhead - measure difference in execution time when compared to
@@ -71,23 +62,26 @@ compared using the following metrics:
   are changed
 \end{itemize}
 
-\subsection{Characterization}
+\subsection{Benchmark Results}
 
 \subsubsection{Radix}
 
 This benchmark performs a parallel radix search implemented by
 repeatedly running counting sort starting with an 8 bit mask.  The
 input array contained 500 16-bit random integers between the values of
-103 and 65326.  The standard radix search algorithm was parallelized in two places:
+103 and 65326.  The standard radix search algorithm was parallelized
+in two places:
 
-* Determining the maximum - evenly distribute numbers to N worker
-threads.  Each thread iterates over its portion of the shared array
-and determines its largest value.  Iterate over each thread's maximum
-to determine global maximum.
+\begin{itemize}
+\item Determining the maximum - evenly distribute numbers to N Maxer
+  threads.  Each thread iterates over its subset of the shared array
+  and determines the largest value.  After, the largest of each
+  thread's maximum is determined and used as the global maximum.
 
-* Masking each number - evenly distribute numbers to N worker threads.
-Each thread iterates over its portion of the shared array, masking
-each number and placing the result in new array.
+\item Masking each number - evenly distribute numbers to N Counter
+  threads.  Each thread iterates over its subset of the shared array,
+  masking off each number and placing the result in new array.
+\end{itemize}
 
 Neither of these segments requires synchronization as the threads are
 working on disjoint portions of the array.  There are no synchronized
@@ -96,6 +90,21 @@ blocks in the maTe source code of this benchmark.
 After the Counters are finished, the masked numbers are aggregated
 into a single array.  From this point on the counting sort is finished
 in a serial fashion.
+
+The number of threads can be given as a command-line option.
+
+In the results, the first point of interest is that the non-DMP runs
+beat out all of the DMP runs by a good margin.  The fastest DMP run
+was with 8 threads, a 1000 instruction quantum, full serial mode and
+an ownership table depth of 1.  However, it is interesting to note
+that, all else being equal, enabling reduced serial mode does not seem
+to affect the results either positively or negatively.  This is likely
+due to the lack of sychronized blocks in this benchmarks.  Without
+threads acquiring/releasing object monitors, the lock counting
+performed in reduced serial mode is never triggered causing an early
+end to a thread's serial segment.  It is also very clear from the
+results that radix does not benefit from increasing the ownership
+table depth.
 
 \subsubsection{Jacobi}
 
@@ -109,4 +118,34 @@ temperature.  When all threads have finished, the maximum change
 across all threads is stored.  This whole process is repeated for 20
 iterations.
 
-\subsubsection{DPL}
+The number of threads is fixed at the number of rows in the input
+table, meaning 20 threads for the 20x25 plate used in the benchmark.
+
+The most surprising result from the jacobi benchmark is the clear
+advantage given to the runs using reduced serial mode.  Except for two
+results where the quantum is brought to the lowest value (1000
+instructions) and the ownership table depth is brought up (5 and 10),
+all runs with reduced serial mode are sometimes twice as fast as runs
+with full serial mode.  This is likely due to the fact that the main
+loop involves each thread acquiring and quickly releasing the old and
+new Table's monitors.
+
+\subsubsection{DPLL}
+
+Solves boolean satisfiability problems using the
+Davis-Putnam-Logemann-Loveland (DPLL) algorithm.  Input files are
+3-SAT problems in CNF format.  The algorithm is parallelized by
+creating N threads, given at the command-line, where each thread has a
+queue of nodes on the truth tree to process.  The queue is made up of
+chained buckets, one bucket for each level on the tree (corresponding
+to each variable in the input problem).  At the beginning of the
+program, the root of the tree is pushed onto the queue of the first
+thread.  Each thread continually removes a node from its queue,
+simplifies that node using the value of true for the node's variable
+and pushes the false node onto its queue.  If a thread reaches a
+dead-end in its subtree and has no more nodes on its queue, it steals
+a node off the queue of a randomly selected thread and continues.
+
+Each thread must acquire the monitor of a a queue's bucket before
+adding/removing a node from that level.
+
