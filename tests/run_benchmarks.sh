@@ -33,9 +33,9 @@ hline="|--------+--------+---------+---------+---------+-------+--------+-------
 
 rm -f results.log
 
-echo $hline							   >> results.log
+printf $hline							   >> results.log
 printf $format dmp class threads quantum serial depth avg overhead >> results.log
-echo $hline							   >> results.log
+printf $hline							   >> results.log
 
 for class in radix jacobi dpl
 do
@@ -117,7 +117,7 @@ do
 	done
     done
 
-    echo $hline >> results.log
+    printf $hline >> results.log
 done
 
 rm -f deleteme.log
