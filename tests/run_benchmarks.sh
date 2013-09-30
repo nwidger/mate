@@ -28,14 +28,12 @@ overhead() {
 trap "{ rm -f deleteme.log; set +x; exit 1; }" SIGINT SIGTERM
 pushd dmp
 
-format="| %-6s | %-6s | %7s | %7s | %-7s | %5s | %6s | %8s |\n"
-hline="|--------+--------+---------+---------+---------+-------+--------+----------|\n"
-
 rm -f results.log
 
-printf "%s" $hline						   >> results.log
-printf $format dmp class threads quantum serial depth avg overhead >> results.log
-printf "%s" $hline						   >> results.log
+echo '|--------+--------+---------+---------+---------+-------+--------+----------|' >> results.log
+printf '| %-6s | %-6s | %7s | %7s | %-7s | %5s | %6s | %8s |\n' \
+    dmp class threads quantum serial depth avg overhead >> results.log
+echo '|--------+--------+---------+---------+---------+-------+--------+----------|' >> results.log
 
 for class in radix jacobi dpl
 do
@@ -77,7 +75,8 @@ do
 	    non_dmp_avg=$(moving_average $n $t $non_dmp_avg)
 	done
 
-	printf $format nondmp $class $threads x x x $non_dmp_avg 0.00 >> results.log
+	printf '| %-6s | %-6s | %7s | %7s | %-7s | %5s | %6s | %8s |\n' \
+	    nondmp $class $threads x x x $non_dmp_avg 0.00 >> results.log
 
 	for quantum in 1000 10000 100000;
 	do
@@ -111,13 +110,14 @@ do
 
 		    ovrhd=$(overhead $non_dmp_avg $dmp_avg)
 
-		    printf $format dmp $class $threads $quantum $serial_mode $depth $dmp_avg $ovrhd >> results.log
+		    printf '| %-6s | %-6s | %7s | %7s | %-7s | %5s | %6s | %8s |\n' \
+			dmp $class $threads $quantum $serial_mode $depth $dmp_avg $ovrhd >> results.log
 		done
 	    done
 	done
     done
 
-    printf "%s" $hline >> results.log
+    echo '|--------+--------+---------+---------+---------+-------+--------+----------|' >> results.log
 done
 
 rm -f deleteme.log
