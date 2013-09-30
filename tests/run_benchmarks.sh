@@ -15,15 +15,27 @@ moving_average() {
     echo $avg
 }
 
+overhead() {
+    local base=$1
+    local curr=$2
+
+    ovrhd=$(echo "scale=2; 1.0 - ($base / $curr)" | bc -q 2> /dev/null)
+
+    echo $ovrhd
+
+}
+
 trap "{ rm -f deleteme.log; set +x; exit 1; }" SIGINT SIGTERM
 pushd dmp
 
+format="| %-6s | %-6s | %7s | %7s | %-7s | %5s | %6s | %8s |\n"
+hline="|--------+--------+---------+---------+---------+-------+--------+----------|"
+
 rm -f results.log
 
-echo "|--------+--------+---------+---------+---------+-------+--------|"  >> results.log
-printf "| %-6s | %-6s | %7s | %7s | %-7s | %5s | %6s |\n" \
-    dmp class threads quantum serial depth avg >> results.log
-echo "|--------+--------+---------+---------+---------+-------+--------|"  >> results.log
+echo $hline							   >> results.log
+printf $format dmp class threads quantum serial depth avg overhead >> results.log
+echo $hline							   >> results.log
 
 for class in radix jacobi dpl
 do
@@ -52,7 +64,7 @@ do
 	    cat $input >> deleteme.log
 	fi
 
-	avg=0.0
+	non_dmp_avg=0.0
 
 	for n in 1 2 3 4 5 6 7 8 9 10;
 	do
@@ -62,11 +74,10 @@ do
 	    set +x
 
 	    t=$(grep real "$output" | awk '{ print $2 }')
-	    avg=$(moving_average $n $t $avg)
+	    non_dmp_avg=$(moving_average $n $t $non_dmp_avg)
 	done
 
-	printf "| %-6s | %-6s | %7s | %7s | %-7s | %5s | %6s |\n" \
-	    nondmp $class $threads x x x $avg >> results.log
+	printf $format nondmp $class $threads x x x $non_dmp_avg 0.00 >> results.log
 
 	for quantum in 1000 10000 100000;
 	do
@@ -85,7 +96,7 @@ do
 		do
 		    g_arg="-g$depth"
 
-		    avg=0.0
+		    dmp_avg=0.0
 
 		    for n in 1 2 3 4 5 6 7 8 9 10;
 		    do
@@ -95,15 +106,18 @@ do
 			set +x
 
 			t=$(grep real "$output" | awk '{ print $2 }')
-			avg=$(moving_average $n $t $avg)
+			dmp_avg=$(moving_average $n $t $dmp_avg)
 		    done
 
-		    printf "| %-6s | %-6s | %7s | %7s | %-7s | %5s | %6s |\n" \
-			dmp $class $threads $quantum $serial_mode $depth $avg >> results.log
+		    ovrhd=$(overhead $non_dmp_avg $dmp_avg)
+
+		    printf $format dmp $class $threads $quantum $serial_mode $depth $dmp_avg $ovrhd >> results.log
 		done
 	    done
 	done
     done
+
+    echo $hline >> results.log
 done
 
 rm -f deleteme.log
