@@ -19,7 +19,7 @@ overhead() {
     local base=$1
     local curr=$2
 
-    ovrhd=$(echo "scale=2; 1.0 - ($base / $curr)" | bc -q 2> /dev/null)
+    ovrhd=$(echo "scale=2; $curr / $base" | bc -q 2> /dev/null)
 
     echo $ovrhd
 
@@ -76,7 +76,7 @@ do
 	done
 
 	printf '| %-6s | %-6s | %7s | %7s | %-7s | %5s | %6s | %8s |\n' \
-	    nondmp $class $threads x x x $non_dmp_avg 0.00 >> results.log
+	    nondmp $class $threads x x x $non_dmp_avg .00 >> results.log
 
 	for quantum in 1000 10000 100000;
 	do
