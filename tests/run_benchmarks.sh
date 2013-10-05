@@ -19,10 +19,9 @@ overhead() {
     local base=$1
     local curr=$2
 
-    ovrhd=$(echo "scale=2; $curr / $base" | bc -q 2> /dev/null)
+    ovrhd=$(echo "scale=2; ($curr - $base) / $base" | bc -q 2> /dev/null)
 
     echo $ovrhd
-
 }
 
 trap "{ rm -f deleteme.log; set +x; exit 1; }" SIGINT SIGTERM
