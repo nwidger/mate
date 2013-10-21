@@ -37,7 +37,7 @@ of parameters.  The parameters were:
 
 \item quantum size - 1000, 10000, and 100000 instructions
 
-\item full serial mode or reduce serial mode
+\item full serial mode or reduced serial mode
 
 \item ownership table granularity - 1, 5 and 10 depth
 \end{itemize}
@@ -60,6 +60,25 @@ the following metrics:
 \end{itemize}
 
 \subsection{Benchmark Results}
+
+In order to make discussing specific benchmark results more concise, I
+will use the following notation:
+
+\begin{itemize}
+\item -Q$N$ - the quantum size (-Q$1000$ means a quantum size of
+  $1,000$).
+
+\item -g$N$ - the ownership table granularity (-g$5$ means an
+  ownership table granularity of $5$).
+
+\item -r - reduced serial mode, the absense of -r means full serial
+  mode.
+\end{itemize}
+
+For example, $-Q10000 -g1$ means a run with a quantum size of
+$10,000$, an ownership table granularity of $5$ and full serial mode,
+whereas $-Q1000 -g10 -r$ means a run with a quantum size of $1,000$,
+an ownership table granularity of $10$ and reduced serial mode.
 
 \subsubsection{Radix}
 
@@ -92,8 +111,7 @@ The number of threads can be given as a command-line option.
 
 In the results, the non-DMP runs unsurprisingly beat out all of the
 DMP runs with overhead ranging from $54\%$ to $4,520\%$.  The fastest
-DMP run was with 8 threads, a 1000 instruction quantum, full serial
-mode and an ownership table depth of 1 with an execution time of 2.65
+DMP run was $-Q1000 -g1$ with 8 threads with an execution time of 2.65
 seconds.
 
 The execution time of this benchmark does not appear sensitive to the
@@ -133,17 +151,16 @@ The number of threads is fixed at the number of rows in the input
 table, meaning 20 threads for the 20x25 plate used in the benchmark.
 
 The non-DMP Jacobi runs averaged 2.91 seconds of runtime.  With DMP
-enabled, the overhead ranged from $127\%$ to $1,221\%$.  The most
+enabled, the overhead ranged from $27\%$ to $1,117\%$.  The most
 surprising result from the Jacobi benchmark is the clear advantage
-given to the runs using reduced serial mode.  Except for two results
-where the quantum is brought to the lowest value (1000 instructions)
-and the ownership table depth is brought up (5 and 10), runs with
-reduced serial mode are much as twice as fast as runs with full serial
+given to the runs using reduced serial mode.  The top seven non-DMP
+runs by both execution time and overhead are using reduced serial
 mode.  This is likely due to the fact that the main loop involves each
 thread acquiring and quickly releasing the old and new Table's
-monitors.  The best DMP run was using a 10,000 instruction quantum,
-reduced serial mode and an ownership table depth of 1 with an average
-time of 3.70 seconds.
+monitors.  The sensitivity to the chosen serial mode on this benchmark
+is strong enough to more than quadruple execution time in some cases
+(compare $-Q10000 -g1 -r$ and $-Q10000 -g1$).  The best DMP run was
+$-Q10000 -g1 -r$ with an average time of 3.71 seconds.
 
 \subsubsection{DPLL}
 
@@ -167,8 +184,7 @@ adding/removing a node from that level.
 The non-DMP DPL runs averaged .44 seconds (2 threads), .52 seconds (4
 threads), .68 seconds (8 threads) and 1.48 seconds (16).  With DMP
 enabled the overhead ranged from $109\%$ to $7,598\%$.  The best DMP
-run was using a 10,000 instruction quantum, full serial mode, an
-ownership table depth of 5 with an average time of .48 seconds.
+run was using $-Q10000 -g5$ with an average time of .48 seconds.
 
 %%% Local Variables:
 %%% mode: latex
