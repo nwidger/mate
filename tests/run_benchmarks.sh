@@ -67,7 +67,7 @@ do
 	do
 	    output="nondmp_${n}_${class}_${threads}.log"
 	    set -x
-	    /usr/bin/time -p mvm ${class}.class < deleteme.log &> "$output"
+	    /usr/bin/time -p mvm -R ${class}.class < deleteme.log &> "$output"
 	    set +x
 
 	    t=$(grep real "$output" | awk '{ print $2 }')
@@ -100,7 +100,7 @@ do
 		    do
 			output="dmp_${n}_${class}_${threads}_${quantum}_${serial_mode}_${depth}.log"
 			set -x
-			/usr/bin/time -p mvm -Dp $q_arg $r_arg $g_arg ${class}.class < deleteme.log &> "$output"
+			/usr/bin/time -p mvm -R -Dp $q_arg $r_arg $g_arg ${class}.class < deleteme.log &> "$output"
 			set +x
 
 			t=$(grep real "$output" | awk '{ print $2 }')
