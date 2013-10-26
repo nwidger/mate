@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <02 Mar 2013 at 11:16:16 by nwidger on macros.local>
+ * Time-stamp: <26 Oct 2013 at 11:47:03 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -45,7 +45,7 @@
 #include "thread_dmp.h"
 #endif
 
-#define OPTARGS ":m:s:i:daqcvhpQ:g:rD"
+#define OPTARGS ":m:s:i:daqcvhRpQ:g:rD"
 
 /* globals */
 FILE *input;
@@ -81,6 +81,7 @@ int print_trace;
 int verbose;
 int debug;
 int restart;
+int integer_seed_rand;
 
 /* forward declarations */
 void usage();
@@ -120,6 +121,7 @@ void usage() {
 	fprintf(stderr, "           removing any extension from the class file and appending a \".sym\" extension.\n");
 	fprintf(stderr, "  -m NUM   Use a heap with a size of NUM bytes, specify \"inf\" for no limit.  Default is %d bytes.\n",
 		HEAP_DEFAULT_SIZE);
+	fprintf(stderr, "  -R       Disable seeding of Integer.rand.\n");
 #ifdef DMP
 	fprintf(stderr, "  -p       Enable DMP (cannot be used with -c).\n");
 	fprintf(stderr, "  -Q NUM   With -p, specify quantum size.  Default is %d.\n",
@@ -501,6 +503,7 @@ int main(int argc, char *argv[]) {
 	symbol_file = NULL;
 	disassemble = 0;
 	debug = 0;
+	integer_seed_rand = INTEGER_SEED_RAND;
 
 	if (argc < 2) {
 		usage();
@@ -550,6 +553,9 @@ int main(int argc, char *argv[]) {
 				fprintf(stderr, "-m must be a positive integer.\n");
 				err = 1;
 			}
+			break;
+		case 'R':
+			integer_seed_rand = 0;
 			break;
 #ifdef DMP
 		case 'p':

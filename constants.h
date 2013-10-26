@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <04 Sep 2013 at 20:17:19 by nwidger on macros.local>
+ * Time-stamp: <26 Oct 2013 at 11:38:05 by nwidger on macros.local>
  */
 
 #ifndef _MVM_CONSTANTS_H
@@ -111,6 +111,7 @@
 #define INTEGER_MAX_INTEGER 2147483648U
 #define INTEGER_MIN_INTEGER 0
 #define INTEGER_TO_STRING_BUFFER_SIZE 12 /* strlen("-2147483648") == 11 */
+#define INTEGER_SEED_RAND 1
 
 /* predefined real constants */
 #define REAL_TO_STRING_BUFFER_SIZE 500

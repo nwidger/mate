@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <10 Dec 2012 at 19:21:40 by nwidger on macros.local>
+ * Time-stamp: <26 Oct 2013 at 11:44:37 by nwidger on macros.local>
  */
 
 #ifdef HAVE_CONFIG_H
@@ -358,7 +358,7 @@ int integer_rand(struct object *o) {
 		mvm_halt();
 	}
 
-	if (once) {
+	if (integer_seed_rand && once) {
 		srand(time(NULL));
 		once = !once;
 	}

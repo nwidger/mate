@@ -1,5 +1,5 @@
 /* Niels Widger
- * Time-stamp: <27 Jan 2012 at 19:16:21 by nwidger on macros.local>
+ * Time-stamp: <26 Oct 2013 at 11:39:52 by nwidger on macros.local>
  */
 
 #ifndef _MVM_GLOBALS_H
@@ -101,6 +101,7 @@ extern int verbose;
 extern int debug;
 /* set by debugger to signal a program restart */
 extern int restart;
+extern int integer_seed_rand;
 
 #ifdef DMP
 /* dmp globas */
