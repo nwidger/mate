@@ -59,6 +59,9 @@ the following metrics:
   are changed.
 \end{itemize}
 
+Each benchmark will be run 10 times for each combination of
+parameters.  Run-times shown are averages.
+
 \subsection{Benchmark Results}
 
 \subsubsection{Notation}
@@ -67,13 +70,13 @@ In order to make discussing specific benchmark results more concise, I
 will use the following notation:
 
 \begin{itemize}
-\item -Q$N$ - the quantum size (-Q$1000$ means a quantum size of
+\item $-QN$ - the quantum size ($-Q1000$ means a quantum size of
   $1,000$).
 
-\item -g$N$ - the ownership table granularity (-g$5$ means an
+\item $-gN$ - the ownership table granularity ($-g5$ means an
   ownership table granularity of $5$).
 
-\item -r - reduced serial mode, the absense of -r means full serial
+\item -r - reduced serial mode, the absense of $-r$ means full serial
   mode.
 \end{itemize}
 
@@ -195,16 +198,37 @@ a node off the queue of a randomly selected thread and continues.
 Each thread must acquire the monitor of a queue's bucket before
 adding/removing a node from that level.
 
-The non-DMP DPL runs averaged .44 seconds (2 threads), .52 seconds (4
-threads), .68 seconds (8 threads) and 1.48 seconds (16).  With DMP
-enabled the overhead ranged from $9\%$ to $7,310\%$.  The best DMP run
-was using $-Q10000 -g5$ with an average time of .48 seconds.
+When generating the results for this benchmark, the maTe virtual
+machine was run in a special mode which ensures the Integer.rand()
+method used in determining which level of a thread's queue to steal
+from always returns the same sequence of numbers.
 
-Many DMP runs beat out non-DMP runs!  Can't read too much into this
-result since times are dependent on the random steals which occur.
-The randomness comes in choosing which level of a queue to take a node
-from, otherwise levels are traversed in order until a non-empty level
-is found.
+The non-DMP DPL runs averaged .71 seconds (2 threads), 1.93 seconds (4
+threads), 4.06 seconds (8 threads) and 6.12 seconds (16).  With DMP
+enabled the overhead ranged from $-23\%$ to $2,789\%$.  The best DMP
+run was 2 threads using $-Q10000 -r -g1$ with an average time of .95
+seconds.
+
+The inefficiency of the maTe virtual machine when running multithreads
+is very apparent in this benchmark.  The average execution time for
+non-DMP runs gets worse as more threads are added.  Furthermore, many
+of the DMP runs executed faster than non-DMP runs executed with a
+higher thread count.
+
+DMP run of 8 threads with $-Q100000 -r -g1$ had an overhead of $-23\%$
+with an average execution time of 3.12 seconds, beating out the
+non-DMP run average time with 8 threads of 4.06 seconds.
+
+Higher instruction quantum values appear to perform better.
+
+For runs with 2 or 4 threads, different ownership table depths had
+little effect on execution time, adding no more than .64 seconds.
+Runs with 8 and 16 threads, however, exhibit extreme jumps in
+execution time when the ownership table depth is increased, compare
+the $-Q1000 -r -g5$ run with an execution time of 11.47 seconds with
+the $-Q1000 -r -g10$ run of 21.76 seconds.  With 16 threads, this
+trend gets even worse, with $-Q1000 -g5$ executing in 21.29 seconds
+and $-Q1000 -g10$ executing in 176.84 seconds.
 
 Overhead is very sensitive to DMP parameters chosen.
 
