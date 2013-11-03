@@ -41,52 +41,116 @@ acquired monitors are released regardless of the execution path.  The
 assembler was modified to be aware of the new instructions and their
 respective opcodes.
 
-I also added support for $for$ loops, boolean operators $&&$ and $||$
-and $!=$, $<=$ and $>=$ operators to the compiler.  None of these
-changes impacted the assembler or virtual machine, however they did
-make implementing the benchmarks much easier.
+I also added support for $for$ loops, boolean operators $\&\&$ and
+$\|\|$ and $!=$, $<=$ and $>=$ operators to the compiler.  None of
+these changes impacted the assembler or virtual machine, however they
+did make implementing the benchmarks much easier.
 
 \section{maTe Virtual Machine}
 
 The majority of the changes required to test this thesis were made in
-the virtual machine.  The first step was adding support for multiple
-user threads in the virtual machine.  Each $Thread$ instance is
-allocated a virtual machine stack and is executed using the $pthreads$
-threading library.  Further synchronization of virtual machine data
-structures such as the heap may be necessary (NOPE NEEDED TO REMOVE A
-TON OF SYNCHRONIZATION IN ORDER TO INCREASE MULTITHREADED
-PERFORMANCE).  Because a $Thread$ instance cannot be collected while
-its $run$ method is still executing, regardless of its accessibility
-via the global object graph, $Thread$ instances are protected from the
-garbage collector by adding them to a global thread set whose contents
-are not considered for deletion by the garbage collector.  The garbage
-collector also uses this set to iterate over the stack of each thread
-while marking the roots during its mark phase.  Finally, the virtual
-machine was modified to include a mutex lock in the implementation of
-each object implements the new $monitorenter$ and $monitorexit$
-instructions.
+the virtual machine.  This step can be broken down into two parts:
+adding threads and adding DMP.
 
-Secondly, DMP was implemented inside the virtual machine.  The
-ownership table is not stored as a global data structure but instead
-distributed amongst all objects: each object stores an $owner$ field.
-If $owner$ is $null$, the object is shared.  If $owner$ is not $null$,
-the object is private and $owner$ specifies the thread ID of its
-current owner.  The fetch/execute loop of each thread keeps an
-executed instructions count for tracking quantum size.  The
-implementation of the $getfield$ and $putfield$ instructions were
-modified to follow the ownership table policy from the DMP paper when
-checking the $owner$ field before allowing the instruction to execute.
-A global barrier is allocated when the virtual machine initializes.
-Calls to the barrier were placed in spots where a thread must block
-for parallel/serial mode:
+\subsection{Implementing Threads}
+
+The first step was adding support for multiple user threads in the
+virtual machine.  Each $Thread$ instance is allocated a virtual
+machine stack and is executed using the $pthreads$ threading library.
+Further synchronization of virtual machine data structures such as the
+heap may be necessary (NOPE NEEDED TO REMOVE A TON OF SYNCHRONIZATION
+IN ORDER TO INCREASE MULTITHREADED PERFORMANCE).  Because a $Thread$
+instance cannot be collected while its $run$ method is still
+executing, regardless of its accessibility via the global object
+graph, $Thread$ instances are protected from the garbage collector by
+adding them to a global thread set whose contents are not considered
+for deletion by the garbage collector.  The garbage collector also
+uses this set to iterate over the stack of each thread while marking
+the roots during its mark phase.  Finally, the virtual machine was
+modified to include a mutex lock in the implementation of each object
+implements the new $monitorenter$ and $monitorexit$ instructions.
+
+\subsection{Implementing DMP}
+
+The second and largest step was implementing DMP inside the virtual
+machine.  As describe earler, there are four situations that can cause
+a thread to block when DMP is enabled:
 
 \begin{itemize}
 \item upon executing a communicating $getfield$ or $putfield$
-  instruction
-\item upon creation of a $Thread$ instance
-\item upon termination of the $run$ method of a $Thread$ instance
+  instruction,
+\item upon creation of a $Thread$ instance,
+\item upon termination of the $run$ method of a $Thread$ instance, and
 \item upon reaching the end of its quantum in the fetch/execute loop
 \end{itemize}
+
+The implemention must satisfy these requirement.  In addition, I had a
+number of architectural goals in mind when deciding how to implement
+this feature:
+
+\begin{itemize}
+\item be able to enable/disable DMP using a command-line argument
+  without needing to compile the maTe source code,
+\item isolate DMP functionality into separate files with minimal hooks
+  in the main virtual machine implementation,
+\item minimize any performance penalty caused by DMP implementation
+  when running with DMP disabled and
+\item allow the possibility of DMP behavior to be per-thread or
+  per-object specific.
+\end{itemize}
+
+In order to achieve these goals, a new DMP-specific module was created
+for the $object$, $table$, $thread$ and $nlock$ modules.  Each module
+stores a pointer to the respective DMP-specific module, and a $NULL$
+pointer check is placed before a hook into the DMP-specific module is
+called to determine if DMP is enabled on that module.  Therefore, when
+running with DMP disabled, these modules store one extra pointer field
+and must perform a handful of extra pointer comparisons but their
+performance and behavior is otherwise unchanged.
+
+The $nlock$ module implements the mutex used by the $monitorenter$ and
+$monitorexit$ instructions.  A DMP-specific module is needed for a
+number of reasons.  First, the virtual machine needs to track monitors
+acquired by a thread in order to implement reduced serial mode.
+Secondly, with DMP enabled the virtual machine must use non-blocking
+system calls when trying to acquire a mutex to ensure a thread does
+not stall indefinitely while waiting for a mutex.  This can situation
+can occur when a thread tries to acquire a mutex held by another
+thread during its turn in serial mode, or in parallel mode when it is
+the last thread to block.
+
+% figure illustrating pointer to DMP module for object, perhaps
+% showing some of the function names.
+
+A single instance of the global $dmp$ module is created when the
+virtual machine starts up.  The DMP-specific modules for $object$,
+$table$, $thread$ and $nlock$ are allocated through this module.  In
+addition, this module holds the barrier used to synchronize threads
+between parallel/serial mode.  Threads call into the $dmp$ module at
+the end of their current segment, and the module ensures each thread
+blocks until the next parallel segment or their turn in serial mode
+begins, depending on the current DMP mode.  Finally, the $dmp$ module
+implements the default ownership table policy for shared memory
+reads/writes.  The DMP-specific $object$ module passes in the ID of
+the object it is going to access and the $dmp$ module returns a
+$thread$ action ($block$ or $proceed$) and an $owner$ action ($none$,
+$set shared$ or $set private$) to perform.
+
+The ownership table is not stored as a global data structure but
+instead distributed amongst all objects: the DMP-specific $object$
+module stores an $owner$ field.  If $owner$ is $0$, the object is
+shared.  If $owner$ is not $0$, the object is private and the value
+specifies the thread ID of its current owner.  The DMP-specific
+$thread$ module maintains an executed instructions count to track the
+end of its quantum which is incremented for each iteration of the
+fetch/execute loop.  Hooks into the DMP-specific $object$ module were
+placed into the $object$ module's $object\_load\_field$ and
+$object\_store\_field$ functions (which are called from the $getfield$
+and $putfield$ instructions)  The implementation of the $getfield$ and
+$putfield$ instructions were modified to follow the ownership table
+policy from the DMP paper when checking the $owner$ field before
+allowing the instruction to execute.  A global barrier is allocated
+when the virtual machine initializes.  
 
 The heap stores a set containing all $Thread$ references sorted by
 creation time.  This is used to wake each thread in a deterministic
@@ -94,3 +158,8 @@ order so that it can execute its serial segment.  Upon reaching the
 end of its serial segment, each thread calls the global barrier again.
 After all threads have reached the second barrier, a new round begins
 with all threads executing in parallel.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "thesis"
+%%% End:
