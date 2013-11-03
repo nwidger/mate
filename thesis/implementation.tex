@@ -9,69 +9,76 @@ predefined class, Real, that wraps a float primitive to allow
 scientific applications that require floating point calculations to be
 written.
 
-In order to test multithreaded programs, the maTe language needed to
-be modified in order to allow user-created threads.  I chose to use
-Java's threading model by adding a new predefined $Thread$ class.
-Users extend this class and override the $run$ method that is called
-after the user begins execution of the thread with a call to its
-$start$ method.
+In order to test multithreaded programs, the maTe language was
+modified to support user-created threads.  I used Java's threading
+model as a guide in creating a new predefined $Thread$ class.  Users
+extend this class and override the $run$ method that is called after
+the user begins execution of the thread with a call to its $start$
+method.
 
 In order to allow for critical sections and synchronization, a monitor
 in the form of a mutex was added to each object in the virtual machine
-that can be acquired through new $monitorenter$ and $monitorexit$
-instructions.  The language was extended to allow for synchronized
-blocks, the body of which is executed only after acquiring the monitor
-of a particular object.  Three new methods were added to the base
-Object class: $wait$, $notify$ and $notifyAll$ adding support for
-asynchronous events.  These new methods function entirely similarly to
-those in Java.  A thread can block for another thread to terminate by
-calling the $join$ method on a particular $Thread$ instance or block
-for a specific length of time using the $sleep$ method.
+that can be acquired and released using new $monitorenter$ and
+$monitorexit$ instructions.  The language was extended to allow for
+synchronized blocks, the body of which is executed only after
+acquiring the monitor of a particular object.  Three new methods were
+added to the base Object class: $wait$, $notify$ and $notifyAll$
+adding support for asynchronous events.  These new methods function
+entirely similarly to those in Java.  A thread can block for another
+thread to terminate by calling the $join$ method on a particular
+$Thread$ instance or block for a specific length of time using the
+$sleep$ method.
 
-These changes to the language required changes to all of the
+These changes to the language required modifications to all of the
 development tools.  The grammar of the language used by the compiler
 was be modified to include synchronized blocks.  At code generation
 time, the compiler emits the new $monitorenter$ and $monitorexit$
 instructions at the entrance and exit of each synchronized block.
 Corner cases involving $break$ or $return$ statements inside nested
-synchronized blocks must be accounted for.  To do so, the compiler
-will need to maintain a monitor stack to ensure that all currently
+synchronized blocks had to be accounted for.  To do so, the compiler
+was modified to maintain a monitor stack to ensure that all currently
 acquired monitors are released regardless of the execution path.  The
-assembler will be modified to be aware of the new instructions and
-their respective opcodes.
+assembler was modified to be aware of the new instructions and their
+respective opcodes.
+
+I also added support for $for$ loops, boolean operators $&&$ and $||$
+and $!=$, $<=$ and $>=$ operators to the compiler.  None of these
+changes impacted the assembler or virtual machine, however they did
+make implementing the benchmarks much easier.
 
 \section{maTe Virtual Machine}
 
-The majority of the changes required to test this thesis will be in
-the virtual machine.  The first step is supporting multiple user
-threads in the virtual machine.  Each $Thread$ instance will be
-allocated a virtual machine stack and will be executed using the
-pthreads threading library.  Further synchronization of virtual
-machine data structures such as the heap may be necessary.  Because a
-$Thread$ instance cannot be collected while its $run$ method is still
-executing, regardless of its accessibility via the global object
-graph, $Thread$ instances will need to be protected from the garbage
-collector by adding them to a global thread set whose contents are not
-considered for deletion by the garbage collector.  The garbage
-collector will also use this set to iterate over the stack of each
-thread while marking the roots during its mark phase.  Finally, the
-virtual machine must be modified to include a mutex lock in the
-implementation of each object and must implement the new
-$monitorenter$ and $monitorexit$ instructions.
+The majority of the changes required to test this thesis were made in
+the virtual machine.  The first step was adding support for multiple
+user threads in the virtual machine.  Each $Thread$ instance is
+allocated a virtual machine stack and is executed using the $pthreads$
+threading library.  Further synchronization of virtual machine data
+structures such as the heap may be necessary (NOPE NEEDED TO REMOVE A
+TON OF SYNCHRONIZATION IN ORDER TO INCREASE MULTITHREADED
+PERFORMANCE).  Because a $Thread$ instance cannot be collected while
+its $run$ method is still executing, regardless of its accessibility
+via the global object graph, $Thread$ instances are protected from the
+garbage collector by adding them to a global thread set whose contents
+are not considered for deletion by the garbage collector.  The garbage
+collector also uses this set to iterate over the stack of each thread
+while marking the roots during its mark phase.  Finally, the virtual
+machine was modified to include a mutex lock in the implementation of
+each object implements the new $monitorenter$ and $monitorexit$
+instructions.
 
-Secondly, DMP must be implemented inside the virtual machine.  The
-ownership table will not be stored as a global data structure but
-instead distributed amongst all objects: each object will store an
-$owner$ field.  If $owner$ is $null$, the object is shared.  If
-$owner$ is not $null$, the object is private and $owner$ specifies the
-thread ID of its current owner.  The fetch/execute loop of each thread
-will keep a executed instructions count for tracking quantum size.
-The implementation of the $getfield$ and $putfield$ instructions will
-be modified to follow the ownership table policy from the DMP paper
-when checking the $owner$ field before allowing the instruction to
-execute.  Two global barriers will be allocated when the virtual
-machine initializes.  Calls to the first barrier will be placed in
-spots where a thread must block for serial mode:
+Secondly, DMP was implemented inside the virtual machine.  The
+ownership table is not stored as a global data structure but instead
+distributed amongst all objects: each object stores an $owner$ field.
+If $owner$ is $null$, the object is shared.  If $owner$ is not $null$,
+the object is private and $owner$ specifies the thread ID of its
+current owner.  The fetch/execute loop of each thread keeps an
+executed instructions count for tracking quantum size.  The
+implementation of the $getfield$ and $putfield$ instructions were
+modified to follow the ownership table policy from the DMP paper when
+checking the $owner$ field before allowing the instruction to execute.
+A global barrier is allocated when the virtual machine initializes.
+Calls to the barrier were placed in spots where a thread must block
+for parallel/serial mode:
 
 \begin{itemize}
 \item upon executing a communicating $getfield$ or $putfield$
@@ -81,9 +88,9 @@ spots where a thread must block for serial mode:
 \item upon reaching the end of its quantum in the fetch/execute loop
 \end{itemize}
 
-The heap will store a set containing all $Thread$ references sorted by
-creation time.  This will be used to wake each thread in a
-deterministic order so that it can execute its serial segment.  Upon
-reaching the end of its serial segment, each thread will call the
-second global barrier.  After all threads have reached the second
-barrier, a new round begins with all threads executing in parallel.
+The heap stores a set containing all $Thread$ references sorted by
+creation time.  This is used to wake each thread in a deterministic
+order so that it can execute its serial segment.  Upon reaching the
+end of its serial segment, each thread calls the global barrier again.
+After all threads have reached the second barrier, a new round begins
+with all threads executing in parallel.
