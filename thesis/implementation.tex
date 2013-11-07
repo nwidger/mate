@@ -57,18 +57,22 @@ adding threads and adding DMP.
 The first step was adding support for multiple user threads in the
 virtual machine.  Each $Thread$ instance is allocated a virtual
 machine stack and is executed using the $pthreads$ threading library.
-Further synchronization of virtual machine data structures such as the
-heap may be necessary (NOPE NEEDED TO REMOVE A TON OF SYNCHRONIZATION
-IN ORDER TO INCREASE MULTITHREADED PERFORMANCE).  Because a $Thread$
-instance cannot be collected while its $run$ method is still
-executing, regardless of its accessibility via the global object
-graph, $Thread$ instances are protected from the garbage collector by
-adding them to a global thread set whose contents are not considered
-for deletion by the garbage collector.  The garbage collector also
-uses this set to iterate over the stack of each thread while marking
-the roots during its mark phase.  Finally, the virtual machine was
-modified to include a mutex lock in the implementation of each object
-implements the new $monitorenter$ and $monitorexit$ instructions.
+Because a $Thread$ instance cannot be collected while its $run$ method
+is still executing, regardless of its accessibility via the global
+object graph, $Thread$ instances are protected from the garbage
+collector by adding them to a global thread set whose contents are not
+considered for deletion by the garbage collector.  The garbage
+collector also uses this set to iterate over the stack of each thread
+while marking the roots during its mark phase.  Finally, the virtual
+machine was modified to include a mutex lock in the implementation of
+each object implements the new $monitorenter$ and $monitorexit$
+instructions.
+
+Initially, additional synchronization through the use of mutexes were
+added to many of the virtual machine's data structures such as the
+heap, stack and stack frame.  However, in order to increase
+performance when running multiple threads, many of these mutexes had
+to be eliminated.
 
 \subsection{Implementing DMP}
 
@@ -109,15 +113,15 @@ and must perform a handful of extra pointer comparisons but their
 performance and behavior is otherwise unchanged.
 
 The $nlock$ module implements the mutex used by the $monitorenter$ and
-$monitorexit$ instructions.  A DMP-specific module is needed for a
-number of reasons.  First, the virtual machine needs to track monitors
-acquired by a thread in order to implement reduced serial mode.
-Secondly, with DMP enabled the virtual machine must use non-blocking
-system calls when trying to acquire a mutex to ensure a thread does
-not stall indefinitely while waiting for a mutex.  This can situation
-can occur when a thread tries to acquire a mutex held by another
-thread during its turn in serial mode, or in parallel mode when it is
-the last thread to block.
+$monitorexit$ instructions.  A DMP-specific module for $nlock$ is
+needed for two reasons.  First, the virtual machine needs to track
+monitors acquired by a thread in order to implement reduced serial
+mode.  Secondly, with DMP enabled the virtual machine must use
+non-blocking system calls when trying to acquire a mutex to ensure a
+thread does not stall indefinitely while waiting for a mutex.  This
+can situation can occur when a thread tries to acquire a mutex held by
+another thread during its turn in serial mode, or in parallel mode
+when it is the last thread to block.
 
 % figure illustrating pointer to DMP module for object, perhaps
 % showing some of the function names.
@@ -131,10 +135,29 @@ the end of their current segment, and the module ensures each thread
 blocks until the next parallel segment or their turn in serial mode
 begins, depending on the current DMP mode.  Finally, the $dmp$ module
 implements the default ownership table policy for shared memory
-reads/writes.  The DMP-specific $object$ module passes in the ID of
-the object it is going to access and the $dmp$ module returns a
-$thread$ action ($block$ or $proceed$) and an $owner$ action ($none$,
-$set shared$ or $set private$) to perform.
+reads/writes.  Before allowing a $getfield$ or $putfield$ to actually
+read/write an object's field, the DMP-specific $object$ module passes
+in the ID of the object it is going to access.  The $dmp$ module
+returns a $thread$ action ($block$ or $proceed$) and an $owner$ action
+($none$, $set shared$ or $set private$) to perform.
+
+The DMP-specific modules were designed to be very flexible.  Each
+module is given an attribute record at creation time.  This record
+holds a operations table and storage for any other attributes needed
+by the module.  The default $object$ attributes are $owner$, the
+thread ID of the object's current owner, and $depth$, the ownership
+table granularity used by the object.  The function pointers in the
+operations table correspond to DMP operations handled by that module.
+The DMP-specific $object$ module has three operations: $load$, $store$
+and $chown$.  The $load$ and $store$ operations allow the module to
+block the thread (by calling into the $dmp$ module) based on an
+attempt to read/write a given object, and $chown$ implements
+proliferating any ownership changes based on the ownership table
+depth.  If any pointers in the operations table are $NULL$, a default
+action is executed.  Although the functionality is not currently
+implemented, it would be possible to give certain $object$s different
+attribute records, containing different operations tables or metadata,
+based on any arbitrary policy.
 
 The ownership table is not stored as a global data structure but
 instead distributed amongst all objects: the DMP-specific $object$
@@ -158,6 +181,26 @@ order so that it can execute its serial segment.  Upon reaching the
 end of its serial segment, each thread calls the global barrier again.
 After all threads have reached the second barrier, a new round begins
 with all threads executing in parallel.
+
+The garbage collector implemented in the virtual machine posed a
+problem with ensuring deterministic execution.  Therefore, only the
+serial garbage collector is used when running with DMP enabled.  The
+garbage collector is run at the end of serial mode if the heap is
+using $90\%$ or more of its maximum memory.
+
+\subsection{Performance Enhancements}
+
+% -Added integer cache to VM for immutable Integer objects as they are
+% created
+%
+% -Added string cache to VM, permanently stores any strings created
+% using the newstr instruction
+% 
+% -Added object ref cache to VM threads, bypass heap access to
+% translate object ref to object pointer.
+% 
+% -Added Linux syscall to set thread affinity when running with DMP
+% enabled, forces threads to have dedicated CPU.
 
 %%% Local Variables:
 %%% mode: latex
