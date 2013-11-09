@@ -142,26 +142,33 @@ returns a $thread$ action ($block$ or $proceed$) and an $owner$ action
 ($none$, $set shared$ or $set private$) to perform.
 
 The DMP-specific modules were designed to be very flexible.  Each
-module is given an attribute record at creation time.  This record
-holds a operations table and storage for any other attributes needed
-by the module.  The default $object$ attributes are $owner$, the
-thread ID of the object's current owner, and $depth$, the ownership
-table granularity used by the object.  The function pointers in the
-operations table correspond to DMP operations handled by that module.
-The DMP-specific $object$ module has three operations: $load$, $store$
-and $chown$.  The $load$ and $store$ operations allow the module to
-block the thread (by calling into the $dmp$ module) based on an
-attempt to read/write a given object, and $chown$ implements
-proliferating any ownership changes based on the ownership table
-depth.  If any pointers in the operations table are $NULL$, a default
-action is executed.  Although the functionality is not currently
-implemented, it would be possible to give certain $object$s different
-attribute records, containing different operations tables or metadata,
-based on any arbitrary policy.
+module is passed a set of attributes at creation time.  These
+attributes include an operations table as well as any
+settings/counters needed by the module.  Although the functionality
+was not implemented, it would be possible to give certain
+objects/threads different attribute records, containing different
+operations tables or metadata, based on any arbitrary policy.  A
+feature such as this could be used to implement a kind of ``fuzz
+testing'' scenario in which a program is repeatedly executed with
+different DMP attributes for each object/thread in an attempt to
+discover concurrency bugs uncovered by certain thread interleavings.
 
-The ownership table is not stored as a global data structure but
-instead distributed amongst all objects: the DMP-specific $object$
-module stores an $owner$ field.  If $owner$ is $0$, the object is
+\subsubsection{Object DMP}
+
+The default $object$ attributes are $owner$, the thread ID of the
+object's current owner, and $depth$, the ownership table granularity
+used by the object.  The function pointers in the operations table
+correspond to DMP operations handled by that module.  The DMP-specific
+$object$ module has three operations: $load$, $store$ and $chown$.
+The $load$ and $store$ operations allow the module to block the thread
+based on an attempt to read/write a given object (by calling into the
+$dmp$ module), and $chown$ implements propagating any ownership
+changes based on the ownership table depth.  A default action is
+executed if a pointer in the operations table is $NULL$.
+
+Therefore the ownership table is not stored as a global data structure
+but instead distributed amongst all objects using the DMP-specific
+$object$ module's $owner$ attribute.  If $owner$ is $0$, the object is
 shared.  If $owner$ is not $0$, the object is private and the value
 specifies the thread ID of its current owner.  The DMP-specific
 $thread$ module maintains an executed instructions count to track the
@@ -169,11 +176,28 @@ end of its quantum which is incremented for each iteration of the
 fetch/execute loop.  Hooks into the DMP-specific $object$ module were
 placed into the $object$ module's $object\_load\_field$ and
 $object\_store\_field$ functions (which are called from the $getfield$
-and $putfield$ instructions)  The implementation of the $getfield$ and
+and $putfield$ instructions) The implementation of the $getfield$ and
 $putfield$ instructions were modified to follow the ownership table
 policy from the DMP paper when checking the $owner$ field before
-allowing the instruction to execute.  A global barrier is allocated
-when the virtual machine initializes.  
+allowing the instruction to execute.
+
+\subsubsection{Thread DMP}
+
+\subsubsection{Table DMP}
+
+The DMP-specific $table$ module is the strangest of all the
+DMP-specific modules.  The operations table has only two entries:
+$load$ and $store$.  Remember that since the $Table$ class is
+implemented entirely within the virtual machine, it has no fields.
+The internal state of a $Table$ instance is accessed entirely through
+method calls.  The purpose of the DMP-specific $table$ module is to
+ensure that threads accessing the native fields of a $Table$ instance
+blocks appropriately just as it would be it were accessing a maTe
+object field.  The default $load$ and $store$ implementations merely
+call the $load$ and $store$ operations of the $Table$ instance's
+DMP-specific $object$ module.
+
+\subsubsection{NLock DMP}
 
 The heap stores a set containing all $Thread$ references sorted by
 creation time.  This is used to wake each thread in a deterministic
