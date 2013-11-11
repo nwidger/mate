@@ -139,7 +139,8 @@ reads/writes.  Before allowing a $getfield$ or $putfield$ to actually
 read/write an object's field, the DMP-specific $object$ module passes
 in the ID of the object it is going to access.  The $dmp$ module
 returns a $thread$ action ($block$ or $proceed$) and an $owner$ action
-($none$, $set shared$ or $set private$) to perform.
+($none$, $set shared$ or $set private$) to perform.  The $dmp$ module
+also holds a list of all threads currently running.
 
 The DMP-specific modules were designed to be very flexible.  Each
 module is passed a set of attributes at creation time.  These
@@ -183,9 +184,30 @@ allowing the instruction to execute.
 
 \subsubsection{Thread DMP}
 
+The DMP-specific $thread$ module has four attributes: the serial mode
+(full/reduced) being used by the thread, the number of locks currently
+held by the thread, the quantum size and the number of instructions
+executed by the thread in the current quantum.  The operations table
+has six entries: $thread\_creation$, $thread\_start$,
+$thread\_destruction$, $thread\_join$ and
+$thread\_execute\_instruction$.  The $thread\_creation$ entry is
+called in $Thread.start$ and prevents a new thread from being created
+until serial mode.  The $thread\_start$ entry is called at the very
+top of $Thread.run$ and ensures the thread sleeps until its turn in
+serial mode.  The $thread\_destruction$ entry is called at the very
+end of $Thread.run$ and waits until the next parallel segment before
+destroying the thread.  The $thread\_join$ entry is called in
+$Thread.join$ and causes the thread to block for parallel/serial mode
+if the thread it is waiting on has not terminated yet.  This must be
+done to prevent a deadlock if a thread tries to join a thread that has
+already blocked waiting for the next parallel/serial mode.  The
+$thread\_execute\_instruction$ entry is called each time a thread
+executes an opcode, and ensures the thread blocks once it has executed
+as many instructions as is dictated by its quantum size.
+
 \subsubsection{Table DMP}
 
-The DMP-specific $table$ module is the strangest of all the
+The DMP-specific $table$ module is perhaps the strangest of all the
 DMP-specific modules.  The operations table has only two entries:
 $load$ and $store$.  Remember that since the $Table$ class is
 implemented entirely within the virtual machine, it has no fields.
