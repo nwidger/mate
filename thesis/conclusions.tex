@@ -3,7 +3,57 @@
 
 \section{Conclusions}
 
+The results gathered from the benchmarks do not back up my original
+thesis: the results indicate that the overhead of implementing DMP in
+a Java-like programming language such as maTe is not lower than a
+C-like programming language.  I no longer think it likely that such an
+implementation can beat out the performance of DMP implemented as a
+runtime-library for compiled languages such as C/C++.
+
+However, I still believe that implementing DMP inside a virtual
+machine is still a sound idea.  On all but the most extreme DMP
+parameter settings, the performance overhead seen in the benchmarks
+was acceptable.  This is especially true if running the benchmarks
+would uncover a bug in the implementation.  Furthermore, there are
+definitely advantages in not having to recompile a maTe program in
+order to run with/without DMP enabled.
+
+I also conclude that implementing an efficient multithreaded virtual
+machine is itself a difficult task, especially when starting with a
+virtual machine that was initially designed to be only single
+threaded.  Reducing thread contention when accessing global data
+structures, especially the heap, was a real pain point.
+
+Analyzing the results was made more difficult due to the fact that in
+many of the benchmarks the maTe virtual machine's performance worsened
+as more threads were added.
+
+It is also clear from the results that using different ownership table
+depths was not particularly effective in reducing the amount of time
+threads block due to ownership changes on most benchmarks.
+
+I definitely found that the Table class, being the most complex native
+class and also the only built-in data structure, was one of the most
+difficult parts of the VM to get working with DMP.
+
 \section{Future Work}
+
+Future work could include modifying the ownership table policy to
+include an adaptive algorithm that attempts to learn the shared memory
+profile of the maTe program and adjust the ownership of objects in an
+atttempt to increase the likelihood that a thread can access a given
+object without needing to block.
+
+Future work could also include making the maTe virtual machine more
+efficient when run with many threads.
+
+As stated earlier, the current implementation runs the serial garbage
+collector at the end of serial mode when the heap is at least $90\%$
+full.  There may be more efficient ways to do this.
+
+Reimplement the virtual machine's heap to allocate large blocks of
+memory up front instead of calling $malloc$ for every allocation of a
+virtual machine object.
 
 %%% Local Variables: 
 %%% mode: latex
