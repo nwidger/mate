@@ -154,6 +154,19 @@ testing'' scenario in which a program is repeatedly executed with
 different DMP attributes for each object/thread in an attempt to
 discover concurrency bugs uncovered by certain thread interleavings.
 
+The heap stores a set containing all $Thread$ references sorted by
+creation time.  This is used to wake each thread in a deterministic
+order so that it can execute its serial segment.  Upon reaching the
+end of its serial segment, each thread calls the global barrier again.
+After all threads have reached the second barrier, a new round begins
+with all threads executing in parallel.
+
+The garbage collector implemented in the virtual machine posed a
+problem with ensuring deterministic execution.  Therefore, only the
+serial garbage collector is used when running with DMP enabled.  The
+garbage collector is run at the end of serial mode if the heap is
+using $90\%$ or more of its maximum memory.
+
 \subsubsection{Object DMP}
 
 The default $object$ attributes are $owner$, the thread ID of the
@@ -221,18 +234,17 @@ DMP-specific $object$ module.
 
 \subsubsection{NLock DMP}
 
-The heap stores a set containing all $Thread$ references sorted by
-creation time.  This is used to wake each thread in a deterministic
-order so that it can execute its serial segment.  Upon reaching the
-end of its serial segment, each thread calls the global barrier again.
-After all threads have reached the second barrier, a new round begins
-with all threads executing in parallel.
-
-The garbage collector implemented in the virtual machine posed a
-problem with ensuring deterministic execution.  Therefore, only the
-serial garbage collector is used when running with DMP enabled.  The
-garbage collector is run at the end of serial mode if the heap is
-using $90\%$ or more of its maximum memory.
+The DMP-specific $nlock$ module prevents the virtual machine from
+losing control of a thread when it blocks waiting to acquire an
+object's monitor.  The DMP-specific $nlock$ operations table has three
+entries: $lock$, $unlock$ and $timedwait$.  The default $lock$
+implementation continually causes a thread to block until the thread
+will successfully acquire the monitor.  Once this situation occurs,
+the module increments the DMP-specific $thread$ module's lock count
+and returns.  The default $unlock$ implementation first decrements the
+DMP-specific $thread$ module's lock count. Then, if the current mode
+is serial mode, the lock count is zero and the thread is using reduced
+serial mode, the thread blocks, otherwise it returns.
 
 \subsection{Performance Enhancements}
 
