@@ -248,6 +248,28 @@ serial mode, the thread blocks, otherwise it returns.
 
 \subsection{Performance Enhancements}
 
+In order to improve the virtual machine's multithreaded performance, a
+number of enhancements were added.
+
+The first category of enhancements is caching for immutable types.  A
+cache for the immutable Integer is used to ensure only a single
+instance of each of the 65,5536 possible immutable Integers is
+instantiated.  The cache is filled incrementally as the program
+executes.  Also, a cache for the immutable String class is used to
+ensure only a single String instance is created for each $newstr$
+instruction.
+
+The second category is caching done to prevent access to the shared,
+global heap.  Each thread maintains an object ref cache which allows a
+thread to translate an object reference to an object pointer without
+needing to go through the global heap.  Secondly, each thread
+maintains a free object cache which allows it to allocate a new object
+without accessing the global heap so long as it finds a freed object
+of the correct size in its cache.
+
+One last enhancement was added which forces sets the affinity of each
+thread using a call to $pthread_setaffinity\_np$.
+
 % -Added integer cache to VM for immutable Integer objects as they are
 % created
 %
@@ -256,6 +278,10 @@ serial mode, the thread blocks, otherwise it returns.
 % 
 % -Added object ref cache to VM threads, bypass heap access to
 % translate object ref to object pointer.
+%
+% -Added free object cache to VM threads, store free'd objects by
+% size, bypass heap access is free object cache contains a free object
+% of the correct size.
 % 
 % -Added Linux syscall to set thread affinity when running with DMP
 % enabled, forces threads to have dedicated CPU.
