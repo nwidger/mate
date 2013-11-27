@@ -232,6 +232,30 @@ object field.  The default $load$ and $store$ implementations merely
 call the $load$ and $store$ operations of the $Table$ instance's
 DMP-specific $object$ module.
 
+A number of attempts were made to improve the performance of the
+$table$ module.
+
+An attempt was made to modify the $table$ module to implement the hash
+table buckets as maTe object fields rather than C structures with the
+goal of allowing more fine-grained ownership.  In the original C
+structure implementation, each Table is entirely owned by a single
+thread.  The downside of this is that two threads cannot write to two
+different buckets of the same Table instance in parallel.  The idea
+was that by implementing the hash table buckets as maTe objects,
+multiple threads could access a Table instance at the same time so
+long as they were not attempting to write to the same hash table
+bucket.  After implementation, the benchmarks ran noticeably faster
+with DMP enabled, however running the Racey benchmark no longer gave
+consistent results meaning that determinism had been lost.  Repeated
+attempts to diagnose and fix the issue were never resolved and so the
+original C structure implementation had to be restored.
+
+Another performance improvement that was implemented was protecting
+access to the $table$ modules hash table buckets using a
+$pthread\_rwlock$.  This allowed multiple simultaneous $Table.get$
+invocations by different threads but allowed only one $Table.put$
+invocation to occur at any time.
+
 \subsubsection{NLock DMP}
 
 The DMP-specific $nlock$ module prevents the virtual machine from
@@ -268,23 +292,7 @@ without accessing the global heap so long as it finds a freed object
 of the correct size in its cache.
 
 One last enhancement was added which forces sets the affinity of each
-thread using a call to $pthread_setaffinity\_np$.
-
-% -Added integer cache to VM for immutable Integer objects as they are
-% created
-%
-% -Added string cache to VM, permanently stores any strings created
-% using the newstr instruction
-% 
-% -Added object ref cache to VM threads, bypass heap access to
-% translate object ref to object pointer.
-%
-% -Added free object cache to VM threads, store free'd objects by
-% size, bypass heap access is free object cache contains a free object
-% of the correct size.
-% 
-% -Added Linux syscall to set thread affinity when running with DMP
-% enabled, forces threads to have dedicated CPU.
+ thread using a call to $pthread\_setaffinity\_np$.
 
 %%% Local Variables:
 %%% mode: latex
