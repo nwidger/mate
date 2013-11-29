@@ -114,6 +114,95 @@ in a serial fashion.
 
 The number of threads can be given as a command-line option.
 
+\begin{center}
+\begin{small}
+\begin{longtable}{llrrlrrr}
+\hline
+dmp & class & threads & quantum & serial & depth & avg & overhead\\
+\hline
+nondmp & radix & 2 & - & - & - & 1.95 & .00\\
+dmp & radix & 2 & 1000 & full & 1 & 3.06 & .56\\
+dmp & radix & 2 & 1000 & full & 5 & 20.74 & 9.63\\
+dmp & radix & 2 & 1000 & full & 10 & 44.06 & 21.59\\
+dmp & radix & 2 & 1000 & reduced & 1 & 3.06 & .56\\
+dmp & radix & 2 & 1000 & reduced & 5 & 20.75 & 9.64\\
+dmp & radix & 2 & 1000 & reduced & 10 & 44.07 & 21.60\\
+dmp & radix & 2 & 10000 & full & 1 & 3.04 & .55\\
+dmp & radix & 2 & 10000 & full & 5 & 6.44 & 2.30\\
+dmp & radix & 2 & 10000 & full & 10 & 11.45 & 4.87\\
+dmp & radix & 2 & 10000 & reduced & 1 & 3.04 & .55\\
+dmp & radix & 2 & 10000 & reduced & 5 & 6.45 & 2.30\\
+dmp & radix & 2 & 10000 & reduced & 10 & 11.43 & 4.86\\
+dmp & radix & 2 & 100000 & full & 1 & 3.01 & .54\\
+dmp & radix & 2 & 100000 & full & 5 & 3.53 & .81\\
+dmp & radix & 2 & 100000 & full & 10 & 4.77 & 1.44\\
+dmp & radix & 2 & 100000 & reduced & 1 & 3.01 & .54\\
+dmp & radix & 2 & 100000 & reduced & 5 & 3.54 & .81\\
+dmp & radix & 2 & 100000 & reduced & 10 & 4.77 & 1.44\\
+nondmp & radix & 4 & - & - & - & 1.48 & .00\\
+dmp & radix & 4 & 1000 & full & 1 & 2.80 & .89\\
+dmp & radix & 4 & 1000 & full & 5 & 24.40 & 15.48\\
+dmp & radix & 4 & 1000 & full & 10 & 53.11 & 34.88\\
+dmp & radix & 4 & 1000 & reduced & 1 & 2.80 & .89\\
+dmp & radix & 4 & 1000 & reduced & 5 & 24.40 & 15.48\\
+dmp & radix & 4 & 1000 & reduced & 10 & 53.14 & 34.90\\
+dmp & radix & 4 & 10000 & full & 1 & 3.02 & 1.04\\
+dmp & radix & 4 & 10000 & full & 5 & 8.35 & 4.64\\
+dmp & radix & 4 & 10000 & full & 10 & 16.37 & 10.06\\
+dmp & radix & 4 & 10000 & reduced & 1 & 3.03 & 1.04\\
+dmp & radix & 4 & 10000 & reduced & 5 & 8.35 & 4.64\\
+dmp & radix & 4 & 10000 & reduced & 10 & 16.39 & 10.07\\
+dmp & radix & 4 & 100000 & full & 1 & 3.03 & 1.04\\
+dmp & radix & 4 & 100000 & full & 5 & 3.97 & 1.68\\
+dmp & radix & 4 & 100000 & full & 10 & 6.42 & 3.33\\
+dmp & radix & 4 & 100000 & reduced & 1 & 3.03 & 1.04\\
+dmp & radix & 4 & 100000 & reduced & 5 & 3.97 & 1.68\\
+dmp & radix & 4 & 100000 & reduced & 10 & 6.42 & 3.33\\
+nondmp & radix & 8 & - & - & - & 1.27 & .00\\
+dmp & radix & 8 & 1000 & full & 1 & 2.65 & 1.08\\
+dmp & radix & 8 & 1000 & full & 5 & 26.11 & 19.55\\
+dmp & radix & 8 & 1000 & full & 10 & 58.67 & 45.19\\
+dmp & radix & 8 & 1000 & reduced & 1 & 2.67 & 1.10\\
+dmp & radix & 8 & 1000 & reduced & 5 & 26.11 & 19.55\\
+dmp & radix & 8 & 1000 & reduced & 10 & 58.68 & 45.20\\
+dmp & radix & 8 & 10000 & full & 1 & 3.05 & 1.40\\
+dmp & radix & 8 & 10000 & full & 5 & 9.43 & 6.42\\
+dmp & radix & 8 & 10000 & full & 10 & 20.52 & 15.15\\
+dmp & radix & 8 & 10000 & reduced & 1 & 3.05 & 1.40\\
+dmp & radix & 8 & 10000 & reduced & 5 & 9.43 & 6.42\\
+dmp & radix & 8 & 10000 & reduced & 10 & 20.55 & 15.18\\
+dmp & radix & 8 & 100000 & full & 1 & 3.07 & 1.41\\
+dmp & radix & 8 & 100000 & full & 5 & 4.42 & 2.48\\
+dmp & radix & 8 & 100000 & full & 10 & 9.73 & 6.66\\
+dmp & radix & 8 & 100000 & reduced & 1 & 3.07 & 1.41\\
+dmp & radix & 8 & 100000 & reduced & 5 & 4.42 & 2.48\\
+dmp & radix & 8 & 100000 & reduced & 10 & 9.73 & 6.66\\
+nondmp & radix & 16 & - & - & - & 1.57 & .00\\
+dmp & radix & 16 & 1000 & full & 1 & 3.13 & .99\\
+dmp & radix & 16 & 1000 & full & 5 & 28.27 & 17.00\\
+dmp & radix & 16 & 1000 & full & 10 & 65.80 & 40.91\\
+dmp & radix & 16 & 1000 & reduced & 1 & 3.13 & .99\\
+dmp & radix & 16 & 1000 & reduced & 5 & 28.30 & 17.02\\
+dmp & radix & 16 & 1000 & reduced & 10 & 65.78 & 40.89\\
+dmp & radix & 16 & 10000 & full & 1 & 3.17 & 1.01\\
+dmp & radix & 16 & 10000 & full & 5 & 10.23 & 5.51\\
+dmp & radix & 16 & 10000 & full & 10 & 24.99 & 14.91\\
+dmp & radix & 16 & 10000 & reduced & 1 & 3.14 & 1.00\\
+dmp & radix & 16 & 10000 & reduced & 5 & 10.24 & 5.52\\
+dmp & radix & 16 & 10000 & reduced & 10 & 24.98 & 14.91\\
+dmp & radix & 16 & 100000 & full & 1 & 3.11 & .98\\
+dmp & radix & 16 & 100000 & full & 5 & 4.48 & 1.85\\
+dmp & radix & 16 & 100000 & full & 10 & 13.38 & 7.52\\
+dmp & radix & 16 & 100000 & reduced & 1 & 3.11 & .98\\
+dmp & radix & 16 & 100000 & reduced & 5 & 4.48 & 1.85\\
+dmp & radix & 16 & 100000 & reduced & 10 & 13.40 & 7.53\\
+\hline
+\caption{Radix Benchmark Results}
+\label{tab:radix_results}
+\end{longtable}
+\end{small}
+\end{center}
+
 In the results, the non-DMP runs unsurprisingly beat out all of the
 DMP runs with overhead ranging from $54\%$ to $4,520\%$.  The fastest
 DMP run was $-Q1000 -g1$ with 8 threads with an execution time of 2.65
@@ -163,6 +252,38 @@ iterations.
 The number of threads is fixed at the number of rows in the input
 table, meaning 20 threads for the 20x25 plate used in the benchmark.
 
+\begin{center}
+\begin{small}
+\begin{longtable}{llrrlrrr}
+\hline
+dmp & class & threads & quantum & serial & depth & avg & overhead\\
+\hline
+nondmp & jacobi & 2 & - & - & - & 2.92 & .00\\
+dmp & jacobi & 2 & 1000 & full & 1 & 17.22 & 4.89\\
+dmp & jacobi & 2 & 1000 & full & 5 & 35.52 & 11.16\\
+dmp & jacobi & 2 & 1000 & full & 10 & 35.54 & 11.17\\
+dmp & jacobi & 2 & 1000 & reduced & 1 & 11.90 & 3.07\\
+dmp & jacobi & 2 & 1000 & reduced & 5 & 24.64 & 7.43\\
+dmp & jacobi & 2 & 1000 & reduced & 10 & 24.63 & 7.43\\
+dmp & jacobi & 2 & 10000 & full & 1 & 16.00 & 4.47\\
+dmp & jacobi & 2 & 10000 & full & 5 & 34.99 & 10.98\\
+dmp & jacobi & 2 & 10000 & full & 10 & 35.00 & 10.98\\
+dmp & jacobi & 2 & 10000 & reduced & 1 & 3.71 & .27\\
+dmp & jacobi & 2 & 10000 & reduced & 5 & 6.98 & 1.39\\
+dmp & jacobi & 2 & 10000 & reduced & 10 & 6.97 & 1.38\\
+dmp & jacobi & 2 & 100000 & full & 1 & 15.98 & 4.47\\
+dmp & jacobi & 2 & 100000 & full & 5 & 35.02 & 10.99\\
+dmp & jacobi & 2 & 100000 & full & 10 & 35.03 & 10.99\\
+dmp & jacobi & 2 & 100000 & reduced & 1 & 3.72 & .27\\
+dmp & jacobi & 2 & 100000 & reduced & 5 & 6.97 & 1.38\\
+dmp & jacobi & 2 & 100000 & reduced & 10 & 7.00 & 1.39\\
+\hline
+\caption{Jacobi Benchmark Results}
+\label{tab:jacobi_results}
+\end{longtable}
+\end{small}
+\end{center}
+
 The non-DMP Jacobi runs averaged 2.91 seconds of runtime.  With DMP
 enabled, the overhead ranged from $27\%$ to $1,117\%$.  The best DMP
 run was $-Q10000 -g1 -r$ with an average time of 3.71 seconds.  The
@@ -197,6 +318,95 @@ a node off the queue of a randomly selected thread and continues.
 
 Each thread must acquire the monitor of a queue's bucket before
 adding/removing a node from that level.
+
+\begin{center}
+\begin{small}
+\begin{longtable}{llrrlrrr}
+\hline
+dmp & class & threads & quantum & serial & depth & avg & overhead\\
+\hline
+nondmp & dpl & 2 & - & - & - & .71 & .00\\
+dmp & dpl & 2 & 1000 & full & 1 & 1.72 & 1.42\\
+dmp & dpl & 2 & 1000 & full & 5 & 1.67 & 1.35\\
+dmp & dpl & 2 & 1000 & full & 10 & 1.72 & 1.42\\
+dmp & dpl & 2 & 1000 & reduced & 1 & 1.59 & 1.23\\
+dmp & dpl & 2 & 1000 & reduced & 5 & 1.85 & 1.60\\
+dmp & dpl & 2 & 1000 & reduced & 10 & 2.02 & 1.84\\
+dmp & dpl & 2 & 10000 & full & 1 & 1.12 & .57\\
+dmp & dpl & 2 & 10000 & full & 5 & 1.00 & .40\\
+dmp & dpl & 2 & 10000 & full & 10 & 1.20 & .69\\
+dmp & dpl & 2 & 10000 & reduced & 1 & .95 & .33\\
+dmp & dpl & 2 & 10000 & reduced & 5 & 1.08 & .52\\
+dmp & dpl & 2 & 10000 & reduced & 10 & 1.10 & .54\\
+dmp & dpl & 2 & 100000 & full & 1 & 1.05 & .47\\
+dmp & dpl & 2 & 100000 & full & 5 & 1.03 & .45\\
+dmp & dpl & 2 & 100000 & full & 10 & 1.34 & .88\\
+dmp & dpl & 2 & 100000 & reduced & 1 & 1.11 & .56\\
+dmp & dpl & 2 & 100000 & reduced & 5 & 1.25 & .76\\
+dmp & dpl & 2 & 100000 & reduced & 10 & 1.20 & .69\\
+nondmp & dpl & 4 & - & - & - & 1.93 & .00\\
+dmp & dpl & 4 & 1000 & full & 1 & 3.66 & .89\\
+dmp & dpl & 4 & 1000 & full & 5 & 3.81 & .97\\
+dmp & dpl & 4 & 1000 & full & 10 & 4.35 & 1.25\\
+dmp & dpl & 4 & 1000 & reduced & 1 & 3.85 & .99\\
+dmp & dpl & 4 & 1000 & reduced & 5 & 3.80 & .96\\
+dmp & dpl & 4 & 1000 & reduced & 10 & 4.10 & 1.12\\
+dmp & dpl & 4 & 10000 & full & 1 & 2.40 & .24\\
+dmp & dpl & 4 & 10000 & full & 5 & 3.04 & .57\\
+dmp & dpl & 4 & 10000 & full & 10 & 2.56 & .32\\
+dmp & dpl & 4 & 10000 & reduced & 1 & 2.40 & .24\\
+dmp & dpl & 4 & 10000 & reduced & 5 & 2.58 & .33\\
+dmp & dpl & 4 & 10000 & reduced & 10 & 2.82 & .46\\
+dmp & dpl & 4 & 100000 & full & 1 & 2.22 & .15\\
+dmp & dpl & 4 & 100000 & full & 5 & 2.30 & .19\\
+dmp & dpl & 4 & 100000 & full & 10 & 2.72 & .40\\
+dmp & dpl & 4 & 100000 & reduced & 1 & 2.15 & .11\\
+dmp & dpl & 4 & 100000 & reduced & 5 & 2.06 & .06\\
+dmp & dpl & 4 & 100000 & reduced & 10 & 2.41 & .24\\
+nondmp & dpl & 8 & - & - & - & 4.06 & .00\\
+dmp & dpl & 8 & 1000 & full & 1 & 13.15 & 2.23\\
+dmp & dpl & 8 & 1000 & full & 5 & 12.88 & 2.17\\
+dmp & dpl & 8 & 1000 & full & 10 & 23.28 & 4.73\\
+dmp & dpl & 8 & 1000 & reduced & 1 & 11.52 & 1.83\\
+dmp & dpl & 8 & 1000 & reduced & 5 & 11.47 & 1.82\\
+dmp & dpl & 8 & 1000 & reduced & 10 & 21.76 & 4.35\\
+dmp & dpl & 8 & 10000 & full & 1 & 5.44 & .33\\
+dmp & dpl & 8 & 10000 & full & 5 & 5.95 & .46\\
+dmp & dpl & 8 & 10000 & full & 10 & 7.47 & .83\\
+dmp & dpl & 8 & 10000 & reduced & 1 & 5.46 & .34\\
+dmp & dpl & 8 & 10000 & reduced & 5 & 5.86 & .44\\
+dmp & dpl & 8 & 10000 & reduced & 10 & 7.91 & .94\\
+dmp & dpl & 8 & 100000 & full & 1 & 5.55 & .36\\
+dmp & dpl & 8 & 100000 & full & 5 & 6.16 & .51\\
+dmp & dpl & 8 & 100000 & full & 10 & 6.96 & .71\\
+dmp & dpl & 8 & 100000 & reduced & 1 & 3.12 & -.23\\
+dmp & dpl & 8 & 100000 & reduced & 5 & 3.45 & -.15\\
+dmp & dpl & 8 & 100000 & reduced & 10 & 3.57 & -.12\\
+nondmp & dpl & 16 & - & - & - & 6.12 & .00\\
+dmp & dpl & 16 & 1000 & full & 1 & 21.26 & 2.47\\
+dmp & dpl & 16 & 1000 & full & 5 & 21.29 & 2.47\\
+dmp & dpl & 16 & 1000 & full & 10 & 176.84 & 27.89\\
+dmp & dpl & 16 & 1000 & reduced & 1 & 22.31 & 2.64\\
+dmp & dpl & 16 & 1000 & reduced & 5 & 20.36 & 2.32\\
+dmp & dpl & 16 & 1000 & reduced & 10 & 160.39 & 25.20\\
+dmp & dpl & 16 & 10000 & full & 1 & 9.76 & .59\\
+dmp & dpl & 16 & 10000 & full & 5 & 11.85 & .93\\
+dmp & dpl & 16 & 10000 & full & 10 & 47.47 & 6.75\\
+dmp & dpl & 16 & 10000 & reduced & 1 & 8.53 & .39\\
+dmp & dpl & 16 & 10000 & reduced & 5 & 9.40 & .53\\
+dmp & dpl & 16 & 10000 & reduced & 10 & 33.83 & 4.52\\
+dmp & dpl & 16 & 100000 & full & 1 & 11.78 & .92\\
+dmp & dpl & 16 & 100000 & full & 5 & 11.22 & .83\\
+dmp & dpl & 16 & 100000 & full & 10 & 26.70 & 3.36\\
+dmp & dpl & 16 & 100000 & reduced & 1 & 5.14 & -.16\\
+dmp & dpl & 16 & 100000 & reduced & 5 & 5.38 & -.12\\
+dmp & dpl & 16 & 100000 & reduced & 10 & 10.54 & .72\\
+\hline
+\caption{DPLL Benchmark Results}
+\label{tab:dpll_results}
+\end{longtable}
+\end{small}
+\end{center}
 
 When generating the results for this benchmark, the maTe virtual
 machine was run in a special mode which ensures the Integer.rand()
