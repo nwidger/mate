@@ -218,22 +218,22 @@ if the thread it is waiting on has not terminated yet.  This must be
 done to prevent a deadlock if a thread tries to join a thread that has
 already blocked waiting for the next parallel/serial mode.  The
 $thread\_execute\_instruction$ entry is called each time a thread
-executes an opcode, and ensures the thread blocks once it has executed
+executes an opcode and ensures the thread blocks once it has executed
 as many instructions as is dictated by its quantum size.
 
 \subsubsection{Table DMP}
 
 The DMP-specific $table$ module is perhaps the strangest of all the
 DMP-specific modules.  The operations table has only two entries:
-$load$ and $store$.  Remember that since the $Table$ class is
-implemented entirely within the virtual machine, it has no fields.
-The internal state of a $Table$ instance is accessed entirely through
-method calls.  The purpose of the DMP-specific $table$ module is to
-ensure that threads accessing the native fields of a $Table$ instance
-blocks appropriately just as it would be it were accessing a maTe
-object field.  The default $load$ and $store$ implementations merely
-call the $load$ and $store$ operations of the $Table$ instance's
-DMP-specific $object$ module.
+$load$ and $store$.  The $Table$ object has no object fields since it
+is entirely implemented within the virtual machine.  The internal
+state of a $Table$ instance is accessible from a maTe program only
+through method calls.  The purpose of the DMP-specific $table$ module
+is to ensure that threads accessing the native fields of a $Table$
+instance blocks appropriately just as it would be it were accessing a
+maTe object field.  The default $load$ and $store$ implementations
+merely call the $load$ and $store$ operations of the $Table$
+instance's DMP-specific $object$ module.
 
 \subsubsection{NLock DMP}
 
@@ -256,11 +256,11 @@ number of enhancements were added.
 
 The first category of enhancements is caching for immutable types.  A
 cache for the immutable Integer is used to ensure only a single
-instance of each of the 65,5536 possible immutable Integers is
+instance of each of the 65,5536 possible immutable $Integer$s is
 instantiated.  The cache is filled incrementally as the program
-executes.  Also, a cache for the immutable String class is used to
-ensure only a single String instance is created for each $newstr$
-instruction.
+executes $newint$ instructions.  Also, a cache for the immutable
+$String$ class is used to ensure only a single $String$ instance is
+created for each $newstr$ instruction.
 
 The second category is caching done to prevent access to the shared,
 global heap.  Each thread maintains an object ref cache which allows a
@@ -289,7 +289,7 @@ bucket.  After implementation, the benchmarks ran noticeably faster
 with DMP enabled, however running the Racey benchmark no longer gave
 consistent results meaning that determinism had been lost.  Repeated
 attempts to diagnose and fix the issue were never resolved and so the
-original C structure implementation had to be restored.
+original C structure implementation was restored.
 
 Another performance improvement that was implemented was protecting
 access to the $table$ modules hash table buckets using a
