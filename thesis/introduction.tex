@@ -42,14 +42,15 @@ determinism makes no assumptions about program correctness.  Strong
 determinism is concerned with all accesses to shared memory whereas
 weak determinism requires that only lock operations are watched.
 Because of this, the overhead to enforce strong determinism is higher
-than weak determinism.
+than weak determinism.  My thesis involves ensuring strong
+determinism.
 
 Most research in deterministic execution has been in the form of
 run-time frameworks for C/C++ code that requires code to be recompiled
 before it can be executed deterministically.  In contrast, my thesis
 involved applying existing deterministic execution techniques to a
-Java-like language that is executed in a virtual machine.  I believed
-is that these techniques can be applied with lower overhead in a
+Java-like language that is executed in a virtual machine with the
+belief that these techniques can be applied with lower overhead in a
 virtual machine setting than in a compiled language.
 
 %%% Local Variables: 

@@ -3,11 +3,10 @@
 
 \section{maTe Language}
 
-Originally, the maTe language currently only allowed for integer
-arithmetic using the predefined Integer class.  I added a new
-predefined class, Real, that wraps a float primitive to allow
-scientific applications that require floating point calculations to be
-written.
+Originally, the maTe language only allowed for integer arithmetic
+using the predefined Integer class.  I added a new predefined class,
+Real, that wraps a float primitive to allow scientific applications
+that require floating point calculations to be written.
 
 In order to test multithreaded programs, the maTe language was
 modified to support user-created threads.  I used Java's threading
@@ -17,17 +16,17 @@ the user begins execution of the thread with a call to its $start$
 method.
 
 In order to allow for critical sections and synchronization, a monitor
-in the form of a mutex was added to each object in the virtual machine
-that can be acquired and released using new $monitorenter$ and
-$monitorexit$ instructions.  The language was extended to allow for
-synchronized blocks, the body of which is executed only after
-acquiring the monitor of a particular object.  Three new methods were
-added to the base Object class: $wait$, $notify$ and $notifyAll$
-adding support for asynchronous events.  These new methods function
-entirely similarly to those in Java.  A thread can block for another
-thread to terminate by calling the $join$ method on a particular
-$Thread$ instance or block for a specific length of time using the
-$sleep$ method.
+in the form of a mutex was added to each object in the virtual
+machine.  An object's monitor can be acquired and released using new
+$monitorenter$ and $monitorexit$ instructions.  The language was
+extended to allow for synchronized blocks, the body of which is
+executed only after acquiring the monitor of a particular object.
+Three new methods were added to the base Object class: $wait$,
+$notify$ and $notifyAll$ adding support for asynchronous events.
+These new methods function entirely similarly to those in Java.  A
+thread can block for another thread to terminate by calling the $join$
+method on a particular $Thread$ instance or block for a specific
+length of time using the $sleep$ method.
 
 These changes to the language required modifications to all of the
 development tools.  The grammar of the language used by the compiler
@@ -50,7 +49,7 @@ did make implementing the benchmarks much easier.
 
 The majority of the changes required to test this thesis were made in
 the virtual machine.  This step can be broken down into two parts:
-adding threads and adding DMP.
+implementing threads and implementing DMP.
 
 \subsection{Implementing Threads}
 
@@ -63,16 +62,16 @@ object graph, $Thread$ instances are protected from the garbage
 collector by adding them to a global thread set whose contents are not
 considered for deletion by the garbage collector.  The garbage
 collector also uses this set to iterate over the stack of each thread
-while marking the roots during its mark phase.  Finally, the virtual
-machine was modified to include a mutex lock in the implementation of
-each object implements the new $monitorenter$ and $monitorexit$
-instructions.
+while marking the roots during its mark phase.  Finally, a
+$pthread\_mutex\_t$ accessed by the new $monitorenter$ and
+$monitorexit$ instructions was added to each object created by the
+virtual machine.
 
 Initially, additional synchronization through the use of mutexes were
 added to many of the virtual machine's data structures such as the
 heap, stack and stack frame.  However, in order to increase
-performance when running multiple threads, many of these mutexes had
-to be eliminated.
+performance when running multiple threads, many of these mutexes were
+eliminated.
 
 \subsection{Implementing DMP}
 
@@ -82,15 +81,15 @@ a thread to block when DMP is enabled:
 
 \begin{itemize}
 \item upon executing a communicating $getfield$ or $putfield$
-  instruction,
-\item upon creation of a $Thread$ instance,
+  instruction (used to read/write an object field),
+\item upon creation of a $Thread$ instance (by calling its $start$
+  method),
 \item upon termination of the $run$ method of a $Thread$ instance, and
 \item upon reaching the end of its quantum in the fetch/execute loop
 \end{itemize}
 
-The implemention must satisfy these requirement.  In addition, I had a
-number of architectural goals in mind when deciding how to implement
-this feature:
+The implemention must satisfy these requirements.  In addition, I had
+a number of architectural goals in mind when implementing DMP:
 
 \begin{itemize}
 \item be able to enable/disable DMP using a command-line argument
@@ -99,7 +98,7 @@ this feature:
   in the main virtual machine implementation,
 \item minimize any performance penalty caused by DMP implementation
   when running with DMP disabled and
-\item allow the possibility of DMP behavior to be per-thread or
+\item allow the possibility for DMP behavior to be per-thread or
   per-object specific.
 \end{itemize}
 
@@ -113,15 +112,16 @@ and must perform a handful of extra pointer comparisons but their
 performance and behavior is otherwise unchanged.
 
 The $nlock$ module implements the mutex used by the $monitorenter$ and
-$monitorexit$ instructions.  A DMP-specific module for $nlock$ is
-needed for two reasons.  First, the virtual machine needs to track
-monitors acquired by a thread in order to implement reduced serial
-mode.  Secondly, with DMP enabled the virtual machine must use
+$monitorexit$ instructions and wraps operations performed on the
+$pthread\_mutex\_t$ used by each object.  A DMP-specific module for
+$nlock$ is needed for two reasons.  First, the virtual machine needs
+to track monitors acquired by a thread in order to implement reduced
+serial mode.  Secondly, with DMP enabled the virtual machine must use
 non-blocking system calls when trying to acquire a mutex to ensure a
 thread does not stall indefinitely while waiting for a mutex.  This
-can situation can occur when a thread tries to acquire a mutex held by
-another thread during its turn in serial mode, or in parallel mode
-when it is the last thread to block.
+situation can occur when a thread tries to acquire a mutex held by
+another thread during its turn in serial mode or in parallel mode when
+it is the last thread to block.
 
 % figure illustrating pointer to DMP module for object, perhaps
 % showing some of the function names.
@@ -129,59 +129,63 @@ when it is the last thread to block.
 A single instance of the global $dmp$ module is created when the
 virtual machine starts up.  The DMP-specific modules for $object$,
 $table$, $thread$ and $nlock$ are allocated through this module.  In
-addition, this module holds the barrier used to synchronize threads
-between parallel/serial mode.  Threads call into the $dmp$ module at
-the end of their current segment, and the module ensures each thread
-blocks until the next parallel segment or their turn in serial mode
-begins, depending on the current DMP mode.  Finally, the $dmp$ module
-implements the default ownership table policy for shared memory
-reads/writes.  Before allowing a $getfield$ or $putfield$ to actually
-read/write an object's field, the DMP-specific $object$ module passes
-in the ID of the object it is going to access.  The $dmp$ module
-returns a $thread$ action ($block$ or $proceed$) and an $owner$ action
-($none$, $set shared$ or $set private$) to perform.  The $dmp$ module
-also holds a list of all threads currently running.
+addition, this module holds the $barrier$ instance used to synchronize
+threads between parallel/serial mode.  The $barrier$ module was
+implemented using a $pthread\_mutex\_t$ mutex and $pthread\_cond\_t$
+condition variable.  Threads call into the $dmp$ module at the end of
+their current segment with a call to $dmp\_thread\_block$.  In
+parallel mode, the $dmp$ module ensures each thread blocks until the
+end of the current parallel segment.  In serial mode, the $dmp$ module
+wakes each thread in creation order and ensures all other threads are
+blocked.  Finally, the $dmp$ module implements the default ownership
+table policy for shared memory reads/writes.  Before allowing a
+$getfield$ or $putfield$ to actually read/write an object's field, the
+DMP-specific $object$ module passes in the ID of the object it is
+going to access.  The $dmp$ module returns a $thread$ action ($block$
+or $proceed$) and an $owner$ action ($none$, $set shared$ or $set
+private$) to perform.
 
 The DMP-specific modules were designed to be very flexible.  Each
 module is passed a set of attributes at creation time.  These
 attributes include an operations table as well as any
 settings/counters needed by the module.  Although the functionality
 was not implemented, it would be possible to give certain
-objects/threads different attribute records, containing different
-operations tables or metadata, based on any arbitrary policy.  A
-feature such as this could be used to implement a kind of ``fuzz
-testing'' scenario in which a program is repeatedly executed with
-different DMP attributes for each object/thread in an attempt to
-discover concurrency bugs uncovered by certain thread interleavings.
+objects/threads different attributes, containing different operations
+tables or metadata based on any arbitrary policy.  A feature such as
+this could be used to implement a kind of ``fuzz testing'' scenario in
+which a program is repeatedly executed with different DMP attributes
+for each object/thread in an attempt to discover concurrency bugs
+uncovered by certain thread interleavings.
 
-The heap stores a set containing all $Thread$ references sorted by
+The heap stores a set containing all $Thread$ instances sorted by
 creation time.  This is used to wake each thread in a deterministic
 order so that it can execute its serial segment.  Upon reaching the
 end of its serial segment, each thread calls the global barrier again.
 After all threads have reached the second barrier, a new round begins
 with all threads executing in parallel.
 
-The garbage collector implemented in the virtual machine posed a
-problem with ensuring deterministic execution.  Therefore, only the
-serial garbage collector is used when running with DMP enabled.  The
-garbage collector is run at the end of serial mode if the heap is
-using $90\%$ or more of its maximum memory.
+The parallel garbage collector implemented in the virtual machine
+posed for deterministic execution since when a collection cycle would
+occur is not deterministic.  Therefore, only the serial garbage
+collector is used when running with DMP enabled.  The garbage
+collector is run at the end of serial mode if the heap is using $90\%$
+or more of its maximum memory.
 
 \subsubsection{Object DMP}
 
 The default $object$ attributes are $owner$, the thread ID of the
 object's current owner, and $depth$, the ownership table granularity
-used by the object.  The function pointers in the operations table
-correspond to DMP operations handled by that module.  The DMP-specific
-$object$ module has three operations: $load$, $store$ and $chown$.
-The $load$ and $store$ operations allow the module to block the thread
-based on an attempt to read/write a given object (by calling into the
-$dmp$ module), and $chown$ implements propagating any ownership
-changes based on the ownership table depth.  A default action is
-executed if a pointer in the operations table is $NULL$.
+used by the object.  The entries in the operations table correspond to
+DMP operations handled by that module.  The DMP-specific $object$
+module has three operations: $load$, $store$ and $chown$.  The $load$
+and $store$ operations allow the module to block the thread based on
+an attempt to read/write a given object (by calling into the $dmp$
+module), and $chown$ implements propagating any ownership changes
+based on the ownership table depth.  A default action is executed if a
+pointer in the operations table is $NULL$.
 
-Therefore the ownership table is not stored as a global data structure
-but instead distributed amongst all objects using the DMP-specific
+The ownership table is not stored as a global data structure but
+instead distributed amongst all objects using the DMP-specific
 $object$ module's $owner$ attribute.  If $owner$ is $0$, the object is
 shared.  If $owner$ is not $0$, the object is private and the value
 specifies the thread ID of its current owner.  The DMP-specific
@@ -190,10 +194,9 @@ end of its quantum which is incremented for each iteration of the
 fetch/execute loop.  Hooks into the DMP-specific $object$ module were
 placed into the $object$ module's $object\_load\_field$ and
 $object\_store\_field$ functions (which are called from the $getfield$
-and $putfield$ instructions) The implementation of the $getfield$ and
-$putfield$ instructions were modified to follow the ownership table
-policy from the DMP paper when checking the $owner$ field before
-allowing the instruction to execute.
+and $putfield$ instructions).  The default $load$ and $store$
+operations follow the ownership table policy from the DMP paper by
+checking the $owner$ field before allowing the instruction to execute.
 
 \subsubsection{Thread DMP}
 
@@ -232,30 +235,6 @@ object field.  The default $load$ and $store$ implementations merely
 call the $load$ and $store$ operations of the $Table$ instance's
 DMP-specific $object$ module.
 
-A number of attempts were made to improve the performance of the
-$table$ module.
-
-An attempt was made to modify the $table$ module to implement the hash
-table buckets as maTe object fields rather than C structures with the
-goal of allowing more fine-grained ownership.  In the original C
-structure implementation, each Table is entirely owned by a single
-thread.  The downside of this is that two threads cannot write to two
-different buckets of the same Table instance in parallel.  The idea
-was that by implementing the hash table buckets as maTe objects,
-multiple threads could access a Table instance at the same time so
-long as they were not attempting to write to the same hash table
-bucket.  After implementation, the benchmarks ran noticeably faster
-with DMP enabled, however running the Racey benchmark no longer gave
-consistent results meaning that determinism had been lost.  Repeated
-attempts to diagnose and fix the issue were never resolved and so the
-original C structure implementation had to be restored.
-
-Another performance improvement that was implemented was protecting
-access to the $table$ modules hash table buckets using a
-$pthread\_rwlock$.  This allowed multiple simultaneous $Table.get$
-invocations by different threads but allowed only one $Table.put$
-invocation to occur at any time.
-
 \subsubsection{NLock DMP}
 
 The DMP-specific $nlock$ module prevents the virtual machine from
@@ -292,7 +271,31 @@ without accessing the global heap so long as it finds a freed object
 of the correct size in its cache.
 
 One last enhancement was added which forces sets the affinity of each
- thread using a call to $pthread\_setaffinity\_np$.
+thread using a call to $pthread\_setaffinity\_np$.
+
+A number of attempts were made to improve the performance of the
+$table$ module.
+
+An attempt was made to modify the $table$ module to implement the hash
+table buckets as maTe object fields rather than C structures with the
+goal of allowing more fine-grained ownership.  In the original C
+structure implementation, each Table is entirely owned by a single
+thread.  The downside of this is that two threads cannot write to two
+different buckets of the same Table instance in parallel.  The idea
+was that by implementing the hash table buckets as maTe objects,
+multiple threads could access a Table instance at the same time so
+long as they were not attempting to write to the same hash table
+bucket.  After implementation, the benchmarks ran noticeably faster
+with DMP enabled, however running the Racey benchmark no longer gave
+consistent results meaning that determinism had been lost.  Repeated
+attempts to diagnose and fix the issue were never resolved and so the
+original C structure implementation had to be restored.
+
+Another performance improvement that was implemented was protecting
+access to the $table$ modules hash table buckets using a
+$pthread\_rwlock\_t$.  This allowed multiple simultaneous $Table.get$
+invocations by different threads but allowed only one $Table.put$
+invocation to occur at any time.
 
 %%% Local Variables:
 %%% mode: latex

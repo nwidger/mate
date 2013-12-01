@@ -201,13 +201,14 @@ or if it is shared and the access is a read.  This change does not
 affect determinism because a shared memory location cannot be written
 to by any thread until serial mode, therefore a read access during
 parallel mode cannot cause nondeterminism.  Transfer of ownership and
-transitions between shared to private are performed after a thread has
-blocked for serial mode and are done in an attempt to take advantage
-of the principle of locality.  If a thread is likely to access a
-memory location again, it is logical to modify the ownership table
-such that its next access will not cause it to block.  However, any
-policy for modifying the shared/private status of a memory location
-during serial mode is acceptable so long as it is deterministic.
+transitions between shared and private are performed after a thread
+has blocked for serial mode and are done in an attempt to take
+advantage of the principle of locality.  If a thread is likely to
+access a memory location again, it is logical to modify the ownership
+table such that its next access will not cause it to block.  However,
+any policy for modifying the shared/private status of a memory
+location during serial mode is acceptable so long as it is
+deterministic.
 
 As mentioned previously, quanta can be constructed using any policy so
 long as it is deterministic.  In their paper, Devietti et al. discuss
@@ -371,8 +372,8 @@ Amarasinghe guarantee determinism using Kendo for data-race free
 programs by guaranteeing a deterministic order of all lock
 acquisitions for a given program input \cite{kendo}.  Kendo implements
 a subset of the POSIX Threads API, replacing the existing
-synchronization functions (such as pthread\_mutex\_lock,
-pthread\_mutex\_unlock, etc.) with calls to their own run-time
+synchronization functions (such as $pthread\_mutex\_lock$,
+$pthread\_mutex\_unlock$, etc.) with calls to their own run-time
 framework.  Programs run using Kendo must first be recompiled and
 linked with the Kendo run-time framework.
 
@@ -583,41 +584,27 @@ an ownership table depth of 1, 2 and 3.  Blackened objects are those
 marked as private and owned by the writing thread.
 
 \begin{figure}
+\begin{small}
   \small \bnncode
   \codeln. class Point \{ \\
   \codeln. \> Integer x, y; \\
   \codeln. \\
-  \codeln. \> Point(Integer x, Integer y) \{ \\
-  \codeln. \>\> this.x = x; \\
-  \codeln. \>\> this.y = y; \\
-  \codeln. \> \} \\
-  \codeln. \\
-  \codeln. \> Point operator+(Point p) \{ \\
-  \codeln. \>\> return new Point(x + p.x, y + p.y); \\
-  \codeln. \> \} \\
+  \codeln. \> Point(Integer x, Integer y) \{ this.x = x; this.y = y; \} \\
+  \codeln. \> Point operator+(Point p) \{ return new Point(x + p.x, y + p.y); \} \\
   \codeln. \\
   \codeln. \> Integer equals(Object obj) \{ \\
-  \codeln. \>\> if (obj == null) \\
-  \codeln. \>\>\> return 0; \\
-  \codeln. \\
+  \codeln. \>\> if (obj == null) return 0; \\
   \codeln. \>\> if (obj instanceof Point) \{ \\
   \codeln. \>\>\> Point p; \\
-  \codeln. \\
   \codeln. \>\>\> p = (Point)obj; \\
-  \codeln. \\
-  \codeln. \>\>\> if (x.equals(p.x)) \{ \\
-  \codeln. \>\>\>\> if (y.equals(p.y)) \{ \\
-  \codeln. \>\>\>\>\> return 1; \\
-  \codeln. \>\>\>\> \} \\
+  \codeln. \>\>\> if (x.equals(p.x) \&\& y.equals(p.y)) \{ \\
+  \codeln. \>\>\>\> return 1; \\
   \codeln. \>\>\> \} \\
   \codeln. \>\> \} \\
-  \codeln. \\
   \codeln. \>\> return 0; \\
   \codeln. \> \} \\
   \codeln. \\
-  \codeln. \> String toString() \{ \\
-  \codeln. \>\> return "(" + x.toString() + ", " + y.toString() + ")"; \\
-  \codeln. \> \} \\
+  \codeln. \> String toString() \{ return "(" + x.toString() + ", " + y.toString() + ")"; \} \\
   \codeln.  \} \\
   \codeln. \\
   \codeln. Integer main() \{ \\
@@ -635,11 +622,13 @@ marked as private and owned by the writing thread.
   \codeln. \}
   \ecode \vspace{-0mm}
   \caption{\label{fig:mate-code} Example of maTe source code.}
+\end{small}
 \end{figure}
 
 In order to test my thesis, I extended the maTe programming language
 and implemented DMP using an ownership table in the maTe virtual
-machine.  maTe is a pure object-oriented, byte-compiled,
+machine.  I did not implement the local store buffer used by CoreDet
+\cite{coredet}.  maTe is a pure object-oriented, byte-compiled,
 garbage-collected programming language.  maTe features support for
 single inheritance, virtual method calls, method and operator
 overloading, nested local variable declarations and basic input/output
@@ -647,7 +636,7 @@ facilities.  maTe includes no primitive data types.  Instead, maTe
 includes four predefined classes to allow for integer arithmetic, text
 manipulation and simple data storage: Object, Integer, String and
 Table (Table is a key/value pair hash map inspired by Java's
-java.util.HashMap class).
+$java.util.HashMap$ class).
 
 Grammatically, maTe source is very similar to Java source code.  An
 example of maTe source code can be seen in Figure~\ref{fig:mate-code}.

@@ -61,18 +61,27 @@ atttempt to increase the likelihood that a thread can access a given
 object without needing to block.
 
 Future work could also include making the maTe virtual machine more
-efficient when run with many threads.
-
-As stated earlier, the current implementation runs the serial garbage
-collector at the end of serial mode when the heap is at least $90\%$
-full.  There may be more efficient ways to do this.
-
-Reimplement the virtual machine's heap to allocate large blocks of
+efficient when run with many threads.  This could include
+reimplementing the virtual machine's heap to allocate large blocks of
 memory up front instead of calling $malloc$ for every allocation of a
 virtual machine object.
 
+As stated earlier, the current implementation runs the serial garbage
+collector at the end of serial mode when the heap is at least $90\%$
+full.  There may be better ways to integrate the garbage collector
+with DMP.  Doing this while maintaining DMP's guarantee of
+deterministic execution could be difficult, however.
+
 Modify language to allow adding annotations to source code which help
-virtual machine choose better DMP parameters.
+virtual machine choose better DMP parameters.  For example, if a data
+structure is known to be accessed only by a single thread, DMP checks
+on that object could be skipped.  It's possible that static analysis
+could be used to determine when such optimizations are possible.
+
+Improve maTe compiler so that object fields are not repeatedly
+accessed unnecessarily when they already exist on the frame's local
+variable array or operand stack.  This could reduce the amount of
+blocking performed by a thread and thus improve performance.
 
 %%% Local Variables: 
 %%% mode: latex
