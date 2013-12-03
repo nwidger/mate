@@ -11,7 +11,7 @@ The following three benchmarks were implemented:
 \begin{itemize}
 \item parallel radix sort - Multithreaded radix sort
 
-\item jacobi - uses the Jacobi method to compute temperature changes
+\item jacobi - uses the Jacobi method to simulate temperature changes
   on a 20x25 plate.
 
 \item parallel DPLL - Multithreaded boolean satisfiability using DPLL
@@ -43,7 +43,7 @@ of parameters.  The parameters were:
 \end{itemize}
 
 The $Jacobi$ benchmark uses a fixed number of threads, and so this
-benchmark not include the threads parameter.
+benchmark does not have a threads parameter.
 
 Before running any benchmarks, I tested my implementation of DMP to
 ensure it was truly deterministic by running Racey \cite{racey}, a
@@ -70,6 +70,8 @@ In order to make discussing specific benchmark results more concise, I
 will use the following notation:
 
 \begin{itemize}
+\item $-tN$ - the number of threads used.
+
 \item $-QN$ - the quantum size ($-Q1000$ means a quantum size of
   $1,000$).
 
@@ -80,10 +82,11 @@ will use the following notation:
   mode.
 \end{itemize}
 
-For example, $-Q10000 -g1$ means a run with a quantum size of
-$10,000$, an ownership table granularity of $5$ and full serial mode,
-whereas $-Q1000 -g10 -r$ means a run with a quantum size of $1,000$,
-an ownership table granularity of $10$ and reduced serial mode.
+For example, $-t2 -Q10000 -g1$ means a run using 2 threads with a
+quantum size of $10,000$, an ownership table granularity of $5$ and
+full serial mode, whereas $-t8 -Q1000 -g10 -r$ means a run using 8
+threads with a quantum size of $1,000$, an ownership table granularity
+of $10$ and reduced serial mode.
 
 \subsubsection{Radix}
 
@@ -97,7 +100,8 @@ in two places:
 \item Determining the maximum - evenly distribute numbers to N Maxer
   threads.  Each thread iterates over its subset of the shared array
   and determines the largest value.  After, the largest of each
-  thread's maximum is determined and used as the global maximum.
+  thread's maximum is determined by iterating serially over each
+  Maxer's maximum with the largest used as the global maximum.
 
 \item Masking each number - evenly distribute numbers to N Counter
   threads.  Each thread iterates over its subset of the shared array,
@@ -105,14 +109,17 @@ in two places:
 \end{itemize}
 
 Neither of these segments requires synchronization as the threads are
-working on disjoint portions of the array.  There are no synchronized
-blocks in the maTe source code of this benchmark.
+working on disjoint portions of the array.  Note that arrays are
+implemented using Table instances where the keys are Integers.  There
+are no synchronized blocks in the maTe source code of this benchmark.
 
 After the Counters are finished, the masked numbers are aggregated
 into a single array.  From this point on the counting sort is finished
 in a serial fashion.
 
 The number of threads can be given as a command-line option.
+
+\pagebreak
 
 \begin{center}
 \begin{small}
@@ -139,6 +146,7 @@ dmp & radix & 2 & 100000 & full & 10 & 4.77 & 1.44\\
 dmp & radix & 2 & 100000 & reduced & 1 & 3.01 & .54\\
 dmp & radix & 2 & 100000 & reduced & 5 & 3.54 & .81\\
 dmp & radix & 2 & 100000 & reduced & 10 & 4.77 & 1.44\\
+\hline
 nondmp & radix & 4 & - & - & - & 1.48 & .00\\
 dmp & radix & 4 & 1000 & full & 1 & 2.80 & .89\\
 dmp & radix & 4 & 1000 & full & 5 & 24.40 & 15.48\\
@@ -158,6 +166,7 @@ dmp & radix & 4 & 100000 & full & 10 & 6.42 & 3.33\\
 dmp & radix & 4 & 100000 & reduced & 1 & 3.03 & 1.04\\
 dmp & radix & 4 & 100000 & reduced & 5 & 3.97 & 1.68\\
 dmp & radix & 4 & 100000 & reduced & 10 & 6.42 & 3.33\\
+\hline
 nondmp & radix & 8 & - & - & - & 1.27 & .00\\
 dmp & radix & 8 & 1000 & full & 1 & 2.65 & 1.08\\
 dmp & radix & 8 & 1000 & full & 5 & 26.11 & 19.55\\
@@ -177,6 +186,7 @@ dmp & radix & 8 & 100000 & full & 10 & 9.73 & 6.66\\
 dmp & radix & 8 & 100000 & reduced & 1 & 3.07 & 1.41\\
 dmp & radix & 8 & 100000 & reduced & 5 & 4.42 & 2.48\\
 dmp & radix & 8 & 100000 & reduced & 10 & 9.73 & 6.66\\
+\hline
 nondmp & radix & 16 & - & - & - & 1.57 & .00\\
 dmp & radix & 16 & 1000 & full & 1 & 3.13 & .99\\
 dmp & radix & 16 & 1000 & full & 5 & 28.27 & 17.00\\
@@ -203,28 +213,29 @@ dmp & radix & 16 & 100000 & reduced & 10 & 13.40 & 7.53\\
 \end{small}
 \end{center}
 
-In the results, the non-DMP runs unsurprisingly beat out all of the
-DMP runs with overhead ranging from $54\%$ to $4,520\%$.  The fastest
-DMP run was $-Q1000 -g1$ with 8 threads with an execution time of 2.65
-seconds.
+Table \ref{tab:radix_results} shows the results for the Radix
+benchmark.  In the results, the non-DMP runs unsurprisingly beat out
+all of the DMP runs with overhead ranging from $54\%$ to $4,520\%$.
+The fastest DMP run was $-t8 -Q1000 -g1$ with an execution time of
+2.65 seconds.
 
 The execution time of this benchmark does not appear sensitive to the
 choice of full or reduced serial mode.  This is likely due to the lack
-of sychronized blocks in this benchmarks.  Without threads
+of sychronized blocks in this benchmark.  Without threads
 acquiring/releasing object monitors, the lock counting performed in
 reduced serial mode is never triggered causing an early end to a
 thread's serial segment.
 
-It is also clear from the results that radix does not benefit from
+It is also clear from the results that Radix does not benefit from
 increasing the ownership table depth.  The runs with a depth of 1 had
 an execution time faster than all the others, with runs at a depth of
 10 having the worst.  One possibile explanation for this is that the
 object graph generated by the benchmark is not very deep.  Since
-threads access shared arrays, a shallow object graph and a large
-ownership depth could lead to threads continuously acquiring ownership
-of a large percentage of the total object graph during serial mode.
-This situation could cause greatly increase the number of blocking
-reads/writes during parallel mode.
+threads access shared arrays using Tables, a shallow object graph and
+a large ownership depth could lead to threads continuously acquiring
+ownership of a large percentage of the total object graph during
+serial mode.  This situation could cause greatly increase the number
+of blocking reads/writes during parallel mode.
 
 At first it would seem this is bourne out by the results, which show
 the percentage of execution time spent in serial mode increasing from
@@ -239,15 +250,15 @@ future blocking reads/writes caused by changing the object's owner.
 
 \subsubsection{Jacobi}
 
-Uses two ``2-dimensional'' global Tables, one for the original values
-and another for the final values.  A worker thread is created for each
-row in the table, and each worker runs the Jacobi algorithm on the
-cells in its assigned row.  The worker threads each read/write to the
-shared original/new global Tables, using synchronized blocks to manage
-thread contention.  When each thread finishes it returns the change in
-temperature.  When all threads have finished, the maximum change
-across all threads is stored.  This whole process is repeated for 20
-iterations.
+The Jacobi benchmark uses two ``2-dimensional'' global Tables, one for
+the original values and another for the final values.  A worker thread
+is created for each row in the table, and each worker runs the Jacobi
+algorithm on the cells in its assigned row.  The worker threads each
+read/write to the shared original/new global Tables, using
+synchronized blocks to manage thread contention.  When each thread
+finishes it returns the change in temperature.  When all threads have
+finished, the maximum change across all threads is stored.  This whole
+process is repeated for 20 iterations.
 
 The number of threads is fixed at the number of rows in the input
 table, meaning 20 threads for the 20x25 plate used in the benchmark.
@@ -284,37 +295,39 @@ dmp & jacobi & 2 & 100000 & reduced & 10 & 7.00 & 1.39\\
 \end{small}
 \end{center}
 
-The non-DMP Jacobi runs averaged 2.91 seconds of runtime.  With DMP
-enabled, the overhead ranged from $27\%$ to $1,117\%$.  The best DMP
-run was $-Q10000 -g1 -r$ with an average time of 3.71 seconds.  The
-most surprising result from the Jacobi benchmark is the clear
-advantage given to the runs using reduced serial mode.  The top seven
-non-DMP runs by both execution time and overhead are using reduced
-serial mode.  This is likely due to the fact that the main loop
-involves each thread acquiring and quickly releasing the old and new
-Table's monitors.  The sensitivity to the chosen serial mode on this
-benchmark is strong enough to more than quadruple execution time in
-some cases (compare $-Q10000 -g1 -r$ and $-Q10000 -g1$).  The results
-show that simply switching from reduced to full serial mode between
-$-Q10000 -g1 -r$ and $-Q10000 -g1$ increased the total number of
-blocking reads/writes from $1842$ to $17,616$, which increased the
+Table \ref{tab:jacobi_results} shows the results for the Jacobi
+benchmark.  The non-DMP Jacobi runs averaged 2.91 seconds of runtime.
+With DMP enabled, the overhead ranged from $27\%$ to $1,117\%$.  The
+best DMP run was $-Q10000 -g1 -r$ with an average time of 3.71
+seconds.  The most surprising result from the Jacobi benchmark is the
+clear advantage given to the runs using reduced serial mode.  The top
+seven non-DMP runs by both execution time and overhead are using
+reduced serial mode.  This is likely due to the fact that the main
+loop involves each thread acquiring and quickly releasing the old and
+new Table's monitors.  The sensitivity to the chosen serial mode on
+this benchmark is strong enough to more than quadruple execution time
+in some cases (compare $-Q10000 -g1 -r$ and $-Q10000 -g1$).  The
+results show that simply switching from reduced to full serial mode
+between $-Q10000 -g1 -r$ and $-Q10000 -g1$ increased the total number
+of blocking reads/writes from $1842$ to $17,616$, which increased the
 total number of rounds from $175$ to $3081$.
 
-\subsubsection{DPLL}
+\subsubsection{Parallel DPLL}
 
-Solves boolean satisfiability problems using the
-Davis-Putnam-Logemann-Loveland (DPLL) algorithm.  Input files are
-3-SAT problems in CNF format.  The algorithm is parallelized by
-creating N threads, given at the command-line, where each thread has a
-queue of nodes on the truth tree to process.  The queue is made up of
-chained buckets, one bucket for each level on the tree (corresponding
-to each variable in the input problem).  At the beginning of the
-program, the root of the tree is pushed onto the queue of the first
-thread.  Each thread continually removes a node from its queue,
-simplifies that node using the value of true for the node's variable
-and pushes the false node onto its queue.  If a thread reaches a
-dead-end in its subtree and has no more nodes on its queue, it steals
-a node off the queue of a randomly selected thread and continues.
+The DPLL benchmark solves boolean satisfiability problems using a
+parallelized form of the Davis-Putnam-Logemann-Loveland (DPLL)
+algorithm.  Input files are 3-SAT problems in CNF format.  The
+algorithm is parallelized by creating N threads, given at the
+command-line, where each thread has a queue of nodes on the truth tree
+to process.  The queue is made up of chained buckets, one bucket for
+each level on the tree (corresponding to each variable in the input
+problem).  At the beginning of the program, the root of the tree is
+pushed onto the queue of the first thread.  Each thread continually
+removes a node from its queue, simplifies the input using the value of
+true for the node's variable and pushes the false node onto its queue.
+If a thread reaches a dead-end in its subtree and has no more nodes on
+its queue, it steals a node off the queue of a randomly selected
+thread and continues.
 
 Each thread must acquire the monitor of a queue's bucket before
 adding/removing a node from that level.
@@ -326,81 +339,84 @@ adding/removing a node from that level.
 dmp & class & threads & quantum & serial & depth & avg & overhead\\
 \hline
 nondmp & dpl & 2 & - & - & - & .71 & .00\\
-dmp & dpl & 2 & 1000 & full & 1 & 1.72 & 1.42\\
-dmp & dpl & 2 & 1000 & full & 5 & 1.67 & 1.35\\
-dmp & dpl & 2 & 1000 & full & 10 & 1.72 & 1.42\\
-dmp & dpl & 2 & 1000 & reduced & 1 & 1.59 & 1.23\\
-dmp & dpl & 2 & 1000 & reduced & 5 & 1.85 & 1.60\\
-dmp & dpl & 2 & 1000 & reduced & 10 & 2.02 & 1.84\\
-dmp & dpl & 2 & 10000 & full & 1 & 1.12 & .57\\
-dmp & dpl & 2 & 10000 & full & 5 & 1.00 & .40\\
-dmp & dpl & 2 & 10000 & full & 10 & 1.20 & .69\\
-dmp & dpl & 2 & 10000 & reduced & 1 & .95 & .33\\
-dmp & dpl & 2 & 10000 & reduced & 5 & 1.08 & .52\\
-dmp & dpl & 2 & 10000 & reduced & 10 & 1.10 & .54\\
-dmp & dpl & 2 & 100000 & full & 1 & 1.05 & .47\\
-dmp & dpl & 2 & 100000 & full & 5 & 1.03 & .45\\
-dmp & dpl & 2 & 100000 & full & 10 & 1.34 & .88\\
-dmp & dpl & 2 & 100000 & reduced & 1 & 1.11 & .56\\
-dmp & dpl & 2 & 100000 & reduced & 5 & 1.25 & .76\\
-dmp & dpl & 2 & 100000 & reduced & 10 & 1.20 & .69\\
-nondmp & dpl & 4 & - & - & - & 1.93 & .00\\
-dmp & dpl & 4 & 1000 & full & 1 & 3.66 & .89\\
-dmp & dpl & 4 & 1000 & full & 5 & 3.81 & .97\\
-dmp & dpl & 4 & 1000 & full & 10 & 4.35 & 1.25\\
-dmp & dpl & 4 & 1000 & reduced & 1 & 3.85 & .99\\
-dmp & dpl & 4 & 1000 & reduced & 5 & 3.80 & .96\\
-dmp & dpl & 4 & 1000 & reduced & 10 & 4.10 & 1.12\\
-dmp & dpl & 4 & 10000 & full & 1 & 2.40 & .24\\
-dmp & dpl & 4 & 10000 & full & 5 & 3.04 & .57\\
-dmp & dpl & 4 & 10000 & full & 10 & 2.56 & .32\\
-dmp & dpl & 4 & 10000 & reduced & 1 & 2.40 & .24\\
-dmp & dpl & 4 & 10000 & reduced & 5 & 2.58 & .33\\
-dmp & dpl & 4 & 10000 & reduced & 10 & 2.82 & .46\\
-dmp & dpl & 4 & 100000 & full & 1 & 2.22 & .15\\
-dmp & dpl & 4 & 100000 & full & 5 & 2.30 & .19\\
-dmp & dpl & 4 & 100000 & full & 10 & 2.72 & .40\\
-dmp & dpl & 4 & 100000 & reduced & 1 & 2.15 & .11\\
-dmp & dpl & 4 & 100000 & reduced & 5 & 2.06 & .06\\
-dmp & dpl & 4 & 100000 & reduced & 10 & 2.41 & .24\\
-nondmp & dpl & 8 & - & - & - & 4.06 & .00\\
-dmp & dpl & 8 & 1000 & full & 1 & 13.15 & 2.23\\
-dmp & dpl & 8 & 1000 & full & 5 & 12.88 & 2.17\\
-dmp & dpl & 8 & 1000 & full & 10 & 23.28 & 4.73\\
-dmp & dpl & 8 & 1000 & reduced & 1 & 11.52 & 1.83\\
-dmp & dpl & 8 & 1000 & reduced & 5 & 11.47 & 1.82\\
-dmp & dpl & 8 & 1000 & reduced & 10 & 21.76 & 4.35\\
-dmp & dpl & 8 & 10000 & full & 1 & 5.44 & .33\\
-dmp & dpl & 8 & 10000 & full & 5 & 5.95 & .46\\
-dmp & dpl & 8 & 10000 & full & 10 & 7.47 & .83\\
-dmp & dpl & 8 & 10000 & reduced & 1 & 5.46 & .34\\
-dmp & dpl & 8 & 10000 & reduced & 5 & 5.86 & .44\\
-dmp & dpl & 8 & 10000 & reduced & 10 & 7.91 & .94\\
-dmp & dpl & 8 & 100000 & full & 1 & 5.55 & .36\\
-dmp & dpl & 8 & 100000 & full & 5 & 6.16 & .51\\
-dmp & dpl & 8 & 100000 & full & 10 & 6.96 & .71\\
-dmp & dpl & 8 & 100000 & reduced & 1 & 3.12 & -.23\\
-dmp & dpl & 8 & 100000 & reduced & 5 & 3.45 & -.15\\
-dmp & dpl & 8 & 100000 & reduced & 10 & 3.57 & -.12\\
-nondmp & dpl & 16 & - & - & - & 6.12 & .00\\
-dmp & dpl & 16 & 1000 & full & 1 & 21.26 & 2.47\\
-dmp & dpl & 16 & 1000 & full & 5 & 21.29 & 2.47\\
-dmp & dpl & 16 & 1000 & full & 10 & 176.84 & 27.89\\
-dmp & dpl & 16 & 1000 & reduced & 1 & 22.31 & 2.64\\
-dmp & dpl & 16 & 1000 & reduced & 5 & 20.36 & 2.32\\
-dmp & dpl & 16 & 1000 & reduced & 10 & 160.39 & 25.20\\
-dmp & dpl & 16 & 10000 & full & 1 & 9.76 & .59\\
-dmp & dpl & 16 & 10000 & full & 5 & 11.85 & .93\\
-dmp & dpl & 16 & 10000 & full & 10 & 47.47 & 6.75\\
-dmp & dpl & 16 & 10000 & reduced & 1 & 8.53 & .39\\
-dmp & dpl & 16 & 10000 & reduced & 5 & 9.40 & .53\\
-dmp & dpl & 16 & 10000 & reduced & 10 & 33.83 & 4.52\\
-dmp & dpl & 16 & 100000 & full & 1 & 11.78 & .92\\
-dmp & dpl & 16 & 100000 & full & 5 & 11.22 & .83\\
-dmp & dpl & 16 & 100000 & full & 10 & 26.70 & 3.36\\
-dmp & dpl & 16 & 100000 & reduced & 1 & 5.14 & -.16\\
-dmp & dpl & 16 & 100000 & reduced & 5 & 5.38 & -.12\\
-dmp & dpl & 16 & 100000 & reduced & 10 & 10.54 & .72\\
+dmp & dpll & 2 & 1000 & full & 1 & 1.72 & 1.42\\
+dmp & dpll & 2 & 1000 & full & 5 & 1.67 & 1.35\\
+dmp & dpll & 2 & 1000 & full & 10 & 1.72 & 1.42\\
+dmp & dpll & 2 & 1000 & reduced & 1 & 1.59 & 1.23\\
+dmp & dpll & 2 & 1000 & reduced & 5 & 1.85 & 1.60\\
+dmp & dpll & 2 & 1000 & reduced & 10 & 2.02 & 1.84\\
+dmp & dpll & 2 & 10000 & full & 1 & 1.12 & .57\\
+dmp & dpll & 2 & 10000 & full & 5 & 1.00 & .40\\
+dmp & dpll & 2 & 10000 & full & 10 & 1.20 & .69\\
+dmp & dpll & 2 & 10000 & reduced & 1 & .95 & .33\\
+dmp & dpll & 2 & 10000 & reduced & 5 & 1.08 & .52\\
+dmp & dpll & 2 & 10000 & reduced & 10 & 1.10 & .54\\
+dmp & dpll & 2 & 100000 & full & 1 & 1.05 & .47\\
+dmp & dpll & 2 & 100000 & full & 5 & 1.03 & .45\\
+dmp & dpll & 2 & 100000 & full & 10 & 1.34 & .88\\
+dmp & dpll & 2 & 100000 & reduced & 1 & 1.11 & .56\\
+dmp & dpll & 2 & 100000 & reduced & 5 & 1.25 & .76\\
+dmp & dpll & 2 & 100000 & reduced & 10 & 1.20 & .69\\
+\hline
+nondmp & dpll & 4 & - & - & - & 1.93 & .00\\
+dmp & dpll & 4 & 1000 & full & 1 & 3.66 & .89\\
+dmp & dpll & 4 & 1000 & full & 5 & 3.81 & .97\\
+dmp & dpll & 4 & 1000 & full & 10 & 4.35 & 1.25\\
+dmp & dpll & 4 & 1000 & reduced & 1 & 3.85 & .99\\
+dmp & dpll & 4 & 1000 & reduced & 5 & 3.80 & .96\\
+dmp & dpll & 4 & 1000 & reduced & 10 & 4.10 & 1.12\\
+dmp & dpll & 4 & 10000 & full & 1 & 2.40 & .24\\
+dmp & dpll & 4 & 10000 & full & 5 & 3.04 & .57\\
+dmp & dpll & 4 & 10000 & full & 10 & 2.56 & .32\\
+dmp & dpll & 4 & 10000 & reduced & 1 & 2.40 & .24\\
+dmp & dpll & 4 & 10000 & reduced & 5 & 2.58 & .33\\
+dmp & dpll & 4 & 10000 & reduced & 10 & 2.82 & .46\\
+dmp & dpll & 4 & 100000 & full & 1 & 2.22 & .15\\
+dmp & dpll & 4 & 100000 & full & 5 & 2.30 & .19\\
+dmp & dpll & 4 & 100000 & full & 10 & 2.72 & .40\\
+dmp & dpll & 4 & 100000 & reduced & 1 & 2.15 & .11\\
+dmp & dpll & 4 & 100000 & reduced & 5 & 2.06 & .06\\
+dmp & dpll & 4 & 100000 & reduced & 10 & 2.41 & .24\\
+\hline
+nondmp & dpll & 8 & - & - & - & 4.06 & .00\\
+dmp & dpll & 8 & 1000 & full & 1 & 13.15 & 2.23\\
+dmp & dpll & 8 & 1000 & full & 5 & 12.88 & 2.17\\
+dmp & dpll & 8 & 1000 & full & 10 & 23.28 & 4.73\\
+dmp & dpll & 8 & 1000 & reduced & 1 & 11.52 & 1.83\\
+dmp & dpll & 8 & 1000 & reduced & 5 & 11.47 & 1.82\\
+dmp & dpll & 8 & 1000 & reduced & 10 & 21.76 & 4.35\\
+dmp & dpll & 8 & 10000 & full & 1 & 5.44 & .33\\
+dmp & dpll & 8 & 10000 & full & 5 & 5.95 & .46\\
+dmp & dpll & 8 & 10000 & full & 10 & 7.47 & .83\\
+dmp & dpll & 8 & 10000 & reduced & 1 & 5.46 & .34\\
+dmp & dpll & 8 & 10000 & reduced & 5 & 5.86 & .44\\
+dmp & dpll & 8 & 10000 & reduced & 10 & 7.91 & .94\\
+dmp & dpll & 8 & 100000 & full & 1 & 5.55 & .36\\
+dmp & dpll & 8 & 100000 & full & 5 & 6.16 & .51\\
+dmp & dpll & 8 & 100000 & full & 10 & 6.96 & .71\\
+dmp & dpll & 8 & 100000 & reduced & 1 & 3.12 & -.23\\
+dmp & dpll & 8 & 100000 & reduced & 5 & 3.45 & -.15\\
+dmp & dpll & 8 & 100000 & reduced & 10 & 3.57 & -.12\\
+\hline
+nondmp & dpll & 16 & - & - & - & 6.12 & .00\\
+dmp & dpll & 16 & 1000 & full & 1 & 21.26 & 2.47\\
+dmp & dpll & 16 & 1000 & full & 5 & 21.29 & 2.47\\
+dmp & dpll & 16 & 1000 & full & 10 & 176.84 & 27.89\\
+dmp & dpll & 16 & 1000 & reduced & 1 & 22.31 & 2.64\\
+dmp & dpll & 16 & 1000 & reduced & 5 & 20.36 & 2.32\\
+dmp & dpll & 16 & 1000 & reduced & 10 & 160.39 & 25.20\\
+dmp & dpll & 16 & 10000 & full & 1 & 9.76 & .59\\
+dmp & dpll & 16 & 10000 & full & 5 & 11.85 & .93\\
+dmp & dpll & 16 & 10000 & full & 10 & 47.47 & 6.75\\
+dmp & dpll & 16 & 10000 & reduced & 1 & 8.53 & .39\\
+dmp & dpll & 16 & 10000 & reduced & 5 & 9.40 & .53\\
+dmp & dpll & 16 & 10000 & reduced & 10 & 33.83 & 4.52\\
+dmp & dpll & 16 & 100000 & full & 1 & 11.78 & .92\\
+dmp & dpll & 16 & 100000 & full & 5 & 11.22 & .83\\
+dmp & dpll & 16 & 100000 & full & 10 & 26.70 & 3.36\\
+dmp & dpll & 16 & 100000 & reduced & 1 & 5.14 & -.16\\
+dmp & dpll & 16 & 100000 & reduced & 5 & 5.38 & -.12\\
+dmp & dpll & 16 & 100000 & reduced & 10 & 10.54 & .72\\
 \hline
 \caption{DPLL Benchmark Results}
 \label{tab:dpll_results}
@@ -409,15 +425,15 @@ dmp & dpl & 16 & 100000 & reduced & 10 & 10.54 & .72\\
 \end{center}
 
 When generating the results for this benchmark, the maTe virtual
-machine was run in a special mode which ensures the Integer.rand()
+machine was run in a special mode which ensures the $Integer.rand$
 method used in determining which level of a thread's queue to steal
 from always returns the same sequence of numbers.
 
-The non-DMP DPL runs averaged .71 seconds (2 threads), 1.93 seconds (4
-threads), 4.06 seconds (8 threads) and 6.12 seconds (16).  With DMP
+Table \ref{tab:dpll_results} shows the results for the DPLL benchmark.
+The non-DMP DPLL runs averaged .71 seconds (2 threads), 1.93 seconds
+(4 threads), 4.06 seconds (8 threads) and 6.12 seconds (16).  With DMP
 enabled the overhead ranged from $-23\%$ to $2,789\%$.  The best DMP
-run was 2 threads using $-Q10000 -r -g1$ with an average time of .95
-seconds.
+run was $-t2 -Q10000 -r -g1$ with an average time of .95 seconds.
 
 The inefficiency of the maTe virtual machine when running multithreads
 is very apparent in this benchmark.  The average execution time for
@@ -429,20 +445,20 @@ DMP run of 8 threads with $-Q100000 -r -g1$ had an overhead of $-23\%$
 with an average execution time of 3.12 seconds, beating out the
 non-DMP run average time with 8 threads of 4.06 seconds.
 
-Higher instruction quantum values appear to perform better.
+% Higher instruction quantum values appear to perform better.
 
 For runs with 2 or 4 threads, different ownership table depths had
 little effect on execution time, adding no more than .64 seconds.
 Runs with 8 and 16 threads, however, exhibit extreme jumps in
 execution time when the ownership table depth is increased, compare
-the $-Q1000 -r -g5$ run with an execution time of 11.47 seconds with
-the $-Q1000 -r -g10$ run of 21.76 seconds.  With 16 threads, this
-trend gets even worse, with $-Q1000 -g5$ executing in 21.29 seconds
-and $-Q1000 -g10$ executing in 176.84 seconds.
+the $-t8 -Q1000 -r -g5$ run with an execution time of 11.47 seconds
+with the $-t8 -Q1000 -r -g10$ run of 21.76 seconds.  With 16 threads,
+this trend gets even worse, with $-t16 -Q1000 -g5$ executing in 21.29
+seconds and $-t16 -Q1000 -g10$ executing in 176.84 seconds.
 
-Overhead is very sensitive to DMP parameters chosen.
+% Overhead is very sensitive to DMP parameters chosen.
 
-Does not appear sensitive to choice of serial mode.
+% Does not appear sensitive to choice of serial mode.
 
 %%% Local Variables:
 %%% mode: latex

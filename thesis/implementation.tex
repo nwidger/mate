@@ -249,6 +249,25 @@ DMP-specific $thread$ module's lock count. Then, if the current mode
 is serial mode, the lock count is zero and the thread is using reduced
 serial mode, the thread blocks, otherwise it returns.
 
+\subsubsection{DMP Statistics}
+
+The $dmp$ module can also be instructed to collect DMP-related
+statistics as a program executes and print them out after the program
+terminates.  These statistics include
+
+\begin{itemize}
+\item number of rounds,
+\item execution time,
+\item time spent in parallel/serial mode,
+\item maximum/minimum/average parallel/serial segment,
+\item number of reads/writes,
+\item number of blocking reads/writes, and
+\item number of reads/writes to shared/private objects
+\end{itemize}
+
+Being able to analyze these statistics made drawing conclusions from
+the benchmarks much easier.
+
 \subsection{Performance Enhancements}
 
 In order to improve the virtual machine's multithreaded performance, a

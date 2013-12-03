@@ -16,9 +16,9 @@ However, I still believe that implementing DMP inside a virtual
 machine is still a sound idea.  On all but the most extreme DMP
 parameter settings, the performance overhead seen in the benchmarks
 was acceptable.  This is especially true if running the benchmarks
-would uncover a bug in the implementation.  On far longer-running
+would uncover a bug in the implementation.  On longer-running
 benchmarks, the acceptability may not hold.  Furthermore, there are
-definitely advantages in not having to recompile a maTe program in
+definitely advantages to not having to recompile a maTe program in
 order to run with/without DMP enabled.  Being able to quickly run the
 same program repeatedly using different DMP parameters makes it much
 easier to find optimal parameters for a given benchmark and input
@@ -28,10 +28,10 @@ I also conclude that implementing an efficient multithreaded virtual
 machine is itself a difficult task, especially when starting with a
 virtual machine that was initially designed to be only single
 threaded.  Reducing thread contention when accessing global data
-structures, especially the heap, was a real pain point.  Analyzing the
-results was made more difficult due to the fact that in many of the
-benchmarks the maTe virtual machine's performance worsened as more
-threads were added.
+structures, especially the heap, was difficult.  Analyzing the results
+was made more difficult due to the fact that in many of the benchmarks
+the maTe virtual machine's performance worsened as more threads were
+added.
 
 It is also clear from the results that using different ownership table
 depths was not particularly effective in reducing the amount of time
@@ -42,8 +42,8 @@ Another possibility is that because most of the benchmarks stored its
 data in Table instances shared across threads, using any depth greater
 than one would mean every write to a Table would cause all the
 key/value pairs objects in the Table to change owner.  In benchmarks
-that stores its data in a handful of global Tables (WHICH DID THAT?),
-this would essentially serialize access to the table.
+that stores its data in a handful of global Tables, % (WHICH DID THAT?)
+this would essentially serialize access to the table. % DID THAT ACTUALLY HAPPEN?
 
 % Discuss attempt to implement Table using objects to try to allow
 % more fine-grained ownership of Table fields.
