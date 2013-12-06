@@ -14,8 +14,8 @@ The following three benchmarks were implemented:
 \item jacobi - uses the Jacobi method to simulate temperature changes
   on a 20x25 plate.
 
-\item parallel DPLL - Multithreaded boolean satisfiability using DPLL
-  algorithm
+\item parallel DPLL - Multithreaded boolean satisfiability using the
+  DPLL algorithm
 \end{itemize}
 
 Comparison of my results with those from the DMP/CoreDet papers will
@@ -237,7 +237,7 @@ ownership of a large percentage of the total object graph during
 serial mode.  This situation could cause greatly increase the number
 of blocking reads/writes during parallel mode.
 
-At first it would seem this is bourne out by the results, which show
+At first it would seem this is borne out by the results, which show
 the percentage of execution time spent in serial mode increasing from
 $50\%$ with $-Q1000 -g1$ to $95\%$ with $-Q1000 -g5$ up to $97\%$ with
 $-Q1000 -g10$.  However, upon closer inspection the total number of
@@ -317,8 +317,8 @@ total number of rounds from $175$ to $3081$.
 The DPLL benchmark solves boolean satisfiability problems using a
 parallelized form of the Davis-Putnam-Logemann-Loveland (DPLL)
 algorithm.  Input files are 3-SAT problems in CNF format.  The
-algorithm is parallelized by creating N threads, given at the
-command-line, where each thread has a queue of nodes on the truth tree
+algorithm is parallelized by creating N threads, where N is given at
+the command-line.  Each thread has a queue of nodes on the truth tree
 to process.  The queue is made up of chained buckets, one bucket for
 each level on the tree (corresponding to each variable in the input
 problem).  At the beginning of the program, the root of the tree is
@@ -425,7 +425,7 @@ dmp & dpll & 16 & 100000 & reduced & 10 & 10.54 & .72\\
 \end{center}
 
 When generating the results for this benchmark, the maTe virtual
-machine was run in a special mode which ensures the $Integer.rand$
+machine was run in a special mode that ensures the $Integer.rand$
 method used in determining which level of a thread's queue to steal
 from always returns the same sequence of numbers.
 

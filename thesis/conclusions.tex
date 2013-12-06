@@ -50,14 +50,14 @@ this would essentially serialize access to the table. % DID THAT ACTUALLY HAPPEN
 
 I definitely found that the Table class, being the most complex native
 class and also the only built-in data structure, was one of the most
-difficult parts of the VM to get working with DMP.
+difficult parts of the virtual machine to get working with DMP.
 
 \section{Future Work}
 
 Future work could include modifying the ownership table policy to
 include an adaptive algorithm that attempts to learn the shared memory
 profile of the maTe program and adjust the ownership of objects in an
-atttempt to increase the likelihood that a thread can access a given
+attempt to increase the likelihood that a thread can access a given
 object without needing to block.
 
 Future work could also include making the maTe virtual machine more
@@ -72,7 +72,7 @@ full.  There may be better ways to integrate the garbage collector
 with DMP.  Doing this while maintaining DMP's guarantee of
 deterministic execution could be difficult, however.
 
-Modify language to allow adding annotations to source code which help
+Modify language to allow adding annotations to source code that help
 virtual machine choose better DMP parameters.  For example, if a data
 structure is known to be accessed only by a single thread, DMP checks
 on that object could be skipped.  It's possible that static analysis

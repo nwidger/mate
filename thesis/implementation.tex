@@ -88,8 +88,8 @@ a thread to block when DMP is enabled:
 \item upon reaching the end of its quantum in the fetch/execute loop
 \end{itemize}
 
-The implemention must satisfy these requirements.  In addition, I had
-a number of architectural goals in mind when implementing DMP:
+The implementation must satisfy these requirements.  In addition, I
+had a number of architectural goals in mind when implementing DMP:
 
 \begin{itemize}
 \item be able to enable/disable DMP using a command-line argument
@@ -165,11 +165,11 @@ After all threads have reached the second barrier, a new round begins
 with all threads executing in parallel.
 
 The parallel garbage collector implemented in the virtual machine
-posed for deterministic execution since when a collection cycle would
-occur is not deterministic.  Therefore, only the serial garbage
-collector is used when running with DMP enabled.  The garbage
-collector is run at the end of serial mode if the heap is using $90\%$
-or more of its maximum memory.
+posed problems for deterministic execution since determining when a
+collection cycle will occur is not deterministic.  Therefore, only the
+serial garbage collector is used when running with DMP enabled.  The
+garbage collector is run at the end of serial mode if the heap is
+using $90\%$ or more of its maximum memory.
 
 \subsubsection{Object DMP}
 
@@ -190,10 +190,10 @@ $object$ module's $owner$ attribute.  If $owner$ is $0$, the object is
 shared.  If $owner$ is not $0$, the object is private and the value
 specifies the thread ID of its current owner.  The DMP-specific
 $thread$ module maintains an executed instructions count to track the
-end of its quantum which is incremented for each iteration of the
+end of its quantum that is incremented for each iteration of the
 fetch/execute loop.  Hooks into the DMP-specific $object$ module were
 placed into the $object$ module's $object\_load\_field$ and
-$object\_store\_field$ functions (which are called from the $getfield$
+$object\_store\_field$ functions (that are called from the $getfield$
 and $putfield$ instructions).  The default $load$ and $store$
 operations follow the ownership table policy from the DMP paper by
 checking the $owner$ field before allowing the instruction to execute.
@@ -230,7 +230,7 @@ is entirely implemented within the virtual machine.  The internal
 state of a $Table$ instance is accessible from a maTe program only
 through method calls.  The purpose of the DMP-specific $table$ module
 is to ensure that threads accessing the native fields of a $Table$
-instance blocks appropriately just as it would be it were accessing a
+instance block appropriately just as it would be it were accessing a
 maTe object field.  The default $load$ and $store$ implementations
 merely call the $load$ and $store$ operations of the $Table$
 instance's DMP-specific $object$ module.
@@ -274,26 +274,22 @@ In order to improve the virtual machine's multithreaded performance, a
 number of enhancements were added.
 
 The first category of enhancements is caching for immutable types.  A
-cache for the immutable Integer is used to ensure only a single
-instance of each of the 65,5536 possible immutable $Integer$s is
-instantiated.  The cache is filled incrementally as the program
-executes $newint$ instructions.  Also, a cache for the immutable
-$String$ class is used to ensure only a single $String$ instance is
-created for each $newstr$ instruction.
+cache for immutable Integer instances is used to ensure only a single
+instance of each $Integer$ with value 0-65,5536 is instantiated.
+Although maTe's Integer class stores 32-bit values, the decision was
+made to only cache values between 0-65,536 was done for memory reason.
+The cache is filled incrementally as the program executes $newint$
+instructions.  Also, a cache for the immutable $String$ class is used
+to ensure only a single $String$ instance is created for each $newstr$
+instruction.
 
 The second category is caching done to prevent access to the shared,
-global heap.  Each thread maintains an object ref cache which allows a
+global heap.  Each thread maintains an object ref cache that allows a
 thread to translate an object reference to an object pointer without
 needing to go through the global heap.  Secondly, each thread
-maintains a free object cache which allows it to allocate a new object
+maintains a free object cache that allows it to allocate a new object
 without accessing the global heap so long as it finds a freed object
 of the correct size in its cache.
-
-One last enhancement was added which forces sets the affinity of each
-thread using a call to $pthread\_setaffinity\_np$.
-
-A number of attempts were made to improve the performance of the
-$table$ module.
 
 An attempt was made to modify the $table$ module to implement the hash
 table buckets as maTe object fields rather than C structures with the

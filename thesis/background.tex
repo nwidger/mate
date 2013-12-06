@@ -11,7 +11,7 @@ weaknesses.
 Devietti et al. describe a method of executing a multithreaded program
 with a strong deterministic guarantee that they call deterministic
 shared memory multiprocessing (DMP) \cite{dmp}.  Previous work on
-deterministic execution focused on deterministic replay systems which
+deterministic execution focused on deterministic replay systems that
 have high overheads due to their need to record a log of the ordering
 of events that can then be replayed for debugging purposes
 \cite{recplay}.  In contrast, DMP enforces deterministic execution
@@ -410,7 +410,7 @@ Grace is designed for fork-join parallelism applications in which a
 parent function spawns one or more children and then waits for them to
 terminate before returning itself.  Berger et al. designed Grace in an
 attempt to get rid of a large number of concurrency bugs while still
-achieving good performance \cite{grace}.  The concurrency bugs which
+achieving good performance \cite{grace}.  The concurrency bugs that
 Grace eliminates and their causes are:
 
 \begin{itemize}
@@ -486,7 +486,7 @@ deterministic execution.
 \section{Deterministic Parallel Java}
 
 Deterministic Parallel Java (DPJ) is an extension to the Java
-programming language which adds parallel code blocks as well as a
+programming language that adds parallel code blocks as well as a
 \emph{type and effect} system that allows a compile-time guarantee of
 determinism \cite{dpj}.  DPJ splits the heap into named
 \emph{regions}.  DPJ source code is annotated to indicate in which
@@ -504,7 +504,7 @@ DPJ uses compile-time enforcement of determinism, meaning its overhead
 at run-time is very small when compared to other solutions such as
 DMP.  However, it could be argued that the type and effect systems
 used by DPJ is clumsy and frustrating to the programmer.  The
-annotations which must be provided by the programmer can wind up being
+annotations that must be provided by the programmer can wind up being
 very complicated and hard to understand.  Furthermore, determinism can
 only be guaranteed if every annotation is correct, and the burden to
 fix any inaccuracies is placed on the programmer's shoulders.
@@ -579,8 +579,8 @@ a depth of one, only the ownership table entry of the object being
 accessed is modified, at a depth of two, the object being modified as
 well as all objects it reference are modified and so on.
 Figure~\ref{fig:depth} illustrates the changes in object ownership
-which occur when writing to the object at the root of the tree using
-an ownership table depth of 1, 2 and 3.  Blackened objects are those
+that occur when writing to the object at the root of the tree using an
+ownership table depth of 1, 2 and 3.  Blackened objects are those
 marked as private and owned by the writing thread.
 
 \begin{figure}
