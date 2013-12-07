@@ -7,20 +7,21 @@ thread scheduling, cache state and I/O delays.  Nondeterministic
 execution leads to an array of problems:
 
 \begin{itemize}
-\item it causes programs to produce different output when executed
-  with the same inputs
+\item It causes programs to produce different output when executed
+  with the same inputs.
 
-\item makes concurrency bugs such as race conditions hard to reproduce
+\item It makes concurrency bugs such as race conditions hard to
+  reproduce.
 
-\item creates bugs that lie dormant in multithreaded code for years
+\item It creates bugs that lie dormant in multithreaded code for years
   before an input and thread interleaving are executed that causes
-  them to be discovered
+  them to be discovered.
 
-\item makes unit testing of multithreaded code difficult and less
-  conclusive
+\item It makes unit testing of multithreaded code difficult and less
+  conclusive.
 
-\item causes major frustrations to programmers wishing to enjoy the
-  benefits of parallel programming
+\item It causes major frustrations to programmers wishing to enjoy the
+  benefits of parallel programming.
 \end{itemize}
 
 However, recent research has shown that deterministic execution of

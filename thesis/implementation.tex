@@ -80,25 +80,25 @@ machine.  As describe earler, there are four situations that can cause
 a thread to block when DMP is enabled:
 
 \begin{itemize}
-\item upon executing a communicating $getfield$ or $putfield$
-  instruction (used to read/write an object field),
-\item upon creation of a $Thread$ instance (by calling its $start$
-  method),
-\item upon termination of the $run$ method of a $Thread$ instance, and
-\item upon reaching the end of its quantum in the fetch/execute loop
+\item Upon executing a communicating $getfield$ or $putfield$
+  instruction (used to read/write an object field).
+\item Upon creation of a $Thread$ instance (by calling its $start$
+  method).
+\item Upon termination of the $run$ method of a $Thread$ instance.
+\item Upon reaching the end of its quantum in the fetch/execute loop.
 \end{itemize}
 
 The implementation must satisfy these requirements.  In addition, I
 had a number of architectural goals in mind when implementing DMP:
 
 \begin{itemize}
-\item be able to enable/disable DMP using a command-line argument
-  without needing to compile the maTe source code,
-\item isolate DMP functionality into separate files with minimal hooks
-  in the main virtual machine implementation,
-\item minimize any performance penalty caused by DMP implementation
-  when running with DMP disabled and
-\item allow the possibility for DMP behavior to be per-thread or
+\item Be able to enable/disable DMP using a command-line argument
+  without needing to compile the maTe source code.
+\item Isolate DMP functionality into separate files with minimal hooks
+  in the main virtual machine implementation.
+\item Minimize any performance penalty caused by DMP implementation
+  when running with DMP disabled.
+\item Allow the possibility for DMP behavior to be per-thread or
   per-object specific.
 \end{itemize}
 
@@ -253,7 +253,7 @@ serial mode, the thread blocks, otherwise it returns.
 
 The $dmp$ module can also be instructed to collect DMP-related
 statistics as a program executes and print them out after the program
-terminates.  These statistics include
+terminates.  These statistics include:
 
 \begin{itemize}
 \item number of rounds,
@@ -262,7 +262,7 @@ terminates.  These statistics include
 \item maximum/minimum/average parallel/serial segment,
 \item number of reads/writes,
 \item number of blocking reads/writes, and
-\item number of reads/writes to shared/private objects
+\item number of reads/writes to shared/private objects.
 \end{itemize}
 
 Being able to analyze these statistics made drawing conclusions from

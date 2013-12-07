@@ -8,14 +8,14 @@ weaknesses.
 
 \section{Deterministic Shared Memory Multiprocessing (DMP)}
 
-Devietti et al. describe a method of executing a multithreaded program
-with a strong deterministic guarantee that they call deterministic
-shared memory multiprocessing (DMP) \cite{dmp}.  Previous work on
-deterministic execution focused on deterministic replay systems that
-have high overheads due to their need to record a log of the ordering
-of events that can then be replayed for debugging purposes
-\cite{recplay}.  In contrast, DMP enforces deterministic execution
-dynamically as the program executes.
+Devietti et al.\ describe a method of executing a multithreaded
+program with a strong deterministic guarantee that they call
+deterministic shared memory multiprocessing (DMP)~\cite{dmp}.
+Previous work on deterministic execution focused on deterministic
+replay systems that have high overheads due to their need to record a
+log of the ordering of events that can then be replayed for debugging
+purposes~\cite{recplay}.  In contrast, DMP enforces deterministic
+execution dynamically as the program executes.
 
 As they describe in their paper, a naive way to achieve deterministic
 execution is to ensure that the interleaving of every instruction is
@@ -31,8 +31,8 @@ in which each thread executes a single quantum.
 
 Serializing the entire program as described above defeats the
 performance advantages of programming using threads.  In their paper,
-Devietti et al. make the point that if two instructions do not
-communicate, the order in which they execute is irrelevant \cite{dmp}.
+Devietti et al.\ make the point that if two instructions do not
+communicate, the order in which they execute is irrelevant~\cite{dmp}.
 Therefore, deterministic execution can be achieved by carefully
 controlling only those instructions that cause interthread
 communication via shared memory.  By controlling the order in which
@@ -48,10 +48,10 @@ this, each quantum is broken into two modes: \emph{parallel mode} and
 concurrently.  Each thread executes in parallel mode until either:
 
 \begin{itemize}
-\item it reaches the end of its quantum or
+\item It reaches the end of its quantum.
 
-\item it attempts to access a memory location that may cause
-  interthread communication
+\item It attempts to access a memory location that may cause
+  interthread communication.
 \end{itemize}
 
 At the start of each round, all threads execute the parallel segment
@@ -74,16 +74,16 @@ Determinism in DMP is guaranteed on the same input for the following
 reasons:
 
 \begin{itemize}
-\item no interthread communication can occur during parallel mode as
-  it is detected and deferred until serial mode
+\item No interthread communication can occur during parallel mode as
+  it is detected and deferred until serial mode.
 
-\item each thread's parallel segment will end at a deterministic point
+\item Each thread's parallel segment will end at a deterministic point
   because, given the same input, a thread will always follow the same
   execution path leading to either the first or second condition being
-  met
+  met.
 
-\item serial mode is deterministic because threads are executed
-  serially in a deterministic order
+\item Serial mode is deterministic because threads are executed
+  serially in a deterministic order.
 \end{itemize}
 
 In their paper, the deterministic token is passed in thread creation
@@ -102,17 +102,6 @@ is common for shared data to be accessed in a read-only manner amongst
 several threads.  A thread should not have to block to read shared
 read-only data as this cannot cause nondeterminism.
 
-\begin{figure}[t]
-  \begin{center}
-    {\resizebox{3.25in}{!}{
-        \includegraphics{./figures/ownership-graph.pdf} }}
-  \end{center}
-  \vspace{-4mm}
-  \caption{Ownership transition graph for a memory location accessible to two
-    threads.}
-  \label{fig:ownership-graph}
-\end{figure}
-
 Therefore, in order to accurately detect that interthread
 communication is about to occur via a read/write to shared memory, the
 ownership/sharing state of each memory location must be tracked.  To
@@ -129,14 +118,14 @@ thread is made to block for serial mode.  An \emph{ownership table
   policy} defines the following:
 
 \begin{itemize}
-\item when an entry in the ownership table transitions between being
-  marked as shared or private
+\item When an entry in the ownership table transitions between being
+  marked as shared or private.
 
-\item when the ownership of an entry in the ownership table
-  transitions from one thread to another
+\item When the ownership of an entry in the ownership table
+  transitions from one thread to another.
 
-\item when a thread executing in parallel mode is allowed to proceed
-  with a memory access
+\item When a thread executing in parallel mode is allowed to proceed
+  with a memory access.
 \end{itemize}
 
 \begin{table}
@@ -154,7 +143,7 @@ thread is made to block for serial mode.  An \emph{ownership table
 \end{table}
 
 Table~\ref{table:ownership-policy} summarizes the ownership table
-policy used by DMP \cite{dmp}.  Note that during serial mode, while a
+policy used by DMP~\cite{dmp}.  Note that during serial mode, while a
 thread does not need to block to access a memory location, the
 transitions between shared and private in the table still occur.  The
 ownership status of a memory location is only relevant if the memory
@@ -169,6 +158,17 @@ that changes to private data by its owner are made visible to other
 threads at a deterministic point in time, i.e. during serial mode.
 Figure~\ref{fig:ownership-graph} shows the possible state transitions
 for a memory location accessible by two threads $t$ and $u$.
+
+\begin{figure}[!]
+  \begin{center}
+    {\resizebox{3.10in}{!}{
+        \includegraphics{./figures/ownership-graph.pdf} }}
+  \end{center}
+  \vspace{-4mm}
+  \caption{Ownership transition graph for a memory location accessible to two
+    threads.}
+  \label{fig:ownership-graph}
+\end{figure}
 
 In order to improve the performance of data shared in a read-only
 manner, when a memory location marked as private is read by a thread
@@ -211,35 +211,35 @@ location during serial mode is acceptable so long as it is
 deterministic.
 
 As mentioned previously, quanta can be constructed using any policy so
-long as it is deterministic.  In their paper, Devietti et al. discuss
-several policies for constructing quanta \cite{dmp}.  They refer to
+long as it is deterministic.  In their paper, Devietti et al.\ discuss
+several policies for constructing quanta~\cite{dmp}.  They refer to
 these as \emph{quantum building policies}.  They experiment with
 several different policies:
 
 \begin{itemize}
-\item each quantum lasts until $N$ instructions have been performed
+\item Each quantum lasts until $N$ instructions have been performed.
 
-\item each quantum lasts until an unlock operation is performed
+\item Each quantum lasts until an unlock operation is performed.
 
-\item each quantum lasts until $N$ consecutive accesses to memory
-  marked as private have been performed
+\item Each quantum lasts until $N$ consecutive accesses to memory
+  marked as private have been performed.
 
-\item boolean $OR$ of the second and third policies.
+\item Boolean $OR$ of the second and third policies.
 \end{itemize}
 
 The first policy is the simplest to implement and simply locks a
 quantum down to a fixed size.  The second and third policies try to
 detect when a thread has left a critical section, hopefully marking
 the end of a period of interthread communication.  In their paper,
-Devietti et al. also experiment with two styles of serial mode
-\cite{dmp}:
+Devietti et al.\ also experiment with two styles of serial
+mode~\cite{dmp}:
 
 \begin{itemize}
-\item serial mode lasts until the end of the quantum
+\item Serial mode lasts until the end of the quantum.
 
-\item serial mode lasts until the end of the quantum or until the
+\item Serial mode lasts until the end of the quantum or until the
   thread performs an unlock operation and the thread is not holding
-  any other locks
+  any other locks.
 \end{itemize}
 
 They refer to the first style as \emph{full serial mode} and the
@@ -263,7 +263,7 @@ serial segment and may block too soon into its next parallel segment,
 likely leading to imbalance.  If serial mode is too long, parallelism
 is reduced by making the execution too serialized.
 
-Devietti et al. argue that deterministic execution should be used not
+Devietti et al.\ argue that deterministic execution should be used not
 only for debugging but should be left on when the product is deployed.
 Their paper advocates for a change in multiprocessor system
 architecture such that deterministic execution using the methods
@@ -305,10 +305,10 @@ of between 37\% and 15\%.
 
 \section{CoreDet}
 
-CoreDet is an implementation of DMP in software.  Bergan et al. use a
+CoreDet is an implementation of DMP in software.  Bergan et al.\ use a
 modified LLVM C/C++ compiler with several new compiler phases that add
 instrumentation code before load and store instructions to shared
-memory \cite{coredet}.  The instrumentation code calls into the
+memory~\cite{coredet}.  The instrumentation code calls into the
 CoreDet run-time framework that consults an in-memory ownership table
 and decides if the instruction can be executed immediately or must
 wait for serial mode.  The ownership table and all other data
@@ -336,9 +336,10 @@ reduced.  Parallel mode ends when either of the following conditions
 hold:
 
 \begin{itemize}
-\item a memory fence instruction is reached or
+\item A memory fence instruction is reached.
 
-\item an atomic operation such as a compare-and-swap must be performed
+\item An atomic operation such as a compare-and-swap must be
+  performed.
 \end{itemize}
 
 The second approach combines ownership tracking with the store buffer.
@@ -370,7 +371,7 @@ Kendo is a software framework that offers a weak determinism guarantee
 for lock-based, data-race free C/C++ code.  Olszewski, Ansel, and
 Amarasinghe guarantee determinism using Kendo for data-race free
 programs by guaranteeing a deterministic order of all lock
-acquisitions for a given program input \cite{kendo}.  Kendo implements
+acquisitions for a given program input~\cite{kendo}.  Kendo implements
 a subset of the POSIX Threads API, replacing the existing
 synchronization functions (such as $pthread\_mutex\_lock$,
 $pthread\_mutex\_unlock$, etc.) with calls to their own run-time
@@ -408,19 +409,19 @@ function invocations.  The order in which functions would be invoked
 in this single-threaded version is known as \emph{program order}.
 Grace is designed for fork-join parallelism applications in which a
 parent function spawns one or more children and then waits for them to
-terminate before returning itself.  Berger et al. designed Grace in an
-attempt to get rid of a large number of concurrency bugs while still
-achieving good performance \cite{grace}.  The concurrency bugs that
-Grace eliminates and their causes are:
+terminate before returning itself.  Berger et al.\ designed Grace in
+an attempt to get rid of a large number of concurrency bugs while
+still achieving good performance~\cite{grace}.  The concurrency bugs
+that Grace eliminates and their causes are:
 
 \begin{itemize}
-\item deadlocks - cyclic lock acquisition
+\item Deadlocks - cyclic lock acquisition.
 
-\item race conditions - unguarded updates
+\item Race conditions - unguarded updates.
 
-\item atomicity violations - unguarded, interleaved updates
+\item Atomicity violations - unguarded, interleaved updates.
 
-\item order violations - threads scheduled in unexpected order
+\item Order violations - threads scheduled in unexpected order.
 \end{itemize}
 
 Grace achieves its goal by allowing multiple threads to execute
@@ -436,16 +437,16 @@ eliminates the above sources of concurrency bugs in the following
 manner:
 
 \begin{itemize}
-\item no deadlocks - all lock acquisitions/releases are converted to
-  no-ops
+\item No deadlocks - all lock acquisitions/releases are converted to
+  no-ops.
 
-\item no race conditions - all transactions commit changes to shared
-  memory in a deterministic order
+\item No race conditions - all transactions commit changes to shared
+  memory in a deterministic order.
 
-\item no atomicity violations - all threads execute atomically in an
-  isolated transaction
+\item No atomicity violations - all threads execute atomically in an
+  isolated transaction.
 
-\item no order violations - threads are executed in program order
+\item No order violations - threads are executed in program order.
 \end{itemize}
 
 Grace uses virtual memory-based software transactional memory to allow
@@ -470,14 +471,14 @@ applications with many small, short-running threads such that threads
 do not wait very long before they can commit. Because Grace runs
 threads in isolation using transactions, Grace is restricted to a
 subset of parallel applications.  For instance, Berger et
-al. \cite{grace} note that the following thread behaviors are not
+al.~\cite{grace} note that the following thread behaviors are not
 supported:
 
 \begin{itemize}
-\item threads that run infinitely or until program is terminated
+\item Threads that run infinitely or until program is terminated.
 
-\item threads that perform interthread communications (i.e., via
-  synchronization primitives such as condition variables)
+\item Threads that perform interthread communications (i.e., via
+  synchronization primitives such as condition variables).
 \end{itemize}
 
 This means that Grace cannot work as a general solution to
@@ -488,7 +489,7 @@ deterministic execution.
 Deterministic Parallel Java (DPJ) is an extension to the Java
 programming language that adds parallel code blocks as well as a
 \emph{type and effect} system that allows a compile-time guarantee of
-determinism \cite{dpj}.  DPJ splits the heap into named
+determinism~\cite{dpj}.  DPJ splits the heap into named
 \emph{regions}.  DPJ source code is annotated to indicate in which
 region a data member is allocated.  Similarly, method definitions are
 annotated to indicate which regions they read and which regions they
@@ -517,10 +518,10 @@ programming language.  A Java-like language is object-oriented where
 objects are accessed through references, is byte-compiled and is
 executed in a virtual machine.  A C-like language contains primitive
 data-types, pointers and is compiled to native code.  In my research,
-I will modify maTe, a Java-like language, and use it to test my
-thesis.  I will build upon existing work in the area of deterministic
-execution to implement DMP inside the maTe virtual machine using
-quanta and an ownership tracking system.
+I modified maTe, a Java-like language, and used it to test my thesis.
+I built upon existing work in the area of deterministic execution to
+implement DMP inside the maTe virtual machine using quanta and an
+ownership tracking system.
 
 As described earlier, DMP relies on an ownership tracking mechanism to
 maintain the shared/private status of each memory location in shared
@@ -555,9 +556,9 @@ on these locations need not be instrumented, reducing overhead.  The
 same cannot be said of C, in which a thread's stack is located in
 shared memory space.
 
-\begin{figure}[t]
+\begin{figure}[!]
   \begin{center}
-    {\resizebox{3.25in}{!}{
+    {\resizebox{\textwidth}{!}{
         \includegraphics{./figures/depth.png} }}
   \end{center}
   \caption{Example of changes in ownership due to a write using depth 1 (a), 2
@@ -583,15 +584,34 @@ that occur when writing to the object at the root of the tree using an
 ownership table depth of 1, 2 and 3.  Blackened objects are those
 marked as private and owned by the writing thread.
 
-\begin{figure}
+In order to test my thesis, I extended the maTe programming language
+and implemented DMP using an ownership table in the maTe virtual
+machine.  I did not implement the local store buffer used by
+CoreDet~\cite{coredet}.  maTe is a pure object-oriented,
+byte-compiled, garbage-collected programming language.  maTe features
+support for single inheritance, virtual method calls, method and
+operator overloading, nested local variable declarations and basic
+input/output facilities.  maTe includes no primitive data types.
+Instead, maTe includes four predefined classes to allow for integer
+arithmetic, text manipulation and simple data storage: Object,
+Integer, String and Table (Table is a key/value pair hash map inspired
+by Java's $java.util.HashMap$ class).
+
+Grammatically, maTe source is very similar to Java source code.  An
+example of maTe source code can be seen in Figure~\ref{fig:mate-code}.
+maTe source code is translated by the maTe compiler to an intermediate
+maTe assembly language before being assembled by the maTe assembler
+into a platform independent binary class file.  Class files are
+executed inside the maTe virtual machine, which implements the maTe
+instruction set as well as the predefined classes in native code.
+
+\begin{figure}[!]
 \begin{small}
   \small \bnncode
   \codeln. class Point \{ \\
   \codeln. \> Integer x, y; \\
-  \codeln. \\
   \codeln. \> Point(Integer x, Integer y) \{ this.x = x; this.y = y; \} \\
   \codeln. \> Point operator+(Point p) \{ return new Point(x + p.x, y + p.y); \} \\
-  \codeln. \\
   \codeln. \> Integer equals(Object obj) \{ \\
   \codeln. \>\> if (obj == null) return 0; \\
   \codeln. \>\> if (obj instanceof Point) \{ \\
@@ -603,48 +623,22 @@ marked as private and owned by the writing thread.
   \codeln. \>\> \} \\
   \codeln. \>\> return 0; \\
   \codeln. \> \} \\
-  \codeln. \\
   \codeln. \> String toString() \{ return "(" + x.toString() + ", " + y.toString() + ")"; \} \\
   \codeln.  \} \\
-  \codeln. \\
   \codeln. Integer main() \{ \\
   \codeln. \> Point p, q, r; \\
-  \codeln. \\
   \codeln. \> p = new Point(10, 10); \\
   \codeln. \> q = new Point(5, 5); \\
   \codeln. \> r = p + q; \\
-  \codeln. \\
   \codeln. \> out "p = " + p.toString() + newline; \\
   \codeln. \> out "q = " + q.toString() + newline; \\
   \codeln. \> out "r = " + r.toString() + newline; \\
-  \codeln. \\
   \codeln. \> return 0; \\
   \codeln. \}
   \ecode \vspace{-0mm}
   \caption{\label{fig:mate-code} Example of maTe source code.}
 \end{small}
 \end{figure}
-
-In order to test my thesis, I extended the maTe programming language
-and implemented DMP using an ownership table in the maTe virtual
-machine.  I did not implement the local store buffer used by CoreDet
-\cite{coredet}.  maTe is a pure object-oriented, byte-compiled,
-garbage-collected programming language.  maTe features support for
-single inheritance, virtual method calls, method and operator
-overloading, nested local variable declarations and basic input/output
-facilities.  maTe includes no primitive data types.  Instead, maTe
-includes four predefined classes to allow for integer arithmetic, text
-manipulation and simple data storage: Object, Integer, String and
-Table (Table is a key/value pair hash map inspired by Java's
-$java.util.HashMap$ class).
-
-Grammatically, maTe source is very similar to Java source code.  An
-example of maTe source code can be seen in Figure~\ref{fig:mate-code}.
-maTe source code is translated by the maTe compiler to an intermediate
-maTe assembly language before being assembled by the maTe assembler
-into a platform independent binary class file.  Class files are
-executed inside the maTe virtual machine, which implements the maTe
-instruction set as well as the predefined classes in native code.
 
 Architecturally, the maTe virtual machine is modeled after the Java
 virtual machine.  Method frames are stored on a global stack with each

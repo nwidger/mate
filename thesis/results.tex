@@ -9,18 +9,18 @@ machine without DMP.
 The following three benchmarks were implemented:
 
 \begin{itemize}
-\item parallel radix sort - Multithreaded radix sort
+\item Parallel radix sort - Multithreaded radix sort.
 
-\item jacobi - uses the Jacobi method to simulate temperature changes
+\item Jacobi - uses the Jacobi method to simulate temperature changes
   on a 20x25 plate.
 
-\item parallel DPLL - Multithreaded boolean satisfiability using the
-  DPLL algorithm
+\item Parallel DPLL - Multithreaded boolean satisfiability using the
+  DPLL algorithm.
 \end{itemize}
 
 Comparison of my results with those from the DMP/CoreDet papers will
 not be a true ``apples-to-apples'' comparison.  The implementations of
-the benchmarks used by DMP \cite{dmp} and CoreDet \cite{coredet} were
+the benchmarks used by DMP~\cite{dmp} and CoreDet~\cite{coredet} were
 implemented using highly-tuned C/C++ code whereas for my thesis I
 implemented benchmarks in maTe.  However, my thesis is that DMP
 executed in a virtual machine can be done with lower overhead.
@@ -33,20 +33,20 @@ All three benchmarks were implemented in maTe and run across a range
 of parameters.  The parameters were:
 
 \begin{itemize}
-\item threads - 2, 4, 8 or 16 threads
+\item threads - 2, 4, 8 or 16 threads.
 
-\item quantum size - 1000, 10000, and 100000 instructions
+\item quantum size - 1000, 10000, and 100000 instructions.
 
-\item full serial mode or reduced serial mode
+\item full serial mode or reduced serial mode.
 
-\item ownership table granularity - 1, 5 and 10 depth
+\item ownership table granularity - 1, 5 and 10 depth.
 \end{itemize}
 
 The $Jacobi$ benchmark uses a fixed number of threads, and so this
 benchmark does not have a threads parameter.
 
 Before running any benchmarks, I tested my implementation of DMP to
-ensure it was truly deterministic by running Racey \cite{racey}, a
+ensure it was truly deterministic by running Racey~\cite{racey}, a
 deterministic stress test, $10,000$ times for each configuration.  The
 results gathered from running the benchmarks will be compared using
 the following metrics:
@@ -78,11 +78,11 @@ will use the following notation:
 \item $-gN$ - the ownership table granularity ($-g5$ means an
   ownership table granularity of $5$).
 
-\item -r - reduced serial mode, the absense of $-r$ means full serial
-  mode.
+\item $-r$ - reduced serial mode, the absense of $-r$ means full
+  serial mode.
 \end{itemize}
 
-For example, $-t2 -Q10000 -g1$ means a run using 2 threads with a
+For example, $-t2 -Q10000 -g5$ means a run using 2 threads with a
 quantum size of $10,000$, an ownership table granularity of $5$ and
 full serial mode, whereas $-t8 -Q1000 -g10 -r$ means a run using 8
 threads with a quantum size of $1,000$, an ownership table granularity
@@ -217,7 +217,8 @@ Table \ref{tab:radix_results} shows the results for the Radix
 benchmark.  In the results, the non-DMP runs unsurprisingly beat out
 all of the DMP runs with overhead ranging from $54\%$ to $4,520\%$.
 The fastest DMP run was $-t8 -Q1000 -g1$ with an execution time of
-2.65 seconds.
+2.65 seconds whereas the fastest non-DMP run was with 8 threads with
+an execution time of 1.27 seconds.
 
 The execution time of this benchmark does not appear sensitive to the
 choice of full or reduced serial mode.  This is likely due to the lack
