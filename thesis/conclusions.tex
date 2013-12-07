@@ -72,15 +72,18 @@ full.  There may be better ways to integrate the garbage collector
 with DMP.  Doing this while maintaining DMP's guarantee of
 deterministic execution could be difficult, however.
 
-Modify language to allow adding annotations to source code that help
-virtual machine choose better DMP parameters.  For example, if a data
-structure is known to be accessed only by a single thread, DMP checks
-on that object could be skipped.  It's possible that static analysis
-could be used to determine when such optimizations are possible.
+Another possibility would be modifying the maTe language to allow
+annotating the source code to help virtual machine choose better DMP
+parameters.  For example, if the programmer can guarantee that a data
+structure is only accessed by a single thread, an annotation could
+indicate such and DMP checks on that object could be skipped.  Static
+analysis could also be used to determine when such optimizations are
+possible.
 
-Improve maTe compiler so that object fields are not repeatedly
-accessed unnecessarily when they already exist on the frame's local
-variable array or operand stack.  This could reduce the amount of
+Finally, there are plenty of opportunities to optimize the maTe
+compiler.  Improving the maTe compiler so that object fields are not
+unnecessarily accessed when they already exist in the frame's local
+variable array or operand stack could greatly reduce the amount of
 blocking performed by a thread and thus improve performance.
 
 %%% Local Variables: 
