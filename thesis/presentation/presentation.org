@@ -1,8 +1,83 @@
 #    -*- mode: org -*-
 #+STARTUP: overview
 #+STARTUP: hidestars
-#
-# Niels Widger
-# Time-stamp: <08 Dec 2013 at 12:14:26 by nwidger on macros.local>
+#+OPTIONS: reveal_center:t reveal_progress:t reveal_history:nil reveal_control:t
+#+OPTIONS: reveal_mathjax:t reveal_rolling_links:t reveal_keyboard:t reveal_overview:t num:nil
+#+OPTIONS: reveal_width:1200 reveal_height:800
+#+OPTIONS: toc:1
+#+REVEAL_MARGIN: 0.1
+#+REVEAL_MIN_SCALE: 0.5
+#+REVEAL_MAX_SCALE: 2.5
+#+REVEAL_TRANS: none
+#+REVEAL_THEME: night
+#+REVEAL_HLEVEL: 999
+#+REVEAL_EXTRA_CSS: ./reveal.js/lib/css/zenburn.css
+#+REVEAL_HEAD_PREAMBLE: <link rel="stylesheet" href="./presentation.css"/>
+# Time-stamp: <08 Dec 2013 at 13:53:35 by nwidger on macros.local>
 
-* test
+#+TITLE: Deterministic Execution in a Java-like Language
+#+AUTHOR: Niels Widger
+#+EMAIL: niels.widger@unh.edu
+
+* Introduction
+
+* Background
+
+** Deterministic Shared Multiprocessing (DMP)
+
+** CoreDet
+
+** Kendo
+
+** Grace
+
+** Deterministic Parallel Java (DPJ)
+
+** maTe DMP
+
+* Implementation
+
+** maTe Language
+
+** maTe Virtual Machine
+
+*** Implementing Threads
+
+*** Implementing DMP
+
+**** Object DMP
+
+#+BEGIN_SRC c :style width:100%
+  int object_load_field(struct object *o, int i) {
+  #ifdef DMP
+          if (o->dmp != NULL)
+                  object_dmp_load(o->dmp, i);
+  #endif
+  
+          return o->fields[i];
+  }
+#+END_SRC
+
+**** Thread DMP
+
+**** Table DMP
+
+**** NLock DMP
+
+**** DMP Statistics
+
+*** Performance Enhancements
+
+* Results
+
+** Notation
+
+** Radix
+
+** Jacobi
+
+** Parallel DPLL
+
+* Conclusions
+
+** Future Work

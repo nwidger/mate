@@ -3,34 +3,158 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>presentation</title>
+<title>(Deterministic Execution in a Java-like Language)</title>
 <meta name="author" content="(Niels Widger)"/>
 <link rel="stylesheet" href="./reveal.js/css/reveal.min.css"/>
-<link rel="stylesheet" href="./reveal.js/css/theme/default.css" id="theme"/>
-
+<link rel="stylesheet" href="./reveal.js/css/theme/night.css" id="theme"/>
+<link rel="stylesheet" href="./reveal.js/lib/css/zenburn.css"/>
 <link rel="stylesheet" href="./reveal.js/css/print/pdf.css" type="text/css" media="print"/>
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<link rel="stylesheet" href="./presentation.css"/>
 </head>
 <body>
 <div class="reveal">
 <div class="slides">
 <section>
-<h1>presentation</h1>
+<h1>Deterministic Execution in a Java-like Language</h1>
 <h2>Niels Widger</h2>
-<h2><a href="mailto:nwidger@macros.local">nwidger@macros.local</a></h2>
+<h2><a href="mailto:niels.widger@unh.edu">niels.widger@unh.edu</a></h2>
 <h2></h2></section>
 <section>
 <h2>Table of Contents</h2><ul>
 <li>
-<a href="#sec-1">test</a>
+<a href="#sec-1">Introduction</a>
+</li>
+<li>
+<a href="#sec-2">Background</a>
+</li>
+<li>
+<a href="#sec-3">Implementation</a>
+</li>
+<li>
+<a href="#sec-4">Results</a>
+</li>
+<li>
+<a href="#sec-5">Conclusions</a>
 </li>
 </ul>
 </section>
 
-<section>
+
 <section id="sec-1" >
 
-<h2><span class="section-number-2">1</span> test</h2>
+<h2>Introduction</h2>
+
 </section>
+<section id="sec-2" >
+
+<h2>Background</h2>
+</section>
+<section id="sec-2-1" >
+
+<h3>Deterministic Shared Multiprocessing (DMP)</h3>
+
+</section>
+<section id="sec-2-2" >
+
+<h3>CoreDet</h3>
+
+</section>
+<section id="sec-2-3" >
+
+<h3>Kendo</h3>
+
+</section>
+<section id="sec-2-4" >
+
+<h3>Grace</h3>
+
+</section>
+<section id="sec-2-5" >
+
+<h3>Deterministic Parallel Java (DPJ)</h3>
+
+</section>
+<section id="sec-2-6" >
+
+<h3>maTe DMP</h3>
+</section>
+<section id="sec-3" >
+
+<h2>Implementation</h2>
+</section>
+<section id="sec-3-1" >
+
+<h3>maTe Language</h3>
+
+</section>
+<section id="sec-3-2" >
+
+<h3>maTe Virtual Machine</h3>
+</section>
+<section id="sec-3-2-1" >
+
+<h4>Implementing Threads</h4>
+
+</section>
+<section id="sec-3-2-2" >
+
+<h4>Implementing DMP</h4>
+<ul class="org-ul"><li class="fragment none">Object DMP<br/><div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #00ff00;">int</span> <span style="color: #9acd32;">object_load_field</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object</span> *<span style="color: #8fbc8f;">o</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">i</span>) {
+<span style="color: #7fffd4;">#ifdef</span> DMP
+        <span style="color: #eee8aa;">if</span> (o-&gt;dmp != <span style="color: #7fffd4;">NULL</span>)
+                object_dmp_load(o-&gt;dmp, i);
+<span style="color: #7fffd4;">#endif</span>
+
+        <span style="color: #eee8aa;">return</span> o-&gt;fields[i];
+}
+</pre>
+</div>
+</li>
+<li class="fragment none">Thread DMP<br/></li>
+
+<li class="fragment none">Table DMP<br/></li>
+
+<li class="fragment none">NLock DMP<br/></li>
+
+<li class="fragment none">DMP Statistics<br/></li></ul>
+</section>
+<section id="sec-3-2-3" >
+
+<h4>Performance Enhancements</h4>
+</section>
+<section id="sec-4" >
+
+<h2>Results</h2>
+</section>
+<section id="sec-4-1" >
+
+<h3>Notation</h3>
+
+</section>
+<section id="sec-4-2" >
+
+<h3>Radix</h3>
+
+</section>
+<section id="sec-4-3" >
+
+<h3>Jacobi</h3>
+
+</section>
+<section id="sec-4-4" >
+
+<h3>Parallel DPLL</h3>
+</section>
+<section id="sec-5" >
+
+<h2>Conclusions</h2>
+</section>
+<section id="sec-5-1" >
+
+<h3>Future Work</h3>
 </section>
 </div>
 </div>
@@ -45,18 +169,18 @@
         			progress: true,
         			history: false,
         			center: true,
-        			rollingLinks: false,
+        			rollingLinks: true,
         			keyboard: true,
         			overview: true,
-        			 // slide width
-        			 // slide height
-        			 // slide margin
-        			 // slide minimum scaling factor
-        			 // slide maximum scaling factor
+        			width: 1200, // slide width
+        			height: 800, // slide height
+        			margin: 0.10, // slide margin
+        			minScale: 0.50, // slide minimum scaling factor
+        			maxScale: 2.50, // slide maximum scaling factor
 
 
         			theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
-        			transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+        			transition: Reveal.getQueryHash().transition || 'none', // default/cube/page/concave/zoom/linear/fade/none
         			transitionSpeed: 'default',
 
         			// Optional libraries used to extend on reveal.js
