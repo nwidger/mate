@@ -22,7 +22,7 @@
 <section>
 <h2>Table of Contents</h2><ul>
 <li>
-<a href="#sec-1">Introduction</a>
+<a href="#sec-1">Thesis</a>
 </li>
 <li>
 <a href="#sec-2">Background</a>
@@ -47,8 +47,11 @@
 
 <section id="sec-1" >
 
-<h2>Introduction</h2>
-
+<h2>Thesis</h2>
+<p>
+A Java-like programming language can be executed deterministically
+using DMP with less overhead than a C-like programming language.
+</p>
 </section>
 <section id="sec-2" >
 
@@ -104,63 +107,112 @@ on Java
 </section>
 <section id="sec-5-1" >
 
-<h3>Language Changes</h3>
-<p>
-Added <code>Real</code> class - floating point calculations
-</p>
+<h3>Compiler Changes</h3>
+</section>
+<section id="sec-5-1-1" >
 
-<p>
-Added synchronized blocks to language
-</p>
-
+<h4><code>synchronized</code> blocks</h4>
 <div class="org-src-container">
 
-<pre class="src src-java"><span style="color: #eee8aa;">synchronized</span>(obj) {
-        <span style="color: #eee8aa;">return</span> obj.field;
+<pre class="src src-java"><span style="color: #eee8aa;">synchronized</span> (obj) { x = obj.shared; }
+</pre>
+</div>
+</section>
+<section id="sec-5-1-2" >
+
+<h4><code>Real</code> class (<code>float</code> wrapper)</h4>
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #eee8aa;">class</span> <span style="color: #00ff00;">Real</span> <span style="color: #eee8aa;">extends</span> <span style="color: #00ff00;">Object</span> {
+        <span style="color: #eee8aa;">native</span> Real();
+        <span style="color: #eee8aa;">native</span> Real(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> Real(<span style="color: #00ff00;">Integer</span> <span style="color: #8fbc8f;">i</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">add</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">subtract</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">multiply</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">divide</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">greaterThan</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">lessThan</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">greaterThanEqual</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">lessThanEqual</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #9acd32;">not</span>();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">minus</span>();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">operator</span> + (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">operator</span> - (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">operator</span> * (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">operator</span> / (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #9acd32;">operator</span> &gt; (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #9acd32;">operator</span> &lt; (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #8fbc8f;">operator</span> &gt;= (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);  
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #8fbc8f;">operator</span> &lt;= (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);  
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #9acd32;">operator</span> ! ();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">operator</span> - ();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #9acd32;">equals</span>(<span style="color: #00ff00;">Object</span> <span style="color: #8fbc8f;">obj</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #9acd32;">hashCode</span>();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">String</span> <span style="color: #9acd32;">toString</span>();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">squareRoot</span>();
 }
 </pre>
 </div>
+</section>
+<section id="sec-5-1-3" >
 
-<p>
-Added <code>Thread</code> class
-</p>
+<h4><code>Thread</code> class</h4>
+<div class="org-src-container">
 
-<p>
-Added <code>wait</code>, <code>notify</code>, <code>notifyAll</code> methods to <code>Object</code> class
-</p>
+<pre class="src src-java"><span style="color: #eee8aa;">class</span> <span style="color: #00ff00;">Thread</span> <span style="color: #eee8aa;">extends</span> <span style="color: #00ff00;">Object</span> {
+        <span style="color: #eee8aa;">native</span> Thread();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">start</span>();  <span style="color: #cd5c5c;">// </span><span style="color: #cd5c5c;">begin execution of run()</span>
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">run</span>();    <span style="color: #cd5c5c;">// </span><span style="color: #cd5c5c;">overridden by subclass</span>
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">join</span>();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">sleep</span>(<span style="color: #00ff00;">Integer</span> <span style="color: #8fbc8f;">millisec</span>);  
+}
+</pre>
+</div>
+</section>
+<section id="sec-5-1-4" >
+
+<h4><code>Object</code> class <code>wait</code> / <code>notify</code> methods</h4>
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #eee8aa;">class</span> <span style="color: #00ff00;">Object</span> {
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">notify</span>();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">notifyAll</span>();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">wait</span>();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">wait</span>(<span style="color: #00ff00;">Integer</span> <span style="color: #8fbc8f;">timeout</span>);    
+}
+</pre>
+</div>
 </section>
 <section id="sec-5-2" >
 
-<h3>Multithreaded Architecture</h3>
-<img src="./images/vm-arch-mt.png" alt="vm-arch-mt.png" />
-</section>
-<section id="sec-5-3" >
-
-<h3>Other Language Changes</h3>
+<h3>Compiler Changes cont'd</h3>
 <p>
-<code>for</code> loops
+(aka things you take for granted)
 </p>
 
+</section>
+<section id="sec-5-2-1" >
+
+<h4><code>for</code> loops</h4>
 <div class="org-src-container">
 
 <pre class="src src-java"><span style="color: #eee8aa;">for</span> (i = 0; i &lt; 10; i = i + 1) { ... }
 </pre>
 </div>
+</section>
+<section id="sec-5-2-2" >
 
-<p>
-<code>&amp;&amp;</code> and <code>||</code> operators
-</p>
-
+<h4><code>&amp;&amp;</code> and <code>||</code> operators</h4>
 <div class="org-src-container">
 
 <pre class="src src-java"><span style="color: #eee8aa;">if</span> ((a &amp;&amp; b) || (c &amp;&amp; d)) { ... }
 </pre>
 </div>
+</section>
+<section id="sec-5-2-3" >
 
-<p>
-<code>!=</code>, <code>&lt;=</code>, <code>&gt;=</code> operators
-</p>
-
+<h4><code>!=</code>, <code>&lt;=</code>, <code>&gt;=</code> operators</h4>
 <div class="org-src-container">
 
 <pre class="src src-java"><span style="color: #eee8aa;">if</span> (a != b) { ... }
@@ -168,16 +220,24 @@ Added <code>wait</code>, <code>notify</code>, <code>notifyAll</code> methods to 
 <span style="color: #eee8aa;">if</span> (a &gt;= b) { ... }
 </pre>
 </div>
+</section>
+<section id="sec-5-3" >
 
+<h3>Assembler Changes</h3>
 <p>
-Made benchmarks much easier to implement!
+<code>monitorenter</code> / <code>monitorexit</code> instructions
 </p>
 </section>
 <section id="sec-5-4" >
 
+<h3>Multithreaded Architecture</h3>
+<img src="./images/vm-arch-mt.png" alt="vm-arch-mt.png" />
+</section>
+<section id="sec-5-5" >
+
 <h3>Virtual Machine Changes</h3>
 </section>
-<section id="sec-5-4-1" >
+<section id="sec-5-5-1" >
 
 <h4>Implementing Threads</h4>
 <p>
@@ -192,7 +252,7 @@ Use <code>pthreads</code> threading library
 Use <code>pthreads_mutex_t</code> for object monitors
 </p>
 </section>
-<section id="sec-5-4-2" >
+<section id="sec-5-5-2" >
 
 <h4>Implementing DMP</h4>
 <ul class="org-ul"><li class="fragment none">Goals<br/><p>
@@ -217,7 +277,7 @@ Global <code>dmp</code> module.
 </p>
 </li></ul>
 </section>
-<section id="sec-5-4-3" >
+<section id="sec-5-5-3" >
 
 <h4>Example</h4>
 <div class="org-src-container">
@@ -233,7 +293,7 @@ Global <code>dmp</code> module.
 </pre>
 </div>
 </section>
-<section id="sec-5-4-4" >
+<section id="sec-5-5-4" >
 
 <h4>Object DMP</h4>
 <div class="org-src-container">
@@ -249,27 +309,27 @@ Global <code>dmp</code> module.
 </pre>
 </div>
 </section>
-<section id="sec-5-4-5" >
+<section id="sec-5-5-5" >
 
 <h4>Thread DMP</h4>
 
 </section>
-<section id="sec-5-4-6" >
+<section id="sec-5-5-6" >
 
 <h4>Table DMP</h4>
 
 </section>
-<section id="sec-5-4-7" >
+<section id="sec-5-5-7" >
 
 <h4>NLock DMP</h4>
 
 </section>
-<section id="sec-5-4-8" >
+<section id="sec-5-5-8" >
 
 <h4>DMP Statistics</h4>
 
 </section>
-<section id="sec-5-4-9" >
+<section id="sec-5-5-9" >
 
 <h4>Performance Enhancements</h4>
 </section>

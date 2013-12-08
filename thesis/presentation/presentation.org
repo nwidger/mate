@@ -50,41 +50,88 @@
 
 * Implementation
 
-** Language Changes
-   
-   Added =Real= class - floating point calculations
-   
-   Added synchronized blocks to language
-   
+** Compiler Changes
+
+*** =synchronized= blocks
+
    #+BEGIN_SRC java
-     synchronized(obj) {
-             return obj.field;
+     synchronized (obj) { x = obj.shared; }
+   #+END_SRC
+
+*** =Real= class (=float= wrapper)
+ 
+   #+BEGIN_SRC java  
+     class Real extends Object {
+             native Real();
+             native Real(Real r);
+             native Real(Integer i);
+             native Real add(Real r);
+             native Real subtract(Real r);
+             native Real multiply(Real r);
+             native Real divide(Real r);
+             native Real greaterThan(Real r);
+             native Real lessThan(Real r);
+             native Real greaterThanEqual(Real r);
+             native Real lessThanEqual(Real r);
+             native Integer not();
+             native Real minus();
+             native Real operator + (Real r);
+             native Real operator - (Real r);
+             native Real operator * (Real r);
+             native Real operator / (Real r);
+             native Integer operator > (Real r);
+             native Integer operator < (Real r);
+             native Integer operator >= (Real r);  
+             native Integer operator <= (Real r);  
+             native Integer operator ! ();
+             native Real operator - ();
+             native Integer equals(Object obj);
+             native Integer hashCode();
+             native String toString();
+             native Real squareRoot();
      }
    #+END_SRC
    
-   Added =Thread= class
+*** =Thread= class
 
-   Added =wait=, =notify=, =notifyAll= methods to =Object= class
+   #+BEGIN_SRC java
+     class Thread extends Object {
+             native Thread();
+             native Object start();  // begin execution of run()
+             native Object run();    // overridden by subclass
+             native Object join();
+             native Object sleep(Integer millisec);  
+     }
+   #+END_SRC
+   
+*** =Object= class =wait= / =notify= methods
 
-** Multithreaded Architecture
+   #+BEGIN_SRC java
+     class Object {
+             native Object notify();
+             native Object notifyAll();
+             native Object wait();
+             native Object wait(Integer timeout);    
+     }
+   #+END_SRC
 
-   [[./images/vm-arch-mt.png]]
+** Compiler Changes cont'd
 
-** Other Language Changes
+   (aka things you take for granted)
 
-   =for= loops
+*** =for= loops
    
    #+BEGIN_SRC java
      for (i = 0; i < 10; i = i + 1) { ... }
    #+END_SRC
    
-   =&&= and =||= operators
+*** =&&= and =||= operators
    
    #+BEGIN_SRC java
      if ((a && b) || (c && d)) { ... }
    #+END_SRC
    
-   =!==, =<==, =>== operators
+*** =!==, =<==, =>== operators
    
    #+BEGIN_SRC java
      if (a != b) { ... }
@@ -92,7 +139,13 @@
      if (a >= b) { ... }
    #+END_SRC
 
-   Made benchmarks much easier to implement!
+** Assembler Changes
+
+   =monitorenter= / =monitorexit= instructions
+
+** Multithreaded Architecture
+
+   [[./images/vm-arch-mt.png]]
 
 ** Virtual Machine Changes
 
