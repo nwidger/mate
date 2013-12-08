@@ -1,1 +1,6 @@
-.reveal pre { width: 100%; }
+.reveal pre {
+    width: 100%;
+    border: none;
+    box-shadow: none;
+}
+

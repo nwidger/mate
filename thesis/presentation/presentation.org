@@ -1,53 +1,142 @@
 #    -*- mode: org -*-
-#+STARTUP: overview
 #+STARTUP: hidestars
-#+OPTIONS: reveal_center:t reveal_progress:t reveal_history:nil reveal_control:t
+#+STARTUP: overview
+#+OPTIONS: reveal_center:t reveal_progress:t reveal_history:t reveal_control:t
 #+OPTIONS: reveal_mathjax:t reveal_rolling_links:t reveal_keyboard:t reveal_overview:t num:nil
 #+OPTIONS: reveal_width:1200 reveal_height:800
 #+OPTIONS: toc:1
-#+REVEAL_MARGIN: 0.1
+#+REVEAL_MARGIN: 0.2
 #+REVEAL_MIN_SCALE: 0.5
 #+REVEAL_MAX_SCALE: 2.5
 #+REVEAL_TRANS: none
 #+REVEAL_THEME: night
 #+REVEAL_HLEVEL: 999
-#+REVEAL_EXTRA_CSS: ./reveal.js/lib/css/zenburn.css
-#+REVEAL_HEAD_PREAMBLE: <link rel="stylesheet" href="./presentation.css"/>
+#+REVEAL_EXTRA_CSS: ./presentation.css
 # Time-stamp: <08 Dec 2013 at 13:53:35 by nwidger on macros.local>
 
 #+TITLE: Deterministic Execution in a Java-like Language
 #+AUTHOR: Niels Widger
 #+EMAIL: niels.widger@unh.edu
 
-* Introduction
+* Thesis
+
+  A Java-like programming language can be executed deterministically
+  using DMP with less overhead than a C-like programming language.
 
 * Background
+
+* Previous Work
 
 ** Deterministic Shared Multiprocessing (DMP)
 
 ** CoreDet
 
-** Kendo
+** maTe
 
-** Grace
+   1. Pure OO programming language
 
-** Deterministic Parallel Java (DPJ)
+   2. Executed in virtual machine
 
-** maTe DMP
+   3. Grammar, instruction set and machine architecture heavily based
+      on Java
+
+   4. Originally single-threaded
+
+*** Architecture
+
+     [[./images/vm-arch.png]]
+
+* maTe DMP
 
 * Implementation
 
-** maTe Language
+** Language Changes
+   
+   Added =Real= class - floating point calculations
+   
+   Added synchronized blocks to language
+   
+   #+BEGIN_SRC java
+     synchronized(obj) {
+             return obj.field;
+     }
+   #+END_SRC
+   
+   Added =Thread= class
 
-** maTe Virtual Machine
+   Added =wait=, =notify=, =notifyAll= methods to =Object= class
+
+** Multithreaded Architecture
+
+   [[./images/vm-arch-mt.png]]
+
+** Other Language Changes
+
+   =for= loops
+   
+   #+BEGIN_SRC java
+     for (i = 0; i < 10; i = i + 1) { ... }
+   #+END_SRC
+   
+   =&&= and =||= operators
+   
+   #+BEGIN_SRC java
+     if ((a && b) || (c && d)) { ... }
+   #+END_SRC
+   
+   =!==, =<==, =>== operators
+   
+   #+BEGIN_SRC java
+     if (a != b) { ... }
+     if (a <= b) { ... }
+     if (a >= b) { ... }
+   #+END_SRC
+
+   Made benchmarks much easier to implement!
+
+** Virtual Machine Changes
 
 *** Implementing Threads
 
+    Each =Thread= gets its own VM stack
+
+    Use =pthreads= threading library
+
+    Use =pthreads_mutex_t= for object monitors
+
 *** Implementing DMP
 
-**** Object DMP
+**** Goals
 
-#+BEGIN_SRC c :style width:100%
+     Enable/disable *without* recompiling
+
+     *Minimize* performance penalty when disabled
+
+     Allow *per-object* or *per-thread* behavior
+
+**** Design
+
+     DMP-specific modules for =object=, =thread=, =nlock= (object
+     monitor) and =table=.
+
+     Global =dmp= module.
+
+*** Example
+
+#+BEGIN_SRC c
+  int object_create(struct class *c, uint32_t n, struct object **o) {
+  #ifdef DMP
+          if (dmp == NULL)
+                  object->dmp = NULL;
+          else
+                  object->dmp = dmp_create_object_dmp(dmp, object);
+  #endif
+  }
+#+END_SRC
+
+*** Object DMP
+
+#+BEGIN_SRC c
   int object_load_field(struct object *o, int i) {
   #ifdef DMP
           if (o->dmp != NULL)
@@ -58,13 +147,13 @@
   }
 #+END_SRC
 
-**** Thread DMP
+*** Thread DMP
 
-**** Table DMP
+*** Table DMP
 
-**** NLock DMP
+*** NLock DMP
 
-**** DMP Statistics
+*** DMP Statistics
 
 *** Performance Enhancements
 
