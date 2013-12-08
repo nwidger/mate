@@ -76,8 +76,8 @@ eliminated.
 \subsection{Implementing DMP}
 
 The second and largest step was implementing DMP inside the virtual
-machine.  As describe earler, there are four situations that can cause
-a thread to block when DMP is enabled:
+machine.  As describe earlier, there are four situations that can
+cause a thread to block when DMP is enabled:
 
 \begin{itemize}
 \item Upon executing a communicating $getfield$ or $putfield$
@@ -284,9 +284,9 @@ to ensure only a single $String$ instance is created for each $newstr$
 instruction.
 
 The second category is caching done to prevent access to the shared,
-global heap.  Each thread maintains an object ref cache that allows a
-thread to translate an object reference to an object pointer without
-needing to go through the global heap.  Secondly, each thread
+global heap.  Each thread maintains an object reference cache that
+allows a thread to translate an object reference to an object pointer
+without needing to go through the global heap.  Secondly, each thread
 maintains a free object cache that allows it to allocate a new object
 without accessing the global heap so long as it finds a freed object
 of the correct size in its cache.
