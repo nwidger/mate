@@ -1,0 +1,8 @@
+#    -*- mode: org -*-
+#+STARTUP: overview
+#+STARTUP: hidestars
+#
+# Niels Widger
+# Time-stamp: <08 Dec 2013 at 12:14:26 by nwidger on macros.local>
+
+* test
