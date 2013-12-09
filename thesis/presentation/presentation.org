@@ -25,11 +25,159 @@
 
 * Background
 
-* Previous Work
+** Multithreaded programming is /hard!/
+   
+   -----
+   
+  1. Concurrency bugs
+     
+     /reproducible?/
+     
+  2. Unit testing
+     
+     /test all inputs/
+     
+     /test each input X times/
+     
+  3. Crash reports
+     
+     /usefullness?/
 
-** Deterministic Shared Multiprocessing (DMP)
+** Source of problems?
 
-** CoreDet
+   -----
+
+   Nondeterminism!
+
+** Thread Interleavings
+
+   #+ATTR_HTML: :width 100%
+   | thread 1 | thread 2 |
+   |----------+----------|
+   | load     |          |
+   | store    |          |
+   |          | load     |
+   | *load*   | *store*  |
+   | store    |          |
+   |          | load     |
+   | load     |          |
+   | store    | store    |
+
+** Why do thread interleavings change?
+
+   + OS scheduler
+
+   + Cache state
+
+   + I/O delays
+
+** Can we make execution deterministic?
+
+   + Multithreaded program
+
+   + Threads communicate via shared memory
+
+   + Produces same output when given the same input
+
+** Naive Deterministic Execution
+
+   #+ATTR_HTML: :height 200%, :width 200%
+   [[./images/naive.png]]
+
+** Deterministic Execution Achieved
+
+   But can we do better?
+
+** Deterministic Shared Multiprocessing
+
+   + Dynamic *run-time* enforcement of deterministic
+
+   + Guarantees deterministic ordering of all *shared memory accesses*
+     for a given input.
+
+   + Arbitrary code
+
+   + *Without* sacrificing performance
+
+** How does it work?
+
+   + Execute non-communicating instructions in parallel
+
+     + Recover parallelism
+
+     + Without interthread communication, thread interleaving does not
+       affect program output
+
+   + Serialize execution during interthread communication
+
+** Communicating Instructions
+
+   + Load/store instructions to shared memory
+
+   + Modify behavior of other threads
+
+   + Enforce ordering of communicating instructions, others do not
+     matter
+
+** Quanta
+
+   + Split in two:
+
+     + Parallel mode
+
+     + Serial mode
+
+   #+ATTR_HTML: :height 200%, :width 200%
+   [[./images/quantum.png]]
+
+** Ownership Table
+
+   + Used to detect communicating instructions
+
+   + Track ownership information for each memory location
+
+     + Private - accessible only to owner
+
+     + Shared - read-only by everyone
+
+   + Access unrestricted in serial mode
+
+   + Granularity - byte, word, page, etc.
+
+   #+ATTR_HTML: :height 200%, :width 200%
+   [[./images/ownershippolicy.png]]
+
+** Ownership Graph
+
+   /solid == proceed immediately, dotted == block until serial mode/
+
+   [[./images/ownership-graph.png]]
+
+** Previous DMP Implementations
+   
+   + CoreDet - DMP in software
+   
+     + Modified LLVM compiler instruments load/store instructions
+      
+     + Arbitrary =C=/=C++= code
+      
+     + Linked with run-time framework
+      
+     + Ownership table stored in shared memory
+      
+   + *Results:* Average slowdown of 1.1x - 6x
+
+   + Good enough for debugging, maybe for deployment!
+
+** DMP Summary
+
+   + Execute arbitrary code deterministically
+
+   + Deterministic ordering of communicating instructions
+
+   + Detect interthread communication, defer until serial mode
+
+   + Ownership table used to detect communicating instructions
 
 ** maTe
 
@@ -42,9 +190,9 @@
 
    4. Originally single-threaded
 
-*** Architecture
+** Architecture
 
-     [[./images/vm-arch.png]]
+   [[./images/vm-arch.png]]
 
 * maTe DMP
 
@@ -212,7 +360,35 @@
 
 * Results
 
-** Notation
+** Benchmarks
+
+   + Parallel radix sort - Multithreaded radix sort
+
+   + Jacobi - uses the Jacobi method to simulate temperature changes
+     on a 20x25 plate
+
+   + Parallel DPLL - Multithreaded boolean satisfiability using the
+     DPLL algorithm
+
+** Parameters
+
+   + threads - 2, 4, 8 or 16 threads
+
+   + quantum size - 1000, 10000, and 100000 instructions
+
+   + full serial mode or reduced serial mode
+
+   + ownership table granularity - 1, 5 and 10 depth
+
+** Evaluation
+
+   + overhead - measure difference in execution time when compared to
+     a non-DMP virtual machine
+
+   + measure difference in performance when parameters are changed
+
+   Each benchmark was run 10 times for each combination of parameters.
+   Run-times are averages.
 
 ** Radix
 
