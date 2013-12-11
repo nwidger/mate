@@ -187,6 +187,13 @@ Nondeterminism!
 
 <h3>Naive Deterministic Execution</h3>
 <img src="./images/naive.png" alt="naive.png" height="200%," width="200%" />
+
+<aside class="notes">
+<p>
+-Force exact same thread interleaving for every execution!
+-Generate interleaving by serializing execution, allowing each thread to execute N instructions called a QUANTUM
+</p>
+</aside>
 </section>
 <section id="sec-2-7" >
 
@@ -265,6 +272,14 @@ matter
 </ul>
 
 <img src="./images/quantum.png" alt="quantum.png" height="200%," width="200%" />
+
+<aside class="notes">
+<p>
+Threads allowed to execute in parallel until they attempt to communicate via a communicating instruction
+Communicating instruction delayed until serial mode
+Remainder of quantum budget executed in serial mode
+</p>
+</aside>
 </section>
 <section id="sec-2-12" >
 
@@ -292,6 +307,14 @@ matter
 </ul>
 
 <img src="./images/ownershippolicy.png" alt="ownershippolicy.png" height="200%," width="200%" />
+
+<aside class="notes">
+<p>
+-consult ownership table before each load/store instruction
+-defer interthread comm. Via comm. Instr. Until serial mode
+-changes to ownership table happen only in serial mode
+</p>
+</aside>
 </section>
 <section id="sec-2-13" >
 
@@ -369,6 +392,16 @@ on Java
 
 <h3>Architecture</h3>
 <img src="./images/vm-arch.png" alt="vm-arch.png" />
+
+<aside class="notes">
+<p>
+-references only == no pointers
+-method frames totally private
+-private <code>= good =</code> no need to instrument
+-other frames inaccessible to other frames or threads
+-no global variables – object graph traversed using object fields
+</p>
+</aside>
 </section>
 <section id="sec-3" >
 
@@ -506,6 +539,13 @@ on Java
 
 <h3>Multithreaded Architecture</h3>
 <img src="./images/vm-arch-mt.png" alt="vm-arch-mt.png" />
+
+<aside class="notes">
+<p>
+-Each thread is allocated its own PC register and VM stack
+-Share same heap
+</p>
+</aside>
 </section>
 <section id="sec-4-5" >
 
@@ -626,6 +666,12 @@ on a 20x25 plate
 DPLL algorithm
 </li>
 </ul>
+
+<aside class="notes">
+<p>
+Test test test
+</p>
+</aside>
 </section>
 <section id="sec-5-2" >
 

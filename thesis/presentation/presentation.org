@@ -84,6 +84,11 @@
    #+ATTR_HTML: :height 200%, :width 200%
    [[./images/naive.png]]
 
+   #+BEGIN_NOTES
+   -Force exact same thread interleaving for every execution!
+   -Generate interleaving by serializing execution, allowing each thread to execute N instructions called a QUANTUM
+   #+END_NOTES
+
 ** Deterministic Execution Achieved
 
    But can we do better?
@@ -130,6 +135,12 @@
    #+ATTR_HTML: :height 200%, :width 200%
    [[./images/quantum.png]]
 
+   #+BEGIN_NOTES
+   Threads allowed to execute in parallel until they attempt to communicate via a communicating instruction
+   Communicating instruction delayed until serial mode
+   Remainder of quantum budget executed in serial mode
+   #+END_NOTES
+
 ** Ownership Table
 
    + Used to detect communicating instructions
@@ -146,6 +157,12 @@
 
    #+ATTR_HTML: :height 200%, :width 200%
    [[./images/ownershippolicy.png]]
+
+   #+BEGIN_NOTES
+   -consult ownership table before each load/store instruction
+   -defer interthread comm. Via comm. Instr. Until serial mode
+   -changes to ownership table happen only in serial mode
+   #+END_NOTES
 
 ** Ownership Graph
 
@@ -193,6 +210,14 @@
 ** Architecture
 
    [[./images/vm-arch.png]]
+
+   #+BEGIN_NOTES
+   -references only == no pointers
+   -method frames totally private
+   -private == good == no need to instrument
+   -other frames inaccessible to other frames or threads
+   -no global variables – object graph traversed using object fields
+   #+END_NOTES
 
 * maTe DMP
 
@@ -295,6 +320,11 @@
 
    [[./images/vm-arch-mt.png]]
 
+   #+BEGIN_NOTES
+   -Each thread is allocated its own PC register and VM stack
+   -Share same heap
+   #+END_NOTES
+
 ** Virtual Machine Changes
 
 *** Implementing Threads
@@ -324,29 +354,29 @@
 
 *** Example
 
-#+BEGIN_SRC c
-  int object_create(struct class *c, uint32_t n, struct object **o) {
-  #ifdef DMP
-          if (dmp == NULL)
-                  object->dmp = NULL;
-          else
-                  object->dmp = dmp_create_object_dmp(dmp, object);
-  #endif
-  }
-#+END_SRC
+    #+BEGIN_SRC c
+      int object_create(struct class *c, uint32_t n, struct object **o) {
+      #ifdef DMP
+              if (dmp == NULL)
+                      object->dmp = NULL;
+              else
+                      object->dmp = dmp_create_object_dmp(dmp, object);
+      #endif
+      }
+    #+END_SRC
 
 *** Object DMP
-
-#+BEGIN_SRC c
-  int object_load_field(struct object *o, int i) {
-  #ifdef DMP
-          if (o->dmp != NULL)
-                  object_dmp_load(o->dmp, i);
-  #endif
-  
-          return o->fields[i];
-  }
-#+END_SRC
+    
+    #+BEGIN_SRC c
+      int object_load_field(struct object *o, int i) {
+      #ifdef DMP
+              if (o->dmp != NULL)
+                      object_dmp_load(o->dmp, i);
+      #endif
+      
+              return o->fields[i];
+      }
+    #+END_SRC
 
 *** Thread DMP
 
@@ -369,6 +399,10 @@
 
    + Parallel DPLL - Multithreaded boolean satisfiability using the
      DPLL algorithm
+     
+   #+BEGIN_NOTES
+   Test test test
+   #+END_NOTES
 
 ** Parameters
 
