@@ -21,88 +21,21 @@
 * Thesis
 
   A Java-like programming language can be executed deterministically
-  using DMP with less overhead than a C-like programming language.
+  using Deterministic Shared Multiprocessing (DMP) with less overhead
+  than a C-like programming language.
 
 * Background
-
-** Multithreaded programming is /hard!/
-   
-   -----
-   
-  1. Concurrency bugs
-     
-     /reproducible?/
-     
-  2. Unit testing
-     
-     /test all inputs/
-     
-     /test each input X times/
-     
-  3. Crash reports
-     
-     /usefullness?/
-
-** Source of problems?
-
-   -----
-
-   Nondeterminism!
-
-** Thread Interleavings
-
-   #+ATTR_HTML: :width 100%
-   | thread 1 | thread 2 |
-   |----------+----------|
-   | load     |          |
-   | store    |          |
-   |          | load     |
-   | *load*   | *store*  |
-   | store    |          |
-   |          | load     |
-   | load     |          |
-   | store    | store    |
-
-** Why do thread interleavings change?
-
-   + OS scheduler
-
-   + Cache state
-
-   + I/O delays
-
-** Can we make execution deterministic?
-
-   + Multithreaded program
-
-   + Threads communicate via shared memory
-
-   + Produces same output when given the same input
-
-** Naive Deterministic Execution
-
-   #+ATTR_HTML: :height 200%, :width 200%
-   [[./images/naive.png]]
-
-   #+BEGIN_NOTES
-   -Force exact same thread interleaving for every execution!
-   -Generate interleaving by serializing execution, allowing each thread to execute N instructions called a QUANTUM
-   #+END_NOTES
-
-** Deterministic Execution Achieved
-
-   But can we do better?
 
 ** Deterministic Shared Multiprocessing
 
    + Dynamic *run-time* enforcement of deterministic
 
-   + Guarantees deterministic ordering of all *shared memory accesses*
+   + Guarantees *deterministic ordering of all shared memory accesses*
      for a given input.
 
-   + Arbitrary code
+   + Works on *arbitrary code*
 
-   + *Without* sacrificing performance
+   + Do so *without* sacrificing performance
 
 ** How does it work?
 
@@ -115,6 +48,18 @@
 
    + Serialize execution during interthread communication
 
+   -----
+
+   #+ATTR_HTML: :height 200%, :width 200%
+   [[./images/quantum.png]]
+
+   #+BEGIN_NOTES
+   Thread given # of instructions to execute per quantum
+   Threads allowed to execute in parallel until they attempt to communicate via a communicating instruction
+   Communicating instruction delayed until serial mode
+   Remainder of quantum budget executed in serial mode
+   #+END_NOTES
+
 ** Communicating Instructions
 
    + Load/store instructions to shared memory
@@ -123,23 +68,6 @@
 
    + Enforce ordering of communicating instructions, others do not
      matter
-
-** Quanta
-
-   + Split in two:
-
-     + Parallel mode
-
-     + Serial mode
-
-   #+ATTR_HTML: :height 200%, :width 200%
-   [[./images/quantum.png]]
-
-   #+BEGIN_NOTES
-   Threads allowed to execute in parallel until they attempt to communicate via a communicating instruction
-   Communicating instruction delayed until serial mode
-   Remainder of quantum budget executed in serial mode
-   #+END_NOTES
 
 ** Ownership Table
 
@@ -176,7 +104,7 @@
    
      + Modified LLVM compiler instruments load/store instructions
       
-     + Arbitrary =C=/=C++= code
+     + Arbitrary =C= / =C++= code
       
      + Linked with run-time framework
       
@@ -192,11 +120,13 @@
 
    + Deterministic ordering of communicating instructions
 
+   + Parallel / serial mode
+
    + Detect interthread communication, defer until serial mode
 
    + Ownership table used to detect communicating instructions
 
-** maTe
+** maTe - a Java-like programming language
 
    1. Pure OO programming language
 
@@ -219,17 +149,68 @@
    -no global variables – object graph traversed using object fields
    #+END_NOTES
 
-* maTe DMP
+** maTe instruction set
+
+   #+ATTR_HTML: :width 100%
+   | =aconst_null= | =invokespecial= |
+   | =aload=       | =invokenative=  |
+   | =areturn=     | =invokevirtual= |
+   | =astore=      | =new=           |
+   | =checkcast=   | =newint=        |
+   | =dup=         | =newstr=        |
+   | =getfield=    | =out=           |
+   | =goto=        | =putfield=      |
+   | =ifeq=        | =refcmp=        |
+   | =in=          | =return=        |
+
+   #+BEGIN_NOTES
+   Only two instructions can cause interthread communication
+   Other instructions work on private op stack/local variable arrays
+   #+END_NOTES
+
+** maTe instruction set
+
+   #+ATTR_HTML: :width 100%
+   | =aconst_null= | =invokespecial= |
+   | =aload=       | =invokenative=  |
+   | =areturn=     | =invokevirtual= |
+   | =astore=      | =new=           |
+   | =checkcast=   | =newint=        |
+   | =dup=         | =newstr=        |
+   | *=getfield=*  | =out=           |
+   | =goto=        | *=putfield=*    |
+   | =ifeq=        | =refcmp=        |
+   | =in=          | =return=        |
 
 * Implementation
 
 ** Compiler Changes
 
-*** =synchronized= blocks
+   (aka things you take for granted)
 
+   -----
+
+   + =for= loops
+   
    #+BEGIN_SRC java
-     synchronized (obj) { x = obj.shared; }
+     for (i = 0; i < 10; i = i + 1) { ... }
    #+END_SRC
+   
+   + Boolean =&&= and =||= operators
+   
+   #+BEGIN_SRC java
+     if ((a && b) || (c && d)) { ... }
+   #+END_SRC
+   
+   + =!==, =<==, =>== operators
+   
+   #+BEGIN_SRC java
+     if (a != b) { ... }
+     if (a <= b) { ... }
+     if (a >= b) { ... }
+   #+END_SRC
+
+** Compiler Changes cont'd
 
 *** =Real= class (=float= wrapper)
  
@@ -264,6 +245,24 @@
              native Real squareRoot();
      }
    #+END_SRC
+
+*** =synchronized= blocks
+
+   #+BEGIN_SRC java
+     for (i = 0; i < 10; i = i + 1) {
+             synchronized (obj) {
+                     if (obj.field != null) return obj.field;
+             }
+     }
+   #+END_SRC
+
+    -----
+
+    + Use new =monitorenter= / =monitorexit= instructions
+
+    + Monitor stack ensures necessary =monitorexit= instructions are
+      executed for all execution paths.
+
    
 *** =Thread= class
 
@@ -276,6 +275,10 @@
              native Object sleep(Integer millisec);  
      }
    #+END_SRC
+
+    -----
+
+    + Java-based threading model
    
 *** =Object= class =wait= / =notify= methods
 
@@ -288,35 +291,13 @@
      }
    #+END_SRC
 
-** Compiler Changes cont'd
+    -----
 
-   (aka things you take for granted)
+    + Allow notification of asynchronous events
 
-*** =for= loops
-   
-   #+BEGIN_SRC java
-     for (i = 0; i < 10; i = i + 1) { ... }
-   #+END_SRC
-   
-*** =&&= and =||= operators
-   
-   #+BEGIN_SRC java
-     if ((a && b) || (c && d)) { ... }
-   #+END_SRC
-   
-*** =!==, =<==, =>== operators
-   
-   #+BEGIN_SRC java
-     if (a != b) { ... }
-     if (a <= b) { ... }
-     if (a >= b) { ... }
-   #+END_SRC
+** Virtual Machine Changes
 
-** Assembler Changes
-
-   =monitorenter= / =monitorexit= instructions
-
-** Multithreaded Architecture
+*** Multithreaded Architecture
 
    [[./images/vm-arch-mt.png]]
 
@@ -325,15 +306,13 @@
    -Share same heap
    #+END_NOTES
 
-** Virtual Machine Changes
-
 *** Implementing Threads
 
-    Each =Thread= gets its own VM stack
+    + Each =Thread= gets its own PC register & VM stack
 
-    Use =pthreads= threading library
+    + Use =pthreads= threading library
 
-    Use =pthreads_mutex_t= for object monitors
+    + Use =pthreads_mutex_t= for object monitors
 
 *** Implementing DMP
 
@@ -347,10 +326,10 @@
 
 **** Design
 
-     DMP-specific modules for =object=, =thread=, =nlock= (object
-     monitor) and =table=.
+     + Global =dmp= module.
 
-     Global =dmp= module.
+     + DMP-specific modules for =object=, =thread=, =nlock= (object
+       monitor) and =table=.
 
 *** Example
 
