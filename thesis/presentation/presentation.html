@@ -143,6 +143,8 @@ matter
 </li>
 </ul>
 
+<hr  />
+
 <img src="./images/ownershippolicy.png" alt="ownershippolicy.png" height="200%," width="200%" />
 
 <aside class="notes">
@@ -200,10 +202,8 @@ matter
 <li>Deterministic ordering of communicating instructions
 </li>
 
-<li>Parallel / serial mode
-</li>
-
-<li>Detect interthread communication, defer until serial mode
+<li>Detect interthread communication in parallel mode, defer until
+serial mode
 </li>
 
 <li>Ownership table used to detect communicating instructions
@@ -224,7 +224,7 @@ matter
 on Java
 </li>
 
-<li>Originally single-threaded
+<li>Single-threaded
 </li>
 </ol>
 </section>
@@ -414,7 +414,7 @@ Other instructions work on private op stack/local variable arrays
 </div>
 
 <ul class="org-ul">
-<li><code>!=</code>, <code>&lt;=</code>, <code>&gt;=</code> operators
+<li><code>!=</code>, <code>&lt;=</code> and <code>&gt;=</code> operators
 </li>
 </ul>
 
@@ -531,7 +531,7 @@ executed for all execution paths.
 <hr  />
 
 <ul class="org-ul">
-<li>Allow notification of asynchronous events
+<li>Asynchronous events
 </li>
 </ul>
 </section>

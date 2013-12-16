@@ -83,9 +83,11 @@
 
    + Granularity - byte, word, page, etc.
 
+   -----
+     
    #+ATTR_HTML: :height 200%, :width 200%
    [[./images/ownershippolicy.png]]
-
+   
    #+BEGIN_NOTES
    -consult ownership table before each load/store instruction
    -defer interthread comm. Via comm. Instr. Until serial mode
@@ -120,9 +122,8 @@
 
    + Deterministic ordering of communicating instructions
 
-   + Parallel / serial mode
-
-   + Detect interthread communication, defer until serial mode
+   + Detect interthread communication in parallel mode, defer until
+     serial mode
 
    + Ownership table used to detect communicating instructions
 
@@ -135,7 +136,7 @@
    3. Grammar, instruction set and machine architecture heavily based
       on Java
 
-   4. Originally single-threaded
+   4. Single-threaded
 
 ** Architecture
 
@@ -202,7 +203,7 @@
      if ((a && b) || (c && d)) { ... }
    #+END_SRC
    
-   + =!==, =<==, =>== operators
+   + =!==, =<== and =>== operators
    
    #+BEGIN_SRC java
      if (a != b) { ... }
@@ -248,16 +249,16 @@
 
 *** =synchronized= blocks
 
-   #+BEGIN_SRC java
+    #+BEGIN_SRC java
      for (i = 0; i < 10; i = i + 1) {
              synchronized (obj) {
                      if (obj.field != null) return obj.field;
              }
      }
-   #+END_SRC
+    #+END_SRC
 
     -----
-
+    
     + Use new =monitorenter= / =monitorexit= instructions
 
     + Monitor stack ensures necessary =monitorexit= instructions are
@@ -293,7 +294,7 @@
 
     -----
 
-    + Allow notification of asynchronous events
+    + Asynchronous events
 
 ** Virtual Machine Changes
 
