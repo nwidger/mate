@@ -54,27 +54,128 @@ than a C-like programming language.
 </section>
 <section id="sec-2-1" >
 
-<h3>Deterministic Shared Multiprocessing</h3>
+<h3>Thread Interleavings</h3>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides" width="100%">
+
+
+<colgroup>
+<col  class="left" />
+
+<col  class="left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="left">thread 1</th>
+<th scope="col" class="left">thread 2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="left">load count</td>
+<td class="left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="left">store count</td>
+<td class="left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="left">&#xa0;</td>
+<td class="left">load count</td>
+</tr>
+
+<tr>
+<td class="left">load count</td>
+<td class="left">store count</td>
+</tr>
+
+<tr>
+<td class="left">store count</td>
+<td class="left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="left">&#xa0;</td>
+<td class="left">load count</td>
+</tr>
+
+<tr>
+<td class="left">load count</td>
+<td class="left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="left">store count</td>
+<td class="left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="left">&#xa0;</td>
+<td class="left">store count</td>
+</tr>
+</tbody>
+</table>
+
+<hr  />
+
 <ul class="org-ul">
-<li>Dynamic <b>run-time</b> enforcement of deterministic
+<li>Source of non-determinism, caused by
+
+<ul class="org-ul">
+<li>OS scheduler
 </li>
 
-<li>Guarantees <b>deterministic ordering of all shared memory accesses</b>
-for a given input.
+<li>Cache state
 </li>
 
-<li>Works on <b>arbitrary code</b>
+<li>I/O delays
+</li>
+</ul>
 </li>
 
-<li>Do so <b>without</b> sacrificing performance
+<li>Could execute threads serially, but we can do better
 </li>
 </ul>
 </section>
 <section id="sec-2-2" >
 
+<h3>Communicating Instructions</h3>
+<ul class="org-ul">
+<li>Load/store instructions to shared memory
+</li>
+
+<li>Modify behavior of other threads
+</li>
+
+<li>Enforce ordering of communicating instructions, others do not
+matter
+</li>
+</ul>
+</section>
+<section id="sec-2-3" >
+
+<h3>Deterministic Shared Multiprocessing</h3>
+<ul class="org-ul">
+<li>Dynamic run-time enforcement of determinism
+</li>
+
+<li>Guarantees deterministic ordering of all shared memory accesses
+for a given input.
+</li>
+
+<li>Works on arbitrary code
+</li>
+
+<li>Aims to do so without sacrificing performance
+</li>
+</ul>
+</section>
+<section id="sec-2-4" >
+
 <h3>How does it work?</h3>
 <ul class="org-ul">
-<li>Execute non-communicating instructions in parallel
+<li>Execute non-communicating instructions during parallel mode
 
 <ul class="org-ul">
 <li>Recover parallelism
@@ -103,22 +204,7 @@ Remainder of quantum budget executed in serial mode
 </p>
 </aside>
 </section>
-<section id="sec-2-3" >
-
-<h3>Communicating Instructions</h3>
-<ul class="org-ul">
-<li>Load/store instructions to shared memory
-</li>
-
-<li>Modify behavior of other threads
-</li>
-
-<li>Enforce ordering of communicating instructions, others do not
-matter
-</li>
-</ul>
-</section>
-<section id="sec-2-4" >
+<section id="sec-2-5" >
 
 <h3>Ownership Table</h3>
 <ul class="org-ul">
@@ -155,7 +241,7 @@ matter
 </p>
 </aside>
 </section>
-<section id="sec-2-5" >
+<section id="sec-2-6" >
 
 <h3>Ownership Graph</h3>
 <p>
@@ -164,7 +250,7 @@ matter
 
 <img src="./images/ownership-graph.png" alt="ownership-graph.png" />
 </section>
-<section id="sec-2-6" >
+<section id="sec-2-7" >
 
 <h3>Previous DMP Implementations</h3>
 <ul class="org-ul">
@@ -192,7 +278,7 @@ matter
 </li>
 </ul>
 </section>
-<section id="sec-2-7" >
+<section id="sec-2-8" >
 
 <h3>DMP Summary</h3>
 <ul class="org-ul">
@@ -210,7 +296,7 @@ serial mode
 </li>
 </ul>
 </section>
-<section id="sec-2-8" >
+<section id="sec-2-9" >
 
 <h3>maTe - a Java-like programming language</h3>
 <ol class="org-ol">
@@ -228,7 +314,7 @@ on Java
 </li>
 </ol>
 </section>
-<section id="sec-2-9" >
+<section id="sec-2-10" >
 
 <h3>Architecture</h3>
 <img src="./images/vm-arch.png" alt="vm-arch.png" />
@@ -243,7 +329,7 @@ on Java
 </p>
 </aside>
 </section>
-<section id="sec-2-10" >
+<section id="sec-2-11" >
 
 <h3>maTe instruction set</h3>
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides" width="100%">
@@ -314,7 +400,7 @@ Other instructions work on private op stack/local variable arrays
 </p>
 </aside>
 </section>
-<section id="sec-2-11" >
+<section id="sec-2-12" >
 
 <h3>maTe instruction set</h3>
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides" width="100%">
@@ -849,14 +935,19 @@ Total:                               4112 (100.0%)
 <h4>Garbage Collection</h4>
 <ul class="org-ul">
 <li>Determining when a collection cycle will occur is not
-deterministic since allocations triggering a collection can
-occur during parallel mode.
+deterministic
 </li>
 
 <li>Serial collector only, run at end of serial mode when heap is
 using <code>90%</code> or more of its available memory.
 </li>
 </ul>
+
+<aside class="notes">
+<p>
+Allocations triggering a collection can occur during parallel mode
+</p>
+</aside>
 </section>
 <section id="sec-3-3-15" >
 
@@ -871,12 +962,31 @@ using <code>90%</code> or more of its available memory.
 <li>Per-thread free object cache
 </li>
 </ul>
+
+<aside class="notes">
+<p>
+First 65,536 integer values
+All Strings created by <code>newstr</code> instruction
+Free object cache in hash keyed on object size
+</p>
+</aside>
 </section>
 <section id="sec-4" >
 
 <h2>Results</h2>
 </section>
 <section id="sec-4-1" >
+
+<h3>Racey</h3>
+<ul class="org-ul">
+<li>Deterministic stress test
+</li>
+
+<li>Ran 10,000 times for each configuration
+</li>
+</ul>
+</section>
+<section id="sec-4-2" >
 
 <h3>Benchmarks</h3>
 <ul class="org-ul">
@@ -891,14 +1001,8 @@ on a 20x25 plate
 DPLL algorithm
 </li>
 </ul>
-
-<aside class="notes">
-<p>
-Test test test
-</p>
-</aside>
 </section>
-<section id="sec-4-2" >
+<section id="sec-4-3" >
 
 <h3>Parameters</h3>
 <ul class="org-ul">
@@ -915,7 +1019,7 @@ Test test test
 </li>
 </ul>
 </section>
-<section id="sec-4-3" >
+<section id="sec-4-4" >
 
 <h3>Evaluation</h3>
 <ul class="org-ul">
@@ -932,17 +1036,17 @@ Each benchmark was run 10 times for each combination of parameters.
 Run-times are averages.
 </p>
 </section>
-<section id="sec-4-4" >
+<section id="sec-4-5" >
 
 <h3>Radix</h3>
 
 </section>
-<section id="sec-4-5" >
+<section id="sec-4-6" >
 
 <h3>Jacobi</h3>
 
 </section>
-<section id="sec-4-6" >
+<section id="sec-4-7" >
 
 <h3>Parallel DPLL</h3>
 </section>

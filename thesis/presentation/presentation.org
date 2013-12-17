@@ -26,20 +26,56 @@
 
 * Background
 
+** Thread Interleavings
+
+   #+ATTR_HTML: :width 100%
+   | thread 1    | thread 2    |
+   |-------------+-------------|
+   | load count  |             |
+   | store count |             |
+   |             | load count  |
+   | load count  | store count |
+   | store count |             |
+   |             | load count  |
+   | load count  |             |
+   | store count |             |
+   |             | store count |
+
+   -----
+
+   + Source of non-determinism, caused by
+
+     + OS scheduler
+
+     + Cache state
+
+     + I/O delays
+
+   + Could execute threads serially, but we can do better
+
+** Communicating Instructions
+
+   + Load/store instructions to shared memory
+
+   + Modify behavior of other threads
+
+   + Enforce ordering of communicating instructions, others do not
+     matter
+   
 ** Deterministic Shared Multiprocessing
 
-   + Dynamic *run-time* enforcement of deterministic
+   + Dynamic run-time enforcement of determinism
 
-   + Guarantees *deterministic ordering of all shared memory accesses*
+   + Guarantees deterministic ordering of all shared memory accesses
      for a given input.
 
-   + Works on *arbitrary code*
+   + Works on arbitrary code
 
-   + Do so *without* sacrificing performance
+   + Aims to do so without sacrificing performance
 
 ** How does it work?
 
-   + Execute non-communicating instructions in parallel
+   + Execute non-communicating instructions during parallel mode
 
      + Recover parallelism
 
@@ -59,15 +95,6 @@
    Communicating instruction delayed until serial mode
    Remainder of quantum budget executed in serial mode
    #+END_NOTES
-
-** Communicating Instructions
-
-   + Load/store instructions to shared memory
-
-   + Modify behavior of other threads
-
-   + Enforce ordering of communicating instructions, others do not
-     matter
 
 ** Ownership Table
 
@@ -513,11 +540,14 @@
 *** Garbage Collection
 
     + Determining when a collection cycle will occur is not
-      deterministic since allocations triggering a collection can
-      occur during parallel mode.
+      deterministic
 
     + Serial collector only, run at end of serial mode when heap is
       using =90%= or more of its available memory.
+
+    #+BEGIN_NOTES
+    Allocations triggering a collection can occur during parallel mode
+    #+END_NOTES
 
 *** Performance Enhancements
 
@@ -527,7 +557,19 @@
 
     + Per-thread free object cache
 
+    #+BEGIN_NOTES
+    First 65,536 integer values
+    All Strings created by =newstr= instruction
+    Free object cache in hash keyed on object size
+    #+END_NOTES
+
 * Results
+
+** Racey
+
+   + Deterministic stress test
+
+   + Ran 10,000 times for each configuration
 
 ** Benchmarks
 
@@ -538,10 +580,6 @@
 
    + Parallel DPLL - Multithreaded boolean satisfiability using the
      DPLL algorithm
-     
-   #+BEGIN_NOTES
-   Test test test
-   #+END_NOTES
 
 ** Parameters
 
