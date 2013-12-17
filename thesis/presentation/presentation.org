@@ -315,25 +315,95 @@
 
     + Use =pthreads_mutex_t= for object monitors
 
-*** Implementing DMP
+*** Implementing DMP in maTe
 
-**** Goals
+    + Control execution of threads
 
-     Enable/disable *without* recompiling
+    + Instrument =getfield= / =putfield= instructions
 
-     *Minimize* performance penalty when disabled
+    + Track owner of each object
 
-     Allow *per-object* or *per-thread* behavior
+*** Design Goals
 
-**** Design
+    + Enable/disable *without* recompiling
+
+      #+BEGIN_SRC sh
+        mvm myclass.class;    # DMP disabled
+        mvm -p myclass.class; # DMP enabled
+      #+END_SRC
+    
+    + *Minimize* performance penalty when disabled
+    
+    + Allow *per-object* or *per-thread* behavior
+
+    + Compile virtual machine with all DMP code absent
+
+      #+BEGIN_SRC sh
+        ./configure --enable-dmp=no && make && sudo make install;
+        mvm -p myclass.class
+        Invalid switch option 'p'
+      #+END_SRC
+
+*** Design
 
      + Global =dmp= module.
 
      + DMP-specific modules for =object=, =thread=, =nlock= (object
        monitor) and =table=.
 
-*** Example
+*** Global =dmp= module
 
+    + Tracks blocked threads, wake them during serial mode
+
+    -----
+
+    #+BEGIN_SRC c
+      int dmp_thread_block(struct dmp *d, struct thread_dmp *td);
+    #+END_SRC
+
+    + Maintain thread set in creation order for serial mode
+
+    -----
+
+    #+BEGIN_SRC c
+      int dmp_add_thread(struct dmp *d, int r);
+      int dmp_remove_thread(struct dmp *d, int r);
+    #+END_SRC
+
+    + Implements default ownership table policy
+
+    -----
+
+    #+BEGIN_SRC c
+      int dmp_shm_read(struct dmp *d, int c, int r, enum dmp_thread_action *ta, enum dmp_owner_action *oa);
+      int dmp_shm_write(struct dmp *d, int c, int r, enum dmp_thread_action *ta, enum dmp_owner_action *oa);
+    #+END_SRC
+
+    #+BEGIN_NOTES
+    Before allowing a $getfield$ or $putfield$ to actually read/write
+    an object's field, the DMP-specific $object$ module passes in the
+    ID of the object it is going to access.  The $dmp$ module returns
+    a $thread$ action ($block$ or $proceed$) and an $owner$ action
+    ($none$, $set shared$ or $set private$) to perform.
+    #+END_NOTES
+
+    + Allocates DMP-specific modules for each =object=, =thread=,
+      =table= and =nlock= instance
+
+    -----
+
+    #+BEGIN_SRC c
+      struct object_dmp * dmp_create_object_dmp(struct dmp *d, struct object *o);
+      struct thread_dmp * dmp_create_thread_dmp(struct dmp *d, struct thread *t);
+      struct nlock_dmp * dmp_create_nlock_dmp(struct dmp *d, struct nlock *n);
+      struct table_dmp * dmp_create_table_dmp(struct dmp *d, struct table *t, struct object_dmp *od);
+    #+END_SRC
+
+*** DMP-specific modules
+
+    + =object=, =thread=, =table= and =nlock= instances store pointer
+      to DMP-specific module instance
+      
     #+BEGIN_SRC c
       int object_create(struct class *c, uint32_t n, struct object **o) {
       #ifdef DMP
@@ -345,7 +415,7 @@
       }
     #+END_SRC
 
-*** Object DMP
+    + Without DMP, performance penalty is extra pointer comparisons
     
     #+BEGIN_SRC c
       int object_load_field(struct object *o, int i) {
@@ -358,6 +428,35 @@
       }
     #+END_SRC
 
+*** DMP-specific modules cont'd.
+
+    + Each instance given an attributes record
+
+    + Attributes contain operations table implementing DMP operations
+      for that module
+
+    + Attributes could be made object- or thread-specific
+      
+    #+BEGIN_SRC c
+      struct object_dmp_attr {
+              int owner;              /* current owner */
+              int depth;              /* ownership depth used by chown() */
+              struct object_dmp_ops *ops;
+      };
+
+      struct object_dmp_ops {
+              int  (*load)(struct object_dmp *od, int i);        /* load object field */
+              int (*store)(struct object_dmp *od, int i, int r); /* store object field */
+              int (*chown)(struct object_dmp *od, int n);        /* change object owner */
+      };
+    #+END_SRC
+
+    #+BEGIN_NOTES
+    NULL pointer == perform default operation
+    #+END_NOTES
+
+*** Object DMP
+
 *** Thread DMP
 
 *** Table DMP
@@ -366,7 +465,67 @@
 
 *** DMP Statistics
 
+    + With =-D=, prints DMP-related statistics on program termination
+
+      #+BEGIN_SRC sh
+        Rounds:                                 9
+        
+        Parallel time (seconds):         0.323777 (37.07164%)
+        Serial time (seconds):           0.549605 (62.92837%)
+        ============================================================
+        Total time (seconds):            0.873382 (100.0%)
+        
+        Max parallel segment (seconds):   0.158997
+        Min parallel segment (seconds):   0.000002
+        Avg parallel segment (seconds):   0.071304
+        
+        Max serial segment (seconds):   -1.000000
+        Min serial segment (seconds):    0.000378
+        Avg serial segment (seconds):    0.201108
+        
+        Reads:                              61957 (93.77620%)
+        Writes:                              4112 (6.22380%)
+        ============================================================
+        Total:                              66069 (100.0%)
+        
+        Total (shared) [?]:                 34232 (51.81250%)
+        Total (private mine):               31825 (48.16934%)
+        Total (private not mine) [*]:          12 (0.01816%)
+        ============================================================
+        Total:                              66069 (100.0%)
+        
+        Reads (shared):                     34224 (55.23831%)
+        Reads (private mine):               27721 (44.74232%)
+        Reads (private not mine) [*]:          12 (0.01937%)
+        ============================================================
+        Total:                              61957 (100.0%)
+        
+        Writes (shared) [*]:                    8 (0.19455%)
+        Writes (private mine):               4104 (99.80545%)
+        Writes (private not mine) [*]:          0 (0.00000%)
+        ============================================================
+        Total:                               4112 (100.0%)
+        
+        [*] Reads/writes required blocking
+        [?] Writes required blocking
+      #+END_SRC
+
+*** Garbage Collection
+
+    + Determining when a collection cycle will occur is not
+      deterministic since allocations triggering a collection can
+      occur during parallel mode.
+
+    + Serial collector only, run at end of serial mode when heap is
+      using =90%= or more of its available memory.
+
 *** Performance Enhancements
+
+    + =Integer= / =String= cache
+
+    + Per-thread object reference cache
+
+    + Per-thread free object cache
 
 * Results
 

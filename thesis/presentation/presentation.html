@@ -567,20 +567,54 @@ executed for all execution paths.
 </section>
 <section id="sec-3-3-3" >
 
-<h4>Implementing DMP</h4>
-<ul class="org-ul"><li class="fragment none">Goals<br/><p>
-Enable/disable <b>without</b> recompiling
-</p>
-
-<p>
-<b>Minimize</b> performance penalty when disabled
-</p>
-
-<p>
-Allow <b>per-object</b> or <b>per-thread</b> behavior
-</p>
+<h4>Implementing DMP in maTe</h4>
+<ul class="org-ul">
+<li>Control execution of threads
 </li>
-<li class="fragment none">Design<br/><ul class="org-ul">
+
+<li>Instrument <code>getfield</code> / <code>putfield</code> instructions
+</li>
+
+<li>Track owner of each object
+</li>
+</ul>
+</section>
+<section id="sec-3-3-4" >
+
+<h4>Design Goals</h4>
+<ul class="org-ul">
+<li>Enable/disable <b>without</b> recompiling
+
+<div class="org-src-container">
+
+<pre class="src src-sh">mvm myclass.class;    <span style="color: #cd5c5c;"># </span><span style="color: #cd5c5c;">DMP disabled</span>
+mvm -p myclass.class; <span style="color: #cd5c5c;"># </span><span style="color: #cd5c5c;">DMP enabled</span>
+</pre>
+</div>
+</li>
+
+<li><b>Minimize</b> performance penalty when disabled
+</li>
+
+<li>Allow <b>per-object</b> or <b>per-thread</b> behavior
+</li>
+
+<li>Compile virtual machine with all DMP code absent
+
+<div class="org-src-container">
+
+<pre class="src src-sh">./configure --enable-dmp=no &amp;&amp; make &amp;&amp; sudo make install;
+mvm -p myclass.class
+Invalid switch option <span style="color: #ffa500;">'p'</span>
+</pre>
+</div>
+</li>
+</ul>
+</section>
+<section id="sec-3-3-5" >
+
+<h4>Design</h4>
+<ul class="org-ul">
 <li>Global <code>dmp</code> module.
 </li>
 
@@ -588,11 +622,87 @@ Allow <b>per-object</b> or <b>per-thread</b> behavior
 monitor) and <code>table</code>.
 </li>
 </ul>
-</li></ul>
 </section>
-<section id="sec-3-3-4" >
+<section id="sec-3-3-6" >
 
-<h4>Example</h4>
+<h4>Global <code>dmp</code> module</h4>
+<ul class="org-ul">
+<li>Tracks blocked threads, wake them during serial mode
+</li>
+</ul>
+
+<hr  />
+
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #00ff00;">int</span> <span style="color: #9acd32;">dmp_thread_block</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp</span> *<span style="color: #8fbc8f;">td</span>);
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>Maintain thread set in creation order for serial mode
+</li>
+</ul>
+
+<hr  />
+
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #00ff00;">int</span> <span style="color: #9acd32;">dmp_add_thread</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">r</span>);
+<span style="color: #00ff00;">int</span> <span style="color: #9acd32;">dmp_remove_thread</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">r</span>);
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>Implements default ownership table policy
+</li>
+</ul>
+
+<hr  />
+
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #00ff00;">int</span> <span style="color: #9acd32;">dmp_shm_read</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">c</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">r</span>, <span style="color: #eee8aa;">enum</span> <span style="color: #00ff00;">dmp_thread_action</span> *<span style="color: #8fbc8f;">ta</span>, <span style="color: #eee8aa;">enum</span> <span style="color: #00ff00;">dmp_owner_action</span> *<span style="color: #8fbc8f;">oa</span>);
+<span style="color: #00ff00;">int</span> <span style="color: #9acd32;">dmp_shm_write</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">c</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">r</span>, <span style="color: #eee8aa;">enum</span> <span style="color: #00ff00;">dmp_thread_action</span> *<span style="color: #8fbc8f;">ta</span>, <span style="color: #eee8aa;">enum</span> <span style="color: #00ff00;">dmp_owner_action</span> *<span style="color: #8fbc8f;">oa</span>);
+</pre>
+</div>
+
+<aside class="notes">
+<p>
+Before allowing a \(getfield\) or \(putfield\) to actually read/write
+an object's field, the DMP-specific \(object\) module passes in the
+ID of the object it is going to access.  The \(dmp\) module returns
+a \(thread\) action (\(block\) or \(proceed\)) and an \(owner\) action
+(\(none\), \(set shared\) or \(set private\)) to perform.
+</p>
+</aside>
+
+<ul class="org-ul">
+<li>Allocates DMP-specific modules for each <code>object</code>, <code>thread</code>,
+      <code>table</code> and <code>nlock</code> instance
+</li>
+</ul>
+
+<hr  />
+
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp</span> * <span style="color: #9acd32;">dmp_create_object_dmp</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object</span> *<span style="color: #8fbc8f;">o</span>);
+<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp</span> * <span style="color: #9acd32;">dmp_create_thread_dmp</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread</span> *<span style="color: #8fbc8f;">t</span>);
+<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock_dmp</span> * <span style="color: #9acd32;">dmp_create_nlock_dmp</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock</span> *<span style="color: #8fbc8f;">n</span>);
+<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">table_dmp</span> * <span style="color: #9acd32;">dmp_create_table_dmp</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">table</span> *<span style="color: #8fbc8f;">t</span>, <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp</span> *<span style="color: #8fbc8f;">od</span>);
+</pre>
+</div>
+</section>
+<section id="sec-3-3-7" >
+
+<h4>DMP-specific modules</h4>
+<ul class="org-ul">
+<li><code>object</code>, <code>thread</code>, <code>table</code> and <code>nlock</code> instances store pointer
+to DMP-specific module instance
+</li>
+</ul>
+
 <div class="org-src-container">
 
 <pre class="src src-c"><span style="color: #00ff00;">int</span> <span style="color: #9acd32;">object_create</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">class</span> *<span style="color: #8fbc8f;">c</span>, <span style="color: #00ff00;">uint32_t</span> <span style="color: #8fbc8f;">n</span>, <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object</span> **<span style="color: #8fbc8f;">o</span>) {
@@ -605,10 +715,12 @@ monitor) and <code>table</code>.
 }
 </pre>
 </div>
-</section>
-<section id="sec-3-3-5" >
 
-<h4>Object DMP</h4>
+<ul class="org-ul">
+<li>Without DMP, performance penalty is extra pointer comparisons
+</li>
+</ul>
+
 <div class="org-src-container">
 
 <pre class="src src-c"><span style="color: #00ff00;">int</span> <span style="color: #9acd32;">object_load_field</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object</span> *<span style="color: #8fbc8f;">o</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">i</span>) {
@@ -622,29 +734,143 @@ monitor) and <code>table</code>.
 </pre>
 </div>
 </section>
-<section id="sec-3-3-6" >
-
-<h4>Thread DMP</h4>
-
-</section>
-<section id="sec-3-3-7" >
-
-<h4>Table DMP</h4>
-
-</section>
 <section id="sec-3-3-8" >
 
-<h4>NLock DMP</h4>
+<h4>DMP-specific modules cont'd.</h4>
+<ul class="org-ul">
+<li>Each instance given an attributes record
+</li>
 
+<li>Attributes contain operations table implementing DMP operations
+for that module
+</li>
+
+<li>Attributes could be made object- or thread-specific
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp_attr</span> {
+        <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">owner</span>;              <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">current owner </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">depth</span>;              <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">ownership depth used by chown() </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp_ops</span> *<span style="color: #8fbc8f;">ops</span>;
+};
+
+<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp_ops</span> {
+        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">load</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp</span> *<span style="color: #8fbc8f;">od</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">i</span>);        <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">load object field </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #00ff00;">int</span> (*<span style="color: #9acd32;">store</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp</span> *<span style="color: #8fbc8f;">od</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">i</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">r</span>); <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">store object field </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #00ff00;">int</span> (*<span style="color: #9acd32;">chown</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp</span> *<span style="color: #8fbc8f;">od</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">n</span>);        <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">change object owner </span><span style="color: #cd5c5c;">*/</span>
+};
+</pre>
+</div>
+
+<aside class="notes">
+<p>
+NULL pointer == perform default operation
+</p>
+</aside>
 </section>
 <section id="sec-3-3-9" >
 
-<h4>DMP Statistics</h4>
+<h4>Object DMP</h4>
 
 </section>
 <section id="sec-3-3-10" >
 
+<h4>Thread DMP</h4>
+
+</section>
+<section id="sec-3-3-11" >
+
+<h4>Table DMP</h4>
+
+</section>
+<section id="sec-3-3-12" >
+
+<h4>NLock DMP</h4>
+
+</section>
+<section id="sec-3-3-13" >
+
+<h4>DMP Statistics</h4>
+<ul class="org-ul">
+<li>With <code>-D</code>, prints DMP-related statistics on program termination
+
+<div class="org-src-container">
+
+<pre class="src src-sh">Rounds:                                 9
+
+Parallel time (seconds):         0.323777 (37.07164%)
+Serial time (seconds):           0.549605 (62.92837%)
+============================================================
+Total time (seconds):            0.873382 (100.0%)
+
+Max parallel segment (seconds):   0.158997
+Min parallel segment (seconds):   0.000002
+Avg parallel segment (seconds):   0.071304
+
+Max serial segment (seconds):   -1.000000
+Min serial segment (seconds):    0.000378
+Avg serial segment (seconds):    0.201108
+
+Reads:                              61957 (93.77620%)
+Writes:                              4112 (6.22380%)
+============================================================
+Total:                              66069 (100.0%)
+
+<span style="color: #9acd32;">Total</span> (shared) [?]:                 34232 (51.81250%)
+<span style="color: #9acd32;">Total</span> (private mine):               31825 (48.16934%)
+<span style="color: #9acd32;">Total</span> (private not mine) [*]:          12 (0.01816%)
+============================================================
+Total:                              66069 (100.0%)
+
+<span style="color: #9acd32;">Reads</span> (shared):                     34224 (55.23831%)
+<span style="color: #9acd32;">Reads</span> (private mine):               27721 (44.74232%)
+<span style="color: #9acd32;">Reads</span> (private not mine) [*]:          12 (0.01937%)
+============================================================
+Total:                              61957 (100.0%)
+
+<span style="color: #9acd32;">Writes</span> (shared) [*]:                    8 (0.19455%)
+<span style="color: #9acd32;">Writes</span> (private mine):               4104 (99.80545%)
+<span style="color: #9acd32;">Writes</span> (private not mine) [*]:          0 (0.00000%)
+============================================================
+Total:                               4112 (100.0%)
+
+[*] Reads/writes required blocking
+[?] Writes required blocking
+</pre>
+</div>
+</li>
+</ul>
+</section>
+<section id="sec-3-3-14" >
+
+<h4>Garbage Collection</h4>
+<ul class="org-ul">
+<li>Determining when a collection cycle will occur is not
+deterministic since allocations triggering a collection can
+occur during parallel mode.
+</li>
+
+<li>Serial collector only, run at end of serial mode when heap is
+using <code>90%</code> or more of its available memory.
+</li>
+</ul>
+</section>
+<section id="sec-3-3-15" >
+
 <h4>Performance Enhancements</h4>
+<ul class="org-ul">
+<li><code>Integer</code> / <code>String</code> cache
+</li>
+
+<li>Per-thread object reference cache
+</li>
+
+<li>Per-thread free object cache
+</li>
+</ul>
 </section>
 <section id="sec-4" >
 
