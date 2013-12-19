@@ -138,6 +138,8 @@
      + Linked with run-time framework
       
      + Ownership table stored in shared memory
+
+     + Reduced serial mode
       
    + *Results:* Average slowdown of 1.1x - 6x
 
@@ -210,35 +212,17 @@
    | =ifeq=        | =refcmp=        |
    | =in=          | =return=        |
 
+** Ownership Depth
+
+   [[./images/depth.png]]
+
 * Implementation
 
+  + Compiler Changes
+
+  + Virtual Machine Changes
+
 ** Compiler Changes
-
-   (aka things you take for granted)
-
-   -----
-
-   + =for= loops
-   
-   #+BEGIN_SRC java
-     for (i = 0; i < 10; i = i + 1) { ... }
-   #+END_SRC
-   
-   + Boolean =&&= and =||= operators
-   
-   #+BEGIN_SRC java
-     if ((a && b) || (c && d)) { ... }
-   #+END_SRC
-   
-   + =!==, =<== and =>== operators
-   
-   #+BEGIN_SRC java
-     if (a != b) { ... }
-     if (a <= b) { ... }
-     if (a >= b) { ... }
-   #+END_SRC
-
-** Compiler Changes cont'd
 
 *** =Real= class (=float= wrapper)
  
@@ -323,6 +307,32 @@
 
     + Asynchronous events
 
+** Compiler Changes
+
+   (aka things you take for granted)
+
+   -----
+
+   + =for= loops
+   
+   #+BEGIN_SRC java
+     for (i = 0; i < 10; i = i + 1) { ... }
+   #+END_SRC
+   
+   + Boolean =&&= and =||= operators
+   
+   #+BEGIN_SRC java
+     if ((a && b) || (c && d)) { ... }
+   #+END_SRC
+   
+   + =!==, =<== and =>== operators
+   
+   #+BEGIN_SRC java
+     if (a != b) { ... }
+     if (a <= b) { ... }
+     if (a >= b) { ... }
+   #+END_SRC
+
 ** Virtual Machine Changes
 
 *** Multithreaded Architecture
@@ -342,6 +352,24 @@
 
     + Use =pthreads_mutex_t= for object monitors
 
+*** Threading Performance Enhancements
+
+    + Remove lots of locks
+
+    + Reduce heap accesses
+
+    + =Integer= / =String= cache
+
+    + Per-thread object reference cache
+
+    + Per-thread free object cache
+
+    #+BEGIN_NOTES
+    First 65,536 integer values
+    All Strings created by =newstr= instruction
+    Free object cache in hash keyed on object size
+    #+END_NOTES
+
 *** Implementing DMP in maTe
 
     + Control execution of threads
@@ -350,24 +378,26 @@
 
     + Track owner of each object
 
+    + Prevent blocking system calls
+
 *** Design Goals
 
-    + Enable/disable *without* recompiling
+    + Enable/disable without recompiling
 
       #+BEGIN_SRC sh
         mvm myclass.class;    # DMP disabled
         mvm -p myclass.class; # DMP enabled
       #+END_SRC
     
-    + *Minimize* performance penalty when disabled
+    + Minimize performance penalty when disabled
     
-    + Allow *per-object* or *per-thread* behavior
+    + Allow object- or thread-specific behavior
 
-    + Compile virtual machine with all DMP code absent
+    + Compile DMP code out of virtual machine
 
       #+BEGIN_SRC sh
         ./configure --enable-dmp=no && make && sudo make install;
-        mvm -p myclass.class
+        mvm -p myclass.class;      # -p = DMP enabled
         Invalid switch option 'p'
       #+END_SRC
 
@@ -380,28 +410,29 @@
 
 *** Global =dmp= module
 
-    + Tracks blocked threads, wake them during serial mode
+**** Tracks blocked threads, wake them during serial mode
 
-    -----
+      + Holds threads at end their serial/parallel segment
+
+      + Wake each in creation order during serial mode
 
     #+BEGIN_SRC c
-      int dmp_thread_block(struct dmp *d, struct thread_dmp *td);
+      int dmp_thread_block(struct dmp *d, struct thread_dmp *td); /* called by thread at end of segment */
     #+END_SRC
 
-    + Maintain thread set in creation order for serial mode
-
-    -----
+**** Maintain thread set in creation order for serial mode
 
     #+BEGIN_SRC c
-      int dmp_add_thread(struct dmp *d, int r);
-      int dmp_remove_thread(struct dmp *d, int r);
+      int dmp_add_thread(struct dmp *d, int r);    /* called when Thread.start() begins */
+      int dmp_remove_thread(struct dmp *d, int r); /* called when Thread.run() terminates */
     #+END_SRC
 
-    + Implements default ownership table policy
-
-    -----
+**** Implements default ownership table policy
 
     #+BEGIN_SRC c
+      /* takes current owner ID accessing thread ID
+       ,* returns thread action (proceed/block) and owner action (shared/private/none)
+       ,*/
       int dmp_shm_read(struct dmp *d, int c, int r, enum dmp_thread_action *ta, enum dmp_owner_action *oa);
       int dmp_shm_write(struct dmp *d, int c, int r, enum dmp_thread_action *ta, enum dmp_owner_action *oa);
     #+END_SRC
@@ -414,12 +445,11 @@
     ($none$, $set shared$ or $set private$) to perform.
     #+END_NOTES
 
-    + Allocates DMP-specific modules for each =object=, =thread=,
+**** Allocates DMP-specific modules for each =object=, =thread=,
       =table= and =nlock= instance
 
-    -----
-
     #+BEGIN_SRC c
+      /* called by object/create/nlock/table_create, pointer stored in 'dmp' field */
       struct object_dmp * dmp_create_object_dmp(struct dmp *d, struct object *o);
       struct thread_dmp * dmp_create_thread_dmp(struct dmp *d, struct thread *t);
       struct nlock_dmp * dmp_create_nlock_dmp(struct dmp *d, struct nlock *n);
@@ -464,31 +494,79 @@
 
     + Attributes could be made object- or thread-specific
       
-    #+BEGIN_SRC c
-      struct object_dmp_attr {
-              int owner;              /* current owner */
-              int depth;              /* ownership depth used by chown() */
-              struct object_dmp_ops *ops;
-      };
-
-      struct object_dmp_ops {
-              int  (*load)(struct object_dmp *od, int i);        /* load object field */
-              int (*store)(struct object_dmp *od, int i, int r); /* store object field */
-              int (*chown)(struct object_dmp *od, int n);        /* change object owner */
-      };
-    #+END_SRC
-
     #+BEGIN_NOTES
     NULL pointer == perform default operation
     #+END_NOTES
 
 *** Object DMP
 
+    #+BEGIN_SRC c
+      struct object_dmp_ops {
+              int  (*load)(struct object_dmp *od, int i);        /* load object field */
+              int (*store)(struct object_dmp *od, int i, int r); /* store object field */
+              int (*chown)(struct object_dmp *od, int n);        /* change object owner */
+      };
+      
+      struct object_dmp_attr {
+              int owner;              /* current owner ID, 0 == shared */
+              int depth;              /* ownership depth used by chown() */
+              struct object_dmp_ops *ops;
+      };
+    #+END_SRC
+
 *** Thread DMP
+
+    #+BEGIN_SRC c
+      struct thread_dmp_ops {
+              int  (*thread_creation)(struct thread_dmp *td);                 /* called in Thread.start() */
+              int  (*thread_start)(struct thread_dmp *td);                    /* called at top of Thread.run() */
+              int  (*thread_destruction)(struct thread_dmp *td);              /* called at bottom of Thread.run() */
+              int  (*thread_join)(struct thread_dmp *td);                     /* called in Thread.join() */
+              int  (*thread_sleep)(struct thread_dmp *td, int32_t m);         /* called in Thread.sleep() */
+              int  (*execute_instruction)(struct thread_dmp *td, uint32_t o); /* called when thread executes instruction */
+      };
+      
+      struct thread_dmp_attr {
+              enum thread_dmp_serial_mode serial_mode; /* full/reduced serial mode */
+              int lock_count;                          /* # of acquired locks, 0 == end serial segment */
+              int quantum_size;                        /* instructions per quantum */
+              uint64_t instruction_counter;            /* instructions executed in current quantum */
+              struct thread_dmp_ops *ops;
+      };
+    #+END_SRC
 
 *** Table DMP
 
+    + Hash table implemented natively inside virtual machine
+
+    + Table key/values must be guarded as if they were actual Object fields
+
+    #+BEGIN_SRC c
+      struct table_dmp_ops {
+              int  (*load)(struct table_dmp *td); /* load table field */
+              int (*store)(struct table_dmp *td); /* store table field */
+      };
+      
+      struct table_dmp_attr {
+              struct table_dmp_ops *ops;
+      };
+    #+END_SRC
+
 *** NLock DMP
+
+    + Implements object monitors
+
+    #+BEGIN_SRC c
+      struct nlock_dmp_ops {
+              int  (*lock)(struct nlock_dmp *nd);      /* acquire monitor */
+              int  (*unlock)(struct nlock_dmp *nd);    /* release monitor */
+              int  (*timedwait)(struct nlock_dmp *nd); /* acquire monitor w/ timeout */
+      };
+      
+      struct nlock_dmp_attr {
+              struct nlock_dmp_ops *ops;
+      };
+    #+END_SRC
 
 *** DMP Statistics
 
@@ -547,20 +625,6 @@
 
     #+BEGIN_NOTES
     Allocations triggering a collection can occur during parallel mode
-    #+END_NOTES
-
-*** Performance Enhancements
-
-    + =Integer= / =String= cache
-
-    + Per-thread object reference cache
-
-    + Per-thread free object cache
-
-    #+BEGIN_NOTES
-    First 65,536 integer values
-    All Strings created by =newstr= instruction
-    Free object cache in hash keyed on object size
     #+END_NOTES
 
 * Results

@@ -268,6 +268,9 @@ Remainder of quantum budget executed in serial mode
 
 <li>Ownership table stored in shared memory
 </li>
+
+<li>Reduced serial mode
+</li>
 </ul>
 </li>
 
@@ -464,11 +467,133 @@ Other instructions work on private op stack/local variable arrays
 </tbody>
 </table>
 </section>
+<section id="sec-2-13" >
+
+<h3>Ownership Depth</h3>
+<img src="./images/depth.png" alt="depth.png" />
+</section>
 <section id="sec-3" >
 
 <h2>Implementation</h2>
+<ul class="org-ul">
+<li>Compiler Changes
+</li>
+
+<li>Virtual Machine Changes
+</li>
+</ul>
+
 </section>
 <section id="sec-3-1" >
+
+<h3>Compiler Changes</h3>
+</section>
+<section id="sec-3-1-1" >
+
+<h4><code>Real</code> class (<code>float</code> wrapper)</h4>
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #eee8aa;">class</span> <span style="color: #00ff00;">Real</span> <span style="color: #eee8aa;">extends</span> <span style="color: #00ff00;">Object</span> {
+        <span style="color: #eee8aa;">native</span> Real();
+        <span style="color: #eee8aa;">native</span> Real(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> Real(<span style="color: #00ff00;">Integer</span> <span style="color: #8fbc8f;">i</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">add</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">subtract</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">multiply</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">divide</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">greaterThan</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">lessThan</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">greaterThanEqual</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">lessThanEqual</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #9acd32;">not</span>();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">minus</span>();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">operator</span> + (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">operator</span> - (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">operator</span> * (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">operator</span> / (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #9acd32;">operator</span> &gt; (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #9acd32;">operator</span> &lt; (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #8fbc8f;">operator</span> &gt;= (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);  
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #8fbc8f;">operator</span> &lt;= (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);  
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #9acd32;">operator</span> ! ();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">operator</span> - ();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #9acd32;">equals</span>(<span style="color: #00ff00;">Object</span> <span style="color: #8fbc8f;">obj</span>);
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #9acd32;">hashCode</span>();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">String</span> <span style="color: #9acd32;">toString</span>();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">squareRoot</span>();
+}
+</pre>
+</div>
+</section>
+<section id="sec-3-1-2" >
+
+<h4><code>synchronized</code> blocks</h4>
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #eee8aa;">for</span> (i = 0; i &lt; 10; i = i + 1) {
+        <span style="color: #eee8aa;">synchronized</span> (obj) {
+                <span style="color: #eee8aa;">if</span> (obj.field != <span style="color: #7fffd4;">null</span>) <span style="color: #eee8aa;">return</span> obj.field;
+        }
+}
+</pre>
+</div>
+
+<hr  />
+
+<ul class="org-ul">
+<li>Use new <code>monitorenter</code> / <code>monitorexit</code> instructions
+</li>
+
+<li>Monitor stack ensures necessary <code>monitorexit</code> instructions are
+executed for all execution paths.
+</li>
+</ul>
+
+</section>
+<section id="sec-3-1-3" >
+
+<h4><code>Thread</code> class</h4>
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #eee8aa;">class</span> <span style="color: #00ff00;">Thread</span> <span style="color: #eee8aa;">extends</span> <span style="color: #00ff00;">Object</span> {
+        <span style="color: #eee8aa;">native</span> Thread();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">start</span>();  <span style="color: #cd5c5c;">// </span><span style="color: #cd5c5c;">begin execution of run()</span>
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">run</span>();    <span style="color: #cd5c5c;">// </span><span style="color: #cd5c5c;">overridden by subclass</span>
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">join</span>();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">sleep</span>(<span style="color: #00ff00;">Integer</span> <span style="color: #8fbc8f;">millisec</span>);  
+}
+</pre>
+</div>
+
+<hr  />
+
+<ul class="org-ul">
+<li>Java-based threading model
+</li>
+</ul>
+</section>
+<section id="sec-3-1-4" >
+
+<h4><code>Object</code> class <code>wait</code> / <code>notify</code> methods</h4>
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #eee8aa;">class</span> <span style="color: #00ff00;">Object</span> {
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">notify</span>();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">notifyAll</span>();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">wait</span>();
+        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">wait</span>(<span style="color: #00ff00;">Integer</span> <span style="color: #8fbc8f;">timeout</span>);    
+}
+</pre>
+</div>
+
+<hr  />
+
+<ul class="org-ul">
+<li>Asynchronous events
+</li>
+</ul>
+</section>
+<section id="sec-3-2" >
 
 <h3>Compiler Changes</h3>
 <p>
@@ -512,115 +637,6 @@ Other instructions work on private op stack/local variable arrays
 </pre>
 </div>
 </section>
-<section id="sec-3-2" >
-
-<h3>Compiler Changes cont'd</h3>
-</section>
-<section id="sec-3-2-1" >
-
-<h4><code>Real</code> class (<code>float</code> wrapper)</h4>
-<div class="org-src-container">
-
-<pre class="src src-java"><span style="color: #eee8aa;">class</span> <span style="color: #00ff00;">Real</span> <span style="color: #eee8aa;">extends</span> <span style="color: #00ff00;">Object</span> {
-        <span style="color: #eee8aa;">native</span> Real();
-        <span style="color: #eee8aa;">native</span> Real(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
-        <span style="color: #eee8aa;">native</span> Real(<span style="color: #00ff00;">Integer</span> <span style="color: #8fbc8f;">i</span>);
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">add</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">subtract</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">multiply</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">divide</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">greaterThan</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">lessThan</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">greaterThanEqual</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">lessThanEqual</span>(<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #9acd32;">not</span>();
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">minus</span>();
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">operator</span> + (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">operator</span> - (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">operator</span> * (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">operator</span> / (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #9acd32;">operator</span> &gt; (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #9acd32;">operator</span> &lt; (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #8fbc8f;">operator</span> &gt;= (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);  
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #8fbc8f;">operator</span> &lt;= (<span style="color: #00ff00;">Real</span> <span style="color: #8fbc8f;">r</span>);  
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #9acd32;">operator</span> ! ();
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">operator</span> - ();
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #9acd32;">equals</span>(<span style="color: #00ff00;">Object</span> <span style="color: #8fbc8f;">obj</span>);
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Integer</span> <span style="color: #9acd32;">hashCode</span>();
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">String</span> <span style="color: #9acd32;">toString</span>();
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Real</span> <span style="color: #9acd32;">squareRoot</span>();
-}
-</pre>
-</div>
-</section>
-<section id="sec-3-2-2" >
-
-<h4><code>synchronized</code> blocks</h4>
-<div class="org-src-container">
-
-<pre class="src src-java"><span style="color: #eee8aa;">for</span> (i = 0; i &lt; 10; i = i + 1) {
-        <span style="color: #eee8aa;">synchronized</span> (obj) {
-                <span style="color: #eee8aa;">if</span> (obj.field != <span style="color: #7fffd4;">null</span>) <span style="color: #eee8aa;">return</span> obj.field;
-        }
-}
-</pre>
-</div>
-
-<hr  />
-
-<ul class="org-ul">
-<li>Use new <code>monitorenter</code> / <code>monitorexit</code> instructions
-</li>
-
-<li>Monitor stack ensures necessary <code>monitorexit</code> instructions are
-executed for all execution paths.
-</li>
-</ul>
-
-</section>
-<section id="sec-3-2-3" >
-
-<h4><code>Thread</code> class</h4>
-<div class="org-src-container">
-
-<pre class="src src-java"><span style="color: #eee8aa;">class</span> <span style="color: #00ff00;">Thread</span> <span style="color: #eee8aa;">extends</span> <span style="color: #00ff00;">Object</span> {
-        <span style="color: #eee8aa;">native</span> Thread();
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">start</span>();  <span style="color: #cd5c5c;">// </span><span style="color: #cd5c5c;">begin execution of run()</span>
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">run</span>();    <span style="color: #cd5c5c;">// </span><span style="color: #cd5c5c;">overridden by subclass</span>
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">join</span>();
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">sleep</span>(<span style="color: #00ff00;">Integer</span> <span style="color: #8fbc8f;">millisec</span>);  
-}
-</pre>
-</div>
-
-<hr  />
-
-<ul class="org-ul">
-<li>Java-based threading model
-</li>
-</ul>
-</section>
-<section id="sec-3-2-4" >
-
-<h4><code>Object</code> class <code>wait</code> / <code>notify</code> methods</h4>
-<div class="org-src-container">
-
-<pre class="src src-java"><span style="color: #eee8aa;">class</span> <span style="color: #00ff00;">Object</span> {
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">notify</span>();
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">notifyAll</span>();
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">wait</span>();
-        <span style="color: #eee8aa;">native</span> <span style="color: #00ff00;">Object</span> <span style="color: #9acd32;">wait</span>(<span style="color: #00ff00;">Integer</span> <span style="color: #8fbc8f;">timeout</span>);    
-}
-</pre>
-</div>
-
-<hr  />
-
-<ul class="org-ul">
-<li>Asynchronous events
-</li>
-</ul>
-</section>
 <section id="sec-3-3" >
 
 <h3>Virtual Machine Changes</h3>
@@ -653,6 +669,34 @@ executed for all execution paths.
 </section>
 <section id="sec-3-3-3" >
 
+<h4>Threading Performance Enhancements</h4>
+<ul class="org-ul">
+<li>Remove lots of locks
+</li>
+
+<li>Reduce heap accesses
+</li>
+
+<li><code>Integer</code> / <code>String</code> cache
+</li>
+
+<li>Per-thread object reference cache
+</li>
+
+<li>Per-thread free object cache
+</li>
+</ul>
+
+<aside class="notes">
+<p>
+First 65,536 integer values
+All Strings created by <code>newstr</code> instruction
+Free object cache in hash keyed on object size
+</p>
+</aside>
+</section>
+<section id="sec-3-3-4" >
+
 <h4>Implementing DMP in maTe</h4>
 <ul class="org-ul">
 <li>Control execution of threads
@@ -663,13 +707,16 @@ executed for all execution paths.
 
 <li>Track owner of each object
 </li>
+
+<li>Prevent blocking system calls
+</li>
 </ul>
 </section>
-<section id="sec-3-3-4" >
+<section id="sec-3-3-5" >
 
 <h4>Design Goals</h4>
 <ul class="org-ul">
-<li>Enable/disable <b>without</b> recompiling
+<li>Enable/disable without recompiling
 
 <div class="org-src-container">
 
@@ -679,25 +726,25 @@ mvm -p myclass.class; <span style="color: #cd5c5c;"># </span><span style="color:
 </div>
 </li>
 
-<li><b>Minimize</b> performance penalty when disabled
+<li>Minimize performance penalty when disabled
 </li>
 
-<li>Allow <b>per-object</b> or <b>per-thread</b> behavior
+<li>Allow object- or thread-specific behavior
 </li>
 
-<li>Compile virtual machine with all DMP code absent
+<li>Compile DMP code out of virtual machine
 
 <div class="org-src-container">
 
 <pre class="src src-sh">./configure --enable-dmp=no &amp;&amp; make &amp;&amp; sudo make install;
-mvm -p myclass.class
+mvm -p myclass.class;      <span style="color: #cd5c5c;"># </span><span style="color: #cd5c5c;">-p = DMP enabled</span>
 Invalid switch option <span style="color: #ffa500;">'p'</span>
 </pre>
 </div>
 </li>
 </ul>
 </section>
-<section id="sec-3-3-5" >
+<section id="sec-3-3-6" >
 
 <h4>Design</h4>
 <ul class="org-ul">
@@ -709,46 +756,36 @@ monitor) and <code>table</code>.
 </li>
 </ul>
 </section>
-<section id="sec-3-3-6" >
+<section id="sec-3-3-7" >
 
 <h4>Global <code>dmp</code> module</h4>
-<ul class="org-ul">
-<li>Tracks blocked threads, wake them during serial mode
+<ul class="org-ul"><li class="fragment none">Tracks blocked threads, wake them during serial mode<br/><ul class="org-ul">
+<li>Holds threads at end their serial/parallel segment
+</li>
+
+<li>Wake each in creation order during serial mode
 </li>
 </ul>
 
-<hr  />
-
 <div class="org-src-container">
 
-<pre class="src src-c"><span style="color: #00ff00;">int</span> <span style="color: #9acd32;">dmp_thread_block</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp</span> *<span style="color: #8fbc8f;">td</span>);
+<pre class="src src-c"><span style="color: #00ff00;">int</span> <span style="color: #9acd32;">dmp_thread_block</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp</span> *<span style="color: #8fbc8f;">td</span>); <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called by thread at end of segment </span><span style="color: #cd5c5c;">*/</span>
 </pre>
 </div>
-
-<ul class="org-ul">
-<li>Maintain thread set in creation order for serial mode
 </li>
-</ul>
+<li class="fragment none">Maintain thread set in creation order for serial mode<br/><div class="org-src-container">
 
-<hr  />
-
-<div class="org-src-container">
-
-<pre class="src src-c"><span style="color: #00ff00;">int</span> <span style="color: #9acd32;">dmp_add_thread</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">r</span>);
-<span style="color: #00ff00;">int</span> <span style="color: #9acd32;">dmp_remove_thread</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">r</span>);
+<pre class="src src-c"><span style="color: #00ff00;">int</span> <span style="color: #9acd32;">dmp_add_thread</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">r</span>);    <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called when Thread.start() begins </span><span style="color: #cd5c5c;">*/</span>
+<span style="color: #00ff00;">int</span> <span style="color: #9acd32;">dmp_remove_thread</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">r</span>); <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called when Thread.run() terminates </span><span style="color: #cd5c5c;">*/</span>
 </pre>
 </div>
-
-<ul class="org-ul">
-<li>Implements default ownership table policy
 </li>
-</ul>
+<li class="fragment none">Implements default ownership table policy<br/><div class="org-src-container">
 
-<hr  />
-
-<div class="org-src-container">
-
-<pre class="src src-c"><span style="color: #00ff00;">int</span> <span style="color: #9acd32;">dmp_shm_read</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">c</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">r</span>, <span style="color: #eee8aa;">enum</span> <span style="color: #00ff00;">dmp_thread_action</span> *<span style="color: #8fbc8f;">ta</span>, <span style="color: #eee8aa;">enum</span> <span style="color: #00ff00;">dmp_owner_action</span> *<span style="color: #8fbc8f;">oa</span>);
+<pre class="src src-c"><span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">takes current owner ID accessing thread ID</span>
+<span style="color: #cd5c5c;"> * returns thread action (proceed/block) and owner action (shared/private/none)</span>
+<span style="color: #cd5c5c;"> </span><span style="color: #cd5c5c;">*/</span>
+<span style="color: #00ff00;">int</span> <span style="color: #9acd32;">dmp_shm_read</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">c</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">r</span>, <span style="color: #eee8aa;">enum</span> <span style="color: #00ff00;">dmp_thread_action</span> *<span style="color: #8fbc8f;">ta</span>, <span style="color: #eee8aa;">enum</span> <span style="color: #00ff00;">dmp_owner_action</span> *<span style="color: #8fbc8f;">oa</span>);
 <span style="color: #00ff00;">int</span> <span style="color: #9acd32;">dmp_shm_write</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">c</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">r</span>, <span style="color: #eee8aa;">enum</span> <span style="color: #00ff00;">dmp_thread_action</span> *<span style="color: #8fbc8f;">ta</span>, <span style="color: #eee8aa;">enum</span> <span style="color: #00ff00;">dmp_owner_action</span> *<span style="color: #8fbc8f;">oa</span>);
 </pre>
 </div>
@@ -762,25 +799,23 @@ a \(thread\) action (\(block\) or \(proceed\)) and an \(owner\) action
 (\(none\), \(set shared\) or \(set private\)) to perform.
 </p>
 </aside>
-
-<ul class="org-ul">
-<li>Allocates DMP-specific modules for each <code>object</code>, <code>thread</code>,
-      <code>table</code> and <code>nlock</code> instance
 </li>
-</ul>
-
-<hr  />
+<li class="fragment none">Allocates DMP-specific modules for each <code>object</code>, <code>thread</code>,<br/><p>
+<code>table</code> and <code>nlock</code> instance
+</p>
 
 <div class="org-src-container">
 
-<pre class="src src-c"><span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp</span> * <span style="color: #9acd32;">dmp_create_object_dmp</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object</span> *<span style="color: #8fbc8f;">o</span>);
+<pre class="src src-c"><span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called by object/create/nlock/table_create, pointer stored in 'dmp' field </span><span style="color: #cd5c5c;">*/</span>
+<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp</span> * <span style="color: #9acd32;">dmp_create_object_dmp</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object</span> *<span style="color: #8fbc8f;">o</span>);
 <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp</span> * <span style="color: #9acd32;">dmp_create_thread_dmp</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread</span> *<span style="color: #8fbc8f;">t</span>);
 <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock_dmp</span> * <span style="color: #9acd32;">dmp_create_nlock_dmp</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock</span> *<span style="color: #8fbc8f;">n</span>);
 <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">table_dmp</span> * <span style="color: #9acd32;">dmp_create_table_dmp</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">table</span> *<span style="color: #8fbc8f;">t</span>, <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp</span> *<span style="color: #8fbc8f;">od</span>);
 </pre>
 </div>
+</li></ul>
 </section>
-<section id="sec-3-3-7" >
+<section id="sec-3-3-8" >
 
 <h4>DMP-specific modules</h4>
 <ul class="org-ul">
@@ -820,7 +855,7 @@ to DMP-specific module instance
 </pre>
 </div>
 </section>
-<section id="sec-3-3-8" >
+<section id="sec-3-3-9" >
 
 <h4>DMP-specific modules cont'd.</h4>
 <ul class="org-ul">
@@ -835,49 +870,102 @@ for that module
 </li>
 </ul>
 
-<div class="org-src-container">
-
-<pre class="src src-c"><span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp_attr</span> {
-        <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">owner</span>;              <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">current owner </span><span style="color: #cd5c5c;">*/</span>
-        <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">depth</span>;              <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">ownership depth used by chown() </span><span style="color: #cd5c5c;">*/</span>
-        <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp_ops</span> *<span style="color: #8fbc8f;">ops</span>;
-};
-
-<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp_ops</span> {
-        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">load</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp</span> *<span style="color: #8fbc8f;">od</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">i</span>);        <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">load object field </span><span style="color: #cd5c5c;">*/</span>
-        <span style="color: #00ff00;">int</span> (*<span style="color: #9acd32;">store</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp</span> *<span style="color: #8fbc8f;">od</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">i</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">r</span>); <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">store object field </span><span style="color: #cd5c5c;">*/</span>
-        <span style="color: #00ff00;">int</span> (*<span style="color: #9acd32;">chown</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp</span> *<span style="color: #8fbc8f;">od</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">n</span>);        <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">change object owner </span><span style="color: #cd5c5c;">*/</span>
-};
-</pre>
-</div>
-
 <aside class="notes">
 <p>
 NULL pointer == perform default operation
 </p>
 </aside>
 </section>
-<section id="sec-3-3-9" >
-
-<h4>Object DMP</h4>
-
-</section>
 <section id="sec-3-3-10" >
 
-<h4>Thread DMP</h4>
+<h4>Object DMP</h4>
+<div class="org-src-container">
 
+<pre class="src src-c"><span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp_ops</span> {
+        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">load</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp</span> *<span style="color: #8fbc8f;">od</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">i</span>);        <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">load object field </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #00ff00;">int</span> (*<span style="color: #9acd32;">store</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp</span> *<span style="color: #8fbc8f;">od</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">i</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">r</span>); <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">store object field </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #00ff00;">int</span> (*<span style="color: #9acd32;">chown</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp</span> *<span style="color: #8fbc8f;">od</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">n</span>);        <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">change object owner </span><span style="color: #cd5c5c;">*/</span>
+};
+
+<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp_attr</span> {
+        <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">owner</span>;              <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">current owner ID, 0 == shared </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">depth</span>;              <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">ownership depth used by chown() </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp_ops</span> *<span style="color: #8fbc8f;">ops</span>;
+};
+</pre>
+</div>
 </section>
 <section id="sec-3-3-11" >
 
-<h4>Table DMP</h4>
+<h4>Thread DMP</h4>
+<div class="org-src-container">
 
+<pre class="src src-c"><span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp_ops</span> {
+        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">thread_creation</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp</span> *<span style="color: #8fbc8f;">td</span>);                 <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called in Thread.start() </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">thread_start</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp</span> *<span style="color: #8fbc8f;">td</span>);                    <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called at top of Thread.run() </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">thread_destruction</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp</span> *<span style="color: #8fbc8f;">td</span>);              <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called at bottom of Thread.run() </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">thread_join</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp</span> *<span style="color: #8fbc8f;">td</span>);                     <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called in Thread.join() </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">thread_sleep</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp</span> *<span style="color: #8fbc8f;">td</span>, <span style="color: #00ff00;">int32_t</span> <span style="color: #8fbc8f;">m</span>);         <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called in Thread.sleep() </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">execute_instruction</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp</span> *<span style="color: #8fbc8f;">td</span>, <span style="color: #00ff00;">uint32_t</span> <span style="color: #8fbc8f;">o</span>); <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called when thread executes instruction </span><span style="color: #cd5c5c;">*/</span>
+};
+
+<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp_attr</span> {
+        <span style="color: #eee8aa;">enum</span> <span style="color: #00ff00;">thread_dmp_serial_mode</span> <span style="color: #8fbc8f;">serial_mode</span>; <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">full/reduced serial mode </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">lock_count</span>;                          <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;"># of acquired locks, 0 == end serial segment </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">quantum_size</span>;                        <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">instructions per quantum </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #00ff00;">uint64_t</span> <span style="color: #8fbc8f;">instruction_counter</span>;            <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">instructions executed in current quantum </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp_ops</span> *<span style="color: #8fbc8f;">ops</span>;
+};
+</pre>
+</div>
 </section>
 <section id="sec-3-3-12" >
 
-<h4>NLock DMP</h4>
+<h4>Table DMP</h4>
+<ul class="org-ul">
+<li>Hash table implemented natively inside virtual machine
+</li>
 
+<li>Table key/values must be guarded as if they were actual Object fields
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">table_dmp_ops</span> {
+        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">load</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">table_dmp</span> *<span style="color: #8fbc8f;">td</span>); <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">load table field </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #00ff00;">int</span> (*<span style="color: #9acd32;">store</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">table_dmp</span> *<span style="color: #8fbc8f;">td</span>); <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">store table field </span><span style="color: #cd5c5c;">*/</span>
+};
+
+<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">table_dmp_attr</span> {
+        <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">table_dmp_ops</span> *<span style="color: #8fbc8f;">ops</span>;
+};
+</pre>
+</div>
 </section>
 <section id="sec-3-3-13" >
+
+<h4>NLock DMP</h4>
+<ul class="org-ul">
+<li>Implements object monitors
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock_dmp_ops</span> {
+        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">lock</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock_dmp</span> *<span style="color: #8fbc8f;">nd</span>);      <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">acquire monitor </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">unlock</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock_dmp</span> *<span style="color: #8fbc8f;">nd</span>);    <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">release monitor </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">timedwait</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock_dmp</span> *<span style="color: #8fbc8f;">nd</span>); <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">acquire monitor w/ timeout </span><span style="color: #cd5c5c;">*/</span>
+};
+
+<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock_dmp_attr</span> {
+        <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock_dmp_ops</span> *<span style="color: #8fbc8f;">ops</span>;
+};
+</pre>
+</div>
+</section>
+<section id="sec-3-3-14" >
 
 <h4>DMP Statistics</h4>
 <ul class="org-ul">
@@ -930,7 +1018,7 @@ Total:                               4112 (100.0%)
 </li>
 </ul>
 </section>
-<section id="sec-3-3-14" >
+<section id="sec-3-3-15" >
 
 <h4>Garbage Collection</h4>
 <ul class="org-ul">
@@ -946,28 +1034,6 @@ using <code>90%</code> or more of its available memory.
 <aside class="notes">
 <p>
 Allocations triggering a collection can occur during parallel mode
-</p>
-</aside>
-</section>
-<section id="sec-3-3-15" >
-
-<h4>Performance Enhancements</h4>
-<ul class="org-ul">
-<li><code>Integer</code> / <code>String</code> cache
-</li>
-
-<li>Per-thread object reference cache
-</li>
-
-<li>Per-thread free object cache
-</li>
-</ul>
-
-<aside class="notes">
-<p>
-First 65,536 integer values
-All Strings created by <code>newstr</code> instruction
-Free object cache in hash keyed on object size
 </p>
 </aside>
 </section>
