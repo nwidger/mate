@@ -410,24 +410,29 @@
 
 *** Global =dmp= module
 
-**** Tracks blocked threads, wake them during serial mode
-
-      + Holds threads at end their serial/parallel segment
-
-      + Wake each in creation order during serial mode
-
-    #+BEGIN_SRC c
-      int dmp_thread_block(struct dmp *d, struct thread_dmp *td); /* called by thread at end of segment */
-    #+END_SRC
-
-**** Maintain thread set in creation order for serial mode
+**** Maintain thread set in creation order
 
     #+BEGIN_SRC c
       int dmp_add_thread(struct dmp *d, int r);    /* called when Thread.start() begins */
       int dmp_remove_thread(struct dmp *d, int r); /* called when Thread.run() terminates */
     #+END_SRC
 
+**** Control thread execution
+
+      + Block threads at end their serial/parallel segment
+
+      + Wake each thread in creation order during serial mode
+
+    #+BEGIN_SRC c
+      int dmp_thread_block(struct dmp *d, struct thread_dmp *td); /* called by thread at end of segment */
+    #+END_SRC
+
 **** Implements default ownership table policy
+
+     + Indicate if thread can proceed immediately with load/store or
+       must block until serial mode
+
+     + Indicate if ownership of object should be changed and how
 
     #+BEGIN_SRC c
       /* takes current owner ID accessing thread ID
@@ -445,17 +450,6 @@
     ($none$, $set shared$ or $set private$) to perform.
     #+END_NOTES
 
-**** Allocates DMP-specific modules for each =object=, =thread=,
-      =table= and =nlock= instance
-
-    #+BEGIN_SRC c
-      /* called by object/create/nlock/table_create, pointer stored in 'dmp' field */
-      struct object_dmp * dmp_create_object_dmp(struct dmp *d, struct object *o);
-      struct thread_dmp * dmp_create_thread_dmp(struct dmp *d, struct thread *t);
-      struct nlock_dmp * dmp_create_nlock_dmp(struct dmp *d, struct nlock *n);
-      struct table_dmp * dmp_create_table_dmp(struct dmp *d, struct table *t, struct object_dmp *od);
-    #+END_SRC
-
 *** DMP-specific modules
 
     + =object=, =thread=, =table= and =nlock= instances store pointer
@@ -472,7 +466,8 @@
       }
     #+END_SRC
 
-    + Without DMP, performance penalty is extra pointer comparisons
+    + Without DMP, performance penalty is =dmp= pointer field and
+      extra pointer comparisons
     
     #+BEGIN_SRC c
       int object_load_field(struct object *o, int i) {
@@ -493,17 +488,22 @@
       for that module
 
     + Attributes could be made object- or thread-specific
-      
+
     #+BEGIN_NOTES
     NULL pointer == perform default operation
     #+END_NOTES
 
 *** Object DMP
 
+    + Detect communicating =getfield= / =putfield= instructions
+
+    + Proceed or block thread and change =owner= attribute after
+      consulting =dmp_shm_read= / =dmp_shm_write=
+
     #+BEGIN_SRC c
       struct object_dmp_ops {
-              int  (*load)(struct object_dmp *od, int i);        /* load object field */
-              int (*store)(struct object_dmp *od, int i, int r); /* store object field */
+              int  (*load)(struct object_dmp *od, int i);        /* called inside getfield */
+              int (*store)(struct object_dmp *od, int i, int r); /* called inside putfield */
               int (*chown)(struct object_dmp *od, int n);        /* change object owner */
       };
       
@@ -516,6 +516,16 @@
 
 *** Thread DMP
 
+    + Handle thread creation/destruction
+
+    + Add/remove =thread= from =dmp= module with =dmp_add_thread= /
+      =dmp_remove_thread=
+
+    + Increment =thread= quantum instruction counter, block with
+      =dmp_thread_block= when quantum in finished
+
+    + Use non-blocking =join= / =sleep= implementations
+
     #+BEGIN_SRC c
       struct thread_dmp_ops {
               int  (*thread_creation)(struct thread_dmp *td);                 /* called in Thread.start() */
@@ -523,7 +533,7 @@
               int  (*thread_destruction)(struct thread_dmp *td);              /* called at bottom of Thread.run() */
               int  (*thread_join)(struct thread_dmp *td);                     /* called in Thread.join() */
               int  (*thread_sleep)(struct thread_dmp *td, int32_t m);         /* called in Thread.sleep() */
-              int  (*execute_instruction)(struct thread_dmp *td, uint32_t o); /* called when thread executes instruction */
+              int  (*execute_instruction)(struct thread_dmp *td, uint32_t o); /* called in fetch/execute cycle */
       };
       
       struct thread_dmp_attr {
@@ -532,6 +542,23 @@
               int quantum_size;                        /* instructions per quantum */
               uint64_t instruction_counter;            /* instructions executed in current quantum */
               struct thread_dmp_ops *ops;
+      };
+    #+END_SRC
+
+*** NLock DMP (Object Monitors)
+
+    + Use non-blocking versions of =pthread_mutex_t= functions
+
+    + Increment/decrement DMP-specific =thread= module's lock count
+
+    #+BEGIN_SRC c
+      struct nlock_dmp_ops {
+              int  (*lock)(struct nlock_dmp *nd);   /* called in monitorenter */
+              int  (*unlock)(struct nlock_dmp *nd); /* called in monitorexit */
+      };
+      
+      struct nlock_dmp_attr {
+              struct nlock_dmp_ops *ops;
       };
     #+END_SRC
 
@@ -549,22 +576,6 @@
       
       struct table_dmp_attr {
               struct table_dmp_ops *ops;
-      };
-    #+END_SRC
-
-*** NLock DMP
-
-    + Implements object monitors
-
-    #+BEGIN_SRC c
-      struct nlock_dmp_ops {
-              int  (*lock)(struct nlock_dmp *nd);      /* acquire monitor */
-              int  (*unlock)(struct nlock_dmp *nd);    /* release monitor */
-              int  (*timedwait)(struct nlock_dmp *nd); /* acquire monitor w/ timeout */
-      };
-      
-      struct nlock_dmp_attr {
-              struct nlock_dmp_ops *ops;
       };
     #+END_SRC
 
@@ -673,4 +684,30 @@
 
 * Conclusions
 
+ + Results do not back up thesis
+
+ + Overhead may still be acceptable for debugging
+
+ + There are still advantages
+
+   + No recompiling
+
+   + Quickly tweak DMP parameters with command-line arguments
+
+ + Implementing efficient multithreaded virtual machine is difficult
+
+ + Poor multithreaded performance, did not scale
+
 ** Future Work
+
+   + Adaptive ownership table policy
+
+   + Improve multithreaded performance
+
+   + Source code annotations/static analysis optimizations
+
+   + Optimize maTe compiler
+
+   + Implement DMP in real Java virtual machine
+
+* Questions?

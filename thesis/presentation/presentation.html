@@ -36,6 +36,9 @@
 <li>
 <a href="#sec-5">Conclusions</a>
 </li>
+<li>
+<a href="#sec-6">Questions?</a>
+</li>
 </ul>
 </section>
 
@@ -759,11 +762,18 @@ monitor) and <code>table</code>.
 <section id="sec-3-3-7" >
 
 <h4>Global <code>dmp</code> module</h4>
-<ul class="org-ul"><li class="fragment none">Tracks blocked threads, wake them during serial mode<br/><ul class="org-ul">
-<li>Holds threads at end their serial/parallel segment
+<ul class="org-ul"><li class="fragment none">Maintain thread set in creation order<br/><div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #00ff00;">int</span> <span style="color: #9acd32;">dmp_add_thread</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">r</span>);    <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called when Thread.start() begins </span><span style="color: #cd5c5c;">*/</span>
+<span style="color: #00ff00;">int</span> <span style="color: #9acd32;">dmp_remove_thread</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">r</span>); <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called when Thread.run() terminates </span><span style="color: #cd5c5c;">*/</span>
+</pre>
+</div>
+</li>
+<li class="fragment none">Control thread execution<br/><ul class="org-ul">
+<li>Block threads at end their serial/parallel segment
 </li>
 
-<li>Wake each in creation order during serial mode
+<li>Wake each thread in creation order during serial mode
 </li>
 </ul>
 
@@ -773,14 +783,16 @@ monitor) and <code>table</code>.
 </pre>
 </div>
 </li>
-<li class="fragment none">Maintain thread set in creation order for serial mode<br/><div class="org-src-container">
-
-<pre class="src src-c"><span style="color: #00ff00;">int</span> <span style="color: #9acd32;">dmp_add_thread</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">r</span>);    <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called when Thread.start() begins </span><span style="color: #cd5c5c;">*/</span>
-<span style="color: #00ff00;">int</span> <span style="color: #9acd32;">dmp_remove_thread</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">r</span>); <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called when Thread.run() terminates </span><span style="color: #cd5c5c;">*/</span>
-</pre>
-</div>
+<li class="fragment none">Implements default ownership table policy<br/><ul class="org-ul">
+<li>Indicate if thread can proceed immediately with load/store or
+must block until serial mode
 </li>
-<li class="fragment none">Implements default ownership table policy<br/><div class="org-src-container">
+
+<li>Indicate if ownership of object should be changed and how
+</li>
+</ul>
+
+<div class="org-src-container">
 
 <pre class="src src-c"><span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">takes current owner ID accessing thread ID</span>
 <span style="color: #cd5c5c;"> * returns thread action (proceed/block) and owner action (shared/private/none)</span>
@@ -799,20 +811,6 @@ a \(thread\) action (\(block\) or \(proceed\)) and an \(owner\) action
 (\(none\), \(set shared\) or \(set private\)) to perform.
 </p>
 </aside>
-</li>
-<li class="fragment none">Allocates DMP-specific modules for each <code>object</code>, <code>thread</code>,<br/><p>
-<code>table</code> and <code>nlock</code> instance
-</p>
-
-<div class="org-src-container">
-
-<pre class="src src-c"><span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called by object/create/nlock/table_create, pointer stored in 'dmp' field </span><span style="color: #cd5c5c;">*/</span>
-<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp</span> * <span style="color: #9acd32;">dmp_create_object_dmp</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object</span> *<span style="color: #8fbc8f;">o</span>);
-<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp</span> * <span style="color: #9acd32;">dmp_create_thread_dmp</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread</span> *<span style="color: #8fbc8f;">t</span>);
-<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock_dmp</span> * <span style="color: #9acd32;">dmp_create_nlock_dmp</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock</span> *<span style="color: #8fbc8f;">n</span>);
-<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">table_dmp</span> * <span style="color: #9acd32;">dmp_create_table_dmp</span>(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">dmp</span> *<span style="color: #8fbc8f;">d</span>, <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">table</span> *<span style="color: #8fbc8f;">t</span>, <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp</span> *<span style="color: #8fbc8f;">od</span>);
-</pre>
-</div>
 </li></ul>
 </section>
 <section id="sec-3-3-8" >
@@ -838,7 +836,8 @@ to DMP-specific module instance
 </div>
 
 <ul class="org-ul">
-<li>Without DMP, performance penalty is extra pointer comparisons
+<li>Without DMP, performance penalty is <code>dmp</code> pointer field and
+extra pointer comparisons
 </li>
 </ul>
 
@@ -879,11 +878,20 @@ NULL pointer == perform default operation
 <section id="sec-3-3-10" >
 
 <h4>Object DMP</h4>
+<ul class="org-ul">
+<li>Detect communicating <code>getfield</code> / <code>putfield</code> instructions
+</li>
+
+<li>Proceed or block thread and change <code>owner</code> attribute after
+consulting <code>dmp_shm_read</code> / <code>dmp_shm_write</code>
+</li>
+</ul>
+
 <div class="org-src-container">
 
 <pre class="src src-c"><span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp_ops</span> {
-        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">load</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp</span> *<span style="color: #8fbc8f;">od</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">i</span>);        <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">load object field </span><span style="color: #cd5c5c;">*/</span>
-        <span style="color: #00ff00;">int</span> (*<span style="color: #9acd32;">store</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp</span> *<span style="color: #8fbc8f;">od</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">i</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">r</span>); <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">store object field </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">load</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp</span> *<span style="color: #8fbc8f;">od</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">i</span>);        <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called inside getfield </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #00ff00;">int</span> (*<span style="color: #9acd32;">store</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp</span> *<span style="color: #8fbc8f;">od</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">i</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">r</span>); <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called inside putfield </span><span style="color: #cd5c5c;">*/</span>
         <span style="color: #00ff00;">int</span> (*<span style="color: #9acd32;">chown</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">object_dmp</span> *<span style="color: #8fbc8f;">od</span>, <span style="color: #00ff00;">int</span> <span style="color: #8fbc8f;">n</span>);        <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">change object owner </span><span style="color: #cd5c5c;">*/</span>
 };
 
@@ -898,6 +906,22 @@ NULL pointer == perform default operation
 <section id="sec-3-3-11" >
 
 <h4>Thread DMP</h4>
+<ul class="org-ul">
+<li>Handle thread creation/destruction
+</li>
+
+<li>Add/remove <code>thread</code> from <code>dmp</code> module with <code>dmp_add_thread</code> /
+      <code>dmp_remove_thread</code>
+</li>
+
+<li>Increment <code>thread</code> quantum instruction counter, block with
+      <code>dmp_thread_block</code> when quantum in finished
+</li>
+
+<li>Use non-blocking <code>join</code> / <code>sleep</code> implementations
+</li>
+</ul>
+
 <div class="org-src-container">
 
 <pre class="src src-c"><span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp_ops</span> {
@@ -906,7 +930,7 @@ NULL pointer == perform default operation
         <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">thread_destruction</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp</span> *<span style="color: #8fbc8f;">td</span>);              <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called at bottom of Thread.run() </span><span style="color: #cd5c5c;">*/</span>
         <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">thread_join</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp</span> *<span style="color: #8fbc8f;">td</span>);                     <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called in Thread.join() </span><span style="color: #cd5c5c;">*/</span>
         <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">thread_sleep</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp</span> *<span style="color: #8fbc8f;">td</span>, <span style="color: #00ff00;">int32_t</span> <span style="color: #8fbc8f;">m</span>);         <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called in Thread.sleep() </span><span style="color: #cd5c5c;">*/</span>
-        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">execute_instruction</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp</span> *<span style="color: #8fbc8f;">td</span>, <span style="color: #00ff00;">uint32_t</span> <span style="color: #8fbc8f;">o</span>); <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called when thread executes instruction </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">execute_instruction</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp</span> *<span style="color: #8fbc8f;">td</span>, <span style="color: #00ff00;">uint32_t</span> <span style="color: #8fbc8f;">o</span>); <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called in fetch/execute cycle </span><span style="color: #cd5c5c;">*/</span>
 };
 
 <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">thread_dmp_attr</span> {
@@ -920,6 +944,30 @@ NULL pointer == perform default operation
 </div>
 </section>
 <section id="sec-3-3-12" >
+
+<h4>NLock DMP (Object Monitors)</h4>
+<ul class="org-ul">
+<li>Use non-blocking versions of <code>pthread_mutex_t</code> functions
+</li>
+
+<li>Increment/decrement DMP-specific <code>thread</code> module's lock count
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock_dmp_ops</span> {
+        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">lock</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock_dmp</span> *<span style="color: #8fbc8f;">nd</span>);   <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called in monitorenter </span><span style="color: #cd5c5c;">*/</span>
+        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">unlock</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock_dmp</span> *<span style="color: #8fbc8f;">nd</span>); <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">called in monitorexit </span><span style="color: #cd5c5c;">*/</span>
+};
+
+<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock_dmp_attr</span> {
+        <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock_dmp_ops</span> *<span style="color: #8fbc8f;">ops</span>;
+};
+</pre>
+</div>
+</section>
+<section id="sec-3-3-13" >
 
 <h4>Table DMP</h4>
 <ul class="org-ul">
@@ -939,28 +987,6 @@ NULL pointer == perform default operation
 
 <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">table_dmp_attr</span> {
         <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">table_dmp_ops</span> *<span style="color: #8fbc8f;">ops</span>;
-};
-</pre>
-</div>
-</section>
-<section id="sec-3-3-13" >
-
-<h4>NLock DMP</h4>
-<ul class="org-ul">
-<li>Implements object monitors
-</li>
-</ul>
-
-<div class="org-src-container">
-
-<pre class="src src-c"><span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock_dmp_ops</span> {
-        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">lock</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock_dmp</span> *<span style="color: #8fbc8f;">nd</span>);      <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">acquire monitor </span><span style="color: #cd5c5c;">*/</span>
-        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">unlock</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock_dmp</span> *<span style="color: #8fbc8f;">nd</span>);    <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">release monitor </span><span style="color: #cd5c5c;">*/</span>
-        <span style="color: #00ff00;">int</span>  (*<span style="color: #9acd32;">timedwait</span>)(<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock_dmp</span> *<span style="color: #8fbc8f;">nd</span>); <span style="color: #cd5c5c;">/* </span><span style="color: #cd5c5c;">acquire monitor w/ timeout </span><span style="color: #cd5c5c;">*/</span>
-};
-
-<span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock_dmp_attr</span> {
-        <span style="color: #eee8aa;">struct</span> <span style="color: #00ff00;">nlock_dmp_ops</span> *<span style="color: #8fbc8f;">ops</span>;
 };
 </pre>
 </div>
@@ -1119,10 +1145,55 @@ Run-times are averages.
 <section id="sec-5" >
 
 <h2>Conclusions</h2>
+<ul class="org-ul">
+<li>Results do not back up thesis
+</li>
+
+<li>Overhead may still be acceptable for debugging
+</li>
+
+<li>There are still advantages
+
+<ul class="org-ul">
+<li>No recompiling
+</li>
+
+<li>Quickly tweak DMP parameters with command-line arguments
+</li>
+</ul>
+</li>
+
+<li>Implementing efficient multithreaded virtual machine is difficult
+</li>
+
+<li>Poor multithreaded performance, did not scale
+</li>
+</ul>
+
 </section>
 <section id="sec-5-1" >
 
 <h3>Future Work</h3>
+<ul class="org-ul">
+<li>Adaptive ownership table policy
+</li>
+
+<li>Improve multithreaded performance
+</li>
+
+<li>Source code annotations/static analysis optimizations
+</li>
+
+<li>Optimize maTe compiler
+</li>
+
+<li>Implement DMP in real Java virtual machine
+</li>
+</ul>
+</section>
+<section id="sec-6" >
+
+<h2>Questions?</h2>
 </section>
 </div>
 </div>
