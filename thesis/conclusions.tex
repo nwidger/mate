@@ -77,11 +77,18 @@ indicate such and DMP checks on that object could be skipped.  Static
 analysis could also be used to determine when such optimizations are
 possible.
 
-Finally, there are plenty of opportunities to optimize the maTe
-compiler.  Improving the maTe compiler so that object fields are not
+There are plenty of opportunities to optimize the maTe compiler.
+Improving the maTe compiler so that object fields are not
 unnecessarily accessed when they already exist in the frame's local
 variable array or operand stack could greatly reduce the amount of
 blocking performed by a thread and thus improve performance.
+
+Finally, DMP could be implemented in a more mature Java-like
+multithreaded virtual machine such as the official HotSpot Java
+virtual machine.  Poor multithreaded performance in the maTe virtual
+machine made conclusions about DMP in a Java-like language difficult.
+Adding DMP to a well-tuned multithreaded virtual machine could make
+such statements more conclusive.
 
 %%% Local Variables: 
 %%% mode: latex
