@@ -174,6 +174,7 @@ Table \ref{tab:jacobi_results} shows the results for the Jacobi
 benchmark.  The non-DMP Jacobi runs averaged 2.91 seconds of runtime.
 With DMP enabled, the overhead ranged from $27\%$ to $1,117\%$.  The
 best DMP run was $-Q10000 -g1 -r$ with an average time of 3.71
+seconds, compared to the non-DMP run with an average time of 2.92
 seconds.  The most surprising result from the Jacobi benchmark is the
 clear advantage given to the runs using reduced serial mode.  The top
 seven non-DMP runs by both execution time and overhead are using
@@ -184,8 +185,8 @@ this benchmark is strong enough to more than quadruple execution time
 in some cases (compare $-Q10000 -g1 -r$ and $-Q10000 -g1$).  The
 results show that simply switching from reduced to full serial mode
 between $-Q10000 -g1 -r$ and $-Q10000 -g1$ increased the total number
-of blocking reads/writes from $1842$ to $17,616$, which increased the
-total number of rounds from $175$ to $3081$.
+of blocking reads/writes from $1,842$ to $17,616$, which increased the
+total number of rounds from $175$ to $3,081$.
 
 \subsubsection{Parallel DPLL}
 
@@ -216,7 +217,8 @@ Table \ref{tab:dpll_results} shows the results for the DPLL benchmark.
 The non-DMP DPLL runs averaged .71 seconds (2 threads), 1.93 seconds
 (4 threads), 4.06 seconds (8 threads) and 6.12 seconds (16).  With DMP
 enabled the overhead ranged from $-23\%$ to $2,789\%$.  The best DMP
-run was $-t2 -Q10000 -r -g1$ with an average time of .95 seconds.
+run was $-t2 -Q10000 -r -g1$ with an average time of .95 seconds,
+compared to the best non-DMP run with 2 threads of .71 seconds.
 
 The inefficiency of the maTe virtual machine when running multithreads
 is very apparent in this benchmark.  The average execution time for
