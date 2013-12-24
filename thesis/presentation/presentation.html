@@ -277,7 +277,7 @@ Remainder of quantum budget executed in serial mode
 </ul>
 </li>
 
-<li><b>Results:</b> Average slowdown of 1.1x - 6x
+<li><b>Results:</b> Average slowdown of 110% - 600%
 </li>
 
 <li>Good enough for debugging, maybe for deployment!
@@ -548,10 +548,9 @@ Other instructions work on private op stack/local variable arrays
 </li>
 
 <li>Monitor stack ensures necessary <code>monitorexit</code> instructions are
-executed for all execution paths.
+emitted for all execution paths.
 </li>
 </ul>
-
 </section>
 <section id="sec-3-1-3" >
 
@@ -683,10 +682,7 @@ executed for all execution paths.
 <li><code>Integer</code> / <code>String</code> cache
 </li>
 
-<li>Per-thread object reference cache
-</li>
-
-<li>Per-thread free object cache
+<li>Per-thread object reference / free object cache
 </li>
 </ul>
 

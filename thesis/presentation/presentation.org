@@ -141,7 +141,7 @@
 
      + Reduced serial mode
       
-   + *Results:* Average slowdown of 1.1x - 6x
+   + *Results:* Average slowdown of 110% - 600%
 
    + Good enough for debugging, maybe for deployment!
 
@@ -273,9 +273,8 @@
     + Use new =monitorenter= / =monitorexit= instructions
 
     + Monitor stack ensures necessary =monitorexit= instructions are
-      executed for all execution paths.
+      emitted for all execution paths.
 
-   
 *** =Thread= class
 
    #+BEGIN_SRC java
@@ -360,9 +359,7 @@
 
     + =Integer= / =String= cache
 
-    + Per-thread object reference cache
-
-    + Per-thread free object cache
+    + Per-thread object reference / free object cache
 
     #+BEGIN_NOTES
     First 65,536 integer values
