@@ -277,7 +277,7 @@ Remainder of quantum budget executed in serial mode
 </ul>
 </li>
 
-<li><b>Results:</b> Average slowdown of 110% - 600%
+<li><b>Results:</b> Average overhead of 110% - 600%
 </li>
 
 <li>Good enough for debugging, maybe for deployment!
@@ -1116,9 +1116,12 @@ DPLL algorithm
 a non-DMP virtual machine
 </li>
 
-<li>measure difference in performance when parameters are changed
+<li>sensitivity - measure difference in performance when parameters
+are changed
 </li>
 </ul>
+
+<hr  />
 
 <p>
 Each benchmark was run 10 times for each combination of parameters.
@@ -1238,10 +1241,18 @@ run out of work.
 <li>Fastest DMP run .95 seconds, fastest non-DMP run 0.71 seconds
 </li>
 
-<li>Showcases ineffiency of maTe virtual machine
+<li>DMP runs sometimes faster than non-DMP runs
+
+<ul class="org-ul">
+<li>8 threads, 100,000 instr. quantum size, reduced serial mode, depth 1/5/10: -23%/-15%/-%12 overhead
 </li>
 
-<li>Some DMP runs beat non-DMP runs by a small margin
+<li>16 threads, 1000,000 instr. quantum size, reduced serial mode, depth 1/5: -16%/-12% overhead
+</li>
+</ul>
+</li>
+
+<li>Showcases ineffiency of maTe virtual machine
 </li>
 
 <li>Not sensitive to ownership table depth for 2/4 threads,
@@ -1270,10 +1281,13 @@ but 8/16 show extreme jumps:
 
 <h2>Conclusions</h2>
 <ul class="org-ul">
-<li><b>Results:</b> Average slowdown of 19% - 2800%
+<li><b>Results:</b> Average overhead of 19% - 2800%
 </li>
 
 <li>Results do not back up thesis
+</li>
+
+<li>Ownership depth not effective
 </li>
 
 <li>Overhead may still be acceptable for debugging

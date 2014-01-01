@@ -141,7 +141,7 @@
 
      + Reduced serial mode
       
-   + *Results:* Average slowdown of 110% - 600%
+   + *Results:* Average overhead of 110% - 600%
 
    + Good enough for debugging, maybe for deployment!
 
@@ -669,7 +669,10 @@
    + overhead - measure difference in execution time when compared to
      a non-DMP virtual machine
 
-   + measure difference in performance when parameters are changed
+   + sensitivity - measure difference in performance when parameters
+     are changed
+
+   -----
 
    Each benchmark was run 10 times for each combination of parameters.
    Run-times are averages.
@@ -755,9 +758,13 @@
 
    + Fastest DMP run .95 seconds, fastest non-DMP run 0.71 seconds
 
-   + Showcases ineffiency of maTe virtual machine
+   + DMP runs sometimes faster than non-DMP runs
 
-   + Some DMP runs beat non-DMP runs by a small margin
+     + 8 threads, 100,000 instr. quantum size, reduced serial mode, depth 1/5/10: -23%/-15%/-%12 overhead
+
+     + 16 threads, 1000,000 instr. quantum size, reduced serial mode, depth 1/5: -16%/-12% overhead
+
+   + Showcases ineffiency of maTe virtual machine
 
    + Not sensitive to ownership table depth for 2/4 threads,
      but 8/16 show extreme jumps:
@@ -775,9 +782,11 @@
 
 * Conclusions
 
- + *Results:* Average slowdown of 19% - 2800%
+ + *Results:* Average overhead of 19% - 2800%
 
  + Results do not back up thesis
+
+ + Ownership depth not effective
 
  + Overhead may still be acceptable for debugging
 
