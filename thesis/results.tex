@@ -15,7 +15,7 @@ The following three benchmarks were implemented:
   on a 20x25 plate.
 
 \item Parallel DPLL - Multithreaded boolean satisfiability using the
-  DPLL algorithm.
+  DPLL (Davis-Putnam-Logemann-Loveland) algorithm.
 \end{itemize}
 
 Comparison of my results with those from the DMP/CoreDet papers will
@@ -26,8 +26,8 @@ implemented benchmarks in maTe.  However, my thesis is that DMP
 executed in a virtual machine can be done with lower overhead.
 Overhead is relative to the particular execution environment being
 used, therefore the success of my thesis rests on showing that the
-relative performance penalty of a maTe program with DMP on is less
-than that of executing a C/C++ program with DMP on.
+relative performance penalty of a maTe program with DMP enabled is
+less than that of executing a C/C++ program with DMP disabled.
 
 All three benchmarks were implemented in maTe and run across a range
 of parameters.  The parameters were:
@@ -42,13 +42,13 @@ of parameters.  The parameters were:
 \item ownership table granularity - 1, 5 and 10 depth.
 \end{itemize}
 
-The $Jacobi$ benchmark uses a fixed number of threads, and so this
-benchmark does not have a threads parameter.
+The $Jacobi$ benchmark does not exercise the threads parameter as it
+uses a fixed number of threads.
 
 Before running any benchmarks, I tested my implementation of DMP to
 ensure it was truly deterministic by running Racey~\cite{racey}, a
 deterministic stress test, $10,000$ times for each configuration.  The
-results gathered from running the benchmarks will be compared using
+results gathered from running the benchmarks were compared using
 the following metrics:
 
 \begin{itemize}
@@ -59,8 +59,8 @@ the following metrics:
   are changed.
 \end{itemize}
 
-Each benchmark will be run 10 times for each combination of
-parameters.  Run-times shown are averages.
+Each benchmark was run 10 times for each combination of parameters.
+Run-times shown are averages.
 
 \subsection{Benchmark Results}
 
@@ -93,56 +93,55 @@ of $10$ and reduced serial mode.
 This benchmark performs a parallel radix search implemented by
 repeatedly running counting sort starting with an 8 bit mask.  The
 input array contained 500 16-bit random integers between the values of
-103 and 65326.  The standard radix search algorithm was parallelized
-in two places:
+103 and 65326.  The number of threads can be given as a command-line
+option.  The standard radix search algorithm was parallelized in two
+places:
 
 \begin{itemize}
-\item Determining the maximum - evenly distribute numbers to N Maxer
+\item Determining the maximum - evenly distribute numbers to $N$ Maxer
   threads.  Each thread iterates over its subset of the shared array
   and determines the largest value.  After, the largest of each
   thread's maximum is determined by iterating serially over each
   Maxer's maximum with the largest used as the global maximum.
 
-\item Masking each number - evenly distribute numbers to N Counter
+\item Masking each number - evenly distribute numbers to $N$ Counter
   threads.  Each thread iterates over its subset of the shared array,
-  masking off each number and placing the result in new array.
+  masking off each number and placing the result in a new array.
 \end{itemize}
 
 Neither of these segments requires synchronization as the threads are
 working on disjoint portions of the array.  Note that arrays are
-implemented using Table instances where the keys are Integers.  There
-are no synchronized blocks in the maTe source code of this benchmark.
+implemented using $Table$ instances where the keys are $Integers$.
+There are no synchronized blocks in the maTe source code of this
+benchmark.
 
 After the Counters are finished, the masked numbers are aggregated
 into a single array.  From this point on the counting sort is finished
 in a serial fashion.
 
-The number of threads can be given as a command-line option.
-
-Table \ref{tab:radix_results} shows the results for the Radix
-benchmark.  In the results, the non-DMP runs unsurprisingly beat out
-all of the DMP runs with overhead ranging from $54\%$ to $4,520\%$.
-The fastest DMP run was $-t8 -Q1000 -g1$ with an execution time of
-2.65 seconds whereas the fastest non-DMP run was with 8 threads with
-an execution time of 1.27 seconds.
+Table~\ref{tab:radix_results} in Appendix A shows the results for the
+Radix benchmark.  In the results, the non-DMP runs unsurprisingly beat
+out all of the DMP runs with overhead ranging from $54\%$ to
+$4,520\%$.  The fastest DMP run was run 40 ($-t8 -Q1000 -g1$) with an
+execution time of 2.65 seconds whereas the fastest non-DMP run was
+with 8 threads with an execution time of 1.27 seconds.
 
 The execution time of this benchmark does not appear sensitive to the
 choice of full or reduced serial mode.  This is likely due to the lack
 of synchronized blocks in this benchmark.  Without threads
 acquiring/releasing object monitors, the lock counting performed in
-reduced serial mode is never triggered causing an early end to a
-thread's serial segment.
+reduced serial mode is never performed.
 
 It is also clear from the results that Radix does not benefit from
 increasing the ownership table depth.  The runs with a depth of 1 had
 an execution time faster than all the others, with runs at a depth of
 10 having the worst.  One possible explanation for this is that the
 object graph generated by the benchmark is not very deep.  Since
-threads access shared arrays using Tables, a shallow object graph and
-a large ownership depth could lead to threads continuously acquiring
-ownership of a large percentage of the total object graph during
-serial mode.  This situation could cause greatly increase the number
-of blocking reads/writes during parallel mode.
+threads access shared arrays using $Table$ instances, a shallow object
+graph and a large ownership depth could lead to threads continuously
+acquiring ownership of a large percentage of the total object graph
+during serial mode.  This situation could cause greatly increase the
+number of blocking reads/writes during parallel mode.
 
 At first it would seem this is borne out by the results, which show
 the percentage of execution time spent in serial mode increasing from
@@ -157,68 +156,70 @@ future blocking reads/writes caused by changing the object's owner.
 
 \subsubsection{Jacobi}
 
-The Jacobi benchmark uses two ``2-dimensional'' global Tables, one for
-the original values and another for the final values.  A worker thread
-is created for each row in the table, and each worker runs the Jacobi
-algorithm on the cells in its assigned row.  The worker threads each
-read/write to the shared original/new global Tables, using
-synchronized blocks to manage thread contention.  When each thread
-finishes it returns the change in temperature.  When all threads have
-finished, the maximum change across all threads is stored.  This whole
-process is repeated for 20 iterations.
+The Jacobi benchmark uses two ``2-dimensional'' global $Table$
+instances, one for the original values and another for the final
+values.  A worker thread is created for each row in the table, and
+each worker runs the Jacobi algorithm on the cells in its assigned
+row.  The worker threads read/write to the shared $Table$ instances,
+using synchronized blocks to manage thread contention.  When each
+thread finishes it returns the change in temperature.  When all
+threads have finished, the maximum change across all threads is
+stored.  This whole process is repeated for 20 iterations.
 
 The number of threads is fixed at the number of rows in the input
 table, meaning 20 threads for the 20x25 plate used in the benchmark.
 
-Table \ref{tab:jacobi_results} shows the results for the Jacobi
-benchmark.  The non-DMP Jacobi runs averaged 2.91 seconds of runtime.
-With DMP enabled, the overhead ranged from $27\%$ to $1,117\%$.  The
-best DMP run was $-Q10000 -g1 -r$ with an average time of 3.71
-seconds, compared to the non-DMP run with an average time of 2.92
-seconds.  The most surprising result from the Jacobi benchmark is the
-clear advantage given to the runs using reduced serial mode.  The top
-seven non-DMP runs by both execution time and overhead are using
-reduced serial mode.  This is likely due to the fact that the main
-loop involves each thread acquiring and quickly releasing the old and
-new Table's monitors.  The sensitivity to the chosen serial mode on
-this benchmark is strong enough to more than quadruple execution time
-in some cases (compare $-Q10000 -g1 -r$ and $-Q10000 -g1$).  The
-results show that simply switching from reduced to full serial mode
-between $-Q10000 -g1 -r$ and $-Q10000 -g1$ increased the total number
-of blocking reads/writes from $1,842$ to $17,616$, which increased the
-total number of rounds from $175$ to $3,081$.
+Table \ref{tab:jacobi_results} in Appendix B shows the results for the
+Jacobi benchmark.  The non-DMP Jacobi runs averaged 2.91 seconds of
+runtime.  With DMP enabled, the overhead ranged from $27\%$ to
+$1,117\%$.  The best DMP run was run 11 ($-Q10000 -g1 -r$) with an
+average time of 3.71 seconds, compared to the non-DMP run with an
+average time of 2.92 seconds.  The most surprising result from the
+Jacobi benchmark is the clear advantage given to the runs using
+reduced serial mode.  The top seven DMP runs by both execution time
+and overhead are using reduced serial mode.  This is likely due to the
+fact that the main loop involves each thread acquiring and quickly
+releasing the old and new $Table$'s monitors.  The sensitivity to the
+chosen serial mode on this benchmark is strong enough to more than
+quadruple execution time in some cases (compare run 11 $-Q10000 -g1
+-r$ and run 8 $-Q10000 -g1$).  The results show that simply switching
+from reduced to full serial mode between run 11 ($-Q10000 -g1 -r$) and
+run 8 ($-Q10000 -g1$) increased the total number of blocking
+reads/writes from $1,842$ to $17,616$, which increased the total
+number of rounds from $175$ to $3,081$.
 
 \subsubsection{Parallel DPLL}
 
 The DPLL benchmark solves boolean satisfiability problems using a
 parallelized form of the Davis-Putnam-Logemann-Loveland (DPLL)
-algorithm.  Input files are 3-SAT problems in CNF format.  The
-algorithm is parallelized by creating N threads, where N is given at
-the command-line.  Each thread has a queue of nodes on the truth tree
-to process.  The queue is made up of chained buckets, one bucket for
-each level on the tree (corresponding to each variable in the input
-problem).  At the beginning of the program, the root of the tree is
-pushed onto the queue of the first thread.  Each thread continually
-removes a node from its queue, simplifies the input using the value of
-true for the node's variable and pushes the false node onto its queue.
-If a thread reaches a dead-end in its subtree and has no more nodes on
-its queue, it steals a node off the queue of a randomly selected
-thread and continues.
-
-Each thread must acquire the monitor of a queue's bucket before
-adding/removing a node from that level.
+algorithm.  Input files are 3-SAT problems (a class of problems that
+contain three literals per clause) in CNF (Conjunctive Normal Form)
+format.  The algorithm is parallelized by creating N threads, where N
+is given at the command-line.  Each thread has a queue of nodes on the
+truth tree to process.  The queue is made up of chained buckets, one
+bucket for each level on the tree (corresponding to each variable in
+the input problem).  At the beginning of the program, the root of the
+tree is pushed onto the queue of the first thread.  Each thread
+continually removes a node from its queue, simplifies the input using
+the value of true for the node's variable and pushes the false node
+onto its queue.  If a thread reaches a dead-end in its subtree and has
+no more nodes on its queue, it steals a node off the queue of a
+randomly selected thread and continues.  Each thread must acquire the
+monitor of a queue's bucket before adding/removing a node from that
+level.
 
 When generating the results for this benchmark, the maTe virtual
 machine was run in a special mode that ensures the $Integer.rand$
 method used in determining which level of a thread's queue to steal
 from always returns the same sequence of numbers.
 
-Table \ref{tab:dpll_results} shows the results for the DPLL benchmark.
-The non-DMP DPLL runs averaged .71 seconds (2 threads), 1.93 seconds
-(4 threads), 4.06 seconds (8 threads) and 6.12 seconds (16).  With DMP
-enabled the overhead ranged from $-23\%$ to $2,789\%$.  The best DMP
-run was $-t2 -Q10000 -r -g1$ with an average time of .95 seconds,
-compared to the best non-DMP run with 2 threads of .71 seconds.
+Table \ref{tab:dpll_results} in Appendix C shows the results for the
+DPLL benchmark.  The non-DMP DPLL runs averaged .71 seconds (2
+threads), 1.93 seconds (4 threads), 4.06 seconds (8 threads) and 6.12
+seconds (16 threads).  With DMP enabled the overhead ranged from
+$-23\%$ to $2,789\%$.  The best DMP run was run 11 ($-t2 -Q10000 -r
+-g1$) with an average time of .95 seconds, compared to the best
+non-DMP run with 2 threads of .71 seconds.
 
 The inefficiency of the maTe virtual machine when running multithreads
 is very apparent in this benchmark.  The average execution time for
@@ -226,24 +227,19 @@ non-DMP runs gets worse as more threads are added.  Furthermore, many
 of the DMP runs executed faster than non-DMP runs executed with a
 higher thread count.
 
-DMP run of 8 threads with $-Q100000 -r -g1$ had an overhead of $-23\%$
-with an average execution time of 3.12 seconds, beating out the
-non-DMP run average time with 8 threads of 4.06 seconds.
-
-% Higher instruction quantum values appear to perform better.
+DMP run 55 ($-t8 -Q100000 -r -g1$) had an overhead of $-23\%$ with an
+average execution time of 3.12 seconds, beating out the non-DMP run
+average time with 8 threads of 4.06 seconds.
 
 For runs with 2 or 4 threads, different ownership table depths had
 little effect on execution time, adding no more than .64 seconds.
 Runs with 8 and 16 threads, however, exhibit extreme jumps in
 execution time when the ownership table depth is increased, compare
-the $-t8 -Q1000 -r -g5$ run with an execution time of 11.47 seconds
-with the $-t8 -Q1000 -r -g10$ run of 21.76 seconds.  With 16 threads,
-this trend gets even worse, with $-t16 -Q1000 -g5$ executing in 21.29
-seconds and $-t16 -Q1000 -g10$ executing in 176.84 seconds.
-
-% Overhead is very sensitive to DMP parameters chosen.
-
-% Does not appear sensitive to choice of serial mode.
+run 44 ($-t8 -Q1000 -r -g5$) with an execution time of 11.47 seconds
+with run 45 ($-t8 -Q1000 -r -g10$) run of 21.76 seconds.  With 16
+threads, this trend gets even worse, with run 60 ($-t16 -Q1000 -g5$)
+executing in 21.29 seconds and run 61 ($-t16 -Q1000 -g10$) executing
+in 176.84 seconds.
 
 %%% Local Variables:
 %%% mode: latex

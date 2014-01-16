@@ -4,29 +4,27 @@
 \section{Conclusions}
 
 The results gathered from the benchmarks do not back up my original
-thesis: the results indicate that the overhead of implementing DMP in
-a Java-like programming language such as maTe is not lower than a
-C-like programming language.  I no longer think it likely that such an
-implementation can beat out the performance of DMP implemented as a
-runtime-library for compiled languages such as C/C++.
-
-% What was the average overhead for C/C++ versus maTe?
+thesis.  The average overhead of the DMP enabled benchmarks was
+between $19\%$ and $2800\%$.  These results indicate that the overhead
+of implementing DMP in a Java-like programming language such as maTe
+is not lower than a C-like programming language.  I no longer think it
+likely that such an implementation can beat out the performance of DMP
+implemented as a runtime-library for compiled languages such as C/C++.
 
 However, I still believe that implementing DMP inside a virtual
-machine is still a sound idea.  On all but the most extreme DMP
-parameter settings, the performance overhead seen in the benchmarks
-was acceptable.  This is especially true if running the benchmarks
-would uncover a bug in the implementation.  On longer-running
-benchmarks, the acceptability may not hold.  Furthermore, there are
-definitely advantages to not having to recompile a maTe program in
-order to run with/without DMP enabled.  Being able to quickly run the
-same program repeatedly using different DMP parameters makes it much
-easier to find optimal parameters for a given benchmark and input
-data.
+machine is a sound idea.  On all but the most extreme DMP parameter
+settings, the performance overhead seen in the benchmarks was
+acceptable.  On longer-running benchmarks, the acceptability may not
+hold.  Furthermore, there are definitely advantages to not having to
+recompile a maTe program in order to run with/without DMP enabled.
+Being able to quickly run the same program repeatedly using different
+DMP parameters offers the possibility of ``fuzz testing'' a program in
+addition to making it much easier to find optimal parameters for a
+given benchmark and input data.
 
 I also conclude that implementing an efficient multithreaded virtual
 machine is itself a difficult task, especially when starting with a
-virtual machine that was initially designed to be only single
+virtual machine and language that was initially designed to be single
 threaded.  Reducing thread contention when accessing global data
 structures, especially the heap, was difficult.  Analyzing the results
 was made more difficult due to the fact that in many of the benchmarks
@@ -38,24 +36,24 @@ depths was not particularly effective in reducing the amount of time
 threads block due to ownership changes on most benchmarks.  There are
 a number of possibilities for this result.  One is that the particular
 set of benchmarks chosen did not benefit from different depths.
-Another possibility is that because most of the benchmarks stored its
-data in Table instances shared across threads, using any depth greater
-than one would mean every write to a Table would cause all the
-key/value pairs objects in the Table to change owner.  In benchmarks
-that stores its data in a handful of global Tables, % (WHICH DID THAT?)
-this would essentially serialize access to the table. % DID THAT ACTUALLY HAPPEN?
-
-I definitely found that the Table class, being the most complex native
-class and also the only built-in data structure, was one of the most
-difficult parts of the virtual machine to get working with DMP.
+Another possibility is that because most of the benchmarks stored
+their data in $Table$ instances shared across threads, using any depth
+greater than one would mean every ownership change to a $Table$
+instance would cause all the key/value pairs objects in the $Table$ to
+change owner as well.  In a benchmark that stores their data in a
+handful of global $Tables$, this would essentially serialize access to
+the table.  In general, I found that the $Table$ class, being the most
+complex native class and also the only built-in data structure, was
+one of the most difficult parts of the virtual machine to get working
+with DMP.
 
 \section{Future Work}
 
 Future work could include modifying the ownership table policy to
 include an adaptive algorithm that attempts to learn the shared memory
-profile of the maTe program and adjust the ownership of objects in an
-attempt to increase the likelihood that a thread can access a given
-object without needing to block.
+access patterns of a maTe program and preemptively change the
+ownership of an object in an attempt to increase the likelihood that a
+thread can access a given object without the need to block.
 
 Future work could also include making the maTe virtual machine more
 efficient when run with many threads.  This could include
@@ -67,15 +65,15 @@ As stated earlier, the current implementation runs the serial garbage
 collector at the end of serial mode when the heap is at least $90\%$
 full.  There may be better ways to integrate the garbage collector
 with DMP.  Doing this while maintaining DMP's guarantee of
-deterministic execution could be difficult, however.
+deterministic execution could be difficult.
 
 Another possibility would be modifying the maTe language to allow
-annotating the source code to help virtual machine choose better DMP
-parameters.  For example, if the programmer can guarantee that a data
-structure is only accessed by a single thread, an annotation could
-indicate such and DMP checks on that object could be skipped.  Static
-analysis could also be used to determine when such optimizations are
-possible.
+annotating the source code to help the virtual machine choose better
+DMP parameters.  For example, if the programmer can guarantee that a
+data structure is only accessed by a single thread, an annotation
+could indicate such and DMP checks on that object could be skipped.
+Static analysis could also be used to determine when such
+optimizations are possible.
 
 There are plenty of opportunities to optimize the maTe compiler.
 Improving the maTe compiler so that object fields are not

@@ -4,8 +4,8 @@
 \section{maTe Language}
 
 Originally, the maTe language only allowed for integer arithmetic
-using the predefined Integer class.  I added a new predefined class,
-Real, that wraps a float primitive to allow scientific applications
+using the predefined $Integer$ class.  I added a new predefined class,
+$Real$, that wraps a float primitive to allow scientific applications
 that require floating point calculations to be written.
 
 In order to test multithreaded programs, the maTe language was
@@ -17,7 +17,7 @@ method.
 
 In order to allow for critical sections and synchronization, a monitor
 in the form of a mutex was added to each object in the virtual
-machine.  An object's monitor can be acquired and released using new
+machine.  An object's monitor is acquired and released using new
 $monitorenter$ and $monitorexit$ instructions.  The language was
 extended to allow for synchronized blocks, the body of which is
 executed only after acquiring the monitor of a particular object.
@@ -30,8 +30,8 @@ length of time using the $sleep$ method.
 
 These changes to the language required modifications to all of the
 development tools.  The grammar of the language used by the compiler
-was be modified to include synchronized blocks.  At code generation
-time, the compiler emits the new $monitorenter$ and $monitorexit$
+was modified to include synchronized blocks.  At code generation time,
+the compiler emits the new $monitorenter$ and $monitorexit$
 instructions at the entrance and exit of each synchronized block.
 Corner cases involving $break$ or $return$ statements inside nested
 synchronized blocks had to be accounted for.  To do so, the compiler
@@ -43,11 +43,11 @@ respective opcodes.
 I also added support for $for$ loops, boolean operators $\&\&$ and
 $\|\|$ and $!=$, $<=$ and $>=$ operators to the compiler.  None of
 these changes impacted the assembler or virtual machine, however they
-did make implementing the benchmarks much easier.
+did make implementing the benchmarks easier.
 
 \section{maTe Virtual Machine}
 
-The majority of the changes required to test this thesis were made in
+The majority of the changes required to test my thesis were made in
 the virtual machine.  This step can be broken down into two parts:
 implementing threads and implementing DMP.
 
@@ -61,22 +61,22 @@ is still executing, regardless of its accessibility via the global
 object graph, $Thread$ instances are protected from the garbage
 collector by adding them to a global thread set whose contents are not
 considered for deletion by the garbage collector.  The garbage
-collector also uses this set to iterate over the stack of each thread
-while marking the roots during its mark phase.  Finally, a
-$pthread\_mutex\_t$ accessed by the new $monitorenter$ and
+collector also uses this set to iterate over the virtual machine stack
+of each thread while marking the roots during its mark phase.
+Finally, a $pthread\_mutex\_t$ accessed by the new $monitorenter$ and
 $monitorexit$ instructions was added to each object created by the
 virtual machine.
 
 Initially, additional synchronization through the use of mutexes were
 added to many of the virtual machine's data structures such as the
-heap, stack and stack frame.  However, in order to increase
-performance when running multiple threads, many of these mutexes were
-eliminated.
+heap, virtual machine stack and stack frame.  However, in order to
+increase performance when running multiple threads, many of these
+mutexes were eliminated.
 
 \subsection{Implementing DMP}
 
 The second and largest step was implementing DMP inside the virtual
-machine.  As describe earlier, there are four situations that can
+machine.  As described earlier, there are four situations that can
 cause a thread to block when DMP is enabled:
 
 \begin{itemize}
@@ -93,9 +93,10 @@ had a number of architectural goals in mind when implementing DMP:
 
 \begin{itemize}
 \item Be able to enable/disable DMP using a command-line argument
-  without needing to compile the maTe source code.
-\item Isolate DMP functionality into separate files with minimal hooks
-  in the main virtual machine implementation.
+  without needing to recompile either the maTe virtual machine or the
+  maTe program to be run.
+\item Be able to compile the virtual machine with all DMP code
+  removed.
 \item Minimize any performance penalty caused by DMP implementation
   when running with DMP disabled.
 \item Allow the possibility for DMP behavior to be per-thread or
@@ -105,23 +106,23 @@ had a number of architectural goals in mind when implementing DMP:
 In order to achieve these goals, a new DMP-specific module was created
 for the $object$, $table$, $thread$ and $nlock$ modules.  Each module
 stores a pointer to the respective DMP-specific module, and a $NULL$
-pointer check is placed before a hook into the DMP-specific module is
-called to determine if DMP is enabled on that module.  Therefore, when
+pointer check is placed before all calls into the DMP-specific module
+to determine if DMP is enabled on that module.  Therefore, when
 running with DMP disabled, these modules store one extra pointer field
 and must perform a handful of extra pointer comparisons but their
 performance and behavior is otherwise unchanged.
 
-The $nlock$ module implements the mutex used by the $monitorenter$ and
-$monitorexit$ instructions and wraps operations performed on the
-$pthread\_mutex\_t$ used by each object.  A DMP-specific module for
-$nlock$ is needed for two reasons.  First, the virtual machine needs
-to track monitors acquired by a thread in order to implement reduced
-serial mode.  Secondly, with DMP enabled the virtual machine must use
-non-blocking system calls when trying to acquire a mutex to ensure a
-thread does not stall indefinitely while waiting for a mutex.  This
-situation can occur when a thread tries to acquire a mutex held by
-another thread during its turn in serial mode or in parallel mode when
-it is the last thread to block.
+The $nlock$ module implements the object monitor used by the
+$monitorenter$ and $monitorexit$ instructions and wraps operations
+performed on the $pthread\_mutex\_t$ used by each object.  A
+DMP-specific module for $nlock$ is needed for two reasons.  First, the
+virtual machine needs to track monitors acquired by a thread in order
+to implement reduced serial mode.  Secondly, when DMP is enabled the
+virtual machine must use non-blocking system calls when trying to
+acquire a mutex to ensure a thread does not stall indefinitely while
+waiting for a mutex.  This situation can occur when a thread tries to
+acquire a mutex held by another thread during its turn in serial mode
+or in parallel mode when it is the last thread to block.
 
 % figure illustrating pointer to DMP module for object, perhaps
 % showing some of the function names.
@@ -157,12 +158,12 @@ which a program is repeatedly executed with different DMP attributes
 for each object/thread in an attempt to discover concurrency bugs
 uncovered by certain thread interleavings.
 
-The heap stores a set containing all $Thread$ instances sorted by
-creation time.  This is used to wake each thread in a deterministic
-order so that it can execute its serial segment.  Upon reaching the
-end of its serial segment, each thread calls the global barrier again.
-After all threads have reached the second barrier, a new round begins
-with all threads executing in parallel.
+The global $dmp$ module stores a set containing all $Thread$ instances
+sorted by creation time.  This is used to wake each thread in a
+deterministic order so that it can execute its serial segment.  Upon
+reaching the end of its serial segment, each thread calls the global
+barrier again.  After all threads have reached the second barrier, a
+new round begins with all threads executing in parallel.
 
 The parallel garbage collector implemented in the virtual machine
 posed problems for deterministic execution since determining when a
@@ -181,36 +182,33 @@ module has three operations: $load$, $store$ and $chown$.  The $load$
 and $store$ operations allow the module to block the thread based on
 an attempt to read/write a given object (by calling into the $dmp$
 module), and $chown$ implements propagating any ownership changes
-based on the ownership table depth.  A default action is executed if a
-pointer in the operations table is $NULL$.
+based on the ownership table depth.
 
 The ownership table is not stored as a global data structure but
 instead distributed amongst all objects using the DMP-specific
 $object$ module's $owner$ attribute.  If $owner$ is $0$, the object is
 shared.  If $owner$ is not $0$, the object is private and the value
-specifies the thread ID of its current owner.  The DMP-specific
-$thread$ module maintains an executed instructions count to track the
-end of its quantum that is incremented for each iteration of the
-fetch/execute loop.  Hooks into the DMP-specific $object$ module were
-placed into the $object$ module's $object\_load\_field$ and
-$object\_store\_field$ functions (that are called from the $getfield$
-and $putfield$ instructions).  The default $load$ and $store$
-operations follow the ownership table policy from the DMP paper by
-checking the $owner$ field before allowing the instruction to execute.
+specifies the thread ID of its current owner.  Hooks into the
+DMP-specific $object$ module were placed into the $object$ module's
+$object\_load\_field$ and $object\_store\_field$ functions (that are
+called from the $getfield$ and $putfield$ instructions).  The default
+$load$ and $store$ operations follow the ownership table policy from
+the DMP paper by checking the $owner$ field before allowing the
+instruction to execute.
 
 \subsubsection{Thread DMP}
 
 The DMP-specific $thread$ module has four attributes: the serial mode
-(full/reduced) being used by the thread, the number of locks currently
-held by the thread, the quantum size and the number of instructions
+(full/reduced) used by the thread, the number of locks currently held
+by the thread, the quantum size and the number of instructions
 executed by the thread in the current quantum.  The operations table
 has six entries: $thread\_creation$, $thread\_start$,
 $thread\_destruction$, $thread\_join$ and
 $thread\_execute\_instruction$.  The $thread\_creation$ entry is
 called in $Thread.start$ and prevents a new thread from being created
 until serial mode.  The $thread\_start$ entry is called at the very
-top of $Thread.run$ and ensures the thread sleeps until its turn in
-serial mode.  The $thread\_destruction$ entry is called at the very
+top of $Thread.run$ and ensures the new thread sleeps until its turn
+in serial mode.  The $thread\_destruction$ entry is called at the very
 end of $Thread.run$ and waits until the next parallel segment before
 destroying the thread.  The $thread\_join$ entry is called in
 $Thread.join$ and causes the thread to block for parallel/serial mode
@@ -228,23 +226,24 @@ DMP-specific modules.  The operations table has only two entries:
 $load$ and $store$.  The $Table$ object has no object fields since it
 is entirely implemented within the virtual machine.  The internal
 state of a $Table$ instance is accessible from a maTe program only
-through method calls.  The purpose of the DMP-specific $table$ module
-is to ensure that threads accessing the native fields of a $Table$
-instance block appropriately just as it would be it were accessing a
-maTe object field.  The default $load$ and $store$ implementations
-merely call the $load$ and $store$ operations of the $Table$
-instance's DMP-specific $object$ module.
+through method calls.  However, threads can still communicate through
+reads and writes to the entries of a $Table$ instance.  The purpose of
+the DMP-specific $table$ module is to ensure that threads accessing
+the native fields of a $Table$ instance block appropriately just as
+they would if they were accessing a maTe object field.  The default
+$load$ and $store$ implementations merely call the $load$ and $store$
+operations of the $Table$ instance's DMP-specific $object$ module.
 
 \subsubsection{NLock DMP}
 
 The DMP-specific $nlock$ module prevents the virtual machine from
 losing control of a thread when it blocks waiting to acquire an
-object's monitor.  The DMP-specific $nlock$ operations table has three
-entries: $lock$, $unlock$ and $timedwait$.  The default $lock$
-implementation continually causes a thread to block until the thread
-will successfully acquire the monitor.  Once this situation occurs,
-the module increments the DMP-specific $thread$ module's lock count
-and returns.  The default $unlock$ implementation first decrements the
+object's monitor.  The DMP-specific $nlock$ operations table has two
+entries: $lock$ and $unlock$.  The default $lock$ implementation
+continually causes a thread to block until the thread will
+successfully acquire the monitor.  Once this situation occurs, the
+module increments the DMP-specific $thread$ module's lock count and
+returns.  The default $unlock$ implementation first decrements the
 DMP-specific $thread$ module's lock count. Then, if the current mode
 is serial mode, the lock count is zero and the thread is using reduced
 serial mode, the thread blocks, otherwise it returns.
@@ -274,31 +273,32 @@ In order to improve the virtual machine's multithreaded performance, a
 number of enhancements were added.
 
 The first category of enhancements is caching for immutable types.  A
-cache for immutable Integer instances is used to ensure only a single
-instance of each $Integer$ with value 0-65,5536 is instantiated.
-Although maTe's Integer class stores 32-bit values, the decision was
-made to only cache values between 0-65,536 was done for memory reason.
-The cache is filled incrementally as the program executes $newint$
-instructions.  Also, a cache for the immutable $String$ class is used
-to ensure only a single $String$ instance is created for each $newstr$
-instruction.
+cache for immutable $Integer$ instances is used to ensure only a
+single instance of each $Integer$ with value 0-65,5536 is
+instantiated.  Although maTe's Integer class stores 32-bit values, the
+decision to only cache values between 0-65,536 was done for memory
+reasons.  The cache is filled incrementally as the program executes
+$newint$ instructions.  Also, a cache for the immutable $String$ class
+is used to ensure only a single $String$ instance is created for each
+$newstr$ instruction in the class file.
 
 The second category is caching done to prevent access to the shared,
 global heap.  Each thread maintains an object reference cache that
 allows a thread to translate an object reference to an object pointer
 without needing to go through the global heap.  Secondly, each thread
 maintains a free object cache that allows it to allocate a new object
-without accessing the global heap so long as it finds a freed object
-of the correct size in its cache.
+without accessing the global heap so long as it finds a recently freed
+object of the correct size in its cache.
 
-An attempt was made to modify the $table$ module to implement the hash
-table buckets as maTe object fields rather than C structures with the
-goal of allowing more fine-grained ownership.  In the original C
-structure implementation, each Table is entirely owned by a single
+An attempt was made to modify the virtual machine's $Table$
+implementation so as to implement the hash table buckets as maTe
+object fields rather than C structures with the goal of allowing more
+fine-grained ownership.  In the original C structure implementation,
+the hash table buckets of each $Table$ are entirely owned by a single
 thread.  The downside of this is that two threads cannot write to two
-different buckets of the same Table instance in parallel.  The idea
+different buckets of the same $Table$ instance in parallel.  The idea
 was that by implementing the hash table buckets as maTe objects,
-multiple threads could access a Table instance at the same time so
+multiple threads could access a $Table$ instance at the same time so
 long as they were not attempting to write to the same hash table
 bucket.  After implementation, the benchmarks ran noticeably faster
 with DMP enabled, however running the Racey benchmark no longer gave
@@ -307,7 +307,7 @@ attempts to diagnose and fix the issue were never resolved and so the
 original C structure implementation was restored.
 
 Another performance improvement that was implemented was protecting
-access to the $table$ modules hash table buckets using a
+access to the $Table$ implementation's hash table buckets using a
 $pthread\_rwlock\_t$.  This allowed multiple simultaneous $Table.get$
 invocations by different threads but allowed only one $Table.put$
 invocation to occur at any time.

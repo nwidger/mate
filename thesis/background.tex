@@ -29,6 +29,18 @@ thread receives the deterministic token, deterministic execution is
 achieved.  In their paper, they refer to a \emph{round} as one cycle
 in which each thread executes a single quantum.
 
+\begin{figure}[!]
+  \begin{center}
+    {\resizebox{\textwidth}{!}{
+        \includegraphics{./figures/quantum.png} }}
+  \end{center}
+  \caption{Example of a quantum with three threads T1, T2 and T3
+    originally from Bergan et al.~\cite{coredet}.  Note that T2 does
+    not execute a serial turn because it executed all instructions
+    allocated to it for the quantum in parallel mode.}
+  \label{fig:quantum}
+\end{figure}
+
 Serializing the entire program as described above defeats the
 performance advantages of programming using threads.  In their paper,
 Devietti et al.\ make the point that if two instructions do not
@@ -44,7 +56,8 @@ Using this idea, and keeping the concepts of rounds, quanta and a
 deterministic token, parallelism can be recovered by allowing threads
 to execute in parallel so long as they do not communicate.  To do
 this, each quantum is broken into two modes: \emph{parallel mode} and
-\emph{serial mode}.  In parallel mode, all threads execute
+\emph{serial mode}.  Figure~\ref{fig:quantum} illustrates three
+threads executing a quantum.  In parallel mode, all threads execute
 concurrently.  Each thread executes in parallel mode until either:
 
 \begin{itemize}
@@ -61,14 +74,14 @@ threads have finished executing their parallel segment.  Once this
 occurs, execution is serialized by passing the deterministic token and
 allowing each thread to run their serial segment in isolation.  At
 this time, each thread is allowed unrestricted access to shared memory
-(both reads and writes).  For each thread, serial mode ends once they
-execute the remainder of their quantum (which may be empty, if the
-first condition marks the end of their parallel segment).  When a
-thread finishes executing its serial segment, it passes the
-deterministic token to the next thread and blocks waiting for serial
-mode to end.  After each thread finishes executing its serial segment,
-a new round begins with each thread executing the parallel segment of
-the next quantum.
+(both reads and writes).  For each thread, serial mode ends once it
+executes the remainder of the instructions in its quantum (which may
+be zero, if the first condition marks the end of its parallel
+segment).  When a thread finishes executing its serial segment, it
+passes the deterministic token to the thread that will execute next
+and blocks waiting for serial mode to end.  After all threads finish
+executing their serial segments, a new round begins with each thread
+executing the parallel segment of the next quantum.
 
 Determinism in DMP is guaranteed on the same input for the following
 reasons:
@@ -112,10 +125,10 @@ the ownership table can be of any size such as byte-, word- or
 page-level.  Choosing a size involves a trade-off between accuracy and
 performance.  A memory location can either be shared amongst all
 threads or privately owned by a single thread.  Before executing each
-load/store instruction to shared memory, the ownership table is
-consulted and the instruction is either allowed to execute or the
-thread is made to block for serial mode.  An \emph{ownership table
-  policy} defines the following:
+load/store instruction to shared memory during parallel mode, the
+ownership table is consulted and the instruction is either allowed to
+execute or the thread is made to block for serial mode.  An
+\emph{ownership table policy} defines the following:
 
 \begin{itemize}
 \item When an entry in the ownership table transitions between being
@@ -129,21 +142,32 @@ thread is made to block for serial mode.  An \emph{ownership table
 \end{itemize}
 
 \begin{table}
-  \begin{tabular}{l|l|l|l}
-    owned  &  sh/priv  &  rd/wr    &  action                         \\
+  \begin{tabular}{l|l}
+    read/write &  parallel mode action              \\
     \hline
-    yes    &  priv     &  -        &  proceed                        \\
-    -      &  sh       &  rd       &  proceed                        \\
-    -      &  sh       &  wr       &  block, set priv+owned, proceed \\
-    no     &  priv     &  rd       &  block, set sh, proceed         \\
-    no     &  priv     &  wr       &  block, set priv+owned, proceed \\
+    read       &  proceed                           \\
+    write      &  block, set private+owned, proceed \\
   \end{tabular}
-  \caption{Ownership table policy used in DMP paper}
-  \label{table:ownership-policy}
+  \caption{Ownership table policy for shared objects used in DMP paper}
+  \label{table:ownership-policy-shared}
 \end{table}
 
-Table~\ref{table:ownership-policy} summarizes the ownership table
-policy used by DMP~\cite{dmp}.  Note that during serial mode, while a
+\begin{table}
+  \begin{tabular}{l|l|l}
+    owned & read/write &  parallel mode action           \\
+    \hline       
+    yes   &  either    &  proceed                        \\
+    no    &  read      &  block, set shared, proceed     \\
+          &  write     &  block, set priv+owned, proceed \\
+  \end{tabular}
+  \caption{Ownership table policy for private objects used in DMP paper}
+  \label{table:ownership-policy-private}
+\end{table}
+
+Table~\ref{table:ownership-policy-shared} and
+Table~\ref{table:ownership-policy-private} summarize the ownership
+table policy used by DMP~\cite{dmp} when accessing shared objects and
+private objects, respectively.  Note that during serial mode, while a
 thread does not need to block to access a memory location, the
 transitions between shared and private in the table still occur.  The
 ownership status of a memory location is only relevant if the memory
@@ -185,9 +209,9 @@ as private that it owns and read-only access to memory marked as
 shared.  For all other accesses, a thread must first block for serial
 mode.  Note that during parallel mode, the ownership table is strictly
 read-only.  A thread is only allowed to modify the ownership table
-during serial mode.  Therefore, no synchronization of the ownership
-table is needed because during serial mode only one thread may be
-executing at a time.
+during serial mode.  No synchronization of the ownership table is
+needed during serial mode as only one thread may be executing at a
+time.
 
 To see that the above policy makes sense, first consider a policy that
 considers the ``owned'' column of Table~\ref{table:ownership-policy}
@@ -245,7 +269,9 @@ mode~\cite{dmp}:
 They refer to the first style as \emph{full serial mode} and the
 second style as \emph{reduced serial mode}.  Reduced serial mode is an
 attempt to end serial mode at the end of a critical section in which
-interthread communication occurs.
+interthread communication occurs.  Reduced serial mode greatly
+improves the performance of DMP for certain applications, as we will
+see in Chapter~\ref{RESULTS}.
 
 For a given round, the ideal quantum building policy would result in
 the parallel segments of each thread being precisely the same length
@@ -268,9 +294,11 @@ only for debugging but should be left on when the product is deployed.
 Their paper advocates for a change in multiprocessor system
 architecture such that deterministic execution using the methods
 described are implemented in hardware.  In their implementation, they
-use the cache line state maintained by a MESI cache coherence protocol
-to track ownership status.  To evaluate their ideas, they simulate a
-hardware implementation of DMP using PIN, a program analysis tool.
+use the cache line state maintained by the MESI cache coherence
+protocol (MESI stands for Modified, Exclusive, Shared and Invalid, the
+four states in the protocol's state diagram) to track ownership
+status.  To evaluate their ideas, they simulate a hardware
+implementation of DMP using Pin, a program analysis tool.
 
 There are both advantages and disadvantages to the DMP method of
 deterministic execution.  DMP makes no assumptions about the behavior
@@ -284,11 +312,13 @@ communicating instructions are ordered the same are known as
 \emph{communication-equivalent interleavings}.
 
 If the particular set of communication-equivalent interleavings that
-DMP generates reveals a bug, that bug will occur every time the
-program is executed.  This makes it easy to fix concurrency bugs that
-surface when the program is run with a given input.  However, testing
-a program with DMP can only guarantee that the program is bug-free
-when run using that input and when run using the thread interleavings
+DMP generates reveals a bug for a given input, that bug will occur
+every time the program is executed with that same input.  DMP is not a
+tool for automatically uncovering concurrency bugs.  However, running
+a program with DMP makes it easy to fix concurrency bugs that surface
+when the program is run with a given input.  However, testing a
+program with DMP can only guarantee that the program is bug-free when
+run using that input and when run using the thread interleavings
 generated by DMP.  It is possible that other bugs exist but do not
 surface with the particular set of interleavings DMP allows.  This is
 a definite disadvantage of DMP.  If the overhead of leaving DMP on
@@ -306,16 +336,17 @@ of between 37\% and 15\%.
 \section{CoreDet}
 
 CoreDet is an implementation of DMP in software.  Bergan et al.\ use a
-modified LLVM C/C++ compiler with several new compiler phases that add
-instrumentation code before load and store instructions to shared
-memory~\cite{coredet}.  The instrumentation code calls into the
-CoreDet run-time framework that consults an in-memory ownership table
-and decides if the instruction can be executed immediately or must
-wait for serial mode.  The ownership table and all other data
-structures needed by the framework is stored in global shared memory.
-A major contribution of CoreDet is that it shows that DMP can be
-implemented effectively in software and it extends the original DMP
-paper by adding two new approaches to deterministic execution.
+modified LLVM (Low Level Virtual Machine) C/C++ compiler with several
+new compiler phases that add instrumentation code before load and
+store instructions to shared memory~\cite{coredet}.  The
+instrumentation code calls into the CoreDet run-time framework that
+consults an in-memory ownership table and decides if the instruction
+can be executed immediately or must wait for serial mode.  The
+ownership table and all other data structures needed by the framework
+are stored in global shared memory.  A major contribution of CoreDet
+is that it shows that DMP can be implemented effectively in software
+and it extends the original DMP paper by adding two new approaches to
+deterministic execution.
 
 The first approach drops the use of a global ownership table to
 prevent uncontrolled interthread communication.  Instead, each thread
@@ -343,8 +374,8 @@ hold:
 \end{itemize}
 
 The second approach combines ownership tracking with the store buffer.
-The global ownership table is brought back and is maintained the same
-as in the original DMP paper, thus allowing distinction of accesses to
+The global ownership table is brought back and is maintained as it was
+in the original DMP paper, thus allowing distinction of accesses to
 shared data from accesses to private data.  While in parallel mode, a
 thread can access its own private data without blocking and without
 consulting its local store, but accesses to another thread's private
@@ -495,8 +526,8 @@ region a data member is allocated.  Similarly, method definitions are
 annotated to indicate which regions they read and which regions they
 write (known as \emph{read effects} and \emph{write effects}).  The
 region into which each object is allocated is computed at
-compile-time.  Using the annotations in the source code, provided by
-the programmer, the DPJ compiler determines if a given program will
+compile-time.  Using the annotations provided by the programmer in the
+source code, the DPJ compiler determines if a given program will
 execute deterministically.  This is done by ensuring that all pairs of
 memory accesses are either both reads, access disjoint regions of the
 heap or are properly synchronized to prevent concurrent access.
@@ -508,7 +539,7 @@ used by DPJ is clumsy and frustrating to the programmer.  The
 annotations that must be provided by the programmer can wind up being
 very complicated and hard to understand.  Furthermore, determinism can
 only be guaranteed if every annotation is correct, and the burden to
-fix any inaccuracies is placed on the programmer's shoulders.
+fix any inaccuracies is placed on the programmer.
 
 \section{maTe DMP}
 
@@ -578,7 +609,7 @@ Therefore, in my implementation, the granularity of the ownership
 table is given not in units of bytes, words or pages but in depth.  At
 a depth of one, only the ownership table entry of the object being
 accessed is modified, at a depth of two, the object being modified as
-well as all objects it reference are modified and so on.
+well as all objects it references are modified and so on.
 Figure~\ref{fig:depth} illustrates the changes in object ownership
 that occur when writing to the object at the root of the tree using an
 ownership table depth of 1, 2 and 3.  Blackened objects are those
@@ -587,7 +618,8 @@ marked as private and owned by the writing thread.
 In order to test my thesis, I extended the maTe programming language
 and implemented DMP using an ownership table in the maTe virtual
 machine.  I did not implement the local store buffer used by
-CoreDet~\cite{coredet}.  maTe is a pure object-oriented,
+CoreDet~\cite{coredet}, however I did implement the option to run
+using \emph{reduced serial mode}.  maTe is a pure object-oriented,
 byte-compiled, garbage-collected programming language.  maTe features
 support for single inheritance, virtual method calls, method and
 operator overloading, nested local variable declarations and basic
