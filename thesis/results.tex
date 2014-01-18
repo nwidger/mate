@@ -214,11 +214,11 @@ $-23\%$ to $2,789\%$.  The best DMP run was run 11 ($-t2 -Q10000 -r
 -g1$) with an average time of .95 seconds, compared to the best
 non-DMP run with 2 threads of .71 seconds.
 
-The inefficiency of the maTe virtual machine when running multithreads
-is very apparent in this benchmark.  The average execution time for
-non-DMP runs gets worse as more threads are added.  Furthermore, many
-of the DMP runs executed faster than non-DMP runs executed with a
-higher thread count.
+The inefficiency of the maTe virtual machine when running multiple
+threads is very apparent in this benchmark.  The average execution
+time for non-DMP runs gets worse as more threads are added.
+Furthermore, many of the DMP runs executed faster than non-DMP runs
+executed with a higher thread count.
 
 DMP run 55 ($-t8 -Q100000 -r -g1$) had an overhead of $-23\%$ with an
 average execution time of 3.12 seconds, beating out the non-DMP run
