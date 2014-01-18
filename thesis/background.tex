@@ -29,18 +29,6 @@ thread receives the deterministic token, deterministic execution is
 achieved.  In their paper, they refer to a \emph{round} as one cycle
 in which each thread executes a single quantum.
 
-\begin{figure}[!]
-  \begin{center}
-    {\resizebox{\textwidth}{!}{
-        \includegraphics{./figures/quantum.png} }}
-  \end{center}
-  \caption{Example of a quantum with three threads T1, T2 and T3
-    originally from Bergan et al.~\cite{coredet}.  Note that T2 does
-    not execute a serial turn because it executed all instructions
-    allocated to it for the quantum in parallel mode.}
-  \label{fig:quantum}
-\end{figure}
-
 Serializing the entire program as described above defeats the
 performance advantages of programming using threads.  In their paper,
 Devietti et al.\ make the point that if two instructions do not
@@ -56,8 +44,7 @@ Using this idea, and keeping the concepts of rounds, quanta and a
 deterministic token, parallelism can be recovered by allowing threads
 to execute in parallel so long as they do not communicate.  To do
 this, each quantum is broken into two modes: \emph{parallel mode} and
-\emph{serial mode}.  Figure~\ref{fig:quantum} illustrates three
-threads executing a quantum.  In parallel mode, all threads execute
+\emph{serial mode}.  In parallel mode, all threads execute
 concurrently.  Each thread executes in parallel mode until either:
 
 \begin{itemize}
@@ -83,6 +70,32 @@ thread that will execute next and blocks waiting for serial mode to
 end.  After all threads finish executing their serial segments, a new
 round begins with each thread executing the parallel segment of the
 next quantum.
+
+\begin{figure}[!]
+  \begin{center}
+    {\resizebox{\textwidth}{!}{
+        \includegraphics{./figures/quantum.png} }}
+  \end{center}
+  \caption{Example of a quantum with three threads T1, T2 and T3.}
+  \label{fig:quantum}
+\end{figure}
+
+Figure~\ref{fig:quantum} from Bergan et al.~\cite{coredet},
+illustrates three threads executing a quantum.  Threads T1, T2 and T3
+begin the quantum executing their parallel segments simultaneously.
+Threads T1 (b) and T3 are blocked before reaching their quantum
+boundaries because they attempt to perform communicating instructions
+during parallel mode.  Serial mode begins after thread T2, the last
+thread to stop executing, reaches its quantum boundary (a) in parallel
+mode without attempting any communicating instructions.  Thread T1 is
+first in the round robin order in serial mode and executes the
+remainder of the instructions in its quantum during its serial turn
+(c) before passing the deterministic token to thread T2.  Thread T2
+immediately passes the deterministic token to thread T3 because it hit
+its quantum boundary in parallel mode.  The quantum is over after
+thread T3, the last thread in the round robin order, executes its
+serial turn.  At this point a new quantum begins (d) with all three
+threads simultaneously beginning their parallel segments.
 
 Determinism in DMP is guaranteed on the same input for the following
 reasons:
