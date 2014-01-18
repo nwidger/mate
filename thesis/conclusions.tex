@@ -41,7 +41,7 @@ their data in $Table$ instances shared across threads, using any depth
 greater than one would mean every ownership change to a $Table$
 instance would cause all the key/value pairs objects in the $Table$ to
 change owner as well.  In a benchmark that stores their data in a
-handful of global $Tables$, this would essentially serialize access to
+handful of shared $Tables$, this would essentially serialize access to
 the table.  In general, I found that the $Table$ class, being the most
 complex native class and also the only built-in data structure, was
 one of the most difficult parts of the virtual machine to get working

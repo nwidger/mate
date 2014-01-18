@@ -119,9 +119,9 @@ After the Counters are finished, the masked numbers are aggregated
 into a single array.  From this point on the counting sort is finished
 in a serial fashion.
 
-Table~\ref{tab:radix_results} in Appendix A shows the results for the
-Radix benchmark.  In the results, the non-DMP runs unsurprisingly beat
-out all of the DMP runs with overhead ranging from $54\%$ to
+Table~\ref{tab:radix_results} in the Appendix shows the results for
+the Radix benchmark.  In the results, the non-DMP runs unsurprisingly
+beat out all of the DMP runs with overhead ranging from $54\%$ to
 $4,520\%$.  The fastest DMP run was run 40 ($-t8 -Q1000 -g1$) with an
 execution time of 2.65 seconds whereas the fastest non-DMP run was
 with 8 threads with an execution time of 1.27 seconds.
@@ -141,18 +141,11 @@ threads access shared arrays using $Table$ instances, a shallow object
 graph and a large ownership depth could lead to threads continuously
 acquiring ownership of a large percentage of the total object graph
 during serial mode.  This situation could cause greatly increase the
-number of blocking reads/writes during parallel mode.
-
-At first it would seem this is borne out by the results, which show
-the percentage of execution time spent in serial mode increasing from
-$50\%$ with $-Q1000 -g1$ to $95\%$ with $-Q1000 -g5$ up to $97\%$ with
-$-Q1000 -g10$.  However, upon closer inspection the total number of
-blocking reads/writes actually went down from around $5600$ with
-$-Q1000 -g1$ to around $4000$ with $-Q1000 -g5$ and finally around
-$3900$ with $-Q1000 -g10$.  I believe the true reason for the slowdown
-is simply the time expense of traversing the object graph while
-changing an object's owner during serial mode and not an increase in
-future blocking reads/writes caused by changing the object's owner.
+number of blocking reads/writes during parallel mode.  However, the
+results indicate that the true reason for the slowdown is simply the
+time expense of traversing the object graph while changing an object's
+owner during serial mode and not an increase in future blocking
+reads/writes caused by changing the object's owner.
 
 \subsubsection{Jacobi}
 
@@ -169,9 +162,9 @@ stored.  This whole process is repeated for 20 iterations.
 The number of threads is fixed at the number of rows in the input
 table, meaning 20 threads for the 20x25 plate used in the benchmark.
 
-Table \ref{tab:jacobi_results} in Appendix B shows the results for the
-Jacobi benchmark.  The non-DMP Jacobi runs averaged 2.91 seconds of
-runtime.  With DMP enabled, the overhead ranged from $27\%$ to
+Table \ref{tab:jacobi_results} in the Appendix shows the results for
+the Jacobi benchmark.  The non-DMP Jacobi runs averaged 2.91 seconds
+of runtime.  With DMP enabled, the overhead ranged from $27\%$ to
 $1,117\%$.  The best DMP run was run 11 ($-Q10000 -g1 -r$) with an
 average time of 3.71 seconds, compared to the non-DMP run with an
 average time of 2.92 seconds.  The most surprising result from the
@@ -213,7 +206,7 @@ machine was run in a special mode that ensures the $Integer.rand$
 method used in determining which level of a thread's queue to steal
 from always returns the same sequence of numbers.
 
-Table \ref{tab:dpll_results} in Appendix C shows the results for the
+Table \ref{tab:dpll_results} in the Appendix shows the results for the
 DPLL benchmark.  The non-DMP DPLL runs averaged .71 seconds (2
 threads), 1.93 seconds (4 threads), 4.06 seconds (8 threads) and 6.12
 seconds (16 threads).  With DMP enabled the overhead ranged from

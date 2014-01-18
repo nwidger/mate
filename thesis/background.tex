@@ -67,21 +67,22 @@ concurrently.  Each thread executes in parallel mode until either:
   interthread communication.
 \end{itemize}
 
-At the start of each round, all threads execute the parallel segment
-of the current quantum and block waiting for serial mode to begin when
-one of the above conditions is met.  Serial mode begins after all
-threads have finished executing their parallel segment.  Once this
-occurs, execution is serialized by passing the deterministic token and
-allowing each thread to run their serial segment in isolation.  At
-this time, each thread is allowed unrestricted access to shared memory
-(both reads and writes).  For each thread, serial mode ends once it
-executes the remainder of the instructions in its quantum (which may
-be zero, if the first condition marks the end of its parallel
-segment).  When a thread finishes executing its serial segment, it
-passes the deterministic token to the thread that will execute next
-and blocks waiting for serial mode to end.  After all threads finish
-executing their serial segments, a new round begins with each thread
-executing the parallel segment of the next quantum.
+At the start of each round, all threads begin by executing the
+parallel segment of the current quantum and block waiting for serial
+mode to begin when one of the above conditions is met.  Serial mode
+begins after all threads have finished executing their parallel
+segment.  Once this occurs, execution is serialized by passing the
+deterministic token and allowing each thread to run their serial
+segment in isolation.  At this time, each thread is allowed
+unrestricted access to shared memory (both reads and writes).  For
+each thread, serial mode ends once it executes the remainder of the
+instructions in its quantum (which may be zero, if the first condition
+marks the end of its parallel segment).  When a thread finishes
+executing its serial segment, it passes the deterministic token to the
+thread that will execute next and blocks waiting for serial mode to
+end.  After all threads finish executing their serial segments, a new
+round begins with each thread executing the parallel segment of the
+next quantum.
 
 Determinism in DMP is guaranteed on the same input for the following
 reasons:
@@ -143,10 +144,10 @@ execute or the thread is made to block for serial mode.  An
 
 \begin{table}
   \begin{tabular}{l|l}
-    read/write &  parallel mode action              \\
+    read/write &  action                                             \\
     \hline
-    read       &  proceed                           \\
-    write      &  block, set private+owned, proceed \\
+    read       &  proceed                                            \\
+    write      &  block if parallel mode, set private+owned, proceed \\
   \end{tabular}
   \caption{Ownership table policy for shared objects used in DMP paper}
   \label{table:ownership-policy-shared}
@@ -154,11 +155,11 @@ execute or the thread is made to block for serial mode.  An
 
 \begin{table}
   \begin{tabular}{l|l|l}
-    owned & read/write &  parallel mode action           \\
+    owned & read/write &  action                                          \\
     \hline       
-    yes   &  either    &  proceed                        \\
-    no    &  read      &  block, set shared, proceed     \\
-          &  write     &  block, set priv+owned, proceed \\
+    yes   &  either    &  proceed                                         \\
+    no    &  read      &  block if parallel mode, set shared, proceed     \\
+          &  write     &  block if parallel mode, set priv+owned, proceed \\
   \end{tabular}
   \caption{Ownership table policy for private objects used in DMP paper}
   \label{table:ownership-policy-private}
@@ -214,17 +215,18 @@ needed during serial mode as only one thread may be executing at a
 time.
 
 To see that the above policy makes sense, first consider a policy that
-considers the ``owned'' column of Table~\ref{table:ownership-policy}
-but ignores the ``shared/private'' and ``read/write'' columns.  Under
-such a policy, a thread can access a memory location in parallel mode
-only if it is the current owner, therefore ensuring determinism as no
-interthread communication can occur.  Next, add the ``shared/private''
-and ``read/write'' columns back into the policy.  Now a thread can
-access a memory location in parallel mode if it is the current owner
-or if it is shared and the access is a read.  This change does not
-affect determinism because a shared memory location cannot be written
-to by any thread until serial mode, therefore a read access during
-parallel mode cannot cause nondeterminism.  Transfer of ownership and
+considers the ``owned'' column of
+Table~\ref{table:ownership-policy-private} but ignores the
+``shared/private'' and ``read/write'' columns.  Under such a policy, a
+thread can access a memory location in parallel mode only if it is the
+current owner, therefore ensuring determinism as no interthread
+communication can occur.  Next, add the ``shared/private'' and
+``read/write'' columns back into the policy.  Now a thread can access
+a memory location in parallel mode if it is the current owner or if it
+is shared and the access is a read.  This change does not affect
+determinism because a shared memory location cannot be written to by
+any thread until serial mode, therefore a read access during parallel
+mode cannot cause nondeterminism.  Transfer of ownership and
 transitions between shared and private are performed after a thread
 has blocked for serial mode and are done in an attempt to take
 advantage of the principle of locality.  If a thread is likely to
@@ -269,9 +271,10 @@ mode~\cite{dmp}:
 They refer to the first style as \emph{full serial mode} and the
 second style as \emph{reduced serial mode}.  Reduced serial mode is an
 attempt to end serial mode at the end of a critical section in which
-interthread communication occurs.  Reduced serial mode greatly
-improves the performance of DMP for certain applications, as we will
-see in Chapter~\ref{RESULTS}.
+interthread communication occurs.  As we will see in
+Chapter~\ref{RESULTS}, reduced serial mode greatly improves the
+performance of DMP for certain applications by increasing the amount
+of time that is spent in parallel mode.
 
 For a given round, the ideal quantum building policy would result in
 the parallel segments of each thread being precisely the same length
@@ -314,19 +317,21 @@ communicating instructions are ordered the same are known as
 If the particular set of communication-equivalent interleavings that
 DMP generates reveals a bug for a given input, that bug will occur
 every time the program is executed with that same input.  DMP is not a
-tool for automatically uncovering concurrency bugs.  However, running
-a program with DMP makes it easy to fix concurrency bugs that surface
-when the program is run with a given input.  However, testing a
-program with DMP can only guarantee that the program is bug-free when
-run using that input and when run using the thread interleavings
-generated by DMP.  It is possible that other bugs exist but do not
-surface with the particular set of interleavings DMP allows.  This is
-a definite disadvantage of DMP.  If the overhead of leaving DMP on
-when deploying a product is too large, a product might be extensively
-tested with DMP across a wide range of inputs, but miss bugs that only
-surface after the product is deployed with DMP turned off.  Therefore,
-to be most effective the overhead of DMP must be small enough that it
-can be left on across the life of the product.
+tool for automatically uncovering concurrency bugs.  However, because
+DMP will always generate the same communication-equivalent
+interleaving for a given input, DMP makes it easy to reproduce and
+therefore fix concurrency bugs that surface when the program is run
+with that input.  However, comprehensively testing a program with DMP
+can only guarantee that the program is bug-free when run using that
+input and when run using the thread interleavings generated by DMP.
+It is possible that other bugs exist but do not surface with the
+particular set of interleavings DMP allows.  This is a definite
+disadvantage of DMP.  If the overhead of leaving DMP on when deploying
+a product is too large, a product might be extensively tested with DMP
+across a wide range of inputs, but miss bugs that only surface after
+the product is deployed with DMP turned off.  Therefore, to be most
+effective the overhead of DMP must be small enough that it can be left
+on across the life of the product.
 
 Their experimental results show that deterministic execution can be
 achieved with acceptable performance using DMP implemented in
